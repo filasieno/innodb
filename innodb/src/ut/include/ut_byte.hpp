@@ -27,15 +27,16 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "univ.i"
 
-/** Pair of ulint integers. */
-typedef	struct dulint_struct	dulint;
-/** Type definition for a 64-bit unsigned integer, which works also
-in 32-bit machines. NOTE! Access the fields only with the accessor
-functions. This definition appears here only for the compiler to
-know the size of a dulint. */
-struct dulint_struct{
-	ulint	high;	/*!< most significant 32 bits */
-	ulint	low;	/*!< least significant 32 bits */
+/// \brief Pair of ulint integers
+typedef	struct dulint_struct dulint;
+
+/// Type definition for a 64-bit unsigned integer, which works also in 32-bit machines. 
+/// NOTE! Access the fields only with the accessor functions. 
+/// This definition appears here only for the compiler to know the size of a dulint. 
+struct dulint_struct
+{
+	ulint high;	//!< most significant 32 bits
+	ulint low;	//!< least significant 32 bits
 };
 
 /** Zero value for a dulint */
@@ -48,34 +49,33 @@ extern const dulint	ut_dulint_max;
 /// \param high High-order 32 bits.
 /// \param low Low-order 32 bits.
 /// \return Created dulint.
-UNIV_INLINE
-dulint ut_dulint_create(ulint high, ulint low);
+UNIV_INLINE dulint ut_dulint_create(ulint high, ulint low);
+
 /// \brief Gets the high-order 32 bits of a dulint.
 /// \param d Dulint.
 /// \return 32 bits in ulint.
-UNIV_INLINE
-ulint ut_dulint_get_high(dulint d);
+UNIV_INLINE ulint ut_dulint_get_high(dulint d);
+
 /// \brief Gets the low-order 32 bits of a dulint.
 /// \param d Dulint.
 /// \return 32 bits in ulint.
-UNIV_INLINE
-ulint ut_dulint_get_low(dulint d);
+UNIV_INLINE ulint ut_dulint_get_low(dulint d);
+
 /// \brief Converts a dulint (a struct of 2 ulints) to ib_int64_t, which is a 64-bit integer type.
 /// \param d Dulint.
 /// \return Value in ib_int64_t type.
-UNIV_INLINE
-ib_int64_t ut_conv_dulint_to_longlong(dulint d);
+UNIV_INLINE ib_int64_t ut_conv_dulint_to_longlong(dulint d);
+
 /// \brief Tests if a dulint is zero.
 /// \param a Dulint.
 /// \return TRUE if zero.
-UNIV_INLINE
-ibool ut_dulint_is_zero(dulint a);
+UNIV_INLINE ibool ut_dulint_is_zero(dulint a);
+
 /// \brief Compares two dulints.
 /// \param a Dulint.
 /// \param b Dulint.
 /// \return -1 if a < b, 0 if a == b, 1 if a > b.
-UNIV_INLINE
-int ut_dulint_cmp(dulint a, dulint b);
+UNIV_INLINE int ut_dulint_cmp(dulint a, dulint b);
 /*******************************************************//**
 Adds a ulint to a dulint.
 @return	sum a + b */

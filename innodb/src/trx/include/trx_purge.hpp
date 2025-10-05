@@ -175,8 +175,9 @@ struct trx_purge_struct
 #define TRX_PURGE_ON 1
 /// Purge operation is stopped, or it should be stopped
 #define TRX_STOP_PURGE 2
+
 #ifndef UNIV_NONINL
-#include "trx0purge.inl"
+#include "trx_purge.inl"
 #endif
 
 #endif

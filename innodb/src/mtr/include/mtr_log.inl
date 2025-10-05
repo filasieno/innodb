@@ -1,27 +1,20 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2009, Innobase Oy. All Rights Reserved.
+// 
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+// 
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/mtr0log.ic
-Mini-transaction logging routines
-
-Created 12/7/1995 Heikki Tuuri
-*******************************************************/
+/// \file include/mtr_log.ic
+/// \brief Mini-transaction logging routines
+/// \author Heikki Tuuri
 
 #include "mach_data.hpp"
 #include "ut_lst.hpp"
@@ -29,68 +22,36 @@ Created 12/7/1995 Heikki Tuuri
 #include "fsp_types.hpp"
 #include "trx_sys.hpp"
 
-/********************************************************//**
-Opens a buffer to mlog. It must be closed with mlog_close.
-@return	buffer, NULL if log mode MTR_LOG_NONE */
-UNIV_INLINE
-byte*
-mlog_open(
-/*======*/
-	mtr_t*	mtr,	/*!< in: mtr */
-	ulint	size)	/*!< in: buffer size in bytes; MUST be
-			smaller than DYN_ARRAY_DATA_SIZE! */
+
+UNIV_INLINE byte* mlog_open(mtr_t* mtr, ulint size)
 {
-	dyn_array_t*	mlog;
-
+	dyn_array_t* mlog;
 	mtr->modifications = TRUE;
-
 	if (mtr_get_log_mode(mtr) == MTR_LOG_NONE) {
-
-		return(NULL);
+		return NULL ;
 	}
-
 	mlog = &(mtr->log);
-
-	return(dyn_array_open(mlog, size));
+	return dyn_array_open(mlog, size);
 }
 
-/********************************************************//**
-Closes a buffer opened to mlog. */
-UNIV_INLINE
-void
-mlog_close(
-/*=======*/
-	mtr_t*	mtr,	/*!< in: mtr */
-	byte*	ptr)	/*!< in: buffer space from ptr up was not used */
+
+UNIV_INLINE void mlog_close(mtr_t* mtr, byte* ptr)
 {
-	dyn_array_t*	mlog;
-
+	dyn_array_t* mlog;
 	ut_ad(mtr_get_log_mode(mtr) != MTR_LOG_NONE);
-
 	mlog = &(mtr->log);
-
 	dyn_array_close(mlog, ptr);
 }
 
 #ifndef UNIV_HOTBACKUP
-/********************************************************//**
-Catenates 1 - 4 bytes to the mtr log. The value is not compressed. */
-UNIV_INLINE
-void
-mlog_catenate_ulint(
-/*================*/
-	mtr_t*	mtr,	/*!< in: mtr */
-	ulint	val,	/*!< in: value to write */
-	ulint	type)	/*!< in: MLOG_1BYTE, MLOG_2BYTES, MLOG_4BYTES */
+
+UNIV_INLINE void mlog_catenate_ulint(mtr_t*	mtr, ulint val, ulint type)
 {
-	dyn_array_t*	mlog;
-	byte*		ptr;
-
+	dyn_array_t* mlog;
+	byte* ptr;
 	if (mtr_get_log_mode(mtr) == MTR_LOG_NONE) {
-
 		return;
 	}
-
 	mlog = &(mtr->log);
 
 #if MLOG_1BYTE != 1
@@ -106,7 +67,6 @@ mlog_catenate_ulint(
 # error "MLOG_8BYTES != 8"
 #endif
 	ptr = (byte*) dyn_array_push(mlog, type);
-
 	if (type == MLOG_4BYTES) {
 		mach_write_to_4(ptr, val);
 	} else if (type == MLOG_2BYTES) {
@@ -117,27 +77,15 @@ mlog_catenate_ulint(
 	}
 }
 
-/********************************************************//**
-Catenates a compressed ulint to mlog. */
-UNIV_INLINE
-void
-mlog_catenate_ulint_compressed(
-/*===========================*/
-	mtr_t*	mtr,	/*!< in: mtr */
-	ulint	val)	/*!< in: value to write */
+
+UNIV_INLINE void mlog_catenate_ulint_compressed(mtr_t* mtr, ulint val)
 {
-	byte*	log_ptr;
-
+	byte* log_ptr;
 	log_ptr = mlog_open(mtr, 10);
-
-	/* If no logging is requested, we may return now */
 	if (log_ptr == NULL) {
-
 		return;
 	}
-
 	log_ptr += mach_write_compressed(log_ptr, val);
-
 	mlog_close(mtr, log_ptr);
 }
 
@@ -244,31 +192,20 @@ mlog_write_initial_log_record_fast(
 	return(log_ptr);
 }
 
-/********************************************************//**
-Writes a log record about an .ibd file create/delete/rename.
-@return	new value of log_ptr */
-UNIV_INLINE
-byte*
-mlog_write_initial_log_record_for_file_op(
-/*======================================*/
-	ulint	type,	/*!< in: MLOG_FILE_CREATE, MLOG_FILE_DELETE, or
-			MLOG_FILE_RENAME */
-	ulint	space_id,/*!< in: space id, if applicable */
-	ulint	page_no,/*!< in: page number (not relevant currently) */
-	byte*	log_ptr,/*!< in: pointer to mtr log which has been opened */
-	mtr_t*	mtr)	/*!< in: mtr */
+UNIV_INLINE byte* mlog_write_initial_log_record_for_file_op(
+	ulint	type,	  /*!< in: MLOG_FILE_CREATE, MLOG_FILE_DELETE, or MLOG_FILE_RENAME */
+	ulint	space_id, /*!< in: space id, if applicable */
+	ulint	page_no, /*!< in: page number (not relevant currently) */
+	byte*	log_ptr, /*!< in: pointer to mtr log which has been opened */
+	mtr_t*	mtr)	 /*!< in: mtr */
 {
 	ut_ad(log_ptr);
-
 	mach_write_to_1(log_ptr, type);
 	log_ptr++;
-
-	/* We write dummy space id and page number */
+	// We write dummy space id and page number
 	log_ptr += mach_write_compressed(log_ptr, space_id);
 	log_ptr += mach_write_compressed(log_ptr, page_no);
-
 	mtr->n_log_recs++;
-
-	return(log_ptr);
+	return log_ptr;
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif // ! UNIV_HOTBACKUP

@@ -23,10 +23,9 @@ Sessions
 Created 6/25/1996 Heikki Tuuri
 *******************************************************/
 
-#ifndef usr0sess_h
-#define usr0sess_h
+#pragma once
 
-#include "univ.i"
+#include "univ.inl"
 #include "ut_byte.hpp"
 #include "trx_types.hpp"
 #include "srv_srv.hpp"
@@ -36,41 +35,43 @@ Created 6/25/1996 Heikki Tuuri
 #include "data_data.hpp"
 #include "rem_rec.hpp"
 
-/*********************************************************************//**
-Opens a session.
-@return	own: session object */
-UNIV_INTERN
-sess_t*
-sess_open(void);
-/*============*/
-/*********************************************************************//**
-Closes a session, freeing the memory occupied by it. */
-UNIV_INTERN
-void
-sess_close(
-/*=======*/
-	sess_t*		sess);		/*!< in, own: session object */
+/// \brief Opens a session.
+/// \return A session object
+/// \internal
+UNIV_INTERN sess_t* sess_open(void);
 
-/** The session handle. All fields are protected by the kernel mutex */
-struct sess_struct{
-	ulint		state;		/*!< state of the session */
-	trx_t*		trx;		/*!< transaction object permanently
+/// \brief Closes a session, freeing the memory occupied by it.
+/// \param sess Session object
+/// \internal
+UNIV_INTERN void sess_close(sess_t* sess);
+
+/// \brief The session handle. 
+/// \details All fields are protected by the kernel mutex
+/// \internal
+struct sess_struct
+{
+	///  state of the session 
+	ulint state;		/*!<  */
+	trx_t* trx;		/*!< transaction object permanently
 					assigned for the session: the
 					transaction instance designated by the
 					trx id changes, but the memory
 					structure is preserved */
-	UT_LIST_BASE_NODE_T(que_t)
-			graphs;		/*!< query graphs belonging to this
-					session */
+	UT_LIST_BASE_NODE_T(que_t) graphs; /*!< query graphs belonging to this session */
 };
 
 /* Session states */
 #define SESS_ACTIVE		1
-#define SESS_ERROR		2	/* session contains an error message
-					which has not yet been communicated
-					to the client */
+
+/// Session contains an error message
+/// which has not yet been communicated
+/// session contains an error message
+/// which has not yet been communicated
+/// to the client
+#define SESS_ERROR		2	/*  */
+
 #ifndef UNIV_NONINL
-#include "usr0sess.inl"
-#endif
+#include "usr_sess.inl"
 
 #endif
+

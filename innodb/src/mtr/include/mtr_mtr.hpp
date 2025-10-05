@@ -253,51 +253,39 @@ UNIV_INTERN
 dulint
 mtr_read_dulint(const byte* ptr, mtr_t* mtr);
 #ifndef UNIV_HOTBACKUP
-/*********************************************************************//**
+/**
 This macro locks an rw-lock in s-mode. */
-#define mtr_s_lock(B, MTR)	mtr_s_lock_func((B), __FILE__, __LINE__,\
-						(MTR))
-/*********************************************************************//**
+#define mtr_s_lock(B, MTR)	mtr_s_lock_func((B), __FILE__, __LINE__, (MTR))
+/**
 This macro locks an rw-lock in x-mode. */
-#define mtr_x_lock(B, MTR)	mtr_x_lock_func((B), __FILE__, __LINE__,\
-						(MTR))
-/*********************************************************************//**
+#define mtr_x_lock(B, MTR)	mtr_x_lock_func((B), __FILE__, __LINE__, (MTR))
+/**
 NOTE! Use the macro above!
 Locks a lock in s-mode. */
-UNIV_INLINE
-void
-mtr_s_lock_func(
-/*============*/
+UNIV_INLINE void mtr_s_lock_func(
+
 	rw_lock_t*	lock,	/*!< in: rw-lock */
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line number */
 	mtr_t*		mtr);	/*!< in: mtr */
-/*********************************************************************//**
+/**
 NOTE! Use the macro above!
 Locks a lock in x-mode. */
-UNIV_INLINE
-void
-mtr_x_lock_func(
-/*============*/
+UNIV_INLINE void mtr_x_lock_func(
 	rw_lock_t*	lock,	/*!< in: rw-lock */
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line number */
 	mtr_t*		mtr);	/*!< in: mtr */
-#endif /* !UNIV_HOTBACKUP */
+#endif // !UNIV_HOTBACKUP
 
-/***************************************************//**
-Releases an object in the memo stack. */
-UNIV_INTERN
-void
-mtr_memo_release(
-/*=============*/
+/** Releases an object in the memo stack. */
+UNIV_INTERN void mtr_memo_release(
 	mtr_t*	mtr,	/*!< in: mtr */
 	void*	object,	/*!< in: object */
 	ulint	type);	/*!< in: object type: MTR_MEMO_S_LOCK, ... */
 #ifdef UNIV_DEBUG
 # ifndef UNIV_HOTBACKUP
-/**********************************************************//**
-Checks if memo contains the given item.
+/** Checks if memo contains the given item.
 @return	TRUE if contains */
 UNIV_INLINE
 ibool
