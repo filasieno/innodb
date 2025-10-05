@@ -1,0 +1,105 @@
+graph BT
+    B[ut] --> A[univ.i]
+    C[os] --> A[univ.i]
+    D[mach] --> B[ut]
+    E[sync] --> B[ut]
+    E --> C[os]
+    F[mem] --> B[ut]
+    F --> E[sync]
+    F --> D[mach]
+
+    G[dyn] --> F[mem]
+    H[page] --> F[mem]
+    I[hash] --> F[mem]
+    J[data] --> F[mem]
+    K[rem] --> F[mem]
+
+    L[buf] --> I[hash]
+    L --> H[page]
+    L --> C[os]
+    L --> B[ut]
+    M[mtr] --> F[mem]
+    M --> G[dyn]
+    M --> L[buf]
+    M --> E[sync]
+    M --> H[page]
+    M --> B[ut]
+
+    N[fil] --> F[mem]
+    O[fsp] --> F[mem]
+    P[log] --> F[mem]
+
+    Q[btr] --> J[data]
+    Q --> H[page]
+    Q --> M[mtr]
+
+    R[dict] --> J[data]
+    R --> F[mem]
+    R --> K[rem]
+    R --> B[ut]
+    R --> I[hash]
+    S[lock] --> F[mem]
+    T[read] --> F[mem]
+    U[que] --> F[mem]
+    V[usr] --> F[mem]
+
+    W[trx] --> R[dict]
+    W --> S[lock]
+    W --> V[usr]
+    W --> U[que]
+    W --> F[mem]
+    W --> T[read]
+
+    X[srv] --> E[sync]
+    X --> C[os]
+    X --> U[que]
+    X --> W[trx]
+
+    Y[row] --> J[data]
+    Y --> R[dict]
+    Y --> W[trx]
+    Y --> U[que]
+    Y --> M[mtr]
+    Y --> K[rem]
+    Y --> T[read]
+    Y --> Q[btr]
+
+    Z[api] --> F[mem]
+    AA[ddl] --> F[mem]
+    BB[ibuf] --> F[mem]
+    CC[fut] --> F[mem]
+    DD[eval] --> F[mem]
+    EE[pars] --> F[mem]
+    FF[thr] --> F[mem]
+    GG[ha] --> F[mem]
+
+    X --> Z[api]
+    
+    classDef level1 fill:#1e3a8a,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level2 fill:#16a34a,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level3 fill:#ea580c,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level4 fill:#7c3aed,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level5 fill:#0d9488,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level6 fill:#dc2626,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level7 fill:#db2777,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level8 fill:#312e81,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level9 fill:#7f1d1d,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef level10 fill:#1e1b4b,stroke:#ffffff,stroke-width:2px,color:#ffffff
+
+    linkStyle default stroke:#ffffff,stroke-width:2px,curve:basis
+
+    class A level1
+
+    %% Ensure univ.i is positioned at the bottom
+    subgraph bottom["Foundation"]
+        A
+    end
+    class B,C level2
+    class D level3
+    class E level4
+    class F level5
+    class G,H,I,J,K level6
+    class L,M,N,O,P level7
+    class Q,R,S,T,U,V level8
+    class W,X level9
+    class Y,Z,AA,BB,CC,DD,EE,FF,GG level10

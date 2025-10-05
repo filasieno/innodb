@@ -1,0 +1,145 @@
+@startuml InnoDB Dependencies
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle uml2
+
+package "Foundation" as foundation #E1F5FE {
+    [univ.i] as univ
+}
+
+package "Core Utilities" as core #16A34A {
+    [ut] as ut
+    [os] as os
+}
+
+package "Machine Layer" as machine #EA580C {
+    [mach] as mach
+}
+
+package "Synchronization" as sync #7C3AED {
+    [sync] as sync_pkg
+}
+
+package "Memory Management" as memory #0D9488 {
+    [mem] as mem
+}
+
+package "Data Structures" as data #DC2626 {
+    [dyn] as dyn
+    [page] as page
+    [hash] as hash
+    [data] as data_pkg
+    [rem] as rem
+}
+
+package "Storage Layer" as storage #DB2777 {
+    [buf] as buf
+    [mtr] as mtr
+    [fil] as fil
+    [fsp] as fsp
+    [log] as log
+}
+
+package "Database Core" as dbcore #312E81 {
+    [btr] as btr
+    [dict] as dict
+    [lock] as lock
+    [read] as read
+    [que] as que
+    [usr] as usr
+}
+
+package "Transaction Layer" as trx #7F1D1D {
+    [trx] as trx
+    [srv] as srv
+}
+
+package "High-Level Operations" as highlevel #1E1B4B {
+    [row] as row
+    [api] as api
+    [ddl] as ddl
+    [ibuf] as ibuf
+    [fut] as fut
+    [eval] as eval
+    [pars] as pars
+    [thr] as thr
+    [ha] as ha
+}
+
+' Dependencies (straight lines)
+univ --> ut
+univ --> os
+ut --> mach
+ut --> sync_pkg
+os --> sync_pkg
+ut --> mem
+sync_pkg --> mem
+mach --> mem
+
+mem --> dyn
+mem --> page
+mem --> hash
+mem --> data_pkg
+mem --> rem
+
+hash --> buf
+page --> buf
+os --> buf
+ut --> buf
+mem --> mtr
+dyn --> mtr
+buf --> mtr
+sync_pkg --> mtr
+page --> mtr
+ut --> mtr
+
+mem --> fil
+mem --> fsp
+mem --> log
+
+data_pkg --> btr
+page --> btr
+mtr --> btr
+
+data_pkg --> dict
+mem --> dict
+rem --> dict
+ut --> dict
+hash --> dict
+mem --> lock
+mem --> read
+mem --> que
+mem --> usr
+
+dict --> trx
+lock --> trx
+usr --> trx
+que --> trx
+mem --> trx
+read --> trx
+
+sync_pkg --> srv
+os --> srv
+que --> srv
+trx --> srv
+
+data_pkg --> row
+dict --> row
+trx --> row
+que --> row
+mtr --> row
+rem --> row
+read --> row
+btr --> row
+
+mem --> api
+mem --> ddl
+mem --> ibuf
+mem --> fut
+mem --> eval
+mem --> pars
+mem --> thr
+mem --> ha
+
+srv --> api
+
+@enduml

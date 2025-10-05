@@ -1,0 +1,59 @@
+
+
+| Name               | Used for .... 
+|--------------------|----------------------------------------------------------|
+
+
+
+|                    |
+| rt                 |
+| mem                |
+| config             | LIKELY, SIZEOF, OFFSETOF, ...
+| platform           | CMake generated header
+
+build
+	modules
+dist
+modules
+ - innodb
+   - include
+   - src
+   - modules
+     - api 
+     - btr 
+   - examples
+   - nix
+   - cmake
+   
+ - effect
+   - include
+   - modules
+     - runtime
+       - include
+       - src
+       - examples
+       - test       
+       - doc
+     - mem
+   - examples
+   - doc 
+config
+cmake
+nix
+
+
+
+module code layout:
+	src/           (sources, private headers)
+	include/       (public headers)
+	doc/           (doxygen templates, md files, diagrams, ...)
+	examples/      (example programs)
+	test/          (unit tests, integration tests, ... )
+	nix/           (nix utilites)
+	cmake/         (cmake utilities)
+	modules/       (sub modules)
+    default.nix    (nix folder file)
+    CMakeLists.txt (cmake configuration)
+		
+
+
