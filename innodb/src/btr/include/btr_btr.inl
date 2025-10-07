@@ -229,36 +229,28 @@ UNIV_INLINE void btr_page_set_prev(page_t* page, page_zip_des_t* page_zip, ulint
 UNIV_INLINE ulint btr_node_ptr_get_child_page_no(const rec_t* rec, const ulint* offsets)
 {
 	const byte*	field;
-	ulint		len;
-	ulint		page_no;
+	ulint len;
+	ulint page_no;
 
 	ut_ad(!rec_offs_comp(offsets) || rec_get_node_ptr_flag(rec));
-
-	field = rec_get_nth_field(rec, offsets,
-				  rec_offs_n_fields(offsets) - 1, &len);
-
+	field = rec_get_nth_field(rec, offsets, rec_offs_n_fields(offsets) - 1, &len);
 	ut_ad(len == 4);
-
 	page_no = mach_read_from_4(field);
-
 	if (UNIV_UNLIKELY(page_no == 0)) {
 		ib_logger(ib_stream, "InnoDB: a nonsensical page number 0 in a node ptr record at offset %lu\n", (ulong) page_offset(rec));
 		buf_page_print(page_align(rec), 0);
 	}
-
-	return(page_no);
+	return page_no;
 }
 
 /// \brief Releases the latches on a leaf page and bufferunfixes it.
 /// \param block buffer block
 /// \param latch_mode BTR_SEARCH_LEAF or BTR_MODIFY_LEAF
 /// \param mtr mtr
-UNIV_INLINE
-void
-btr_leaf_page_release(buf_block_t* block, ulint latch_mode, mtr_t* mtr)
+UNIV_INLINE void btr_leaf_page_release(buf_block_t* block, ulint latch_mode, mtr_t* mtr)
 {
 	ut_ad(latch_mode == BTR_SEARCH_LEAF || latch_mode == BTR_MODIFY_LEAF);
 	ut_ad(!mtr_memo_contains(mtr, block, MTR_MEMO_MODIFY));
 	mtr_memo_release(mtr, block, latch_mode == BTR_SEARCH_LEAF ? MTR_MEMO_PAGE_S_FIX : MTR_MEMO_PAGE_X_FIX);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif // ! UNIV_HOTBACKUP
