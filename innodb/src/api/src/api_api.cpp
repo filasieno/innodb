@@ -661,12 +661,6 @@ ib_err_t ib_trx_rollback(ib_trx_t ib_trx)
 	return err;
 }
 
-/// \brief Check that the combination of values and name makes sense.v
-/// in: length of the column
-/// in: column attribute
-/// in: column type
-/// in: column name
-/// \return TRUE if OK
 UNIV_INLINE ibool ib_check_col_is_ok(const char* name, ib_col_type_t ib_col_type, ib_col_attr_t ib_col_attr, ib_ulint_t len)
 {
 	UT_DBG_ENTER_FUNC;
@@ -692,10 +686,6 @@ UNIV_INLINE ibool ib_check_col_is_ok(const char* name, ib_col_type_t ib_col_type
 	return TRUE;
 }
 
-/// \brief Find an index definition from the index vector using index name.
-/// in: vector of indexes
-/// in: index name
-/// \return index def. if found else NULL */
 UNIV_INLINE const ib_index_def_t* ib_table_find_index(ib_vector_t* indexes, const char* name) 	
 {
 	ulint i;
@@ -710,9 +700,6 @@ UNIV_INLINE const ib_index_def_t* ib_table_find_index(ib_vector_t* indexes, cons
 	return NULL;
 }
 
-/// \brief Get the InnoDB internal precise type from the schema column definition.
-/// in: column definition
-/// \return precise type in api format */
 UNIV_INLINE ulint ib_col_get_prtype(const ib_col_t* ib_col)
 {
 	ulint prtype = 0;
@@ -736,9 +723,6 @@ UNIV_INLINE ulint ib_col_get_prtype(const ib_col_t* ib_col)
 	return prtype;
 }
 
-/// \brief Get the InnoDB internal main type from the schema column definition.
-/// in: column definition
-/// \return column main type */
 UNIV_INLINE ulint ib_col_get_mtype(const ib_col_t* ib_col)
 {
 	UT_DBG_ENTER_FUNC;
@@ -747,10 +731,6 @@ UNIV_INLINE ulint ib_col_get_mtype(const ib_col_t* ib_col)
 	return(ib_col->ib_col_type);
 }
 
-/// \brief Find a column in the the column vector with the same name.
-/// in: column list head
-/// in: column name to find
-/// \return col. def. if found else NULL */
 UNIV_INLINE const ib_col_t* ib_table_find_col(const ib_vector_t* cols, const char* name)
 {
 	ulint i;
@@ -765,10 +745,6 @@ UNIV_INLINE const ib_col_t* ib_table_find_col(const ib_vector_t* cols, const cha
 	return NULL;
 }
 
-/// \brief Find a column in the the column list with the same name.
-/// in: column list head
-/// in: column name to find
-/// \return col. def. if found else NULL 
 UNIV_INLINE const ib_key_col_t* ib_index_find_col(ib_vector_t* cols, const char* name) 
 {
 	ulint i;
@@ -783,14 +759,6 @@ UNIV_INLINE const ib_key_col_t* ib_index_find_col(ib_vector_t* cols, const char*
 	return(NULL);
 }
 
-/// \brief Add columns to a table schema.
-/// \param ib_tbl_sch schema instance
-/// \param name name of column
-/// \param ib_col_type column main type
-/// \param ib_col_attr column attributes
-/// \param client_type any 16 bit number relevant only to the client
-/// \param len max length of column
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_table_schema_add_col(ib_tbl_sch_t ib_tbl_sch, const char* name, ib_col_type_t ib_col_type, ib_col_attr_t ib_col_attr, ib_u16_t client_type, ib_ulint_t len)
 {
 	ib_col_t* ib_col;
@@ -821,11 +789,6 @@ ib_err_t ib_table_schema_add_col(ib_tbl_sch_t ib_tbl_sch, const char* name, ib_c
 	return err;
 }
 
-/// \brief Create and add an index key definition to a table schema. The index schema is owned by the table schema instance and will be freed when the table schema instance is freed.
-/// \param ib_tbl_sch schema instance
-/// \param name key defn. name to create
-/// \param ib_idx_sch key definition instance
-/// \return DB_SUCCESS or err code
 ib_err_t ib_table_schema_add_index(ib_tbl_sch_t ib_tbl_sch, const char* name, ib_idx_sch_t* ib_idx_sch)
 {
 	ib_err_t err = DB_SUCCESS;
@@ -859,8 +822,6 @@ ib_err_t ib_table_schema_add_index(ib_tbl_sch_t ib_tbl_sch, const char* name, ib
 	return err;
 }
 
-/// \brief Destroy a schema. 
-/// in, own: table schema to delete
 void ib_table_schema_delete(ib_tbl_sch_t ib_tbl_sch)
 {
 	ulint 	i;
@@ -941,15 +902,15 @@ static void ib_to_lower_case(char* ptr)
 }
 #endif /* __WIN__ */
 
-/// \brief Normalizes a table name string. A normalized name consists of the database name catenated to '/' and table name. An example:
-/// test/mytable. On Windows normalization puts both the database name and the
-/// table name always to lower case. This function can be called for system
-/// tables and they don't have a database component. For tables that don't have
-/// a database component, we don't normalize them to lower case on Windows.
-/// The assumption is that they are system tables that reside in the system
-/// table space. 
-/// out: normalized name as a null-terminated string
-/// in: table name string
+/// \brief Normalizes a table name string. 
+/// \details A normalized name consists of the database name catenated to '/' and table name. 
+/// An example: test/mytable. 
+/// On Windows normalization puts both the database name and the table name always to lower case. 
+/// This function can be called for system tables and they don't have a database component. 
+/// For tables that don't have a database component, we don't normalize them to lower case on Windows.
+/// The assumption is that they are system tables that reside in the system table space. 
+/// \param[out] norm_name normalized name as a null-terminated string
+/// \param[in] name table name string
 static void ib_normalize_table_name(char* norm_name,  const char* name)
 {
 	const char* ptr = name;
@@ -981,9 +942,9 @@ static void ib_normalize_table_name(char* norm_name,  const char* name)
 }
 
 /// \brief Check whether the table name conforms to our requirements. 
-/// Currently we only do a simple check for the presence of a '/'.
-/// in: table name to check
-/// \return DB_SUCCESS or err code */
+/// \details Currently we only do a simple check for the presence of a '/'.
+/// \param[in] name table name to check
+/// \return DB_SUCCESS or err code
 static ib_err_t ib_table_name_check(const char* name)
 {
 	const char* slash = NULL;
@@ -1003,7 +964,7 @@ static ib_err_t ib_table_name_check(const char* name)
 		case '>':
 			return(DB_DATA_MISMATCH);
 		}
-#endif /* __WIN__ */
+#endif // __WIN__ 
 		if (*name == '/') {
 			if (slash) {
 				return(DB_DATA_MISMATCH);
@@ -1014,12 +975,6 @@ static ib_err_t ib_table_name_check(const char* name)
 	return slash ? DB_SUCCESS : DB_DATA_MISMATCH;
 }
 
-/// \brief Create a table schema.
-/// \return DB_SUCCESS or err code
-/// name in: table name to create
-/// ib_tbl_sch out  schema instance
-/// ib_tbl_fmt in table format
-/// page_size in Page size or 0 for default
 ib_err_t ib_table_schema_create(const char* name, ib_tbl_sch_t* ib_tbl_sch, ib_tbl_fmt_t ib_tbl_fmt, ib_ulint_t page_size) 
 {
 	ib_err_t err = DB_SUCCESS;
@@ -1057,19 +1012,19 @@ ib_err_t ib_table_schema_create(const char* name, ib_tbl_sch_t* ib_tbl_sch, ib_t
 	return err;
 }
 
-/// \brief Get the column number within the index defnintion.
-/// in: index definition
-/// in: column name to search
+/// \brief Get the column number within the index definition.
+/// \param[in] ib_index_def index definition
+/// \param[in] name column name to search
 /// \return -1 or column number 
 static int ib_index_get_col_no(const ib_index_def_t* ib_index_def, const char* name)
 {
-	int col_no;
+	int col_no = -1;
 	UT_DBG_ENTER_FUNC;
-	// Is this column definition for an existing table 
+	// Is this column definition for an existing table ?
 	if (ib_index_def->table != NULL) {
 		col_no = dict_table_get_col_no(ib_index_def->table, name);
 	} else {
-		ib_vector_t* cols;
+		const ib_vector_t* cols;
 		const ib_col_t* ib_col;
 		cols = ib_index_def->schema->cols;
 		ib_col = ib_table_find_col(cols, name);
@@ -1080,26 +1035,22 @@ static int ib_index_get_col_no(const ib_index_def_t* ib_index_def, const char* n
 			col_no = -1;
 		}
 	}
-	return(col_no);
+	return col_no;
 }
 
-/// \brief
-/// Check whether a prefix length index is allowed on the column.
-/// in: index definition
-/// \return TRUE if allowed. */
-static int ib_index_is_prefix_allowed(
-	const ib_index_def_t* ib_index_def, /*!<  */
-	const char* name) 		/*!< in: column name to
-						check */
+/// \brief Check whether a prefix length index is allowed on the column.
+/// \param[in] ib_index_def index definition
+/// \param[in] name column name to check
+/// \return TRUE if allowed
+static int ib_index_is_prefix_allowed(const ib_index_def_t* ib_index_def, const char* name)
 {
 	ib_bool_t allowed = TRUE;
 	ulint 	mtype = ULINT_UNDEFINED;
 	UT_DBG_ENTER_FUNC;
-	// Is this column definition for an existing table ?
+	// Is this column definition for an existing table ?	
 	if (ib_index_def->table != NULL) {
 		const dict_col_t* col;
-		int 		col_no;
-		col_no = dict_table_get_col_no(ib_index_def->table, name);
+		int col_no = dict_table_get_col_no(ib_index_def->table, name);
 		ut_a(col_no != -1);
 		col = dict_table_get_nth_col(ib_index_def->table, col_no);
 		ut_a(col != NULL);
@@ -1123,14 +1074,9 @@ static int ib_index_is_prefix_allowed(
 	case ULINT_UNDEFINED:
 		ut_error;
 	}
-	return(allowed);
+	return allowed;
 }
 
-/// \brief Add columns to a schema definition.
-/// /*!< in/out: index schema instance */
-/// /*!< in: name of column */
-/// /*!< in: length of prefix or 0 */
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_index_schema_add_col(ib_idx_sch_t ib_idx_sch, const char* name, ib_ulint_t prefix_len) 
 {
 	ib_err_t err = DB_SUCCESS;
@@ -1147,10 +1093,8 @@ ib_err_t ib_index_schema_add_col(ib_idx_sch_t ib_idx_sch, const char* name, ib_u
 	} else  if (prefix_len > 0 && !ib_index_is_prefix_allowed(index_def, name)) {
 		err = DB_SCHEMA_ERROR;
 	} else {
-		mem_heap_t* heap;
-		ib_key_col_t* ib_col;
-		heap = index_def->heap;
-		ib_col = (ib_key_col_t*) mem_heap_zalloc(heap, sizeof(*ib_col));
+		mem_heap_t* heap = index_def->heap;
+		ib_key_col_t* ib_col = (ib_key_col_t*) mem_heap_zalloc(heap, sizeof(*ib_col));
 		if (ib_col == NULL) {
 			err = DB_OUT_OF_MEMORY;
 		} else {
@@ -1162,16 +1106,10 @@ ib_err_t ib_index_schema_add_col(ib_idx_sch_t ib_idx_sch, const char* name, ib_u
 	return err;
 }
 
-/// \brief Create an index schema instance.
-/// /*!< in: transaction */
-/// /*!< in: index name in schema */
-/// /*!< in: table name */
-/// /*!< out: index schema instance */
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_index_schema_create(ib_trx_t ib_usr_trx, const char* name, const char* table_name, ib_idx_sch_t* ib_idx_sch) 
 {
 	dict_table_t* table = NULL;
-	char* 	normalized_name;
+	char* normalized_name;
 	ib_err_t err = DB_SUCCESS;
 	IB_CHECK_PANIC();
 	UT_DBG_ENTER_FUNC;
@@ -1707,13 +1645,6 @@ static ib_err_t ib_table_get_id_low(const char* table_name, ib_id_t* table_id)
 	return err;
 }
 
-/// \brief Create a table. 
-/// If the table exists in the database then this function
-/// will return DB_TABLE_IS_BEING_USED and id will contain that tables id.
-/// /*!< in/out: transaction */
-/// /*!< in: table schema */
-/// /*!< out: table id */
-/// \return DB_SUCCESS or err code 
 ib_err_t ib_table_create(ib_trx_t ib_trx, const ib_tbl_sch_t ib_tbl_sch, ib_id_t* id) 	
 {
 	ulint i;
@@ -1799,11 +1730,6 @@ ib_err_t ib_table_create(ib_trx_t ib_trx, const ib_tbl_sch_t ib_tbl_sch, ib_id_t
 	return err;
 }
 
-/// \brief Rename a table.
-/// /*!< in/out: transaction */
-/// /*!< in: old name*/
-/// /*!< in: old name*/
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_table_rename(ib_trx_t ib_trx, const char* old_name, const char* new_name) 
 {
 	ib_err_t err;
@@ -1944,10 +1870,6 @@ static ib_err_t ib_create_secondary_index(ib_idx_sch_t ib_idx_sch, ib_id_t* inde
 	return err;
 }
 
-/// \brief Create a secondary index. The index id encodes the table id in the high 4 bytes and the index id in the lower 4 bytes.
-/// *!< in/out: key definition for index */
-/// /*!< out: index id */
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_index_create(ib_idx_sch_t ib_idx_sch, ib_id_t* index_id) 
 {
 	ib_err_t err;
@@ -1963,10 +1885,6 @@ ib_err_t ib_index_create(ib_idx_sch_t ib_idx_sch, ib_id_t* index_id)
 	return err;
 }
 
-/// \brief Drop a table.
-/// /*!< in: transaction */
-/// /*!< in: table name to drop*/
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_table_drop(ib_trx_t ib_trx, const char* name) 	
 {
 	ib_err_t err;
@@ -1983,10 +1901,6 @@ ib_err_t ib_table_drop(ib_trx_t ib_trx, const char* name)
 	return err;
 }
 
-/// \brief Drop a secondary index.
-/// /*!< in: transaction */
-/// /*!< in: index id to drop */
-/// \return DB_SUCCESS or err code */
 ib_err_t ib_index_drop(ib_trx_t ib_trx, ib_id_t index_id) 
 {
 	ib_err_t err;
@@ -2014,24 +1928,17 @@ ib_err_t ib_index_drop(ib_trx_t ib_trx, ib_id_t index_id)
 	return(err);
 }
 
-/// \brief Create an internal cursor instance.
-/// /*!< out: InnoDB cursor */
-/// /*!< in: table instance */
-/// /*!< in: index id or 0 */
-/// /*!< in: transaction */
-/// \return DB_SUCCESS or err code */
 static ib_err_t ib_create_cursor(ib_crsr_t* ib_crsr, ib_id_t index_id, trx_t* trx) 	
 {
-	mem_heap_t* heap;
-	ib_cursor_t* cursor;
-	ib_err_t err = DB_SUCCESS;
-	dulint 	id = ut_dulint_create(0, (ulint) index_id);
-	IB_CHECK_PANIC();
 	UT_DBG_ENTER_FUNC;
-	heap = mem_heap_create(sizeof(*cursor) * 2);
+	IB_CHECK_PANIC();
+
+	ib_err_t err = DB_SUCCESS;
+	dulint id = ut_dulint_create(0, (ulint) index_id);
+	mem_heap_t* heap = mem_heap_create(sizeof(*cursor) * 2);
+
 	if (heap != NULL) {
-		row_prebuilt_t* prebuilt;
-		cursor = mem_heap_zalloc(heap, sizeof(*cursor));
+		ib_cursor_t* cursor = mem_heap_zalloc(heap, sizeof(*cursor));
 		cursor->heap = heap;
 		cursor->query_heap = mem_heap_create(64);
 		if (cursor->query_heap == NULL) {
@@ -2039,7 +1946,7 @@ static ib_err_t ib_create_cursor(ib_crsr_t* ib_crsr, ib_id_t index_id, trx_t* tr
 			return(DB_OUT_OF_MEMORY);
 		}
 		cursor->prebuilt = row_prebuilt_create(table);
-		prebuilt = cursor->prebuilt;
+		row_prebuilt_t* prebuilt = cursor->prebuilt;
 		prebuilt->trx = trx;
 		prebuilt->table = table;
 		prebuilt->select_lock_type = LOCK_NONE;
@@ -3152,17 +3059,15 @@ UNIV_INLINE ib_col_attr_t ib_col_get_attr(ulint prtype)
 /// \return len of column data */
 UNIV_INLINE ib_ulint_t ib_col_get_meta_low(ib_tpl_t ib_tpl, ib_ulint_t i, ib_col_meta_t* ib_col_meta) 
 {
-	ib_u16_t prtype;
-	const dfield_t* dfield;
-	ulint 	data_len;
-	ib_tuple_t* tuple = (ib_tuple_t*) ib_tpl;
 	UT_DBG_ENTER_FUNC;
-	dfield = ib_col_get_dfield(tuple, i);
-	data_len = dfield_get_len(dfield);
+
+	ib_tuple_t* tuple = (ib_tuple_t*) ib_tpl;
+	const dfield_t* dfield = ib_col_get_dfield(tuple, i);
+	ulint data_len = dfield_get_len(dfield);
 	// We assume 1-1 mapping between the ENUM and internal type codes.
 	ib_col_meta->type = dtype_get_mtype(dfield_get_type(dfield));
 	ib_col_meta->type_len = dtype_get_len(dfield_get_type(dfield));
-	prtype = (ib_u16_t) dtype_get_prtype(dfield_get_type(dfield));
+	ib_u16_t prtype = (ib_u16_t) dtype_get_prtype(dfield_get_type(dfield));
 	ib_col_meta->attr = ib_col_get_attr(prtype);
 	ib_col_meta->client_type = prtype & DATA_CLIENT_TYPE_MASK;
 	return data_len;
@@ -3175,123 +3080,77 @@ UNIV_INLINE ib_err_t ib_tuple_check_int(ib_tpl_t ib_tpl, ib_ulint_t i, ib_bool_t
 	ib_col_meta_t ib_col_meta;
 	ib_col_get_meta_low(ib_tpl, i, &ib_col_meta);
 	if (ib_col_meta.type != IB_INT) {
-		return(DB_DATA_MISMATCH);
+		return DB_DATA_MISMATCH;
 	} else if (ib_col_meta.type_len == IB_SQL_NULL) {
-		return(DB_UNDERFLOW);
+		return DB_UNDERFLOW;
 	} else if (ib_col_meta.type_len != size) {
 		return(DB_DATA_MISMATCH);
 	} else if ((ib_col_meta.attr & IB_COL_UNSIGNED) && !usign) {
-		return(DB_DATA_MISMATCH);
+		return DB_DATA_MISMATCH;
 	}
-	return(DB_SUCCESS);
+	return DB_SUCCESS;
 }
 
-/// \brief Read a signed int 8 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error */
 ib_err_t ib_tuple_read_i8(ib_tpl_t ib_tpl, ib_ulint_t i, ib_i8_t* ival) 
 {
-	ib_err_t 	err;
 	IB_CHECK_PANIC();
-	err = ib_tuple_check_int(ib_tpl, i, IB_FALSE, sizeof(*ival));
+	ib_err_t err = ib_tuple_check_int(ib_tpl, i, IB_FALSE, sizeof(*ival));
 	if (err == DB_SUCCESS) {
 		ib_col_copy_value_low(ib_tpl, i, ival, sizeof(*ival));
 	}
-	return(err);
+	return err;
 }
 
-/// \brief Read an unsigned int 8 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error */
-ib_err_t
-ib_tuple_read_u8(ib_tpl_t ib_tpl, ib_ulint_t i, ib_u8_t* ival)
+ib_err_t ib_tuple_read_u8(ib_tpl_t ib_tpl, ib_ulint_t i, ib_u8_t* ival)
 {
-	ib_err_t 	err;
 	IB_CHECK_PANIC();
-	err = ib_tuple_check_int(ib_tpl, i, IB_TRUE, sizeof(*ival));
+	ib_err_t err = ib_tuple_check_int(ib_tpl, i, IB_TRUE, sizeof(*ival));
 	if (err == DB_SUCCESS) {
 		ib_col_copy_value_low(ib_tpl, i, ival, sizeof(*ival));
 	}
-	return(err);
+	return err;
 }
 
-/// \brief Read a signed int 16 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error */
 ib_err_t ib_tuple_read_i16(ib_tpl_t ib_tpl, ib_ulint_t i, ib_i16_t* ival)
 {
-	ib_err_t 	err;
 	IB_CHECK_PANIC();
-	err = ib_tuple_check_int(ib_tpl, i, FALSE, sizeof(*ival));
+	ib_err_t err = ib_tuple_check_int(ib_tpl, i, FALSE, sizeof(*ival));
 	if (err == DB_SUCCESS) {
 		ib_col_copy_value_low(ib_tpl, i, ival, sizeof(*ival));
 	}
-	return(err);
+	return err;
 }
 
-
-/// \brief Read an unsigned int 16 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error 
 ib_err_t ib_tuple_read_u16(ib_tpl_t ib_tpl, ib_ulint_t i, ib_u16_t* ival) 
 {
-	ib_err_t 	err;
 	IB_CHECK_PANIC();
-	err = ib_tuple_check_int(ib_tpl, i, IB_TRUE, sizeof(*ival));
+	ib_err_t err = ib_tuple_check_int(ib_tpl, i, IB_TRUE, sizeof(*ival));
 	if (err == DB_SUCCESS) {
 		ib_col_copy_value_low(ib_tpl, i, ival, sizeof(*ival));
 	}
-	return(err);
+	return err;
 }
 
-/// \brief Read a signed int 32 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error
-ib_err_t ib_tuple_read_i32(
-	ib_tpl_t ib_tpl, 
-	ib_ulint_t i, 
-	ib_i32_t* ival) 
+ib_err_t ib_tuple_read_i32(ib_tpl_t ib_tpl, ib_ulint_t i, ib_i32_t* ival) 
 {
-	ib_err_t err;
 	IB_CHECK_PANIC();
-	err = ib_tuple_check_int(ib_tpl, i, FALSE, sizeof(*ival));
+	ib_err_t err = ib_tuple_check_int(ib_tpl, i, FALSE, sizeof(*ival));
 	if (err == DB_SUCCESS) {
 		ib_col_copy_value_low(ib_tpl, i, ival, sizeof(*ival));
 	}
-	return(err);
+	return err;
 }
 
-/// \brief Read an unsigned int 32 bit column from an InnoDB tuple.
-/// \return DB_SUCCESS or error
-ib_err_t ib_tuple_read_u32(
-	ib_tpl_t ib_tpl, /*!< in: InnoDB tuple */
-	ib_ulint_t i, /*!< in: column number */
-	ib_u32_t* ival) /*!< out: integer value */
+ib_err_t ib_tuple_read_u32(ib_tpl_t ib_tpl, ib_ulint_t i, ib_u32_t* ival)
 {
-	ib_err_t 	err;
 	IB_CHECK_PANIC();
-	err = ib_tuple_check_int(ib_tpl, i, IB_TRUE, sizeof(*ival));
+	ib_err_t err = ib_tuple_check_int(ib_tpl, i, IB_TRUE, sizeof(*ival));
 	if (err == DB_SUCCESS) {
 		ib_col_copy_value_low(ib_tpl, i, ival, sizeof(*ival));
 	}
-	return(err);
+	return err;
 }
 
-/// \brief Read a signed int 64 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error
 ib_err_t ib_tuple_read_i64(ib_tpl_t ib_tpl, ib_ulint_t i, ib_i64_t* ival) 
 {
 	ib_err_t 	err;
@@ -3303,12 +3162,6 @@ ib_err_t ib_tuple_read_i64(ib_tpl_t ib_tpl, ib_ulint_t i, ib_i64_t* ival)
 	return(err);
 }
 
-/// \brief Read an unsigned int 64 bit column from an InnoDB tuple.
-/// Read an unsigned int 64 bit column from an InnoDB tuple.
-/// /*!< in: InnoDB tuple */
-/// /*!< in: column number */
-/// /*!< out: integer value */
-/// \return DB_SUCCESS or error
 ib_err_t ib_tuple_read_u64(ib_tpl_t ib_tpl, ib_ulint_t i, ib_u64_t* ival) 
 {
 	ib_err_t 	err;
