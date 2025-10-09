@@ -1320,7 +1320,18 @@ INNODB_API ib_err_t ib_cursor_set_lock_mode(ib_crsr_t crsr, ib_lck_mode_t mode) 
 /// \param crsr is the cursor instance for which we want to set the flag
 INNODB_API void ib_cursor_set_cluster_access(ib_crsr_t crsr);
 
-/// \brief Read a table's schema using the visitor pattern. It will make the following sequence of calls: visitor->table() visitor->table_col() for each user column visitor->index() for each user index visitor->index_col() for each column in user index It will stop if any of the above functions returns a non-zero value. The caller must have an exclusive lock on the InnoDB data dictionary.
+/// \brief Read a table's schema using the visitor pattern. 
+/// \details It will make the following sequence of calls: 
+/// \verbatim 
+///      visitor->table() 
+///      visitor->table_col() 
+///      for each user column: 
+///         visitor->index() 
+///      for each user index 
+///         visitor->index_col() 
+///      for each column in user index It will stop if any of the above functions returns a non-zero value. 
+/// \endverbatim
+/// The caller must have an exclusive lock on the InnoDB data dictionary.
 /// \ingroup ddl
 /// \param trx transaction that owns the schema lock
 /// \param name is the table name to read
