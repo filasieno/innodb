@@ -30,24 +30,24 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 /// \brief Normalizes a directory path for Windows: converts slashes to backslashes.
 /// \param str Null-terminated character string.
-UNIV_INTERN
+IB_INTERN
 void
 srv_normalize_path_for_win(char* str);
 /// \brief Reads the data files and their sizes from a character string.
 /// \param str The data file path string.
 /// \return TRUE if ok, FALSE on parse error.
-UNIV_INTERN
+IB_INTERN
 ibool
 srv_parse_data_file_paths_and_sizes(const char* str);
 /// \brief Reads log group home directories from a character string.
 /// \param str Character string.
 /// \return TRUE if ok, FALSE on parse error.
-UNIV_INTERN
+IB_INTERN
 ibool
 srv_parse_log_group_home_dirs(const char* str);
 /// \brief Frees the memory allocated by srv_parse_data_file_paths_and_sizes()
 /// and srv_parse_log_group_home_dirs().
-UNIV_INTERN
+IB_INTERN
 void
 srv_free_paths_and_sizes(void);
 #ifndef UNIV_HOTBACKUP
@@ -55,14 +55,14 @@ srv_free_paths_and_sizes(void);
 Starts Innobase and creates a new database if database files
 are not found and the user wants.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ib_err_t
 innobase_start_or_create(void);
 /*===========================*/
 /****************************************************************//**
 Shuts down the Innobase database.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 enum db_err
 innobase_shutdown(
 /*==============*/

@@ -217,7 +217,7 @@ Creates a synchronization wait array. It is protected by a mutex
 which is automatically reserved when the functions operating on it
 are called.
 @return	own: created wait array */
-UNIV_INTERN
+IB_INTERN
 sync_array_t*
 sync_array_create(
 /*==============*/
@@ -257,7 +257,7 @@ sync_array_create(
 
 /******************************************************************//**
 Frees the resources in a wait array. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_free(
 /*============*/
@@ -288,7 +288,7 @@ sync_array_free(
 /********************************************************************//**
 Validates the integrity of the wait array. Checks
 that the number of reserved cells equals the count variable. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_validate(
 /*================*/
@@ -334,7 +334,7 @@ sync_cell_get_event(
 /******************************************************************//**
 Reserves a wait array cell for waiting for an object.
 The event of the cell is reset to nonsignalled state. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_reserve_cell(
 /*====================*/
@@ -406,7 +406,7 @@ This function should be called when a thread starts to wait on
 a wait array cell. In the debug version this function checks
 if the wait for a semaphore will result in a deadlock, in which
 case prints info and asserts. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_wait_event(
 /*==================*/
@@ -822,7 +822,7 @@ sync_arr_cell_can_wake_up(
 /******************************************************************//**
 Frees the cell. NOTE! sync_array_wait_event frees the cell
 automatically! */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_free_cell(
 /*=================*/
@@ -849,7 +849,7 @@ sync_array_free_cell(
 
 /**********************************************************************//**
 Increments the signalled count. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_object_signalled(
 /*========================*/
@@ -874,7 +874,7 @@ function should be called about every 1 second in the server.
 Note that there's a race condition between this thread and mutex_exit
 changing the lock_word and calling signal_object, so sometimes this finds
 threads to wake up even when nothing has gone wrong. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_arr_wake_threads_if_sema_free(void)
 /*====================================*/
@@ -915,7 +915,7 @@ sync_arr_wake_threads_if_sema_free(void)
 /**********************************************************************//**
 Prints warnings of long semaphore waits to ib_stream.
 @return	TRUE if fatal semaphore wait threshold was exceeded */
-UNIV_INTERN
+IB_INTERN
 ibool
 sync_array_print_long_waits(void)
 /*=============================*/
@@ -1012,7 +1012,7 @@ sync_array_output_info(
 
 /**********************************************************************//**
 Prints info of the wait array. */
-UNIV_INTERN
+IB_INTERN
 void
 sync_array_print_info(
 /*==================*/

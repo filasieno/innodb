@@ -109,13 +109,13 @@ extern ulint		os_fast_mutex_count;
 
 /*********************************************************//**
 Initializes global event and OS 'slow' mutex lists. */
-UNIV_INTERN
+IB_INTERN
 void
 os_sync_init(void);
 /*==============*/
 /*********************************************************//**
 Frees created events and OS 'slow' mutexes. */
-UNIV_INTERN
+IB_INTERN
 void
 os_sync_free(void);
 /*==============*/
@@ -124,7 +124,7 @@ Creates an event semaphore, i.e., a semaphore which may just have two states:
 signaled and nonsignaled. The created event is manual reset: it must be reset
 explicitly by calling sync_os_reset_event.
 @return	the event handle */
-UNIV_INTERN
+IB_INTERN
 os_event_t
 os_event_create(
 /*============*/
@@ -133,7 +133,7 @@ os_event_create(
 /**********************************************************//**
 Sets an event semaphore to the signaled state: lets waiting threads
 proceed. */
-UNIV_INTERN
+IB_INTERN
 void
 os_event_set(
 /*=========*/
@@ -145,14 +145,14 @@ The return value should be passed to os_even_wait_low() if it is desired
 that this thread should not wait in case of an intervening call to
 os_event_set() between this os_event_reset() and the
 os_event_wait_low() call. See comments for os_event_wait_low(). */
-UNIV_INTERN
+IB_INTERN
 ib_int64_t
 os_event_reset(
 /*===========*/
 	os_event_t	event);	/*!< in: event to reset */
 /**********************************************************//**
 Frees an event object. */
-UNIV_INTERN
+IB_INTERN
 void
 os_event_free(
 /*==========*/
@@ -178,7 +178,7 @@ thread C calls os_event_wait()  [infinite wait!]
 Where such a scenario is possible, to avoid infinite wait, the
 value returned by os_event_reset() should be passed in as
 reset_sig_count. */
-UNIV_INTERN
+IB_INTERN
 void
 os_event_wait_low(
 /*==============*/
@@ -192,7 +192,7 @@ os_event_wait_low(
 Waits for any event in an OS native event array. Returns if even a single
 one is signaled or becomes signaled.
 @return	index of the event which was signaled */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_event_wait_multiple(
 /*===================*/
@@ -209,7 +209,7 @@ os_event_wait_multiple(
 Waits for an event object until it is in the signaled state or
 a timeout is exceeded. In Unix the timeout is always infinite.
 @return	0 if success, OS_SYNC_TIME_EXCEEDED if timeout was exceeded */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_event_wait_time(
 /*===============*/
@@ -220,7 +220,7 @@ os_event_wait_time(
 Creates an operating system mutex semaphore. Because these are slow, the
 mutex semaphore of InnoDB itself (mutex_t) should be used where possible.
 @return	the mutex handle */
-UNIV_INTERN
+IB_INTERN
 os_mutex_t
 os_mutex_create(
 /*============*/
@@ -228,21 +228,21 @@ os_mutex_create(
 				the mutex is created without a name */
 /**********************************************************//**
 Acquires ownership of a mutex semaphore. */
-UNIV_INTERN
+IB_INTERN
 void
 os_mutex_enter(
 /*===========*/
 	os_mutex_t	mutex);	/*!< in: mutex to acquire */
 /**********************************************************//**
 Releases ownership of a mutex. */
-UNIV_INTERN
+IB_INTERN
 void
 os_mutex_exit(
 /*==========*/
 	os_mutex_t	mutex);	/*!< in: mutex to release */
 /**********************************************************//**
 Frees an mutex object. */
-UNIV_INTERN
+IB_INTERN
 void
 os_mutex_free(
 /*==========*/
@@ -258,35 +258,35 @@ os_fast_mutex_trylock(
 	os_fast_mutex_t*	fast_mutex);	/*!< in: mutex to acquire */
 /**********************************************************//**
 Releases ownership of a fast mutex. */
-UNIV_INTERN
+IB_INTERN
 void
 os_fast_mutex_unlock(
 /*=================*/
 	os_fast_mutex_t*	fast_mutex);	/*!< in: mutex to release */
 /*********************************************************//**
 Initializes an operating system fast mutex semaphore. */
-UNIV_INTERN
+IB_INTERN
 void
 os_fast_mutex_init(
 /*===============*/
 	os_fast_mutex_t*	fast_mutex);	/*!< in: fast mutex */
 /**********************************************************//**
 Acquires ownership of a fast mutex. */
-UNIV_INTERN
+IB_INTERN
 void
 os_fast_mutex_lock(
 /*===============*/
 	os_fast_mutex_t*	fast_mutex);	/*!< in: mutex to acquire */
 /**********************************************************//**
 Frees an mutex object. */
-UNIV_INTERN
+IB_INTERN
 void
 os_fast_mutex_free(
 /*===============*/
 	os_fast_mutex_t*	fast_mutex);	/*!< in: mutex to free */
 /*************************************************************
 Reset the variables. */
-UNIV_INTERN
+IB_INTERN
 void
 os_sync_var_init(void);
 /*==================*/

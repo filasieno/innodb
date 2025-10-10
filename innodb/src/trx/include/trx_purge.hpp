@@ -57,18 +57,18 @@ fil_addr_t trx_purge_get_log_from_hist(fil_addr_t node_addr);
  * \return TRUE if is sure that it is preserved, also if the function
  * returns FALSE, it is possible that the undo log still exists in the system
  */
-UNIV_INTERN
+IB_INTERN
 ibool trx_purge_update_undo_must_exist(trx_id_t trx_id);
 /**
  * \brief Creates the global purge system control structure and inits the history
  * mutex.
  */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_sys_create(void);
 /**
  * \brief Frees the global purge system control structure.
  */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_sys_close(void);
 /**
  * \brief Adds the update undo log as the first log in the history list. Removes the
@@ -77,7 +77,7 @@ void trx_purge_sys_close(void);
  * \param undo_page Update undo log header page, x-latched
  * \param mtr Mtr
  */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_add_update_undo_to_history(trx_t *trx, page_t *undo_page, mtr_t *mtr);
 /**
  * \brief Fetches the next undo log record from the history list to purge. It must be
@@ -88,29 +88,29 @@ void trx_purge_add_update_undo_to_history(trx_t *trx, page_t *undo_page, mtr_t *
  * \return Copy of an undo log record or pointer to trx_purge_dummy_rec,
  * if the whole undo log can skipped in purge; NULL if none left
  */
-UNIV_INTERN
+IB_INTERN
 trx_undo_rec_t *trx_purge_fetch_next_rec(roll_ptr_t *roll_ptr, trx_undo_inf_t **cell, mem_heap_t *heap);
 /**
  * \brief Releases a reserved purge undo record.
  * \param cell Storage cell
  */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_rec_release(trx_undo_inf_t *cell);
 /**
  * \brief This function runs a purge batch.
  * \return Number of undo log pages handled in the batch
  */
-UNIV_INTERN
+IB_INTERN
 ulint trx_purge(void);
 /**
  * \brief Prints information of the purge system to stderr.
  */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_sys_print(void);
 /**
  * \brief Reset the variables.
  */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_var_init(void);
 
 /**

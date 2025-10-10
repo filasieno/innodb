@@ -74,7 +74,7 @@ page_zip_rec_needs_ext(
 /**********************************************************************//**
 Determine the guaranteed free space on an empty page.
 @return	minimum payload size on the page */
-UNIV_INTERN
+IB_INTERN
 ulint
 page_zip_empty_size(
 /*================*/
@@ -94,7 +94,7 @@ page_zip_des_init(
 
 /**********************************************************************//**
 Configure the zlib allocator to use the given memory heap. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_set_alloc(
 /*===============*/
@@ -105,7 +105,7 @@ page_zip_set_alloc(
 Compress a page.
 @return TRUE on success, FALSE on failure; page_zip will be left
 intact on failure. */
-UNIV_INTERN
+IB_INTERN
 ibool
 page_zip_compress(
 /*==============*/
@@ -121,7 +121,7 @@ Decompress a page.  This function should tolerate errors on the compressed
 page.  Instead of letting assertions fail, it will return FALSE if an
 inconsistency is detected.
 @return	TRUE on success, FALSE on failure */
-UNIV_INTERN
+IB_INTERN
 ibool
 page_zip_decompress(
 /*================*/
@@ -150,7 +150,7 @@ page_zip_simple_validate(
 /**********************************************************************//**
 Check that the compressed and decompressed pages match.
 @return	TRUE if valid, FALSE if not */
-UNIV_INTERN
+IB_INTERN
 ibool
 page_zip_validate_low(
 /*==================*/
@@ -161,7 +161,7 @@ page_zip_validate_low(
 	__attribute__((nonnull));
 /**********************************************************************//**
 Check that the compressed and decompressed pages match. */
-UNIV_INTERN
+IB_INTERN
 ibool
 page_zip_validate(
 /*==============*/
@@ -212,7 +212,7 @@ page_zip_write_header(
 /**********************************************************************//**
 Write an entire record on the compressed page.  The data must already
 have been written to the uncompressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_write_rec(
 /*===============*/
@@ -226,7 +226,7 @@ page_zip_write_rec(
 /***********************************************************//**
 Parses a log record of writing a BLOB pointer of a record.
 @return	end of log record or NULL */
-UNIV_INTERN
+IB_INTERN
 byte*
 page_zip_parse_write_blob_ptr(
 /*==========================*/
@@ -238,7 +238,7 @@ page_zip_parse_write_blob_ptr(
 /**********************************************************************//**
 Write a BLOB pointer of a record on the leaf page of a clustered index.
 The information must already have been updated on the uncompressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_write_blob_ptr(
 /*====================*/
@@ -255,7 +255,7 @@ page_zip_write_blob_ptr(
 /***********************************************************//**
 Parses a log record of writing the node pointer of a record.
 @return	end of log record or NULL */
-UNIV_INTERN
+IB_INTERN
 byte*
 page_zip_parse_write_node_ptr(
 /*==========================*/
@@ -266,7 +266,7 @@ page_zip_parse_write_node_ptr(
 
 /**********************************************************************//**
 Write the node pointer of a record on a non-leaf compressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_write_node_ptr(
 /*====================*/
@@ -279,7 +279,7 @@ page_zip_write_node_ptr(
 
 /**********************************************************************//**
 Write the trx_id and roll_ptr of a record on a B-tree leaf node page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_write_trx_id_and_roll_ptr(
 /*===============================*/
@@ -294,7 +294,7 @@ page_zip_write_trx_id_and_roll_ptr(
 /**********************************************************************//**
 Write the "deleted" flag of a record on a compressed page.  The flag must
 already have been written on the uncompressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_rec_set_deleted(
 /*=====================*/
@@ -306,7 +306,7 @@ page_zip_rec_set_deleted(
 /**********************************************************************//**
 Write the "owned" flag of a record on a compressed page.  The n_owned field
 must already have been written on the uncompressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_rec_set_owned(
 /*===================*/
@@ -317,7 +317,7 @@ page_zip_rec_set_owned(
 
 /**********************************************************************//**
 Insert a record to the dense page directory. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_dir_insert(
 /*================*/
@@ -330,7 +330,7 @@ page_zip_dir_insert(
 /**********************************************************************//**
 Shift the dense page directory and the array of BLOB pointers
 when a record is deleted. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_dir_delete(
 /*================*/
@@ -343,7 +343,7 @@ page_zip_dir_delete(
 
 /**********************************************************************//**
 Add a slot to the dense page directory. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_dir_add_slot(
 /*==================*/
@@ -355,7 +355,7 @@ page_zip_dir_add_slot(
 /***********************************************************//**
 Parses a log record of writing to the header of a page.
 @return	end of log record or NULL */
-UNIV_INTERN
+IB_INTERN
 byte*
 page_zip_parse_write_header(
 /*========================*/
@@ -391,7 +391,7 @@ bits in the same mini-transaction in such a way that the modification
 will be redo-logged.
 @return TRUE on success, FALSE on failure; page_zip will be left
 intact on failure, but page will be overwritten. */
-UNIV_INTERN
+IB_INTERN
 ibool
 page_zip_reorganize(
 /*================*/
@@ -408,7 +408,7 @@ Copy the records of a page byte for byte.  Do not copy the page header
 or trailer, except those B-tree header fields that are directly
 related to the storage of records.  Also copy PAGE_MAX_TRX_ID.
 NOTE: The caller must update the lock table and the adaptive hash index. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_copy_recs(
 /*===============*/
@@ -426,7 +426,7 @@ page_zip_copy_recs(
 /**********************************************************************//**
 Parses a log record of compressing an index page.
 @return	end of log record or NULL */
-UNIV_INTERN
+IB_INTERN
 byte*
 page_zip_parse_compress(
 /*====================*/
@@ -439,7 +439,7 @@ page_zip_parse_compress(
 /**********************************************************************//**
 Calculate the compressed page checksum.
 @return	page checksum */
-UNIV_INTERN
+IB_INTERN
 ulint
 page_zip_calc_checksum(
 /*===================*/
@@ -448,7 +448,7 @@ page_zip_calc_checksum(
 	__attribute__((nonnull));
 /**************************************************************************
 Reset variables. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_var_init(void);
 /*===================*/

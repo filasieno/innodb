@@ -348,7 +348,7 @@ page_zip_des_init(
 
 /**********************************************************************//**
 Write a log record of writing to the uncompressed header portion of a page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_write_header_log(
 /*======================*/

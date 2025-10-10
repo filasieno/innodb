@@ -73,10 +73,10 @@ buffer pool; the latter method is used for very big heaps */
 
 /// \brief Initializes the memory system.
 /// \param [in] size common pool size in bytes
-UNIV_INTERN void mem_init(ulint	size);
+IB_INTERN void mem_init(ulint	size);
 
 /// \brief Closes the memory system.
-UNIV_INTERN void mem_close(void);
+IB_INTERN void mem_close(void);
 
 /// \brief Use this macro instead of the corresponding function! Macro for memory heap creation. */
 #define mem_heap_create(N) mem_heap_create_func((N), MEM_HEAP_DYNAMIC, __FILE__, __LINE__)
@@ -231,7 +231,7 @@ mem_strdupl(
 /**********************************************************************//**
 Duplicates a NUL-terminated string, allocated from a memory heap.
 @return	own: a copy of the string */
-UNIV_INTERN
+IB_INTERN
 char*
 mem_heap_strdup(
 /*============*/
@@ -252,7 +252,7 @@ mem_heap_strdupl(
 /**********************************************************************//**
 Concatenate two strings and return the result, using a memory heap.
 @return	own: the result */
-UNIV_INTERN
+IB_INTERN
 char*
 mem_heap_strcat(
 /*============*/
@@ -263,7 +263,7 @@ mem_heap_strcat(
 /**********************************************************************//**
 Duplicate a block of data, allocated from a memory heap.
 @return	own: a copy of the data */
-UNIV_INTERN
+IB_INTERN
 void*
 mem_heap_dup(
 /*=========*/
@@ -277,7 +277,7 @@ formatted string from the given heap. This supports a very limited set of
 the printf syntax: types 's' and 'u' and length modifier 'l' (which is
 required for the 'u' type).
 @return	heap-allocated formatted string */
-UNIV_INTERN
+IB_INTERN
 char*
 mem_heap_printf(
 /*============*/
@@ -289,7 +289,7 @@ mem_heap_printf(
 /******************************************************************//**
 Goes through the list of all allocated mem blocks, checks their magic
 numbers, and reports possible corruption. */
-UNIV_INTERN
+IB_INTERN
 void
 mem_heap_verify(
 /*============*/

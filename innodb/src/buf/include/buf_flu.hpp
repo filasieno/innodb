@@ -32,7 +32,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 /********************************************************************//**
 Remove a block from the flush list of modified blocks. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_remove(
 /*=============*/
@@ -41,7 +41,7 @@ buf_flush_remove(
 Relocates a buffer control block on the flush_list.
 Note that it is assumed that the contents of bpage has already been
 copied to dpage. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_relocate_on_flush_list(
 /*=============================*/
@@ -49,7 +49,7 @@ buf_flush_relocate_on_flush_list(
 	buf_page_t*	dpage);	/*!< in/out: destination block */
 /********************************************************************//**
 Updates the flush system data structures when a write is completed. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_write_complete(
 /*=====================*/
@@ -57,14 +57,14 @@ buf_flush_write_complete(
 /*********************************************************************//**
 Flushes pages from the end of the LRU list if there is too small
 a margin of replaceable pages there. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_free_margin(void);
 /*=======================*/
 #endif /* !UNIV_HOTBACKUP */
 /********************************************************************//**
 Initializes a page for writing to the tablespace. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_init_for_writing(
 /*=======================*/
@@ -81,7 +81,7 @@ end up waiting for these latches! NOTE 2: in the case of a flush list flush,
 the calling thread is not allowed to own any latches on pages!
 @return number of blocks for which the write request was queued;
 ULINT_UNDEFINED if there was a flush of the same type already running */
-UNIV_INTERN
+IB_INTERN
 ulint
 buf_flush_batch(
 /*============*/
@@ -99,7 +99,7 @@ buf_flush_batch(
 					min_n), otherwise ignored */
 /******************************************************************//**
 Waits until a flush batch of the given type ends */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_wait_batch_end(
 /*=====================*/
@@ -129,7 +129,7 @@ buf_flush_recv_note_modification(
 Returns TRUE if the file page block is immediately suitable for replacement,
 i.e., transition FILE_PAGE => NOT_USED allowed.
 @return	TRUE if can replace immediately */
-UNIV_INTERN
+IB_INTERN
 ibool
 buf_flush_ready_for_replace(
 /*========================*/
@@ -156,7 +156,7 @@ typedef struct buf_flush_stat_struct buf_flush_stat_t;
 /*********************************************************************
 Update the historical stats that we are collecting for flush rate
 heuristics at the end of each interval. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_stat_update(void);
 /*=======================*/
@@ -168,7 +168,7 @@ in the number of dirty pages (for example, an in-memory workload)
 it can cause IO bursts of flushing. This function implements heuristics
 to avoid this burstiness.
 @return	number of dirty pages to be flushed / second */
-UNIV_INTERN
+IB_INTERN
 ulint
 buf_flush_get_desired_flush_rate(void);
 /*==================================*/
@@ -177,7 +177,7 @@ buf_flush_get_desired_flush_rate(void);
 /******************************************************************//**
 Validates the flush list.
 @return	TRUE if ok */
-UNIV_INTERN
+IB_INTERN
 ibool
 buf_flush_validate(void);
 /*====================*/
@@ -187,14 +187,14 @@ buf_flush_validate(void);
 Initialize the red-black tree to speed up insertions into the flush_list
 during recovery process. Should be called at the start of recovery
 process before any page has been read/written. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_init_flush_rbt(void);
 /*==========================*/
 
 /******************************************************************//**
 Frees up the red-black tree. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_free_flush_rbt(void);
 /*==========================*/

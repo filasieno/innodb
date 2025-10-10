@@ -55,7 +55,7 @@ Created 4/20/1996 Heikki Tuuri
 /*********************************************************************//**
 Creates an insert node struct.
 @return	own: insert node struct */
-UNIV_INTERN
+IB_INTERN
 ins_node_t*
 row_ins_node_create(
 /*================*/
@@ -89,7 +89,7 @@ row_ins_node_create(
 
 /***********************************************************//**
 Creates an entry template for each index of a table. */
-UNIV_INTERN
+IB_INTERN
 void
 row_ins_node_create_entry_list(
 /*=======================*/
@@ -173,7 +173,7 @@ row_ins_alloc_sys_fields(
 Sets a new row to insert for an INS_DIRECT node. This function is only used
 if we have constructed the row separately, which is a rare case; this
 function is quite slow. */
-UNIV_INTERN
+IB_INTERN
 void
 row_ins_node_set_new_row(
 /*=====================*/
@@ -1205,7 +1205,7 @@ Checks if foreign key constraint fails for an index entry. Sets shared locks
 which lock either the success or the failure of the constraint. NOTE that
 the caller must have a shared latch on dict_operation_lock.
 @return	DB_SUCCESS, DB_NO_REFERENCED_ROW, or DB_ROW_IS_REFERENCED */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_ins_check_foreign_constraint(
 /*=============================*/
@@ -2155,7 +2155,7 @@ descent down the tree. If the entry matches enough to a delete marked record,
 performs the insert by updating or delete unmarking the delete marked
 record.
 @return	DB_SUCCESS, DB_LOCK_WAIT, DB_DUPLICATE_KEY, or some other error code */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_ins_index_entry(
 /*================*/
@@ -2425,7 +2425,7 @@ row_ins(
 Inserts a row to a table. This is a high-level function used in SQL execution
 graphs.
 @return	query thread to run next or NULL */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 row_ins_step(
 /*=========*/

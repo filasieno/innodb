@@ -196,7 +196,7 @@ mtr_t*
 mtr_start(mtr_t* mtr);
 /// \brief Commits a mini-transaction.
 /// \param mtr Mini-transaction.
-UNIV_INTERN
+IB_INTERN
 void
 mtr_commit(mtr_t* mtr);
 /// \brief Sets and returns a savepoint in mtr.
@@ -210,7 +210,7 @@ mtr_set_savepoint(mtr_t* mtr);
 /// savepoint, as these can be handled only by mtr_commit.
 /// \param mtr Mtr.
 /// \param savepoint Savepoint.
-UNIV_INTERN
+IB_INTERN
 void
 mtr_rollback_to_savepoint(mtr_t* mtr, ulint savepoint);
 #ifndef UNIV_HOTBACKUP
@@ -242,14 +242,14 @@ mtr_set_log_mode(mtr_t* mtr, ulint mode);
 /// \param type MLOG_1BYTE, MLOG_2BYTES, MLOG_4BYTES.
 /// \param mtr Mini-transaction handle.
 /// \return Value read.
-UNIV_INTERN
+IB_INTERN
 ulint
 mtr_read_ulint(const byte* ptr, ulint type, mtr_t* mtr);
 /// \brief Reads 8 bytes from a file page buffered in the buffer pool.
 /// \param ptr Pointer from where to read.
 /// \param mtr Mini-transaction handle.
 /// \return Value read.
-UNIV_INTERN
+IB_INTERN
 dulint
 mtr_read_dulint(const byte* ptr, mtr_t* mtr);
 #ifndef UNIV_HOTBACKUP
@@ -279,7 +279,7 @@ IB_INLINE void mtr_x_lock_func(
 #endif // !UNIV_HOTBACKUP
 
 /** Releases an object in the memo stack. */
-UNIV_INTERN void mtr_memo_release(
+IB_INTERN void mtr_memo_release(
 	mtr_t*	mtr,	/*!< in: mtr */
 	void*	object,	/*!< in: object */
 	ulint	type);	/*!< in: object type: MTR_MEMO_S_LOCK, ... */
@@ -300,12 +300,12 @@ mtr_memo_contains(
 /// \param ptr Pointer to buffer frame.
 /// \param type Type of object.
 /// \return TRUE if contains.
-UNIV_INTERN
+IB_INTERN
 ibool
 mtr_memo_contains_page(mtr_t* mtr, const byte* ptr, ulint type);
 /// \brief Prints info of an mtr handle.
 /// \param mtr Mtr.
-UNIV_INTERN
+IB_INTERN
 void
 mtr_print(mtr_t* mtr);
 # else /* !UNIV_HOTBACKUP */

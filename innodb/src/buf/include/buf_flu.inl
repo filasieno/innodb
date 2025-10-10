@@ -29,7 +29,7 @@ Created 11/5/1995 Heikki Tuuri
 
 /********************************************************************//**
 Inserts a modified block into the flush list. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_insert_into_flush_list(
 /*=============================*/
@@ -38,7 +38,7 @@ buf_flush_insert_into_flush_list(
 Inserts a modified block into the flush list in the right sorted position.
 This function is used by recovery, because there the modifications do not
 necessarily come in the order of lsn's. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_insert_sorted_into_flush_list(
 /*====================================*/

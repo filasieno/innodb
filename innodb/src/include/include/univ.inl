@@ -170,9 +170,9 @@ operations (very slow); also UNIV_DEBUG must be defined
 // Linkage specifier for non-static InnoDB symbols (variables and functions)
 // that are only referenced from within InnoDB.
 #if defined(__GNUC__) && (__GNUC__ >= 4) || defined(__INTEL_COMPILER)
-#define UNIV_INTERN __attribute__((visibility("hidden")))
+#define IB_INTERN __attribute__((visibility("hidden")))
 #else
-#define UNIV_INTERN
+#define IB_INTERN
 #endif
 
 #if (!defined(UNIV_DEBUG) && !defined(UNIV_MUST_NOT_INLINE))
@@ -191,7 +191,7 @@ operations (very slow); also UNIV_DEBUG must be defined
 // definitions:
 
 #define UNIV_NONINL
-#define IB_INLINE UNIV_INTERN
+#define IB_INLINE IB_INTERN
 
 #endif	  // UNIV_DEBUG
 
@@ -340,8 +340,8 @@ typedef unsigned long ulong;
 #elif (defined(__SUNPRO_C) && __SUNPRO_C >= 0x590) || (defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x590)
 #include <sun_prefetch.h>
 #if __SUNPRO_C >= 0x550
-#undef UNIV_INTERN
-#define UNIV_INTERN __hidden
+#undef IB_INTERN
+#define IB_INTERN __hidden
 #endif	  // __SUNPRO_C >= 0x550
 // Use sun_prefetch when compile with Sun Studio
 #define UNIV_EXPECT(expr, value) (expr)

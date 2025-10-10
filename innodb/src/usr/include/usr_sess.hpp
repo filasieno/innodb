@@ -38,12 +38,12 @@ Created 6/25/1996 Heikki Tuuri
 /// \brief Opens a session.
 /// \return A session object
 /// \internal
-UNIV_INTERN sess_t* sess_open(void);
+IB_INTERN sess_t* sess_open(void);
 
 /// \brief Closes a session, freeing the memory occupied by it.
 /// \param sess Session object
 /// \internal
-UNIV_INTERN void sess_close(sess_t* sess);
+IB_INTERN void sess_close(sess_t* sess);
 
 /// \brief The session handle. 
 /// \details All fields are protected by the kernel mutex

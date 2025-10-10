@@ -342,27 +342,27 @@ enum srv_thread_type {
 /*********************************************************************//**
 Boots Innobase server.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ulint
 srv_boot(void);
 /*==========*/
 /*********************************************************************//**
 Frees the data structures created in srv_init(). */
-UNIV_INTERN
+IB_INTERN
 void
 srv_free(void);
 /*==========*/
 /*********************************************************************//**
 Initializes the synchronization primitives, memory system, and the thread
 local storage. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_general_init(void);
 /*==================*/
 /*********************************************************************//**
 Gets the number of threads in the system.
 @return	sum of srv_n_threads[] */
-UNIV_INTERN
+IB_INTERN
 ulint
 srv_get_n_threads(void);
 /*===================*/
@@ -378,7 +378,7 @@ Releases threads of the type given from suspension in the thread table.
 NOTE! The server mutex has to be reserved by the caller!
 @return number of threads released: this may be less than n if not
 enough threads were suspended at the moment */
-UNIV_INTERN
+IB_INTERN
 ulint
 srv_release_threads(
 /*================*/
@@ -387,7 +387,7 @@ srv_release_threads(
 /*********************************************************************//**
 The master thread controlling the server.
 @return	a dummy parameter */
-UNIV_INTERN
+IB_INTERN
 os_thread_ret_t
 srv_master_thread(
 /*==============*/
@@ -399,20 +399,20 @@ and wakes up the master thread if it is suspended (not sleeping). Used
 in the client interface. Note that there is a small chance that the master
 thread stays suspended (we do not protect our operation with the kernel
 mutex, for performace reasons). */
-UNIV_INTERN
+IB_INTERN
 void
 srv_active_wake_master_thread(void);
 /*===============================*/
 /*******************************************************************//**
 Wakes up the master thread if it is suspended or being suspended. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_wake_master_thread(void);
 /*========================*/
 /*********************************************************************//**
 Puts an OS thread to wait if there are too many concurrent threads
 (>= srv_thread_concurrency) inside InnoDB. The threads wait in a FIFO queue. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_conc_enter_innodb(
 /*==================*/
@@ -421,7 +421,7 @@ srv_conc_enter_innodb(
 /*********************************************************************//**
 This must be called when a thread exits InnoDB in a lock wait or at the
 end of an SQL statement. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_conc_force_exit_innodb(
 /*=======================*/
@@ -433,7 +433,7 @@ occurs during the wait trx->error_state associated with thr is
 != DB_SUCCESS when we return. DB_LOCK_WAIT_TIMEOUT and DB_DEADLOCK
 are possible errors. DB_DEADLOCK is returned if selective deadlock
 resolution chose this transaction as a victim. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_suspend_user_thread(
 /*====================*/
@@ -442,7 +442,7 @@ srv_suspend_user_thread(
 /********************************************************************//**
 Releases a user OS thread waiting for a lock to be released, if the
 thread is already suspended. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_release_user_thread_if_suspended(
 /*=================================*/
@@ -451,7 +451,7 @@ srv_release_user_thread_if_suspended(
 /*********************************************************************//**
 A thread which wakes up threads whose lock wait may have lasted too long.
 @return	a dummy parameter */
-UNIV_INTERN
+IB_INTERN
 os_thread_ret_t
 srv_lock_timeout_thread(
 /*====================*/
@@ -460,7 +460,7 @@ srv_lock_timeout_thread(
 /*********************************************************************//**
 A thread which prints the info output by various InnoDB monitors.
 @return	a dummy parameter */
-UNIV_INTERN
+IB_INTERN
 os_thread_ret_t
 srv_monitor_thread(
 /*===============*/
@@ -470,7 +470,7 @@ srv_monitor_thread(
 A thread which prints warnings about semaphore waits which have lasted
 too long. These can be used to track bugs which cause hangs.
 @return	a dummy parameter */
-UNIV_INTERN
+IB_INTERN
 os_thread_ret_t
 srv_error_monitor_thread(
 /*=====================*/
@@ -480,7 +480,7 @@ srv_error_monitor_thread(
 Outputs to a file the output of the InnoDB Monitor.
 @return FALSE if not all information printed
 due to failure to obtain necessary mutex */
-UNIV_INTERN
+IB_INTERN
 ibool
 srv_printf_innodb_monitor(
 /*======================*/
@@ -494,21 +494,21 @@ srv_printf_innodb_monitor(
 
 /******************************************************************//**
 Function to pass InnoDB status variables to client */
-UNIV_INTERN
+IB_INTERN
 void
 srv_export_innodb_status(void);
 /*==========================*/
 
 /***********************************************************************//**
 Reset variables. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_var_init(void);
 /*===============*/
 
 /***********************************************************************//**
 Resets the variables of all the InnoDB modules. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_modules_var_init(void);
 /*======================*/
@@ -581,6 +581,6 @@ extern ulint	srv_n_threads_active[];
 
 extern void* ib_panic_data;
 typedef void (*ib_panic_function_t)(void*, int, char*, ...);
-UNIV_INTERN void srv_panic(int panic_ib_error, char* fmt, ...);
+IB_INTERN void srv_panic(int panic_ib_error, char* fmt, ...);
 
 #endif

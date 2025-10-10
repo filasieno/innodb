@@ -39,7 +39,7 @@ Created 02/03/2009 Sunny Bains
 /************************************************************************
 Create a prebuilt struct for a user table handle.
 @return	own: a prebuilt struct */
-UNIV_INTERN
+IB_INTERN
 row_prebuilt_t*
 row_prebuilt_create(
 /*================*/
@@ -103,7 +103,7 @@ row_prebuilt_create(
 
 /************************************************************************
 Free a prebuilt struct for a user table handle. */
-UNIV_INTERN
+IB_INTERN
 void
 row_prebuilt_free(
 /*==============*/
@@ -162,7 +162,7 @@ row_prebuilt_free(
 
 /************************************************************************
 Reset a prebuilt struct for a user table handle. */
-UNIV_INTERN
+IB_INTERN
 void
 row_prebuilt_reset(
 /*===============*/
@@ -195,7 +195,7 @@ row_prebuilt_reset(
 /*************************************************************************
 Updates the transaction pointers in query graphs stored in the prebuilt
 struct. */
-UNIV_INTERN
+IB_INTERN
 void
 row_prebuilt_update_trx(
 /*====================*/

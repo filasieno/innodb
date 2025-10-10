@@ -65,7 +65,7 @@ using this macro */
 
 /*************************************************************//**
 Report a failed assertion. */
-UNIV_INTERN
+IB_INTERN
 void
 ut_dbg_assertion_failed(
 /*====================*/
@@ -102,7 +102,7 @@ extern ibool	ut_dbg_stop_threads;
 
 /*************************************************************//**
 Stop a thread after assertion failure. */
-UNIV_INTERN
+IB_INTERN
 void
 ut_dbg_stop_thread(
 /*===============*/
@@ -174,7 +174,7 @@ typedef struct speedo_struct {
 
 /*******************************************************************//**
 Resets a speedo (records the current time in it). */
-UNIV_INTERN
+IB_INTERN
 void
 speedo_reset(
 /*=========*/
@@ -183,7 +183,7 @@ speedo_reset(
 /*******************************************************************//**
 Shows the time elapsed and usage statistics since the last reset of a
 speedo. */
-UNIV_INTERN
+IB_INTERN
 void
 speedo_show(
 /*========*/

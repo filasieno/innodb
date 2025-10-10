@@ -22,71 +22,71 @@
 	/// \brief Initializes an allocated memory field in the debug version.
 	/// \param [in] buf memory field
 	/// \param [in] n how many bytes the user requested
-	UNIV_INTERN void mem_field_init(byte* buf, ulint n);	
+	IB_INTERN void mem_field_init(byte* buf, ulint n);	
 
 	///\brief Erases an allocated memory field in the debug version.
 	/// \param [in] buf memory field
 	/// \param [in] n how many bytes the user requested
-	UNIV_INTERN void mem_field_erase(byte* buf, ulint n);	
+	IB_INTERN void mem_field_erase(byte* buf, ulint n);	
 
 	/// \brief Initializes a buffer to a random combination of hex BA and BE.
 	/// \param [in] buf pointer to buffer
 	/// \param [in] n length of buffer
-	UNIV_INTERN void mem_init_buf(byte* buf, ulint n);	
+	IB_INTERN void mem_init_buf(byte* buf, ulint n);	
 
 	/// \brief Initializes a buffer to a random combination of hex DE and AD.
 	/// \param [in] buf pointer to buffer
 	/// \param [in] n length of buffer
-	UNIV_INTERN void mem_erase_buf(byte* buf, ulint n);	
+	IB_INTERN void mem_erase_buf(byte* buf, ulint n);	
 
 	/// \brief Inserts a created memory heap to the hash table of current allocated memory heaps.
 	/// \param [in] heap memory heap
 	/// \param [in] file_name file name of creation
 	/// \param [in] line line where created
-	UNIV_INTERN void mem_hash_insert(mem_heap_t* heap, const char* file_name, ulint line);	
+	IB_INTERN void mem_hash_insert(mem_heap_t* heap, const char* file_name, ulint line);	
 
 
 	/// \brief Removes a memory heap (which is going to be freed by the caller) from the list of live memory heaps.
 	/// \param [in] heap memory heap
 	/// \param [in] file_name file name of freeing
 	/// \param [in] line line where freed
-	UNIV_INTERN void mem_hash_remove(mem_heap_t* heap, const char* file_name, ulint line);	
+	IB_INTERN void mem_hash_remove(mem_heap_t* heap, const char* file_name, ulint line);	
 
 
 	/// \brief Sets the length of a memory field
 	/// \param [in] field memory field
 	/// \param [in] len length of memory field
-	UNIV_INTERN void mem_field_header_set_len(byte* field, ulint len);	
+	IB_INTERN void mem_field_header_set_len(byte* field, ulint len);	
 
 
 	/// \brief Gets the length of a memory field
 	/// \param [in] field memory field
 	/// \return length of memory field
-	UNIV_INTERN ulint mem_field_header_get_len(byte* field);	
+	IB_INTERN ulint mem_field_header_get_len(byte* field);	
 
 
 	/// \brief Sets the check of a memory field
 	/// \param [in] field memory field
 	/// \param [in] check check of memory field
-	UNIV_INTERN void mem_field_header_set_check(byte* field, ulint check);	
+	IB_INTERN void mem_field_header_set_check(byte* field, ulint check);	
 
 
 	/// \brief Gets the check of a memory field
 	/// \param [in] field memory field
 	/// \return check of memory field
-	UNIV_INTERN ulint mem_field_header_get_check(byte* field);	
+	IB_INTERN ulint mem_field_header_get_check(byte* field);	
 
 
 	/// \brief Sets the check of a memory field
 	/// \param [in] field memory field
 	/// \param [in] check check of memory field
-	UNIV_INTERN void mem_field_trailer_set_check(byte* field, ulint check);	
+	IB_INTERN void mem_field_trailer_set_check(byte* field, ulint check);	
 
 
 	/// \brief Gets the check of a memory field
 	/// \param [in] field memory field
 	/// \return check of memory field
-	UNIV_INTERN ulint mem_field_trailer_get_check(byte* field);	
+	IB_INTERN ulint mem_field_trailer_get_check(byte* field);	
 #endif
 
 /// \brief Initializes a buffer to a random combination of hex DE and AD.
@@ -97,13 +97,13 @@ void mem_init_buf(byte*	buf, ulint n);
 /// \brief Used to erase freed memory.
 /// \param [in] buf pointer to buffer
 /// \param [in] n length of buffer
-UNIV_INTERN void mem_erase_buf(byte* buf, ulint n);
+IB_INTERN void mem_erase_buf(byte* buf, ulint n);
 
 /// \brief Inserts a created memory heap to the hash table of current allocated memory heaps.
 /// \param [in] heap memory heap
 /// \param [in] file_name file name of creation
 /// \param [in] line line where created
-UNIV_INTERN void mem_hash_insert(mem_heap_t* heap, const char* file_name, ulint line);
+IB_INTERN void mem_hash_insert(mem_heap_t* heap, const char* file_name, ulint line);
 
 /// \brief Removes a memory heap (which is going to be freed by the caller)
 /// from the list of live memory heaps. Returns the size of the heap
@@ -115,7 +115,7 @@ UNIV_INTERN void mem_hash_insert(mem_heap_t* heap, const char* file_name, ulint 
 /// \param [in] heap memory heap
 /// \param [in] file_name file name of freeing
 /// \param [in] line line where freed
-UNIV_INTERN void mem_hash_remove(mem_heap_t* heap, const char* file_name, ulint line);
+IB_INTERN void mem_hash_remove(mem_heap_t* heap, const char* file_name, ulint line);
 
 void  mem_field_header_set_len(byte* field, ulint len);
 ulint mem_field_header_get_len(byte* field);

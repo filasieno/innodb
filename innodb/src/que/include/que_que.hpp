@@ -43,7 +43,7 @@ extern ibool	que_trace_on;
 
 /***********************************************************************//**
 Adds a query graph to the session's list of graphs. */
-UNIV_INTERN
+IB_INTERN
 void
 que_graph_publish(
 /*==============*/
@@ -52,7 +52,7 @@ que_graph_publish(
 /***********************************************************************//**
 Creates a query graph fork node.
 @return	own: fork node */
-UNIV_INTERN
+IB_INTERN
 que_fork_t*
 que_fork_create(
 /*============*/
@@ -87,7 +87,7 @@ que_node_set_parent(
 /***********************************************************************//**
 Creates a query graph thread node.
 @return	own: query thread node */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 que_thr_create(
 /*===========*/
@@ -96,14 +96,14 @@ que_thr_create(
 /**********************************************************************//**
 Frees a query graph, but not the heap where it was created. Does not free
 explicit cursor declarations, they are freed in que_graph_free. */
-UNIV_INTERN
+IB_INTERN
 void
 que_graph_free_recursive(
 /*=====================*/
 	que_node_t*	node);	/*!< in: query graph node */
 /**********************************************************************//**
 Frees a query graph. */
-UNIV_INTERN
+IB_INTERN
 void
 que_graph_free(
 /*===========*/
@@ -117,7 +117,7 @@ Stops a query thread if graph or trx is in a state requiring it. The
 conditions are tested in the order (1) graph, (2) trx. The kernel mutex has
 to be reserved.
 @return	TRUE if stopped */
-UNIV_INTERN
+IB_INTERN
 ibool
 que_thr_stop(
 /*=========*/
@@ -126,7 +126,7 @@ que_thr_stop(
 Moves a thread from another state to the QUE_THR_RUNNING state. Increments
 the n_active_thrs counters of the query graph and transaction if thr was
 not active. */
-UNIV_INTERN
+IB_INTERN
 void
 que_thr_move_to_run_state_for_client(
 /*=================================*/
@@ -136,14 +136,14 @@ que_thr_move_to_run_state_for_client(
 The query thread is stopped and made inactive, except in the case where
 it was put to the lock wait state in lock0lock.c, but the lock has already
 been granted or the transaction chosen as a victim in deadlock resolution. */
-UNIV_INTERN
+IB_INTERN
 void
 que_thr_stop_client(
 /*================*/
 	que_thr_t*	thr);	/*!< in: query thread */
 /**********************************************************************//**
 Run a query thread. Handles lock waits. */
-UNIV_INTERN
+IB_INTERN
 void
 que_run_threads(
 /*============*/
@@ -152,7 +152,7 @@ que_run_threads(
 After signal handling is finished, returns control to a query graph error
 handling routine. (Currently, just returns the control to the root of the
 graph so that the graph can communicate an error message to the client.) */
-UNIV_INTERN
+IB_INTERN
 void
 que_fork_error_handle(
 /*==================*/
@@ -164,7 +164,7 @@ Moves a suspended query thread to the QUE_THR_RUNNING state and releases
 a single worker thread to execute it. This function should be used to end
 the wait state of a query thread waiting for a lock or a stored procedure
 completion. */
-UNIV_INTERN
+IB_INTERN
 void
 que_thr_end_wait(
 /*=============*/
@@ -179,7 +179,7 @@ que_thr_end_wait(
 					a new query thread */
 /**********************************************************************//**
 Same as que_thr_end_wait, but no parameter next_thr available. */
-UNIV_INTERN
+IB_INTERN
 void
 que_thr_end_wait_no_next_thr(
 /*=========================*/
@@ -195,7 +195,7 @@ is returned.
 @return a query thread of the graph moved to QUE_THR_RUNNING state, or
 NULL; the query thread should be executed by que_run_threads by the
 caller */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 que_fork_start_command(
 /*===================*/
@@ -273,7 +273,7 @@ que_node_get_parent(
 Get the first containing loop node (e.g. while_node_t or for_node_t) for the
 given node, or NULL if the node is not within a loop.
 @return	containing loop node, or NULL. */
-UNIV_INTERN
+IB_INTERN
 que_node_t*
 que_node_get_containing_loop_node(
 /*==============================*/
@@ -316,7 +316,7 @@ que_graph_is_select(
 	que_t*		graph);		/*!< in: graph */
 /**********************************************************************//**
 Prints info of an SQL query graph node. */
-UNIV_INTERN
+IB_INTERN
 void
 que_node_print_info(
 /*================*/
@@ -324,7 +324,7 @@ que_node_print_info(
 /*********************************************************************//**
 Evaluate the given SQL
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 que_eval_sql(
 /*=========*/
@@ -340,7 +340,7 @@ the n_active_thrs counters of the query graph and transaction if thr was
 not active.
 ***NOTE***: This is the only functions in which such a transition is
 allowed to happen! */
-UNIV_INTERN
+IB_INTERN
 void
 que_thr_move_to_run_state(
 /*======================*/
@@ -351,7 +351,7 @@ A patch for a client used to 'stop' a dummy query thread used in client
 select, when there is no error or lock wait.
 
 TODO: Currently only called from row0merge, needs to be removed. */
-UNIV_INTERN
+IB_INTERN
 void
 que_thr_stop_for_client_no_error(
 /*=============================*/
@@ -359,7 +359,7 @@ que_thr_stop_for_client_no_error(
 	trx_t*		trx);	/*!< in: transaction */
 /*************************************************************************//**
 Reset the variables. */
-UNIV_INTERN
+IB_INTERN
 void
 que_var_init(void);
 /*==============*/

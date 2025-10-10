@@ -163,7 +163,7 @@ the creating trx of the oldest view is set as not visible in the 'copied'
 view. Opens a new view if no views currently exist. The view must be closed
 with ..._close. This is used in purge.
 @return	own: read view struct */
-UNIV_INTERN
+IB_INTERN
 read_view_t*
 read_view_oldest_copy_or_open_new(
 /*==============================*/
@@ -247,7 +247,7 @@ read_view_oldest_copy_or_open_new(
 Opens a read view where exactly the transactions serialized before this
 point in time are seen in the view.
 @return	own: read view struct */
-UNIV_INTERN
+IB_INTERN
 read_view_t*
 read_view_open_now(
 /*===============*/
@@ -321,7 +321,7 @@ read_view_open_now(
 
 /*********************************************************************//**
 Closes a read view. */
-UNIV_INTERN
+IB_INTERN
 void
 read_view_close(
 /*============*/
@@ -335,7 +335,7 @@ read_view_close(
 /*********************************************************************//**
 Closes a consistent read view for the client. This function is called at
 an SQL statement end if the trx isolation level is <= TRX_ISO_READ_COMMITTED. */
-UNIV_INTERN
+IB_INTERN
 void
 read_view_close_for_read_committed(
 /*===============================*/
@@ -357,7 +357,7 @@ read_view_close_for_read_committed(
 
 /*********************************************************************//**
 Prints a read view to ib_stream. */
-UNIV_INTERN
+IB_INTERN
 void
 read_view_print(
 /*============*/
@@ -401,7 +401,7 @@ Create a high-granularity consistent cursor view to be used
 in cursors. In this consistent read view modifications done by the
 creating transaction after the cursor is created or future transactions
 are not visible. */
-UNIV_INTERN
+IB_INTERN
 cursor_view_t*
 read_cursor_view_create(
 /*====================*/
@@ -491,7 +491,7 @@ read_cursor_view_create(
 /*********************************************************************//**
 Close a given consistent cursor view and restore global read view
 back to a transaction read view. */
-UNIV_INTERN
+IB_INTERN
 void
 read_cursor_view_close(
 /*===================*/
@@ -520,7 +520,7 @@ read_cursor_view_close(
 This function sets a given consistent cursor view to a transaction
 read view if given consistent cursor view is not NULL. Otherwise, function
 restores a global read view to a transaction read view. */
-UNIV_INTERN
+IB_INTERN
 void
 read_cursor_set(
 /*============*/

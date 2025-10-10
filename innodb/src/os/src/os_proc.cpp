@@ -47,12 +47,12 @@ MAP_ANON but MAP_ANON is marked as deprecated */
 #define OS_MAP_ANON	MAP_ANON
 #endif
 
-UNIV_INTERN ibool os_use_large_pages;
+IB_INTERN ibool os_use_large_pages;
 /* Large page size. This may be a boot-time option on some platforms */
-UNIV_INTERN ulint os_large_page_size;
+IB_INTERN ulint os_large_page_size;
 
 /// \brief Reset the variables.
-UNIV_INTERN
+IB_INTERN
 void os_proc_var_init(void)
 {
 	os_use_large_pages = 0;
@@ -62,7 +62,7 @@ void os_proc_var_init(void)
 /// \brief Converts the current process id to a number.
 /// \details It is not guaranteed that the number is unique. In Linux returns the 'process number' of the current thread. That number is the same as one sees in 'top', for example. In Linux the thread id is not the same as one sees in 'top'.
 /// \return Process id as a number.
-UNIV_INTERN
+IB_INTERN
 ulint os_proc_get_number(void)
 {
 #ifdef __WIN__
@@ -75,7 +75,7 @@ ulint os_proc_get_number(void)
 /// \brief Allocates large pages memory.
 /// \param n Number of bytes.
 /// \return Allocated memory.
-UNIV_INTERN
+IB_INTERN
 void* os_mem_alloc_large(ulint* n)
 {
 	void*	ptr;
@@ -186,7 +186,7 @@ skip:
 /// \brief Frees large pages memory.
 /// \param ptr Pointer returned by os_mem_alloc_large().
 /// \param size Size returned by os_mem_alloc_large().
-UNIV_INTERN
+IB_INTERN
 void os_mem_free_large(void *ptr, ulint size)
 {
 	os_fast_mutex_lock(&ut_list_mutex);

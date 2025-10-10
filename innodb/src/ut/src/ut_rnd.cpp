@@ -31,13 +31,13 @@
 // @}
 
 /// \brief Seed value of ut_rnd_gen_ulint().
-UNIV_INTERN ulint ut_rnd_ulint_counter = 65654363;
+IB_INTERN ulint ut_rnd_ulint_counter = 65654363;
 
 /// \brief Looks for a prime number slightly greater than the given argument.
 /// The prime is chosen so that it is not near any power of 2.
 /// \param n in: positive number > 100
 /// \return prime
-UNIV_INTERN
+IB_INTERN
 ulint ut_find_prime(ulint n)
 {
 	ulint pow2;

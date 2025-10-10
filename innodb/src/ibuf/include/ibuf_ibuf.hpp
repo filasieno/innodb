@@ -74,20 +74,20 @@ free bits could momentarily be set too high. */
 /******************************************************************//**
 Creates the insert buffer data structure at a database startup and
 initializes the data structures for the insert buffer of each tablespace. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_init_at_db_start(void);
 /*=======================*/
 /*********************************************************************//**
 Reads the biggest tablespace id from the high end of the insert buffer
 tree and updates the counter in fil_system. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_update_max_tablespace_id(void);
 /*===============================*/
 /*********************************************************************//**
 Initializes an ibuf bitmap page. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_bitmap_page_init(
 /*==================*/
@@ -102,7 +102,7 @@ buffer bitmap must never exceed the free space on a page.  It is safe
 to decrement or reset the bits in the bitmap in a mini-transaction
 that is committed before the mini-transaction that affects the free
 space. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_reset_free_bits(
 /*=================*/
@@ -145,7 +145,7 @@ thread until mtr is committed.  NOTE: The free bits in the insert
 buffer bitmap must never exceed the free space on a page.  It is safe
 to set the free bits in the same mini-transaction that updated the
 page. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_update_free_bits_low(
 /*======================*/
@@ -164,7 +164,7 @@ thread until mtr is committed.  NOTE: The free bits in the insert
 buffer bitmap must never exceed the free space on a page.  It is safe
 to set the free bits in the same mini-transaction that updated the
 page. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_update_free_bits_zip(
 /*======================*/
@@ -177,7 +177,7 @@ virtually prevent any further operations until mtr is committed.
 NOTE: The free bits in the insert buffer bitmap must never exceed the
 free space on a page.  It is safe to set the free bits in the same
 mini-transaction that updated the pages. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_update_free_bits_for_two_pages_low(
 /*====================================*/
@@ -205,7 +205,7 @@ routine.
 For instance, a read-ahead of non-ibuf pages is forbidden by threads
 that are executing an insert buffer routine.
 @return TRUE if inside an insert buffer routine */
-UNIV_INTERN
+IB_INTERN
 ibool
 ibuf_inside(void);
 /*=============*/
@@ -223,7 +223,7 @@ ibuf_bitmap_page(
 Checks if a page is a level 2 or 3 page in the ibuf hierarchy of pages.
 Must not be called when recv_no_ibuf_operations==TRUE.
 @return	TRUE if level 2 or level 3 page */
-UNIV_INTERN
+IB_INTERN
 ibool
 ibuf_page(
 /*======*/
@@ -238,7 +238,7 @@ ibuf_page(
 Frees excess pages from the ibuf free list. This function is called when an OS
 thread calls fsp services to allocate a new file segment, or a new page to a
 file segment, and the thread did not own the fsp latch before this call. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_free_excess_pages(void);
 /*========================*/
@@ -247,7 +247,7 @@ Makes an index insert to the insert buffer, instead of directly to the disk
 page, if this is possible. Does not do insert if the index is clustered
 or unique.
 @return	TRUE if success */
-UNIV_INTERN
+IB_INTERN
 ibool
 ibuf_insert(
 /*========*/
@@ -264,7 +264,7 @@ The entries are deleted from the insert buffer. If the page is not read, but
 created in the buffer pool, this function deletes its buffered entries from
 the insert buffer; there can exist entries for such a page if the page
 belonged to an index which subsequently was dropped. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_merge_or_delete_for_page(
 /*==========================*/
@@ -285,7 +285,7 @@ Deletes all entries in the insert buffer for a given space id. This is used
 in DISCARD TABLESPACE and IMPORT TABLESPACE.
 NOTE: this does not update the page free bitmaps in the space. The space will
 become CORRUPT when you call this function! */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_delete_for_discarded_space(
 /*============================*/
@@ -295,7 +295,7 @@ Contracts insert buffer trees by reading pages to the buffer pool.
 @return a lower limit for the combined size in bytes of entries which
 will be merged from ibuf trees to the pages read, 0 if ibuf is
 empty */
-UNIV_INTERN
+IB_INTERN
 ulint
 ibuf_contract(
 /*==========*/
@@ -307,7 +307,7 @@ Contracts insert buffer trees by reading pages to the buffer pool.
 @return a lower limit for the combined size in bytes of entries which
 will be merged from ibuf trees to the pages read, 0 if ibuf is
 empty */
-UNIV_INTERN
+IB_INTERN
 ulint
 ibuf_contract_for_n_pages(
 /*======================*/
@@ -321,7 +321,7 @@ ibuf_contract_for_n_pages(
 /*********************************************************************//**
 Parses a redo log record of an ibuf bitmap page init.
 @return	end of log record or NULL */
-UNIV_INTERN
+IB_INTERN
 byte*
 ibuf_parse_bitmap_init(
 /*===================*/
@@ -335,7 +335,7 @@ ibuf_parse_bitmap_init(
 Gets the ibuf count for a given page.
 @return number of entries in the insert buffer currently buffered for
 this page */
-UNIV_INTERN
+IB_INTERN
 ulint
 ibuf_count_get(
 /*===========*/
@@ -345,26 +345,26 @@ ibuf_count_get(
 /******************************************************************//**
 Looks if the insert buffer is empty.
 @return	TRUE if empty */
-UNIV_INTERN
+IB_INTERN
 ibool
 ibuf_is_empty(void);
 /*===============*/
 /******************************************************************//**
 Prints info of ibuf. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_print(
 /*=======*/
 	ib_stream_t	ib_stram);	/*!< in: stream where to print */
 /**********************************************************************
 Reset the variables. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_var_init(void);
 /*===============*/
 /**********************************************************************
 Closes insert buffer and frees the data structures. */
-UNIV_INTERN
+IB_INTERN
 void
 ibuf_close(void);
 /*============*/

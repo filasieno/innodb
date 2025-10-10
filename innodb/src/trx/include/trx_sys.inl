@@ -47,7 +47,7 @@ typedef byte	trx_sysf_rseg_t;
 
 /*****************************************************************//**
 Writes the value of max_trx_id to the file based trx system header. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_flush_max_trx_id(void);
 /*==========================*/

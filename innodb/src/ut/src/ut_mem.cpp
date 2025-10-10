@@ -38,10 +38,10 @@ typedef struct ut_mem_block_struct ut_mem_block_t;
 /// \brief The total amount of memory currently allocated from the operating
 /// system with os_mem_alloc_large() or malloc().  Does not count malloc()
 /// if srv_use_sys_malloc is set.  Protected by ut_list_mutex.
-UNIV_INTERN ulint ut_total_allocated_memory = 0;
+IB_INTERN ulint ut_total_allocated_memory = 0;
 
 /// \brief Mutex protecting ut_total_allocated_memory and ut_mem_block_list
-UNIV_INTERN os_fast_mutex_t ut_list_mutex;
+IB_INTERN os_fast_mutex_t ut_list_mutex;
 
 /// \brief Dynamically allocated memory block
 struct ut_mem_block_struct
@@ -69,7 +69,7 @@ static ibool ut_mem_block_list_inited = FALSE;
 static ulint *ut_mem_null_ptr = NULL;
 
 /// \brief Reset the variables.
-UNIV_INTERN
+IB_INTERN
 void ut_mem_var_init(void)
 {
 	ut_total_allocated_memory = 0;
@@ -84,7 +84,7 @@ void ut_mem_var_init(void)
 }
 
 /// \brief Initializes the mem block list at database startup.
-UNIV_INTERN
+IB_INTERN
 void ut_mem_init(void)
 {
 	ut_a(!srv_was_started);
@@ -103,7 +103,7 @@ void ut_mem_init(void)
 /// \param set_to_zero TRUE if allocated memory should be set to zero if UNIV_SET_MEM_TO_ZERO is defined.
 /// \param assert_on_error If TRUE, we crash the server if the memory cannot be allocated.
 /// \return Allocated memory.
-UNIV_INTERN
+IB_INTERN
 void *ut_malloc_low(ulint n, ibool set_to_zero, ibool assert_on_error)
 {
 #ifndef UNIV_HOTBACKUP
@@ -227,7 +227,7 @@ retry:
 /// \details Sets it also to zero if UNIV_SET_MEM_TO_ZERO is defined.
 /// \param n Number of bytes to allocate.
 /// \return Allocated memory.
-UNIV_INTERN
+IB_INTERN
 void *ut_malloc(ulint n)
 {
 #ifndef UNIV_HOTBACKUP
@@ -242,7 +242,7 @@ void *ut_malloc(ulint n)
 /// \details ut_malloc() asserts if memory runs out. It cannot be used if we want to return an error message. Prints to ib_stream a message if fails.
 /// \param n Try to allocate this many bytes.
 /// \return TRUE if succeeded.
-UNIV_INTERN
+IB_INTERN
 ibool ut_test_malloc(ulint n)
 {
 	void *ret;
@@ -277,7 +277,7 @@ ibool ut_test_malloc(ulint n)
 
 /// \brief Frees a memory block allocated with ut_malloc.
 /// \param ptr Memory block to free.
-UNIV_INTERN
+IB_INTERN
 void ut_free(void *ptr)
 {
 #ifndef UNIV_HOTBACKUP
@@ -311,7 +311,7 @@ void ut_free(void *ptr)
 /// \param ptr Pointer to old block or NULL.
 /// \param size Desired size.
 /// \return Pointer to new mem block or NULL.
-UNIV_INTERN
+IB_INTERN
 void *ut_realloc(void *ptr, ulint size)
 {
 	ut_mem_block_t *block;
@@ -354,7 +354,7 @@ void *ut_realloc(void *ptr, ulint size)
 }
 
 /// \brief Frees in shutdown all allocated memory not freed yet.
-UNIV_INTERN void ut_free_all_mem(void)
+IB_INTERN void ut_free_all_mem(void)
 {
 	ut_mem_block_t *block;
 
@@ -387,7 +387,7 @@ UNIV_INTERN void ut_free_all_mem(void)
 /// \param src Source buffer.
 /// \param size Size of destination buffer.
 /// \return strlen(src).
-UNIV_INTERN
+IB_INTERN
 ulint ut_strlcpy(char *dst, const char *src, ulint size)
 {
 	ulint src_size = strlen(src);
@@ -407,7 +407,7 @@ ulint ut_strlcpy(char *dst, const char *src, ulint size)
 /// \param src Source buffer.
 /// \param size Size of destination buffer.
 /// \return strlen(src).
-UNIV_INTERN
+IB_INTERN
 ulint ut_strlcpy_rev(char *dst, const char *src, ulint size)
 {
 	ulint src_size = strlen(src);
@@ -426,7 +426,7 @@ ulint ut_strlcpy_rev(char *dst, const char *src, ulint size)
 /// \param q The quote character.
 /// \param src Null-terminated string.
 /// \return Pointer to end of dest.
-UNIV_INTERN
+IB_INTERN
 char *ut_strcpyq(char *dest, char q, const char *src)
 {
 	while (*src) {
@@ -445,7 +445,7 @@ char *ut_strcpyq(char *dest, char q, const char *src)
 /// \param src String to be quoted.
 /// \param len Length of src.
 /// \return Pointer to end of dest.
-UNIV_INTERN
+IB_INTERN
 char *ut_memcpyq(char *dest, char q, const char *src, ulint len)
 {
 	const char *srcend = src + len;
@@ -465,7 +465,7 @@ char *ut_memcpyq(char *dest, char q, const char *src, ulint len)
 /// \param s1 String to search in.
 /// \param s2 String to search for.
 /// \return The number of times s2 occurs in s1.
-UNIV_INTERN
+IB_INTERN
 ulint ut_strcount(const char *s1, const char *s2)
 {
 	ulint count = 0;
@@ -490,7 +490,7 @@ ulint ut_strcount(const char *s1, const char *s2)
 /// \param s1 String to replace.
 /// \param s2 String to replace s1 with.
 /// \return Modified string, must be freed with mem_free().
-UNIV_INTERN
+IB_INTERN
 char *ut_strreplace(const char *str, const char *s1, const char *s2)
 {
 	char *new_str;

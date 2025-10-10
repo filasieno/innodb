@@ -41,7 +41,7 @@
 /// \param iter iterator
 /// \param lock lock to start from
 /// \param bit_no record number in the heap
-UNIV_INTERN void lock_queue_iterator_reset(lock_queue_iterator_t *iter, const lock_t *lock, ulint bit_no)
+IB_INTERN void lock_queue_iterator_reset(lock_queue_iterator_t *iter, const lock_t *lock, ulint bit_no)
 {
 	iter->current_lock = lock;
 	if (bit_no != ULINT_UNDEFINED) {
@@ -67,7 +67,7 @@ UNIV_INTERN void lock_queue_iterator_reset(lock_queue_iterator_t *iter, const lo
 /// receded (if not-NULL is returned).
 /// \param [in/out] iterator
 /// \return previous lock or NULL
-UNIV_INTERN const lock_t *lock_queue_iterator_get_prev(lock_queue_iterator_t *iter)
+IB_INTERN const lock_t *lock_queue_iterator_get_prev(lock_queue_iterator_t *iter)
 {
 	const lock_t *prev_lock;
 	switch (lock_get_type_low(iter->current_lock)) {

@@ -53,13 +53,13 @@
 	/// \param [out] us_size allocated memory (for the user) in the heap, if a NULL pointer is passed as this argument, it is ignored; in the non-debug version this is always -1
 	/// \param [out] ph_size physical size of the heap, if a NULL pointer is passed as this argument, it is ignored
 	/// \param [out] n_blocks number of blocks in the heap, if a NULL pointer is passed as this argument, it is ignored
-	UNIV_INTERN void mem_heap_validate_or_print(mem_heap_t* heap, byte* top, ibool print, ibool* error, ulint* us_size, ulint* ph_size, ulint* n_blocks);
+	IB_INTERN void mem_heap_validate_or_print(mem_heap_t* heap, byte* top, ibool print, ibool* error, ulint* us_size, ulint* ph_size, ulint* n_blocks);
 
 
 	/// \brief Validates the contents of a memory heap.
 	/// \param [in] heap memory heap
 	/// \return TRUE if ok
-	UNIV_INTERN ibool mem_heap_validate(mem_heap_t* heap);
+	IB_INTERN ibool mem_heap_validate(mem_heap_t* heap);
 
 #endif // UNIV_MEM_DEBUG || UNIV_DEBUG
 
@@ -69,11 +69,11 @@
 	/// \param [in] heap memory heap
 	/// \return TRUE if ok
 
-	UNIV_INTERN ibool mem_heap_check(mem_heap_t* heap);
+	IB_INTERN ibool mem_heap_check(mem_heap_t* heap);
 
 #endif // UNIV_DEBUG
 
 /// \brief Validates the dynamic memory
 /// \return TRUE if ok
-UNIV_INTERN ibool mem_validate(void);
+IB_INTERN ibool mem_validate(void);
 

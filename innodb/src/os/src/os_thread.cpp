@@ -44,7 +44,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 /// \param a OS thread or thread id.
 /// \param b OS thread or thread id.
 /// \return TRUE if equal.
-UNIV_INTERN
+IB_INTERN
 ibool os_thread_eq(os_thread_id_t a, os_thread_id_t b)
 {
 #ifdef __WIN__
@@ -66,7 +66,7 @@ ibool os_thread_eq(os_thread_id_t a, os_thread_id_t b)
 /// \details It is NOT guaranteed that the ulint is unique for the thread though!
 /// \param a OS thread identifier.
 /// \return Thread identifier as a number.
-UNIV_INTERN
+IB_INTERN
 ulint os_thread_pf(os_thread_id_t a)
 {
 #ifdef UNIV_HPUX10
@@ -82,7 +82,7 @@ ulint os_thread_pf(os_thread_id_t a)
 /// \brief Returns the thread identifier of current thread.
 /// \details Currently the thread identifier in Unix is the thread handle itself. Note that in HP-UX pthread_t is a struct of 3 fields.
 /// \return Current thread identifier.
-UNIV_INTERN
+IB_INTERN
 os_thread_id_t os_thread_get_curr_id(void)
 {
 #ifdef __WIN__
@@ -97,7 +97,7 @@ Creates a new thread of execution. The execution starts from
 the function given. The start function takes a void* parameter
 and returns an ulint.
 @return	handle to the thread */
-UNIV_INTERN
+IB_INTERN
 os_thread_t
 os_thread_create(
 /*=============*/
@@ -208,7 +208,7 @@ os_thread_create(
 
 /*****************************************************************//**
 Exits the current thread. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_exit(
 /*===========*/
@@ -241,7 +241,7 @@ os_thread_exit(
 /*****************************************************************//**
 Returns handle to the current thread.
 @return	current thread handle */
-UNIV_INTERN
+IB_INTERN
 os_thread_t
 os_thread_get_curr(void)
 /*====================*/
@@ -255,7 +255,7 @@ os_thread_get_curr(void)
 
 /*****************************************************************//**
 Advises the os to give up remainder of the thread's time slice. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_yield(void)
 /*=================*/
@@ -276,7 +276,7 @@ os_thread_yield(void)
 
 /*****************************************************************//**
 The thread sleeps at least the time given in microseconds. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_sleep(
 /*============*/
@@ -299,7 +299,7 @@ os_thread_sleep(
 #ifndef UNIV_HOTBACKUP
 /******************************************************************//**
 Sets a thread priority. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_set_priority(
 /*===================*/
@@ -329,7 +329,7 @@ os_thread_set_priority(
 /******************************************************************//**
 Gets a thread priority.
 @return	priority */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_thread_get_priority(
 /*===================*/
@@ -361,7 +361,7 @@ os_thread_get_priority(
 /******************************************************************//**
 Gets the last operating system error code for the calling thread.
 @return	last error on Windows, 0 otherwise */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_thread_get_last_error(void)
 /*==========================*/

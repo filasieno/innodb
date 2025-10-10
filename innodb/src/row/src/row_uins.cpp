@@ -296,7 +296,7 @@ marked, at the time of the insert.  InnoDB is eager in a rollback:
 if it figures out that an index record will be removed in the purge
 anyway, it will remove it in the rollback.
 @return	DB_SUCCESS or DB_OUT_OF_FILE_SPACE */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_undo_ins(
 /*=========*/

@@ -54,18 +54,18 @@ typedef struct ib_list_helper_struct ib_list_helper_t;
 
 /// \brief Create a new list using mem_alloc. Lists created with this function must be freed with ib_list_free.
 /// \return list
-UNIV_INTERN ib_list_t* ib_list_create(void);
+IB_INTERN ib_list_t* ib_list_create(void);
 
 /// \brief Free a list.
 /// \param [in] list list
-UNIV_INTERN void ib_list_free(ib_list_t* list);	/*!< in: list */
+IB_INTERN void ib_list_free(ib_list_t* list);	/*!< in: list */
 
 /// \brief Add the data to the end of the list.
 /// \param [in] list list
 /// \param [in] data data
 /// \param [in] heap memory heap to use
 /// \return new list node
-UNIV_INTERN ib_list_node_t* ib_list_add_last(ib_list_t* list, void* data, mem_heap_t* heap);	
+IB_INTERN ib_list_node_t* ib_list_add_last(ib_list_t* list, void* data, mem_heap_t* heap);	
 
 /// \brief Add the data after the indicated node.
 /// \param [in] list list
@@ -73,14 +73,14 @@ UNIV_INTERN ib_list_node_t* ib_list_add_last(ib_list_t* list, void* data, mem_he
 /// \param [in] data data
 /// \param [in] heap memory heap to use
 /// \return new list node
-UNIV_INTERN ib_list_node_t* ib_list_add_after(ib_list_t* list, ib_list_node_t* prev_node, void* data, mem_heap_t* heap);		
+IB_INTERN ib_list_node_t* ib_list_add_after(ib_list_t* list, ib_list_node_t* prev_node, void* data, mem_heap_t* heap);		
 
 
 /// \brief Remove the node from the list.
 /// \param [in] list list
 /// \param [in] node node to remove
 /// \return new list node
-UNIV_INTERN void ib_list_remove(ib_list_t* list, ib_list_node_t* node);
+IB_INTERN void ib_list_remove(ib_list_t* list, ib_list_node_t* node);
 
 
 /// \brief Get the first node in the list.

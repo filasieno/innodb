@@ -30,14 +30,14 @@
 /// \param val Value to write.
 /// \param type MLOG_1BYTE, MLOG_2BYTES, MLOG_4BYTES.
 /// \param mtr Mini-transaction handle.
-UNIV_INTERN void mlog_write_ulint(byte *ptr, ulint val, byte type, mtr_t *mtr);
+IB_INTERN void mlog_write_ulint(byte *ptr, ulint val, byte type, mtr_t *mtr);
 
 /// \brief Writes 8 bytes to a file page buffered in the buffer pool.
 /// \details Writes the corresponding log record to the mini-transaction log.
 /// \param ptr Pointer where to write.
 /// \param val Value to write.
 /// \param mtr Mini-transaction handle.
-UNIV_INTERN void mlog_write_dulint(byte *ptr, dulint val, mtr_t *mtr);
+IB_INTERN void mlog_write_dulint(byte *ptr, dulint val, mtr_t *mtr);
 
 /// \brief Writes a string to a file page buffered in the buffer pool.
 /// \details Writes the corresponding log record to the mini-transaction log.
@@ -45,14 +45,14 @@ UNIV_INTERN void mlog_write_dulint(byte *ptr, dulint val, mtr_t *mtr);
 /// \param str String to write.
 /// \param len String length.
 /// \param mtr Mini-transaction handle.
-UNIV_INTERN void mlog_write_string(byte *ptr, const byte *str, ulint len, mtr_t *mtr);
+IB_INTERN void mlog_write_string(byte *ptr, const byte *str, ulint len, mtr_t *mtr);
 
 /// \brief Logs a write of a string to a file page buffered in the buffer pool.
 /// \details Writes the corresponding log record to the mini-transaction log.
 /// \param ptr Pointer written to.
 /// \param len String length.
 /// \param mtr Mini-transaction handle.
-UNIV_INTERN void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr);
+IB_INTERN void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr);
 
 /// \brief Writes initial part of a log record consisting of one-byte item
 /// type and four-byte space and page numbers.
@@ -60,7 +60,7 @@ UNIV_INTERN void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr);
 /// modification is made
 /// \param type Log item type: MLOG_1BYTE, ...
 /// \param mtr Mini-transaction handle.
-UNIV_INTERN void mlog_write_initial_log_record(const byte *ptr, byte type, mtr_t *mtr);
+IB_INTERN void mlog_write_initial_log_record(const byte *ptr, byte type, mtr_t *mtr);
 
 /// \brief Writes a log record about an .ibd file create/delete/rename.
 /// \param type MLOG_FILE_CREATE, MLOG_FILE_DELETE, or MLOG_FILE_RENAME.
@@ -81,7 +81,7 @@ IB_INLINE void mlog_catenate_ulint(mtr_t *mtr, ulint val, ulint type);
 /// \param mtr Mtr.
 /// \param str String to write.
 /// \param len String length.
-UNIV_INTERN void mlog_catenate_string(mtr_t *mtr, const byte *str, ulint len);
+IB_INTERN void mlog_catenate_string(mtr_t *mtr, const byte *str, ulint len);
 
 /// \brief Catenates a compressed ulint to mlog.
 /// \param mtr Mtr.
@@ -127,7 +127,7 @@ IB_INLINE byte* mlog_write_initial_log_record_fast(const byte *ptr, byte type, b
 /// \param space Space id.
 /// \param page_no Page number.
 /// \return Parsed record end, NULL if not a complete record.
-UNIV_INTERN byte* mlog_parse_initial_log_record(byte *ptr, byte *end_ptr, byte *type, ulint *space, ulint *page_no);
+IB_INTERN byte* mlog_parse_initial_log_record(byte *ptr, byte *end_ptr, byte *type, ulint *space, ulint *page_no);
 
 /// \brief Parses a log record written by mlog_write_ulint or mlog_write_dulint.
 /// \param type Log record type: MLOG_1BYTE, ...
@@ -136,7 +136,7 @@ UNIV_INTERN byte* mlog_parse_initial_log_record(byte *ptr, byte *end_ptr, byte *
 /// \param page Page where to apply the log record, or NULL.
 /// \param page_zip Compressed page, or NULL.
 /// \return Parsed record end, NULL if not a complete record.
-UNIV_INTERN byte* mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *page_zip);
+IB_INTERN byte* mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *page_zip);
 
 /// \brief Parses a log record written by mlog_write_string.
 /// \param ptr Buffer.
@@ -144,7 +144,7 @@ UNIV_INTERN byte* mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *
 /// \param page Page where to apply the log record, or NULL.
 /// \param page_zip Compressed page, or NULL.
 /// \return Parsed record end, NULL if not a complete record.
-UNIV_INTERN byte* mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip);
+IB_INTERN byte* mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip);
 
 #ifndef UNIV_HOTBACKUP
 
@@ -157,7 +157,7 @@ UNIV_INTERN byte* mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *
 /// \param type Log item type.
 /// \param size Requested buffer size in bytes (if 0, calls mlog_close() and returns NULL).
 /// \return Buffer, NULL if log mode MTR_LOG_NONE.
-UNIV_INTERN byte* mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_index_t *index, byte type, ulint size);
+IB_INTERN byte* mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_index_t *index, byte type, ulint size);
 
 #endif // !UNIV_HOTBACKUP
 
@@ -167,7 +167,7 @@ UNIV_INTERN byte* mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_in
 /// \param comp TRUE=compact record format.
 /// \param index Dummy index.
 /// \return Parsed record end, NULL if not a complete record.
-UNIV_INTERN byte* mlog_parse_index(byte *ptr, const byte *end_ptr, ibool comp, dict_index_t **index);
+IB_INTERN byte* mlog_parse_index(byte *ptr, const byte *end_ptr, ibool comp, dict_index_t **index);
 
 #ifndef UNIV_HOTBACKUP
 /* Insert, update, and maybe other functions may use this value to define an

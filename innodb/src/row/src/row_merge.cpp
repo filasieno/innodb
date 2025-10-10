@@ -1881,7 +1881,7 @@ err_exit:
 Drop an index from the InnoDB system tables.  The data dictionary must
 have been locked exclusively by the caller, because the transaction
 will not be committed. */
-UNIV_INTERN
+IB_INTERN
 void
 row_merge_drop_index(
 /*=================*/
@@ -1899,7 +1899,7 @@ Drop those indexes which were created before an error occurred when
 building an index.  The data dictionary must have been locked
 exclusively by the caller, because the transaction will not be
 committed. */
-UNIV_INTERN
+IB_INTERN
 void
 row_merge_drop_indexes(
 /*===================*/
@@ -1985,7 +1985,7 @@ row_merge_col_prtype(
 Create a temporary table for creating a primary key, using the definition
 of an existing table.
 @return	table, or NULL on error */
-UNIV_INTERN
+IB_INTERN
 dict_table_t*
 row_merge_create_temporary_table(
 /*=============================*/
@@ -2038,7 +2038,7 @@ Rename the temporary indexes in the dictionary to permanent ones.  The
 data dictionary must have been locked exclusively by the caller,
 because the transaction will not be committed.
 @return	DB_SUCCESS if all OK */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_merge_rename_indexes(
 /*=====================*/
@@ -2089,7 +2089,7 @@ Rename the tables in the data dictionary.  The data dictionary must
 have been locked exclusively by the caller, because the transaction
 will not be committed.
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_merge_rename_tables(
 /*====================*/
@@ -2162,7 +2162,7 @@ err_exit:
 /*********************************************************************//**
 Create the index and load in to the dictionary.
 @return	index, or NULL on error */
-UNIV_INTERN
+IB_INTERN
 dict_index_t*
 row_merge_create_index(
 /*===================*/
@@ -2216,7 +2216,7 @@ row_merge_create_index(
 
 /*********************************************************************//**
 Check if a transaction can use an index. */
-UNIV_INTERN
+IB_INTERN
 ibool
 row_merge_is_index_usable(
 /*======================*/
@@ -2232,7 +2232,7 @@ row_merge_is_index_usable(
 /*********************************************************************//**
 Drop the old table.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_merge_drop_table(
 /*=================*/
@@ -2255,7 +2255,7 @@ Build indexes on a table by reading a clustered index,
 creating a temporary file containing index entries, merge sorting
 these index entries and inserting sorted index entries to indexes.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_merge_build_indexes(
 /*====================*/

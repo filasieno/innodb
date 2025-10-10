@@ -103,7 +103,7 @@ extern page_zip_stat_t page_zip_stat[PAGE_ZIP_NUM_SSIZE - 1];
 /**********************************************************************//**
 Write the "deleted" flag of a record on a compressed page.  The flag must
 already have been written on the uncompressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_rec_set_deleted(
 /*=====================*/
@@ -115,7 +115,7 @@ page_zip_rec_set_deleted(
 /**********************************************************************//**
 Write the "owned" flag of a record on a compressed page.  The n_owned field
 must already have been written on the uncompressed page. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_rec_set_owned(
 /*===================*/
@@ -126,7 +126,7 @@ page_zip_rec_set_owned(
 
 /**********************************************************************//**
 Shift the dense page directory when a record is deleted. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_dir_delete(
 /*================*/
@@ -139,7 +139,7 @@ page_zip_dir_delete(
 
 /**********************************************************************//**
 Add a slot to the dense page directory. */
-UNIV_INTERN
+IB_INTERN
 void
 page_zip_dir_add_slot(
 /*==================*/

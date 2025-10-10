@@ -35,20 +35,20 @@ extern ulint os_large_page_size; // Large page size. This may be a boot-time opt
 /// thread. That number is the same as one sees in 'top', for example. In Linux
 /// the thread id is not the same as one sees in 'top'.
 /// \return process id as a number
-UNIV_INTERN ulint os_proc_get_number(void);
+IB_INTERN ulint os_proc_get_number(void);
 
 /// \brief Allocates large pages memory.
 /// \return allocated memory
 /// \param n in/out: number of bytes
-UNIV_INTERN void* os_mem_alloc_large(ulint* n);
+IB_INTERN void* os_mem_alloc_large(ulint* n);
 
 /// \brief Frees large pages memory.
 /// \param ptr pointer returned by os_mem_alloc_large()
 /// \param size size returned by os_mem_alloc_large()
-UNIV_INTERN void os_mem_free_large(void* ptr, ulint size);
+IB_INTERN void os_mem_free_large(void* ptr, ulint size);
 
 /// \brief Reset the variables.
-UNIV_INTERN void os_proc_var_init(void);
+IB_INTERN void os_proc_var_init(void);
 
 #ifndef UNIV_NONINL
 #include "os_proc.inl"

@@ -36,7 +36,7 @@ Created 12/15/1997 Heikki Tuuri
 /******************************************************************//**
 Creates a symbol table for a single stored procedure or query.
 @return	own: symbol table */
-UNIV_INTERN
+IB_INTERN
 sym_tab_t*
 sym_tab_create(
 /*===========*/
@@ -45,7 +45,7 @@ sym_tab_create(
 Frees the memory allocated dynamically AFTER parsing phase for variables
 etc. in the symbol table. Does not free the mem heap where the table was
 originally created. Frees also SQL explicit cursor definitions. */
-UNIV_INTERN
+IB_INTERN
 void
 sym_tab_free_private(
 /*=================*/
@@ -53,7 +53,7 @@ sym_tab_free_private(
 /******************************************************************//**
 Adds an integer literal to a symbol table.
 @return	symbol table node */
-UNIV_INTERN
+IB_INTERN
 sym_node_t*
 sym_tab_add_int_lit(
 /*================*/
@@ -62,7 +62,7 @@ sym_tab_add_int_lit(
 /******************************************************************//**
 Adds an string literal to a symbol table.
 @return	symbol table node */
-UNIV_INTERN
+IB_INTERN
 sym_node_t*
 sym_tab_add_str_lit(
 /*================*/
@@ -73,7 +73,7 @@ sym_tab_add_str_lit(
 /******************************************************************//**
 Add a bound literal to a symbol table.
 @return	symbol table node */
-UNIV_INTERN
+IB_INTERN
 sym_node_t*
 sym_tab_add_bound_lit(
 /*==================*/
@@ -83,7 +83,7 @@ sym_tab_add_bound_lit(
 /******************************************************************//**
 Adds an SQL null literal to a symbol table.
 @return	symbol table node */
-UNIV_INTERN
+IB_INTERN
 sym_node_t*
 sym_tab_add_null_lit(
 /*=================*/
@@ -91,7 +91,7 @@ sym_tab_add_null_lit(
 /******************************************************************//**
 Adds an identifier to a symbol table.
 @return	symbol table node */
-UNIV_INTERN
+IB_INTERN
 sym_node_t*
 sym_tab_add_id(
 /*===========*/
@@ -102,7 +102,7 @@ sym_tab_add_id(
 /******************************************************************//**
 Add a bound identifier to a symbol table.
 @return	symbol table node */
-UNIV_INTERN
+IB_INTERN
 sym_node_t*
 sym_tab_add_bound_id(
 /*===========*/

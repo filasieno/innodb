@@ -31,7 +31,7 @@
 @file api/api0ucode.c
 Determines the connection character set.
 @return	connection character set */
-UNIV_INTERN
+IB_INTERN
 const charset_t*
 ib_ucode_get_connection_charset(void)
 /*========-========================*/
@@ -43,7 +43,7 @@ ib_ucode_get_connection_charset(void)
 Determines the character set based on id.
 FIXME: If the id can't be found then what do we do, return some default ?
 @return	character set or NULL */
-UNIV_INTERN
+IB_INTERN
 const charset_t*
 ib_ucode_get_charset(
 /*=================*/
@@ -54,7 +54,7 @@ ib_ucode_get_charset(
 
 /******************************************************************//**
 Get the variable length bounds of the given (multibyte) character set. */
-UNIV_INTERN
+IB_INTERN
 void
 ib_ucode_get_charset_width(
 /*=======================*/
@@ -108,7 +108,7 @@ ib_utf8_strncasecmp(
 
 /******************************************************************//**
 Makes all characters in a NUL-terminated UTF-8 string lower case. */
-UNIV_INTERN
+IB_INTERN
 void
 ib_utf8_casedown(
 /*=============*/
@@ -128,7 +128,7 @@ ib_utf8_casedown(
 
 /******************************************************************//**
 Converts an identifier to a table name. */
-UNIV_INTERN
+IB_INTERN
 void
 ib_utf8_convert_from_table_id(
 /*==========================*/
@@ -151,7 +151,7 @@ ib_utf8_convert_from_table_id(
 
 /******************************************************************//**
 Converts an identifier to UTF-8. */
-UNIV_INTERN
+IB_INTERN
 void
 ib_utf8_convert_from_id(
 /*=====================*/
@@ -176,7 +176,7 @@ ib_utf8_convert_from_id(
 /**********************************************************************//**
 Test whether a UTF-8 character is a space or not.
 @return	TRUE if isspace(c) */
-UNIV_INTERN
+IB_INTERN
 int
 ib_utf8_isspace(
 /*============*/
@@ -195,7 +195,7 @@ ib_utf8_isspace(
 This function is used to find the storage length in bytes of the
 characters that will fit into prefix_len bytes.
 @return	number of bytes required to copy the characters that will fit into prefix_len bytes. */
-UNIV_INTERN
+IB_INTERN
 ulint
 ib_ucode_get_storage_size(
 /*======================*/

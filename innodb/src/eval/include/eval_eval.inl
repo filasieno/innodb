@@ -30,7 +30,7 @@ Created 12/29/1997 Heikki Tuuri
 
 /*****************************************************************//**
 Evaluates a function node. */
-UNIV_INTERN
+IB_INTERN
 void
 eval_func(
 /*======*/
@@ -42,7 +42,7 @@ freed. If the node already has allocated buffer, that buffer is freed
 here. NOTE that this is the only function where dynamic memory should be
 allocated for a query node val field.
 @return	pointer to allocated buffer */
-UNIV_INTERN
+IB_INTERN
 byte*
 eval_node_alloc_val_buf(
 /*====================*/

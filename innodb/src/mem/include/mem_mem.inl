@@ -26,18 +26,18 @@
 /// \param [in] file_name in: file name where created
 /// \param [in] line in: line where created
 /// \return own: memory heap block, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
-UNIV_INTERN mem_block_t* mem_heap_create_block(mem_heap_t* heap, ulint n, ulint type, const char* file_name, ulint line);
+IB_INTERN mem_block_t* mem_heap_create_block(mem_heap_t* heap, ulint n, ulint type, const char* file_name, ulint line);
 
 /// \brief Frees a block from a memory heap.
 /// \param [in] heap in: heap
 /// \param [in] block in: block to free
-UNIV_INTERN void mem_heap_block_free(mem_heap_t* heap, mem_block_t* block);
+IB_INTERN void mem_heap_block_free(mem_heap_t* heap, mem_block_t* block);
 
 #ifndef UNIV_HOTBACKUP
 
 	/// \brief Frees the free_block field from a memory heap.
 	/// \param [in] heap in: heap
-	UNIV_INTERN void mem_heap_free_block_free(mem_heap_t* heap);
+	IB_INTERN void mem_heap_free_block_free(mem_heap_t* heap);
 
 #endif // !UNIV_HOTBACKUP
 
@@ -45,7 +45,7 @@ UNIV_INTERN void mem_heap_block_free(mem_heap_t* heap, mem_block_t* block);
 /// \param [in] heap in: memory heap
 /// \param [in] n in: number of bytes user needs
 /// \return created block, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
-UNIV_INTERN mem_block_t* mem_heap_add_block(mem_heap_t* heap, ulint n);
+IB_INTERN mem_block_t* mem_heap_add_block(mem_heap_t* heap, ulint n);
 
 IB_INLINE void mem_block_set_len(mem_block_t* block, ulint len)
 {

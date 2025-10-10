@@ -33,7 +33,7 @@ Created 6/25/1996 Heikki Tuuri
 
 /// \brief Opens a session.
 /// \return	session object
-UNIV_INTERN sess_t *sess_open(void)
+IB_INTERN sess_t *sess_open(void)
 {
 	sess_t *sess;
 	ut_ad(mutex_own(&kernel_mutex));
@@ -46,7 +46,7 @@ UNIV_INTERN sess_t *sess_open(void)
 
 /*********************************************************************/ /**
 Closes a session, freeing the memory occupied by it. */
-UNIV_INTERN void sess_close(sess_t *sess)								/*!< in, own: session object */
+IB_INTERN void sess_close(sess_t *sess)								/*!< in, own: session object */
 {
 	ut_ad(!mutex_own(&kernel_mutex));
 	ut_a(UT_LIST_GET_LEN(sess->graphs) == 0);

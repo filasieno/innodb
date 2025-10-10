@@ -95,32 +95,32 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include <errno.h>
 
 /* Log sequence number immediately after startup */
-UNIV_INTERN ib_uint64_t	srv_start_lsn;
+IB_INTERN ib_uint64_t	srv_start_lsn;
 /** Log sequence number at shutdown */
-UNIV_INTERN ib_uint64_t	srv_shutdown_lsn;
+IB_INTERN ib_uint64_t	srv_shutdown_lsn;
 
 #ifdef HAVE_DARWIN_THREADS
 # include <sys/utsname.h>
 /** TRUE if the F_FULLFSYNC option is available */
-UNIV_INTERN ibool	srv_have_fullfsync = FALSE;
+IB_INTERN ibool	srv_have_fullfsync = FALSE;
 #endif
 
 /** TRUE if a raw partition is in use */
-UNIV_INTERN ibool	srv_start_raw_disk_in_use = FALSE;
+IB_INTERN ibool	srv_start_raw_disk_in_use = FALSE;
 
 /** TRUE if the server is being started, before rolling back any
 incomplete transactions */
-UNIV_INTERN ibool	srv_startup_is_before_trx_rollback_phase = FALSE;
+IB_INTERN ibool	srv_startup_is_before_trx_rollback_phase = FALSE;
 /** TRUE if the server is being started */
-UNIV_INTERN ibool	srv_is_being_started = FALSE;
+IB_INTERN ibool	srv_is_being_started = FALSE;
 /** TRUE if the server was successfully started */
-UNIV_INTERN ibool	srv_was_started = FALSE;
+IB_INTERN ibool	srv_was_started = FALSE;
 /** TRUE if innobase_start_or_create_for_mysql() has been called */
 static ibool		srv_start_has_been_called = FALSE;
 
 /** At a shutdown this value climbs from SRV_SHUTDOWN_NONE to
 SRV_SHUTDOWN_CLEANUP and then to SRV_SHUTDOWN_LAST_PHASE, and so on */
-UNIV_INTERN enum srv_shutdown_state	srv_shutdown_state = SRV_SHUTDOWN_NONE;
+IB_INTERN enum srv_shutdown_state	srv_shutdown_state = SRV_SHUTDOWN_NONE;
 
 /** Files comprising the system tablespace */
 static os_file_t	files[1000];
@@ -231,7 +231,7 @@ srv_add_path_separator_if_needed(
 /*********************************************************************//**
 Reads the data files and their sizes from a character string.
 @return	TRUE if ok, FALSE on parse error */
-UNIV_INTERN
+IB_INTERN
 ibool
 srv_parse_data_file_paths_and_sizes(
 /*================================*/
@@ -437,7 +437,7 @@ srv_parse_data_file_paths_and_sizes(
 /*********************************************************************//**
 Reads log group home directories from a character string.
 @return	TRUE if ok, FALSE on parse error */
-UNIV_INTERN
+IB_INTERN
 ibool
 srv_parse_log_group_home_dirs(
 /*==========================*/
@@ -540,7 +540,7 @@ srv_parse_log_group_home_dirs(
 /*********************************************************************//**
 Frees the memory allocated by srv_parse_data_file_paths_and_sizes()
 and srv_parse_log_group_home_dirs(). */
-UNIV_INTERN
+IB_INTERN
 void
 srv_free_paths_and_sizes(void)
 /*==========================*/
@@ -625,7 +625,7 @@ io_handler_thread(
 
 /*********************************************************************//**
 Normalizes a directory path for Windows: converts slashes to backslashes. */
-UNIV_INTERN
+IB_INTERN
 void
 srv_normalize_path_for_win(
 /*=======================*/
@@ -1167,7 +1167,7 @@ srv_startup_abort(
 Starts InnoDB and creates a new database if database files
 are not found and the user wants.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ib_err_t
 innobase_start_or_create(void)
 /*===========================*/
@@ -2012,7 +2012,7 @@ srv_threads_shutdown(void)
 /****************************************************************//**
 Shuts down the InnoDB database.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 enum db_err
 innobase_shutdown(
 /*==============*/

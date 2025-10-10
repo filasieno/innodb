@@ -51,7 +51,7 @@ Finds out if an active transaction has inserted or modified a secondary
 index record. NOTE: the kernel mutex is temporarily released in this
 function!
 @return NULL if committed, else the active transaction */
-UNIV_INTERN
+IB_INTERN
 trx_t*
 row_vers_impl_x_locked_off_kernel(
 /*==============================*/
@@ -303,7 +303,7 @@ exit_func:
 Finds out if we must preserve a delete marked earlier version of a clustered
 index record, because it is >= the purge view.
 @return	TRUE if earlier version should be preserved */
-UNIV_INTERN
+IB_INTERN
 ibool
 row_vers_must_preserve_del_marked(
 /*==============================*/
@@ -336,7 +336,7 @@ if there is any not delete marked version of the record where the trx
 id >= purge view, and the secondary index entry and ientry are identified in
 the alphabetical ordering; exactly in this case we return TRUE.
 @return	TRUE if earlier version should have */
-UNIV_INTERN
+IB_INTERN
 ibool
 row_vers_old_has_index_entry(
 /*=========================*/
@@ -479,7 +479,7 @@ Constructs the version of a clustered index record which a consistent
 read should see. We assume that the trx id stored in rec is such that
 the consistent read should not see rec in its present version.
 @return	DB_SUCCESS or DB_MISSING_HISTORY */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_vers_build_for_consistent_read(
 /*===============================*/
@@ -611,7 +611,7 @@ row_vers_build_for_consistent_read(
 Constructs the last committed version of a clustered index record,
 which should be seen by a semi-consistent read.
 @return	DB_SUCCESS or DB_MISSING_HISTORY */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_vers_build_for_semi_consistent_read(
 /*====================================*/

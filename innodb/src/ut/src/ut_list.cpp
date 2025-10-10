@@ -24,7 +24,7 @@
 
 /// \brief Create a new list.
 /// \return list
-UNIV_INTERN
+IB_INTERN
 ib_list_t *ib_list_create(void)
 {
 	ib_list_t *list = mem_alloc(sizeof(ib_list_t));
@@ -38,7 +38,7 @@ ib_list_t *ib_list_create(void)
 
 /// \brief Free a list.
 /// \param list in: list
-UNIV_INTERN
+IB_INTERN
 void ib_list_free(ib_list_t *list)
 {
 	ut_a(!list->is_heap_list);
@@ -55,7 +55,7 @@ void ib_list_free(ib_list_t *list)
 /// \param data in: data
 /// \param heap in: memory heap to use
 /// \return new list node
-UNIV_INTERN
+IB_INTERN
 ib_list_node_t *ib_list_add_last(ib_list_t *list, void *data, mem_heap_t *heap)
 {
 	return (ib_list_add_after(list, ib_list_get_last(list), data, heap));
@@ -67,7 +67,7 @@ ib_list_node_t *ib_list_add_last(ib_list_t *list, void *data, mem_heap_t *heap)
 /// \param data in: data
 /// \param heap in: memory heap to use
 /// \return new list node
-UNIV_INTERN
+IB_INTERN
 ib_list_node_t *ib_list_add_after(ib_list_t *list, ib_list_node_t *prev_node, void *data, mem_heap_t *heap)
 {
 	ib_list_node_t *node = mem_heap_alloc(heap, sizeof(ib_list_node_t));
@@ -114,7 +114,7 @@ ib_list_node_t *ib_list_add_after(ib_list_t *list, ib_list_node_t *prev_node, vo
 /// \brief Remove the node from the list.
 /// \param list in: list
 /// \param node in: node to remove
-UNIV_INTERN
+IB_INTERN
 void ib_list_remove(ib_list_t *list, ib_list_node_t *node)
 {
 	if (node->prev) {

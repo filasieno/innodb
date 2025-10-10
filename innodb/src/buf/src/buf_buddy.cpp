@@ -43,12 +43,12 @@ static ulint buf_buddy_n_frames;
 #endif /* UNIV_DEBUG */
 /** Statistics of the buddy system, indexed by block size.
 Protected by buf_pool_mutex. */
-UNIV_INTERN buf_buddy_stat_t buf_buddy_stat[BUF_BUDDY_SIZES + 1];
+IB_INTERN buf_buddy_stat_t buf_buddy_stat[BUF_BUDDY_SIZES + 1];
 
 /**********************************************************************//**
 Get the offset of the buddy of a compressed page frame.
 @return	the buddy relative of page */
-UNIV_INTERN
+IB_INTERN
 void
 buf_buddy_var_init(void)
 /*====================*/
@@ -301,7 +301,7 @@ Allocate a block.  The thread calling this function must hold
 buf_pool_mutex and must not hold buf_pool_zip_mutex or any block->mutex.
 The buf_pool_mutex may only be released and reacquired if lru != NULL.
 @return	allocated block, possibly NULL if lru==NULL */
-UNIV_INTERN
+IB_INTERN
 void*
 buf_buddy_alloc_low(
 /*================*/
@@ -522,7 +522,7 @@ success:
 
 /**********************************************************************//**
 Deallocate a block. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_buddy_free_low(
 /*===============*/

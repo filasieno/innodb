@@ -66,7 +66,7 @@ buf_buddy_free(
 
 /**************************************************************************
 Get the offset of the buddy of a compressed page frame. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_buddy_var_init(void);
 /*====================*/

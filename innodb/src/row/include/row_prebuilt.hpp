@@ -21,27 +21,27 @@
 /// \brief Create a prebuilt struct for a user table handle.
 /// \return own: a prebuilt struct
 /// \param table Innobase table handle
-UNIV_INTERN
+IB_INTERN
 row_prebuilt_t*
 row_prebuilt_create(dict_table_t* table);
 
 /// \brief Free a prebuilt struct for a user table handle.
 /// \param prebuilt in, own: prebuilt struct
 /// \param dict_locked TRUE if dict was locked
-UNIV_INTERN
+IB_INTERN
 void
 row_prebuilt_free(row_prebuilt_t* prebuilt, ibool dict_locked);
 
 /// \brief Reset a prebuilt struct for a user table handle.
 /// \param prebuilt in/out: prebuilt struct
-UNIV_INTERN
+IB_INTERN
 void
 row_prebuilt_reset(row_prebuilt_t* prebuilt);
 
 /// \brief Updates the transaction pointers in query graphs stored in the prebuilt struct.
 /// \param prebuilt in/out: prebuilt struct handle
 /// \param trx transaction handle
-UNIV_INTERN
+IB_INTERN
 void
 row_prebuilt_update_trx(row_prebuilt_t* prebuilt, trx_t* trx);
 

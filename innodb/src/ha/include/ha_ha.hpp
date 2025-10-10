@@ -45,7 +45,7 @@ ha_search_and_get_data(
 /*********************************************************//**
 Looks for an element when we know the pointer to the data and updates
 the pointer to data if found. */
-UNIV_INTERN
+IB_INTERN
 void
 ha_search_and_update_if_found_func(
 /*===============================*/
@@ -82,7 +82,7 @@ updates the pointer to data if found.
 Creates a hash table with at least n array cells.  The actual number
 of cells is chosen to be a prime number slightly bigger than n.
 @return	own: created table */
-UNIV_INTERN
+IB_INTERN
 hash_table_t*
 ha_create_func(
 /*===========*/
@@ -115,7 +115,7 @@ chosen to be a slightly bigger prime number.
 
 /*************************************************************//**
 Empties a hash table and frees the memory heaps. */
-UNIV_INTERN
+IB_INTERN
 void
 ha_clear(
 /*=====*/
@@ -126,7 +126,7 @@ Inserts an entry into a hash table. If an entry with the same fold number
 is found, its node is updated to point to the new data, and no new node
 is inserted.
 @return	TRUE if succeed, FALSE if no more memory could be allocated */
-UNIV_INTERN
+IB_INTERN
 ibool
 ha_insert_for_fold_func(
 /*====================*/
@@ -179,7 +179,7 @@ ha_search_and_delete_if_found(
 /*****************************************************************//**
 Removes from the chain determined by fold all nodes whose data pointer
 points to the page given. */
-UNIV_INTERN
+IB_INTERN
 void
 ha_remove_all_nodes_to_page(
 /*========================*/
@@ -189,7 +189,7 @@ ha_remove_all_nodes_to_page(
 /*************************************************************//**
 Validates a given range of the cells in hash table.
 @return	TRUE if ok */
-UNIV_INTERN
+IB_INTERN
 ibool
 ha_validate(
 /*========*/
@@ -198,7 +198,7 @@ ha_validate(
 	ulint		end_index);	/*!< in: end index */
 /*************************************************************//**
 Prints info of a hash table. */
-UNIV_INTERN
+IB_INTERN
 void
 ha_print_info(
 /*==========*/

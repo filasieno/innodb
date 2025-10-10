@@ -159,13 +159,13 @@ store the charset-collation number; one byte is left unused, though */
 /// \param prefix_len length of the requested prefix, in characters, multiplied by dtype_get_mbmaxlen(dtype)
 /// \param data_len length of str (in bytes)
 /// \param str the string whose prefix length is being determined
-UNIV_INTERN
+IB_INTERN
 ulint dtype_get_at_most_n_mbchars(ulint prtype, ulint mbminlen, ulint mbmaxlen, ulint prefix_len, ulint data_len, const char *str);
 #endif /* !UNIV_HOTBACKUP */
 /// \brief Checks if a data main type is a string type. Also a BLOB is considered a string type.
 /// \return TRUE if string type
 /// \param mtype InnoDB main data type code: DATA_CHAR, ...
-UNIV_INTERN
+IB_INTERN
 ibool dtype_is_string_type(ulint mtype);
 /// \brief Checks if a type is a binary string type. Note that for tables created with
 /// < 4.0.14, we do not know if a DATA_BLOB column is a BLOB or a TEXT column. For
@@ -173,7 +173,7 @@ ibool dtype_is_string_type(ulint mtype);
 /// \return TRUE if binary string type
 /// \param mtype main data type
 /// \param prtype precise type
-UNIV_INTERN
+IB_INTERN
 ibool dtype_is_binary_string_type(ulint mtype, ulint prtype);
 /// \brief Checks if a type is a non-binary string type. That is, dtype_is_string_type is
 /// TRUE and dtype_is_binary_string_type is FALSE. Note that for tables created
@@ -182,7 +182,7 @@ ibool dtype_is_binary_string_type(ulint mtype, ulint prtype);
 /// \return TRUE if non-binary string type
 /// \param mtype main data type
 /// \param prtype precise type
-UNIV_INTERN
+IB_INTERN
 ibool dtype_is_non_binary_string_type(ulint mtype, ulint prtype);
 /*********************************************************************/ /**
 Sets a data type structure. */
@@ -242,7 +242,7 @@ ulint dtype_get_charset_coll(
 Forms a precise type from the < 4.1.2 format precise type plus the
 charset-collation code.
 @return precise type, including the charset-collation code */
-UNIV_INTERN
+IB_INTERN
 ulint dtype_form_prtype(
     /*==============*/
     ulint old_prtype, /*!< in: the user type code and the flags
@@ -371,14 +371,14 @@ void dtype_new_read_for_order_and_null_size(
 /*********************************************************************/ /**
 Validates a data type structure.
 @return	TRUE if ok */
-UNIV_INTERN
+IB_INTERN
 ibool dtype_validate(
     /*===========*/
     const dtype_t *type
 );                                                                      /*!< in: type struct to validate */
 /*********************************************************************/ /**
 Prints a data type structure. */
-UNIV_INTERN
+IB_INTERN
 void dtype_print(
     /*========*/
     const dtype_t *type
@@ -394,7 +394,7 @@ ulint dtype_get_attrib(
 ); /*!< in: type struct */
 /*************************************************************************
 Reset dtype variables. */
-UNIV_INTERN
+IB_INTERN
 void dtype_var_init(void);
 /*================*/
 

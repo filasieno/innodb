@@ -41,7 +41,7 @@ Created 4/20/1996 Heikki Tuuri
 Gets the offset of the trx id field, in bytes relative to the origin of
 a clustered index record.
 @return	offset of DATA_TRX_ID */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_get_trx_id_offset(
 /*==================*/
@@ -74,7 +74,7 @@ the entry to be inserted into or purged from an index on the table.
 @return index entry which should be inserted or purged, or NULL if the
 externally stored columns in the clustered index record are
 unavailable and ext != NULL */
-UNIV_INTERN
+IB_INTERN
 dtuple_t*
 row_build_index_entry(
 /*==================*/
@@ -89,7 +89,7 @@ row_build_index_entry(
 An inverse function to row_build_index_entry. Builds a row from a
 record in a clustered index.
 @return	own: row built; see the NOTE below! */
-UNIV_INTERN
+IB_INTERN
 dtuple_t*
 row_build(
 /*======*/
@@ -131,7 +131,7 @@ row_build(
 Converts an index record to a typed data tuple.
 @return index entry built; does not set info_bits, and the data fields
 in the entry will point directly to rec */
-UNIV_INTERN
+IB_INTERN
 dtuple_t*
 row_rec_to_index_entry_low(
 /*=======================*/
@@ -146,7 +146,7 @@ row_rec_to_index_entry_low(
 Converts an index record to a typed data tuple. NOTE that externally
 stored (often big) fields are NOT copied to heap.
 @return	own: index entry built; see the NOTE below! */
-UNIV_INTERN
+IB_INTERN
 dtuple_t*
 row_rec_to_index_entry(
 /*===================*/
@@ -175,7 +175,7 @@ row_rec_to_index_entry(
 Builds from a secondary index record a row reference with which we can
 search the clustered index record.
 @return	own: row reference built; see the NOTE below! */
-UNIV_INTERN
+IB_INTERN
 dtuple_t*
 row_build_row_ref(
 /*==============*/
@@ -196,7 +196,7 @@ row_build_row_ref(
 /*******************************************************************//**
 Builds from a secondary index record a row reference with which we can
 search the clustered index record. */
-UNIV_INTERN
+IB_INTERN
 void
 row_build_row_ref_in_tuple(
 /*=======================*/
@@ -234,7 +234,7 @@ row_build_row_ref_fast(
 Searches the clustered index record for a row, if we have the row
 reference.
 @return	TRUE if found */
-UNIV_INTERN
+IB_INTERN
 ibool
 row_search_on_row_ref(
 /*==================*/
@@ -248,7 +248,7 @@ row_search_on_row_ref(
 Fetches the clustered index record for a secondary index record. The latches
 on the secondary index record are preserved.
 @return	record or NULL, if no record found */
-UNIV_INTERN
+IB_INTERN
 rec_t*
 row_get_clust_rec(
 /*==============*/
@@ -260,7 +260,7 @@ row_get_clust_rec(
 /***************************************************************//**
 Searches an index record.
 @return	TRUE if found */
-UNIV_INTERN
+IB_INTERN
 ibool
 row_search_index_entry(
 /*===================*/
@@ -291,7 +291,7 @@ The result is always NUL-terminated (provided buf_size is positive) and the
 number of bytes that were written to "buf" is returned (including the
 terminating NUL).
 @return	number of bytes that were written */
-UNIV_INTERN
+IB_INTERN
 ulint
 row_raw_format(
 /*===========*/

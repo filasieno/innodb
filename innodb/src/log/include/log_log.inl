@@ -54,7 +54,7 @@ log_release(void)
 /******************************************************//**
 Checks by parsing that the catenated log segment for a single mtr is
 consistent. */
-UNIV_INTERN
+IB_INTERN
 ibool
 log_check_log_recs(
 /*===============*/

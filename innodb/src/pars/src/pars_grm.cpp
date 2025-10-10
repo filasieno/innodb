@@ -3174,7 +3174,7 @@ yyreturn:
 
 /**********************************************************************
 Release any resources used by the parser. */
-UNIV_INTERN
+IB_INTERN
 void
 pars_close(void)
 /*============*/

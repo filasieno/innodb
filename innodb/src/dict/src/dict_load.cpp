@@ -63,7 +63,7 @@ name_of_col_is(
 Finds the first table name in the given database.
 @return own: table name, NULL if does not exist; the caller must free
 the memory in the string! */
-UNIV_INTERN
+IB_INTERN
 char*
 dict_get_first_table_name_in_db(
 /*============================*/
@@ -145,7 +145,7 @@ loop:
 /********************************************************************//**
 Prints to the standard output information on all tables found in the data
 dictionary system table. */
-UNIV_INTERN
+IB_INTERN
 void
 dict_print(void)
 /*============*/
@@ -305,7 +305,7 @@ to what we already read with fil_load_single_table_tablespaces().
 In a normal startup, we create the tablespace objects for every table in
 InnoDB's data dictionary, if the corresponding .ibd file exists.
 We also scan the biggest space id, and store it to fil_system. */
-UNIV_INTERN
+IB_INTERN
 void
 dict_check_tablespaces_and_store_max_id(
 /*====================================*/
@@ -842,7 +842,7 @@ dictionary cache.
 @return table, NULL if does not exist; if the table is stored in an
 .ibd file, but the file does not exist, then we set the
 ibd_file_missing flag TRUE in the table object we return */
-UNIV_INTERN
+IB_INTERN
 dict_table_t*
 dict_load_table(
 /*============*/
@@ -1076,7 +1076,7 @@ err_exit:
 /***********************************************************************//**
 Loads a table object based on the table id.
 @return	table; NULL if table does not exist */
-UNIV_INTERN
+IB_INTERN
 dict_table_t*
 dict_load_table_on_id(
 /*==================*/
@@ -1170,7 +1170,7 @@ dict_load_table_on_id(
 This function is called when the database is booted. Loads system table
 index definitions except for the clustered index which is added to the
 dictionary cache at booting before calling this function. */
-UNIV_INTERN
+IB_INTERN
 void
 dict_load_sys_table(
 /*================*/
@@ -1391,7 +1391,7 @@ constraints to the data dictionary. Note that we know that the dictionary
 cache already contains all constraints where the other relevant table is
 already in the dictionary cache.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ulint
 dict_load_foreigns(
 /*===============*/

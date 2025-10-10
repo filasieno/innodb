@@ -161,7 +161,7 @@ static void mtr_log_reserve_and_write(mtr_t *mtr, ulint recovery)
 /// @brief Commits a mini-transaction.
 /// @param mtr in: mini-transaction
 
-UNIV_INTERN
+IB_INTERN
 void mtr_commit(mtr_t *mtr)
 {
 #ifndef UNIV_HOTBACKUP
@@ -210,7 +210,7 @@ void mtr_commit(mtr_t *mtr)
 /// @param mtr in: mtr
 /// @param savepoint in: savepoint
 
-UNIV_INTERN
+IB_INTERN
 void mtr_rollback_to_savepoint(mtr_t *mtr, ulint savepoint)
 {
 	mtr_memo_slot_t *slot;
@@ -242,7 +242,7 @@ void mtr_rollback_to_savepoint(mtr_t *mtr, ulint savepoint)
 /// @param object in: object
 /// @param type in: object type: MTR_MEMO_S_LOCK, ...
 
-UNIV_INTERN
+IB_INTERN
 void mtr_memo_release(mtr_t *mtr, void *object, ulint type)
 {
 	mtr_memo_slot_t *slot;
@@ -279,7 +279,7 @@ void mtr_memo_release(mtr_t *mtr, void *object, ulint type)
 /// @param mtr in: mini-transaction handle
 /// @return value read
 
-UNIV_INTERN
+IB_INTERN
 ulint mtr_read_ulint(const byte *ptr, ulint type, mtr_t *mtr __attribute__((unused)))
 {
 	ut_ad(mtr->state == MTR_ACTIVE);
@@ -300,7 +300,7 @@ ulint mtr_read_ulint(const byte *ptr, ulint type, mtr_t *mtr __attribute__((unus
 /// @param mtr in: mini-transaction handle
 /// @return value read
 
-UNIV_INTERN
+IB_INTERN
 dulint mtr_read_dulint(const byte *ptr, mtr_t *mtr __attribute__((unused)))
 {
 	ut_ad(mtr->state == MTR_ACTIVE);
@@ -317,7 +317,7 @@ dulint mtr_read_dulint(const byte *ptr, mtr_t *mtr __attribute__((unused)))
 /// @param type in: type of object
 /// @return TRUE if contains
 
-UNIV_INTERN
+IB_INTERN
 ibool mtr_memo_contains_page(mtr_t *mtr, const byte *ptr, ulint type)
 {
 	return (mtr_memo_contains(mtr, buf_block_align(ptr), type));
@@ -327,7 +327,7 @@ ibool mtr_memo_contains_page(mtr_t *mtr, const byte *ptr, ulint type)
 /// @brief Prints info of an mtr handle.
 /// @param mtr in: mtr
 
-UNIV_INTERN
+IB_INTERN
 void mtr_print(mtr_t *mtr)
 {
 	ib_logger(

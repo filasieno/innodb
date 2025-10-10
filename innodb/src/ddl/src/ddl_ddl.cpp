@@ -94,7 +94,7 @@ The master thread in srv0srv.c calls this regularly to drop tables which
 we must drop in background after queries to them have ended. Such lazy
 dropping of tables is needed in ALTER TABLE on Unix.
 @return	how many tables dropped + remaining tables in list */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_drop_tables_in_background(void)
 /*===============================*/
@@ -167,7 +167,7 @@ already_dropped:
 Get the background drop list length. NOTE: the caller must own the kernel
 mutex!
 @return	how many tables in list */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_get_background_drop_list_len_low(void)
 /*======================================*/
@@ -243,7 +243,7 @@ name of the dropped table ends in one of "innodb_monitor",
 "innodb_table_monitor", then this will also stop the printing of
 monitor output by the master thread.
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_drop_table(
 /*===========*/
@@ -638,7 +638,7 @@ then this will also start the printing of monitor output by the master
 thread. If the table name ends in "innodb_mem_validate", InnoDB will
 try to invoke mem_validate().
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_create_table(
 /*=============*/
@@ -805,7 +805,7 @@ err_exit:
 /*************************************************************************
 Does an index creation operation.
 @return	error number or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_create_index(
 /*=============*/
@@ -842,7 +842,7 @@ ddl_create_index(
 /*************************************************************************
 Truncates a table
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 enum db_err
 ddl_truncate_table(
 /*===============*/
@@ -1148,7 +1148,7 @@ func_exit:
 /*************************************************************************
 Drops an index.
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_drop_index(
 /*===========*/
@@ -1262,7 +1262,7 @@ ddl_delete_constraint(
 /*************************************************************************
 Renames a table.
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_rename_table(
 /*=============*/
@@ -1491,7 +1491,7 @@ func_exit:
 /*************************************************************************
 Renames an index.
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 ulint
 ddl_rename_index(
 /*=============*/
@@ -1648,7 +1648,7 @@ ddl_drop_all_foreign_keys_in_db(
 /*************************************************************************
 Drops a database.
 @return	error code or DB_SUCCESS */
-UNIV_INTERN
+IB_INTERN
 enum db_err
 ddl_drop_database(
 /*==============*/
@@ -1739,7 +1739,7 @@ loop:
 
 /*********************************************************************//**
 Drop all partially created indexes. */
-UNIV_INTERN
+IB_INTERN
 void
 ddl_drop_all_temp_indexes(
 /*======================*/
@@ -1830,7 +1830,7 @@ ddl_drop_all_temp_indexes(
 
 /*********************************************************************//**
 Drop all temporary tables. */
-UNIV_INTERN
+IB_INTERN
 void
 ddl_drop_all_temp_tables(
 /*=====================*/

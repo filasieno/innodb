@@ -30,7 +30,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 /// \brief Enqueues a task to server task queue and releases a worker thread, if there
 /// is a suspended one.
 /// \param thr Query thread.
-UNIV_INTERN
+IB_INTERN
 void
 srv_que_task_enqueue_low(que_thr_t* thr);
 

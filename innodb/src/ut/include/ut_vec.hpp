@@ -49,7 +49,7 @@ typedef struct ib_vector_struct ib_vector_t;
 /****************************************************************//**
 Create a new vector with the given initial size.
 @return	vector */
-UNIV_INTERN
+IB_INTERN
 ib_vector_t*
 ib_vector_create(
 /*=============*/
@@ -58,7 +58,7 @@ ib_vector_create(
 
 /****************************************************************//**
 Push a new element to the vector, increasing its size if necessary. */
-UNIV_INTERN
+IB_INTERN
 void
 ib_vector_push(
 /*===========*/

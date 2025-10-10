@@ -200,14 +200,14 @@ IB_INLINE dulint mach_dulint_read_much_compressed(const byte* b) __attribute__((
 /// \param [in] end_ptr pointer to end of the buffer
 /// \param [out] val read value
 /// \return pointer to end of the stored field, NULL if not complete
-UNIV_INTERN byte* mach_parse_compressed(byte* ptr, byte* end_ptr, ulint* val);
+IB_INTERN byte* mach_parse_compressed(byte* ptr, byte* end_ptr, ulint* val);
 
 /// \brief Reads a dulint in a compressed form if the log record fully contains it.
 /// \param [in] ptr pointer to buffer from where to read
 /// \param [in] end_ptr pointer to end of the buffer
 /// \param [out] val read value
 /// \return pointer to end of the stored field, NULL if not complete
-UNIV_INTERN byte* mach_dulint_parse_compressed(byte* ptr, byte* end_ptr, dulint* val);
+IB_INTERN byte* mach_dulint_parse_compressed(byte* ptr, byte* end_ptr, dulint* val);
 
 #ifndef UNIV_HOTBACKUP
 

@@ -64,7 +64,7 @@ typedef void* (*os_posix_f_t) (void*);
 /***************************************************************//**
 Compares two thread ids for equality.
 @return	TRUE if equal */
-UNIV_INTERN
+IB_INTERN
 ibool
 os_thread_eq(
 /*=========*/
@@ -74,7 +74,7 @@ os_thread_eq(
 Converts an OS thread id to a ulint. It is NOT guaranteed that the ulint is
 unique for the thread though!
 @return	thread identifier as a number */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_thread_pf(
 /*=========*/
@@ -86,7 +86,7 @@ and returns a ulint.
 NOTE: We count the number of threads in os_thread_exit(). A created
 thread should always use that to exit and not use return() to exit.
 @return	handle to the thread */
-UNIV_INTERN
+IB_INTERN
 os_thread_t
 os_thread_create(
 /*=============*/
@@ -103,7 +103,7 @@ os_thread_create(
 
 /*****************************************************************//**
 Exits the current thread. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_exit(
 /*===========*/
@@ -112,26 +112,26 @@ os_thread_exit(
 /*****************************************************************//**
 Returns the thread identifier of current thread.
 @return	current thread identifier */
-UNIV_INTERN
+IB_INTERN
 os_thread_id_t
 os_thread_get_curr_id(void);
 /*========================*/
 /*****************************************************************//**
 Returns handle to the current thread.
 @return	current thread handle */
-UNIV_INTERN
+IB_INTERN
 os_thread_t
 os_thread_get_curr(void);
 /*====================*/
 /*****************************************************************//**
 Advises the os to give up remainder of the thread's time slice. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_yield(void);
 /*=================*/
 /*****************************************************************//**
 The thread sleeps at least the time given in microseconds. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_sleep(
 /*============*/
@@ -139,14 +139,14 @@ os_thread_sleep(
 /******************************************************************//**
 Gets a thread priority.
 @return	priority */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_thread_get_priority(
 /*===================*/
 	os_thread_t	handle);/*!< in: OS handle to the thread */
 /******************************************************************//**
 Sets a thread priority. */
-UNIV_INTERN
+IB_INTERN
 void
 os_thread_set_priority(
 /*===================*/
@@ -155,7 +155,7 @@ os_thread_set_priority(
 /******************************************************************//**
 Gets the last operating system error code for the calling thread.
 @return	last error on Windows, 0 otherwise */
-UNIV_INTERN
+IB_INTERN
 ulint
 os_thread_get_last_error(void);
 /*==========================*/

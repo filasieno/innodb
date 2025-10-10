@@ -29,7 +29,7 @@ Created 2/17/1996 Heikki Tuuri
 
 /*********************************************************************//**
 Updates the search info. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_info_update_slow(
 /*========================*/

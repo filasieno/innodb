@@ -98,7 +98,7 @@ string_append(
 
 /*************************************************************************
 Reset the lexing variables. */
-UNIV_INTERN
+IB_INTERN
 void
 pars_lexer_var_init(void)
 /*=====================*/
@@ -685,7 +685,7 @@ void yyset_extra(void* p) { }
 
 /**********************************************************************
 Release any resources used by the lexer. */
-UNIV_INTERN
+IB_INTERN
 void
 pars_lexer_close(void)
 /*==================*/

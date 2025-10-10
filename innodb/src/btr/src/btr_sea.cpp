@@ -45,25 +45,25 @@ Created 2/17/1996 Heikki Tuuri
 
 /** Flag: has the search system been enabled?
 Protected by btr_search_latch and btr_search_enabled_mutex. */
-UNIV_INTERN char		btr_search_enabled	= TRUE;
+IB_INTERN char		btr_search_enabled	= TRUE;
 
 /** Mutex protecting btr_search_enabled */
 static mutex_t			btr_search_enabled_mutex;
 
 /** A dummy variable to fool the compiler */
-UNIV_INTERN ulint		btr_search_this_is_zero = 0;
+IB_INTERN ulint		btr_search_this_is_zero = 0;
 
 #ifdef UNIV_SEARCH_PERF_STAT
 /** Number of successful adaptive hash index lookups */
-UNIV_INTERN ulint		btr_search_n_succ	= 0;
+IB_INTERN ulint		btr_search_n_succ	= 0;
 /** Number of failed adaptive hash index lookups */
-UNIV_INTERN ulint		btr_search_n_hash_fail	= 0;
+IB_INTERN ulint		btr_search_n_hash_fail	= 0;
 #endif /* UNIV_SEARCH_PERF_STAT */
 
 /** padding to prevent other memory update
 hotspots from residing on the same memory
 cache line as btr_search_latch */
-UNIV_INTERN byte		btr_sea_pad1[64];
+IB_INTERN byte		btr_sea_pad1[64];
 
 /** The latch protecting the adaptive search system: this latch protects the
 (1) positions of records on those pages where a hash index has been built.
@@ -73,14 +73,14 @@ indexes. */
 
 /* We will allocate the latch from dynamic memory to get it to the
 same DRAM page as other hotspot semaphores */
-UNIV_INTERN rw_lock_t*		btr_search_latch_temp;
+IB_INTERN rw_lock_t*		btr_search_latch_temp;
 
 /** padding to prevent other memory update hotspots from residing on
 the same memory cache line */
-UNIV_INTERN byte		btr_sea_pad2[64];
+IB_INTERN byte		btr_sea_pad2[64];
 
 /** The adaptive hash index */
-UNIV_INTERN btr_search_sys_t*	btr_search_sys;
+IB_INTERN btr_search_sys_t*	btr_search_sys;
 
 /** If the number of records on the page divided by this parameter
 would have been successfully accessed using a hash index, the index
@@ -156,7 +156,7 @@ btr_search_check_free_space_in_heap(void)
 
 /*****************************************************************//**
 Reset global configuration variables. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_var_init(void)
 /*=====================*/
@@ -175,7 +175,7 @@ btr_search_var_init(void)
 
 /*********************************************************************
 Creates and initializes the adaptive search system at a database start. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_sys_create(
 /*==================*/
@@ -196,7 +196,7 @@ btr_search_sys_create(
 
 /*********************************************************************
 Closes the adaptive search system at a database shutdown. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_sys_close(void)
 /*======================*/
@@ -224,7 +224,7 @@ btr_search_sys_close(void)
 
 /************************************************************************
 Disable the adaptive hash search system and empty the index. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_disable(void)
 /*====================*/
@@ -247,7 +247,7 @@ btr_search_disable(void)
 
 /********************************************************************//**
 Enable the adaptive hash search system. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_enable(void)
 /*====================*/
@@ -264,7 +264,7 @@ btr_search_enable(void)
 /*****************************************************************//**
 Creates and initializes a search info struct.
 @return	own: search info struct */
-UNIV_INTERN
+IB_INTERN
 btr_search_t*
 btr_search_info_create(
 /*===================*/
@@ -306,7 +306,7 @@ btr_search_info_create(
 Returns the value of ref_count. The value is protected by
 btr_search_latch.
 @return	ref_count value. */
-UNIV_INTERN
+IB_INTERN
 ulint
 btr_search_info_get_ref_count(
 /*==========================*/
@@ -598,7 +598,7 @@ btr_search_update_hash_ref(
 
 /*********************************************************************//**
 Updates the search info. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_info_update_slow(
 /*========================*/
@@ -830,7 +830,7 @@ of the index. Note that if mode is PAGE_CUR_LE, which is used in inserts,
 and the function returns TRUE, then cursor->up_match and cursor->low_match
 both have sensible values.
 @return	TRUE if succeeded */
-UNIV_INTERN
+IB_INTERN
 ibool
 btr_search_guess_on_hash(
 /*=====================*/
@@ -1035,7 +1035,7 @@ failure:
 
 /********************************************************************//**
 Drops a page hash index. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_drop_page_hash_index(
 /*============================*/
@@ -1203,7 +1203,7 @@ cleanup:
 /********************************************************************//**
 Drops a page hash index when a page is freed from a fseg to the file system.
 Drops possible hash index if the page happens to be in the buffer pool. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_drop_page_hash_when_freed(
 /*=================================*/
@@ -1446,7 +1446,7 @@ Moves or deletes hash entries for moved records. If new_page is already hashed,
 then the hash index for page, if any, is dropped. If new_page is not hashed,
 and page is hashed, then a new hash index is built to new_page with the same
 parameters as page (this often happens when a page is split). */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_move_or_delete_hash_entries(
 /*===================================*/
@@ -1509,7 +1509,7 @@ btr_search_move_or_delete_hash_entries(
 
 /********************************************************************//**
 Updates the page hash index when a single record is deleted from a page. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_update_hash_on_delete(
 /*=============================*/
@@ -1562,7 +1562,7 @@ btr_search_update_hash_on_delete(
 
 /********************************************************************//**
 Updates the page hash index when a single record is inserted on a page. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_update_hash_node_on_insert(
 /*==================================*/
@@ -1613,7 +1613,7 @@ btr_search_update_hash_node_on_insert(
 
 /********************************************************************//**
 Updates the page hash index when a single record is inserted on a page. */
-UNIV_INTERN
+IB_INTERN
 void
 btr_search_update_hash_on_insert(
 /*=============================*/
@@ -1764,7 +1764,7 @@ function_exit:
 /********************************************************************//**
 Validates the search system.
 @return	TRUE if ok */
-UNIV_INTERN
+IB_INTERN
 ibool
 btr_search_validate(void)
 /*=====================*/

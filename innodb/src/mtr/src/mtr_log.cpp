@@ -35,7 +35,7 @@
 /// @param mtr in: mtr
 /// @param str in: string to write
 /// @param len in: string length
-UNIV_INTERN
+IB_INTERN
 void mlog_catenate_string(mtr_t *mtr, const byte *str, ulint len)
 {
 	dyn_array_t *mlog;
@@ -59,7 +59,7 @@ void mlog_catenate_string(mtr_t *mtr, const byte *str, ulint len)
 /// @param type in: log item type: MLOG_1BYTE, ...
 /// @param mtr in: mini-transaction handle
 
-UNIV_INTERN
+IB_INTERN
 void mlog_write_initial_log_record(const byte *ptr, byte type, mtr_t *mtr)
 {
 	byte *log_ptr;
@@ -90,7 +90,7 @@ void mlog_write_initial_log_record(const byte *ptr, byte type, mtr_t *mtr)
 /// @param page_no out: page number
 /// @return parsed record end, NULL if not a complete record
 
-UNIV_INTERN
+IB_INTERN
 byte *mlog_parse_initial_log_record(byte *ptr, byte *end_ptr, byte *type, ulint *space, ulint *page_no)
 {
 	if (end_ptr < ptr + 1) {
@@ -129,7 +129,7 @@ byte *mlog_parse_initial_log_record(byte *ptr, byte *end_ptr, byte *type, ulint 
 /// @param page_zip in/out: compressed page, or NULL
 /// @return parsed record end, NULL if not a complete record or a corrupt record
 
-UNIV_INTERN
+IB_INTERN
 byte *mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *page_zip)
 {
 	ulint offset;
@@ -226,7 +226,7 @@ byte *mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *
 /// @param type in: MLOG_1BYTE, MLOG_2BYTES, MLOG_4BYTES
 /// @param mtr in: mini-transaction handle
 
-UNIV_INTERN
+IB_INTERN
 void mlog_write_ulint(byte *ptr, ulint val, byte type, mtr_t *mtr)
 {
 	byte *log_ptr;
@@ -270,7 +270,7 @@ void mlog_write_ulint(byte *ptr, ulint val, byte type, mtr_t *mtr)
 /// @param val in: value to write
 /// @param mtr in: mini-transaction handle
 
-UNIV_INTERN
+IB_INTERN
 void mlog_write_dulint(byte *ptr, dulint val, mtr_t *mtr)
 {
 	byte *log_ptr;
@@ -306,7 +306,7 @@ void mlog_write_dulint(byte *ptr, dulint val, mtr_t *mtr)
 /// @param len in: string length
 /// @param mtr in: mini-transaction handle
 
-UNIV_INTERN
+IB_INTERN
 void mlog_write_string(byte *ptr, const byte *str, ulint len, mtr_t *mtr)
 {
 	ut_ad(ptr && mtr);
@@ -324,7 +324,7 @@ void mlog_write_string(byte *ptr, const byte *str, ulint len, mtr_t *mtr)
 /// @param len in: string length
 /// @param mtr in: mini-transaction handle
 
-UNIV_INTERN
+IB_INTERN
 void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr)
 {
 	byte *log_ptr;
@@ -361,7 +361,7 @@ void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr)
 /// @param page_zip in/out: compressed page, or NULL
 /// @return parsed record end, NULL if not a complete record
 
-UNIV_INTERN
+IB_INTERN
 byte *mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip)
 {
 	ulint offset;
@@ -411,7 +411,7 @@ byte *mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip)
 /// @param size in: requested buffer size in bytes (if 0, calls mlog_close() and returns NULL)
 /// @return buffer, NULL if log mode MTR_LOG_NONE
 
-UNIV_INTERN
+IB_INTERN
 byte *mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_index_t *index, byte type, ulint size)
 {
 	byte *log_ptr;
@@ -504,7 +504,7 @@ byte *mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_index_t *index
 /// @param index out, own: dummy index
 /// @return parsed record end, NULL if not a complete record
 
-UNIV_INTERN
+IB_INTERN
 byte *mlog_parse_index(byte *ptr, const byte *end_ptr, ibool comp, dict_index_t **index)
 {
 	ulint i, n, n_uniq;

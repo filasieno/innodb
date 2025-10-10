@@ -28,7 +28,7 @@ Created 8/18/1994 Heikki Tuuri
 
 /***********************************************************//**
 Deletes a hash node. */
-UNIV_INTERN
+IB_INTERN
 void
 ha_delete_hash_node(
 /*================*/

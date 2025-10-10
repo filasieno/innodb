@@ -24,22 +24,22 @@
 #if defined(__GNUC__) && (__GNUC__ > 2)
 #else
 /// \brief This is used to eliminate compiler warnings
-UNIV_INTERN ulint ut_dbg_zero = 0;
+IB_INTERN ulint ut_dbg_zero = 0;
 #endif
 
 #if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
 /// \brief If this is set to TRUE by ut_dbg_assertion_failed(), all threads
 /// will stop at the next ut_a() or ut_ad().
-UNIV_INTERN ibool ut_dbg_stop_threads = FALSE;
+IB_INTERN ibool ut_dbg_stop_threads = FALSE;
 #endif
 #ifdef __NETWARE__
 /// \brief Flag for ignoring further assertion failures.  This is set to TRUE
 /// when on NetWare there happens an InnoDB assertion failure or other
 /// fatal error condition that requires an immediate shutdown.
-UNIV_INTERN ibool panic_shutdown = FALSE;
+IB_INTERN ibool panic_shutdown = FALSE;
 #elif !defined(UT_DBG_USE_ABORT)
 /// \brief A null pointer that will be dereferenced to trigger a memory trap
-UNIV_INTERN ulint *ut_dbg_null_ptr = NULL;
+IB_INTERN ulint *ut_dbg_null_ptr = NULL;
 #endif
 
 
@@ -47,7 +47,7 @@ UNIV_INTERN ulint *ut_dbg_null_ptr = NULL;
 /// \param expr in: the failed assertion (optional)
 /// \param file in: source file containing the assertion
 /// \param line in: line number of the assertion
-UNIV_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint line)
+IB_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint line)
 {
 	ut_print_timestamp(ib_stream);
 
@@ -79,7 +79,7 @@ UNIV_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, uli
 
 #ifdef __NETWARE__
 	/// \brief Shut down InnoDB after assertion failure.
-	UNIV_INTERN void ut_dbg_panic(void)
+	IB_INTERN void ut_dbg_panic(void)
 	{
 		if (!panic_shutdown) {
 			panic_shutdown = TRUE;
@@ -92,7 +92,7 @@ UNIV_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, uli
 	/// \brief Stop a thread after assertion failure.
 	/// \param file in: source file name
 	/// \param line in: line number
-	UNIV_INTERN
+	IB_INTERN
 	void ut_dbg_stop_thread(const char *file, ulint line)
 	{
 	#ifndef UNIV_HOTBACKUP
@@ -129,7 +129,7 @@ UNIV_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, uli
 
 /// \brief Resets a speedo (records the current time in it).
 /// \param speedo out: speedo
-UNIV_INTERN void speedo_reset(speedo_t *speedo)
+IB_INTERN void speedo_reset(speedo_t *speedo)
 {
 	gettimeofday(&speedo->tv, NULL);
 	getrusage(RUSAGE_SELF, &speedo->ru);
@@ -137,7 +137,7 @@ UNIV_INTERN void speedo_reset(speedo_t *speedo)
 
 /// \brief Shows the time elapsed and usage statistics since the last reset of a speedo.
 /// \param [in] speedo speedo
-UNIV_INTERN void speedo_show(const speedo_t *speedo)
+IB_INTERN void speedo_show(const speedo_t *speedo)
 {
 	struct rusage ru_now;
 	struct timeval tv_now;

@@ -25,11 +25,11 @@
 
 /// @brief Zero value for a dulint
 ///
-UNIV_INTERN const dulint ut_dulint_zero = { 0, 0 };
+IB_INTERN const dulint ut_dulint_zero = { 0, 0 };
 
 /// \brief Maximum value for a dulint
 ///
-UNIV_INTERN const dulint ut_dulint_max = { 0xFFFFFFFFUL, 0xFFFFFFFFUL };
+IB_INTERN const dulint ut_dulint_max = { 0xFFFFFFFFUL, 0xFFFFFFFFUL };
 
 
 
@@ -42,7 +42,7 @@ UNIV_INTERN const dulint ut_dulint_max = { 0xFFFFFFFFUL, 0xFFFFFFFFUL };
 /// \param aux_arr in/out: auxiliary array (same size as arr)
 /// \param low in: low bound of sort interval, inclusive
 /// \param high in: high bound of sort interval, noninclusive
-UNIV_INTERN void ut_dulint_sort(dulint *arr, dulint *aux_arr, ulint low, ulint high)
+IB_INTERN void ut_dulint_sort(dulint *arr, dulint *aux_arr, ulint low, ulint high)
 {
 	UT_SORT_FUNCTION_BODY(ut_dulint_sort, arr, aux_arr, low, high, ut_dulint_cmp);
 }

@@ -86,7 +86,7 @@
 /// \param heap in: memory heap where string is allocated
 /// \param str in: string to be copied
 /// \return own: a copy of the string
-UNIV_INTERN char *mem_heap_strdup(mem_heap_t *heap, const char *str)
+IB_INTERN char *mem_heap_strdup(mem_heap_t *heap, const char *str)
 {
 	return (mem_heap_dup(heap, str, strlen(str) + 1));
 }
@@ -96,7 +96,7 @@ UNIV_INTERN char *mem_heap_strdup(mem_heap_t *heap, const char *str)
 /// \param data in: data to be copied
 /// \param len in: length of data, in bytes
 /// \return own: a copy of the data
-UNIV_INTERN void *mem_heap_dup(mem_heap_t *heap, const void *data, ulint len)
+IB_INTERN void *mem_heap_dup(mem_heap_t *heap, const void *data, ulint len)
 {
 	return (memcpy(mem_heap_alloc(heap, len), data, len));
 }
@@ -106,7 +106,7 @@ UNIV_INTERN void *mem_heap_dup(mem_heap_t *heap, const void *data, ulint len)
 /// \param s1 in: string 1
 /// \param s2 in: string 2
 /// \return own: the result
-UNIV_INTERN char *mem_heap_strcat(mem_heap_t *heap, const char *s1, const char *s2)
+IB_INTERN char *mem_heap_strcat(mem_heap_t *heap, const char *s1, const char *s2)
 {
 	char *s;
 	ulint s1_len = strlen(s1);
@@ -204,7 +204,7 @@ static ulint mem_heap_printf_low(char *buf, const char *format, va_list ap)
 /// \param heap in: memory heap
 /// \param format in: format string
 /// \return heap-allocated formatted string
-UNIV_INTERN
+IB_INTERN
 char *mem_heap_printf(mem_heap_t *heap, const char *format, ...)
 {
 	va_list ap;
@@ -234,7 +234,7 @@ char *mem_heap_printf(mem_heap_t *heap, const char *format, ...)
 /// \param line in: line where created
 /// \return own: memory heap block, NULL if did not succeed (only possible
 /// for MEM_HEAP_BTR_SEARCH type heaps)
-UNIV_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint type, const char *file_name, ulint line)
+IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint type, const char *file_name, ulint line)
 {
 #ifndef UNIV_HOTBACKUP
 	buf_block_t *buf_block = NULL;
@@ -322,7 +322,7 @@ UNIV_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint 
 /// \param n in: number of bytes user needs
 /// \return created block, NULL if did not succeed (only possible for
 /// MEM_HEAP_BTR_SEARCH type heaps)
-UNIV_INTERN mem_block_t *mem_heap_add_block(mem_heap_t *heap, ulint n)
+IB_INTERN mem_block_t *mem_heap_add_block(mem_heap_t *heap, ulint n)
 {
 	mem_block_t *block;
 	mem_block_t *new_block;
@@ -370,7 +370,7 @@ UNIV_INTERN mem_block_t *mem_heap_add_block(mem_heap_t *heap, ulint n)
 /// \brief Frees a block from a memory heap.
 /// \param heap in: heap
 /// \param block in: block to free
-UNIV_INTERN void mem_heap_block_free(mem_heap_t *heap, mem_block_t *block)
+IB_INTERN void mem_heap_block_free(mem_heap_t *heap, mem_block_t *block)
 {
 	ulint type;
 	ulint len;
@@ -424,7 +424,7 @@ UNIV_INTERN void mem_heap_block_free(mem_heap_t *heap, mem_block_t *block)
 #ifndef UNIV_HOTBACKUP
 /// \brief Frees the free_block field from a memory heap.
 /// \param heap in: heap
-UNIV_INTERN
+IB_INTERN
 void mem_heap_free_block_free(mem_heap_t *heap)
 {
 	if (UNIV_LIKELY_NULL(heap->free_block)) {
@@ -440,7 +440,7 @@ void mem_heap_free_block_free(mem_heap_t *heap)
 /// \brief Goes through the list of all allocated mem blocks, checks their magic
 /// numbers, and reports possible corruption.
 /// \param heap in: memory heap
-UNIV_INTERN ibool mem_heap_check(mem_heap_t *heap)
+IB_INTERN ibool mem_heap_check(mem_heap_t *heap)
 {
 	ut_a(heap->magic_n == MEM_BLOCK_MAGIC_N);
 
@@ -665,7 +665,7 @@ ibool mem_heap_validate(mem_heap_t *heap)
 #ifdef UNIV_DEBUG
 /// \brief Verify that the heap is not corrupt.
 /// \param heap in: heap to verify
-UNIV_INTERN void mem_heap_verify(const mem_heap_t *heap)
+IB_INTERN void mem_heap_verify(const mem_heap_t *heap)
 {
 	mem_block_t *block;
 

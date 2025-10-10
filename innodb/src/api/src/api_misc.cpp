@@ -38,7 +38,7 @@
 #include "lock_lock.hpp"
 
 /* If set then we rollback the transaction on DB_LOCK_WAIT_TIMEOUT error. */
-UNIV_INTERN ibool	ses_rollback_on_timeout	= FALSE;
+IB_INTERN ibool	ses_rollback_on_timeout	= FALSE;
 
 #ifdef __WIN__
 

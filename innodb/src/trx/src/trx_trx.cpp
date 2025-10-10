@@ -47,18 +47,18 @@ Created 3/26/1996 Heikki Tuuri
 
 /* TODO: Can we remove this? */
 /* Dummy session used currently in client interface */
-UNIV_INTERN sess_t*		trx_dummy_sess = NULL;
+IB_INTERN sess_t*		trx_dummy_sess = NULL;
 
 /* Number of transactions currently allocated for the client: protected by
 the kernel mutex */
-UNIV_INTERN ulint		trx_n_transactions = 0;
+IB_INTERN ulint		trx_n_transactions = 0;
 
 /* Threads with unknown id. */
-UNIV_INTERN os_thread_id_t	NULL_THREAD_ID;
+IB_INTERN os_thread_id_t	NULL_THREAD_ID;
 
 /**************************************************************************
 Reset global variables. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_var_init(void)
 /*==============*/
@@ -70,7 +70,7 @@ trx_var_init(void)
 /**************************************************************************
 Determines if the currently running transaction is in strict_mode.
 @return	TRUE if strict */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_is_strict(
 /*==========*/
@@ -81,7 +81,7 @@ trx_is_strict(
 
 /*****************************************************************
 Set detailed error message for the transaction. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_set_detailed_error(
 /*===================*/
@@ -94,7 +94,7 @@ trx_set_detailed_error(
 /****************************************************************//**
 Creates and initializes a transaction object.
 @return	own: the transaction */
-UNIV_INTERN
+IB_INTERN
 trx_t*
 trx_create(
 /*=======*/
@@ -194,7 +194,7 @@ trx_create(
 /********************************************************************//**
 Creates a transaction object for client.
 @return	own: transaction object */
-UNIV_INTERN
+IB_INTERN
 trx_t*
 trx_allocate_for_client(
 /*====================*/
@@ -222,7 +222,7 @@ trx_allocate_for_client(
 /********************************************************************//**
 Creates a transaction object for background operations by the master thread.
 @return	own: transaction object */
-UNIV_INTERN
+IB_INTERN
 trx_t*
 trx_allocate_for_background(void)
 /*=============================*/
@@ -244,7 +244,7 @@ trx_allocate_for_background(void)
 
 /********************************************************************//**
 Releases the search latch if trx has reserved it. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_search_latch_release_if_reserved(
 /*=================================*/
@@ -328,7 +328,7 @@ trx_free(
 
 /********************************************************************//**
 Frees a transaction object for client. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_free_for_client(
 /*================*/
@@ -349,7 +349,7 @@ trx_free_for_client(
 
 /********************************************************************//**
 Frees a transaction object of a background operation of the master thread. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_free_for_background(
 /*====================*/
@@ -408,7 +408,7 @@ trx_sys at database start. Rollback segment and undo log lists must
 already exist when this function is called, because the lists of
 transactions to be rolled back or cleaned up are built based on the
 undo log lists. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_lists_init_at_db_start(
 /*=======================*/
@@ -634,7 +634,7 @@ loop:
 /****************************************************************//**
 Starts a new transaction.
 @return	TRUE */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_start_low(
 /*==========*/
@@ -691,7 +691,7 @@ trx_start_low(
 /****************************************************************//**
 Starts a new transaction.
 @return	TRUE */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_start(
 /*======*/
@@ -723,7 +723,7 @@ trx_start(
 
 /****************************************************************//**
 Commits a transaction. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_commit_off_kernel(
 /*==================*/
@@ -945,7 +945,7 @@ trx_commit_off_kernel(
 Cleans up a transaction at database startup. The cleanup is needed if
 the transaction already got to the middle of a commit when the database
 crashed, and we cannot roll it back. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_cleanup_at_db_startup(
 /*======================*/
@@ -969,7 +969,7 @@ Assigns a read view for a consistent read query. All the consistent reads
 within the same transaction will get the same read view, which is created
 when this function is first called for a new started transaction.
 @return	consistent read view */
-UNIV_INTERN
+IB_INTERN
 read_view_t*
 trx_assign_read_view(
 /*=================*/
@@ -1042,7 +1042,7 @@ trx_handle_commit_sig_off_kernel(
 The transaction must be in the TRX_QUE_LOCK_WAIT state. Puts it to
 the TRX_QUE_RUNNING state and releases query threads which were
 waiting for a lock in the wait_thrs list. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_end_lock_wait(
 /*==============*/
@@ -1200,7 +1200,7 @@ trx_sig_is_compatible(
 
 /****************************************************************//**
 Sends a signal to a trx object. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sig_send(
 /*=========*/
@@ -1287,7 +1287,7 @@ Ends signal handling. If the session is in the error state, and
 trx->graph_before_signal_handling != NULL, then returns control to the error
 handling routine of the graph (currently just returns the control to the
 graph root which then will send an error message to the client). */
-UNIV_INTERN
+IB_INTERN
 void
 trx_end_signal_handling(
 /*====================*/
@@ -1308,7 +1308,7 @@ trx_end_signal_handling(
 
 /****************************************************************//**
 Starts handling of a trx signal. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sig_start_handle(
 /*=================*/
@@ -1414,7 +1414,7 @@ loop:
 /****************************************************************//**
 Send the reply message when a signal in the queue of the trx has been
 handled. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sig_reply(
 /*==========*/
@@ -1448,7 +1448,7 @@ trx_sig_reply(
 
 /****************************************************************//**
 Removes a signal object from the trx signal queue. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sig_remove(
 /*===========*/
@@ -1471,7 +1471,7 @@ trx_sig_remove(
 /*********************************************************************//**
 Creates a commit command node struct.
 @return	own: commit node struct */
-UNIV_INTERN
+IB_INTERN
 commit_node_t*
 commit_node_create(
 /*===============*/
@@ -1489,7 +1489,7 @@ commit_node_create(
 /***********************************************************//**
 Performs an execution step for a commit type node in a query graph.
 @return	query thread to run next, or NULL */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 trx_commit_step(
 /*============*/
@@ -1537,7 +1537,7 @@ trx_commit_step(
 /**********************************************************************//**
 Does the transaction commit for client.
 @return	DB_SUCCESS or error number */
-UNIV_INTERN
+IB_INTERN
 ulint
 trx_commit(
 /*=======*/
@@ -1567,7 +1567,7 @@ trx_commit(
 If required, flushes the log to disk if we called trx_commit_for_client()
 with trx->flush_log_later == TRUE.
 @return	0 or error number */
-UNIV_INTERN
+IB_INTERN
 ulint
 trx_commit_flush_log(
 /*=================*/
@@ -1613,7 +1613,7 @@ trx_commit_flush_log(
 
 /**********************************************************************//**
 Marks the latest SQL statement ended. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_mark_sql_stat_end(
 /*==================*/
@@ -1631,7 +1631,7 @@ trx_mark_sql_stat_end(
 /**********************************************************************//**
 Prints info about a transaction to the given file. The caller must own the
 kernel mutex. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_print(
 /*======*/
@@ -1737,7 +1737,7 @@ trx_print(
 /*******************************************************************//**
 Compares the "weight" (or size) of two transactions.
 @return	<0, 0 or >0; similar to strcmp(3) */
-UNIV_INTERN
+IB_INTERN
 int
 trx_weight_cmp(
 /*===========*/
@@ -1761,7 +1761,7 @@ trx_weight_cmp(
 
 /****************************************************************//**
 Prepares a transaction. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_prepare_off_kernel(
 /*===================*/
@@ -1869,7 +1869,7 @@ trx_prepare_off_kernel(
 /**********************************************************************//**
 Does the transaction prepare for client.
 @return	0 or error number */
-UNIV_INTERN
+IB_INTERN
 ulint
 trx_prepare(
 /*========*/
@@ -1899,7 +1899,7 @@ This function is used to find number of prepared transactions and
 their transaction objects for a recovery. This function is used to
 recover any X/Open XA distributed transactions
 @return	number of prepared transactions stored in xid_list */
-UNIV_INTERN
+IB_INTERN
 int
 trx_recover(
 /*========*/
@@ -1973,7 +1973,7 @@ trx_recover(
 This function is used to find one X/Open XA distributed transaction
 which is in the prepared state
 @return	trx or NULL */
-UNIV_INTERN
+IB_INTERN
 trx_t*
 trx_get_trx_by_xid(
 /*===============*/

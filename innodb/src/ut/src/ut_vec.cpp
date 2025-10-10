@@ -27,7 +27,7 @@
 /// \param heap in: heap
 /// \param size in: initial size
 /// \return vector
-UNIV_INTERN ib_vector_t *ib_vector_create(mem_heap_t *heap, ulint size)
+IB_INTERN ib_vector_t *ib_vector_create(mem_heap_t *heap, ulint size)
 {
 	ut_a(size > 0);
 
@@ -44,7 +44,7 @@ UNIV_INTERN ib_vector_t *ib_vector_create(mem_heap_t *heap, ulint size)
 /// \brief Push a new element to the vector, increasing its size if necessary.
 /// \param vec in: vector
 /// \param elem in: data element
-UNIV_INTERN void ib_vector_push(ib_vector_t *vec, void *elem)
+IB_INTERN void ib_vector_push(ib_vector_t *vec, void *elem)
 {
 	if (vec->used >= vec->total) {
 		void **new_data;

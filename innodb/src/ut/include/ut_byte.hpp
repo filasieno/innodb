@@ -165,7 +165,7 @@ IB_INLINE ib_uint64_t ut_uint64_align_up(ib_uint64_t n, ulint align_no);
 /// \param aux_arr in/out: auxiliary array (same size as arr)
 /// \param low in: low bound of sort interval, inclusive
 /// \param high in: high bound of sort interval, noninclusive
-UNIV_INTERN void ut_dulint_sort(dulint* arr, dulint* aux_arr, ulint low, ulint high);
+IB_INTERN void ut_dulint_sort(dulint* arr, dulint* aux_arr, ulint low, ulint high);
 #endif /* notdefined */
 
 /// \brief Rounds up a pointer to the nearest aligned address.

@@ -59,7 +59,7 @@ extern ibool			trx_sys_multiple_tablespace_format;
 /****************************************************************//**
 Creates the doublewrite buffer to a new InnoDB installation. The header of the
 doublewrite buffer is placed on the trx system header page. */
-UNIV_INTERN
+IB_INTERN
 enum db_err
 trx_sys_create_doublewrite_buf(void);
 /*================================*/
@@ -70,7 +70,7 @@ upgrading to an InnoDB version which supports multiple tablespaces, then this
 function performs the necessary update operations. If we are in a crash
 recovery, this function uses a possible doublewrite buffer to restore
 half-written pages in the data files. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_doublewrite_init_or_restore_pages(
 /*======================================*/
@@ -78,7 +78,7 @@ trx_sys_doublewrite_init_or_restore_pages(
 /****************************************************************//**
 Marks the trx sys header when we have successfully upgraded to the >= 4.1.x
 multiple tablespace format. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_mark_upgraded_to_multiple_tablespaces(void);
 /*===============================================*/
@@ -86,7 +86,7 @@ trx_sys_mark_upgraded_to_multiple_tablespaces(void);
 Determines if a page number is located inside the doublewrite buffer.
 @return TRUE if the location is inside the two blocks of the
 doublewrite buffer */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_doublewrite_page_inside(
 /*========================*/
@@ -103,14 +103,14 @@ trx_sys_hdr_page(
 /*****************************************************************//**
 Creates and initializes the central memory structures for the transaction
 system. This is called when the database is started. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_init_at_db_start(
 /*=====================*/
 	ib_recovery_t	recovery);	/*!< in: recovery flag */
 /*****************************************************************//**
 Creates and initializes the transaction system at the database creation. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_create(
 /*===========*/
@@ -118,7 +118,7 @@ trx_sys_create(
 /****************************************************************//**
 Looks for a free slot for a rollback segment in the trx system file copy.
 @return	slot index or ULINT_UNDEFINED if not found */
-UNIV_INTERN
+IB_INTERN
 ulint
 trx_sysf_rseg_find_free(
 /*====================*/
@@ -260,26 +260,26 @@ trx_is_active(
 /****************************************************************//**
 Checks that trx is in the trx list.
 @return	TRUE if is in */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_in_trx_list(
 /*============*/
 	trx_t*	in_trx);/*!< in: trx */
 /*****************************************************************//**
 Initializes the tablespace tag system. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_file_format_init(void);
 /*==========================*/
 /*****************************************************************//**
 Closes the tablespace tag system. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_file_format_close(void);
 /*===========================*/
 /*******************************************************************//**
 Shutdown/Close the transaction system. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_close(void);
 /*===============*/
@@ -288,14 +288,14 @@ Tags the system table space with minimum format id if it has not been
 tagged yet.
 WARNING: This function is only called during the startup and AFTER the
 redo log application during recovery has finished. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_file_format_tag_init(void);
 /*==============================*/
 #ifndef UNIV_HOTBACKUP
 /*****************************************************************//**
 Shutdown/Close the transaction system. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_close(void);
 /*===============*/
@@ -303,7 +303,7 @@ trx_sys_close(void);
 /*****************************************************************//**
 Get the name representation of the file format from its id.
 @return	pointer to the name */
-UNIV_INTERN
+IB_INTERN
 const char*
 trx_sys_file_format_id_to_name(
 /*===========================*/
@@ -311,7 +311,7 @@ trx_sys_file_format_id_to_name(
 /**************************************************************//**
 Validate the file format name and return its corresponding id.
 @return	valid file format id or DICT_TF_FORMAT_MAX + 1 */
-UNIV_INTERN
+IB_INTERN
 ulint
 trx_sys_file_format_name_to_id(
 /*===========================*/
@@ -320,7 +320,7 @@ trx_sys_file_format_name_to_id(
 Set the file format id unconditionally except if it's already the
 same value.
 @return	TRUE if value updated */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_sys_file_format_max_set(
 /*===========================*/
@@ -330,14 +330,14 @@ trx_sys_file_format_max_set(
 /*****************************************************************//**
 Get the name representation of the file format from its id.
 @return	pointer to the max format name */
-UNIV_INTERN
+IB_INTERN
 const char*
 trx_sys_file_format_max_get(void);
 /*=============================*/
 /*****************************************************************//**
 Check for the max file format tag stored on disk.
 @return	DB_SUCCESS or error code */
-UNIV_INTERN
+IB_INTERN
 ulint
 trx_sys_file_format_max_check(
 /*==========================*/
@@ -346,7 +346,7 @@ trx_sys_file_format_max_check(
 Update the file format tag in the system tablespace only if the given
 format id is greater than the known max id.
 @return	TRUE if format_id was bigger than the known max id */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_sys_file_format_max_upgrade(
 /*============================*/
@@ -354,7 +354,7 @@ trx_sys_file_format_max_upgrade(
 	ulint		format_id);	/*!< in: file format identifier */
 /******************************************************************//**
 Reset the variables. */
-UNIV_INTERN
+IB_INTERN
 void
 trx_sys_var_init(void);
 /*==================*/
@@ -364,7 +364,7 @@ Even if the call succeeds and returns TRUE, the returned format id
 may be ULINT_UNDEFINED signalling that the format id was not present
 in the data file.
 @return TRUE if call succeeds */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_sys_read_file_format_id(
 /*========================*/
@@ -375,7 +375,7 @@ trx_sys_read_file_format_id(
 /*****************************************************************//**
 Reads the file format id from the given per-table data file.
 @return TRUE if call succeeds */
-UNIV_INTERN
+IB_INTERN
 ibool
 trx_sys_read_pertable_file_format_id(
 /*=================================*/
@@ -386,7 +386,7 @@ trx_sys_read_pertable_file_format_id(
 /*****************************************************************//**
 Get the name representation of the file format from its id.
 @return	pointer to the name */
-UNIV_INTERN
+IB_INTERN
 const char*
 trx_sys_file_format_id_to_name(
 /*===========================*/

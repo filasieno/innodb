@@ -22,7 +22,7 @@
 #include "mach_data.inl"
 #endif
 
-UNIV_INTERN byte *mach_parse_compressed(byte *ptr, byte *end_ptr, ulint *val)
+IB_INTERN byte *mach_parse_compressed(byte *ptr, byte *end_ptr, ulint *val)
 {
 	ut_ad(ptr && end_ptr && val);
 
@@ -62,7 +62,7 @@ UNIV_INTERN byte *mach_parse_compressed(byte *ptr, byte *end_ptr, ulint *val)
 	}
 }
 
-UNIV_INTERN byte *mach_dulint_parse_compressed(byte *ptr, byte *end_ptr, dulint *val)
+IB_INTERN byte *mach_dulint_parse_compressed(byte *ptr, byte *end_ptr, dulint *val)
 {
 	ut_ad(ptr && end_ptr && val);
 

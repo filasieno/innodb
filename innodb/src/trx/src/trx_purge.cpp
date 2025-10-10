@@ -45,14 +45,14 @@ Created 3/26/1996 Heikki Tuuri
 #include "trx_trx.hpp"
 
 /** The global data structure coordinating a purge */
-UNIV_INTERN trx_purge_t *purge_sys = NULL;
+IB_INTERN trx_purge_t *purge_sys = NULL;
 
 /** A dummy undo record used as a return value when we have a whole undo log which needs no purge */
-UNIV_INTERN trx_undo_rec_t trx_purge_dummy_rec;
+IB_INTERN trx_undo_rec_t trx_purge_dummy_rec;
 
 /*****************************************************************/ /**
 Reset the variables. */
-UNIV_INTERN void trx_purge_var_init(void)
+IB_INTERN void trx_purge_var_init(void)
 {
 	purge_sys = NULL;
 	memset(&trx_purge_dummy_rec, 0x0, sizeof(trx_purge_dummy_rec));
@@ -67,7 +67,7 @@ system
 
 in: transaction id
 */
-UNIV_INTERN ibool trx_purge_update_undo_must_exist(trx_id_t trx_id)
+IB_INTERN ibool trx_purge_update_undo_must_exist(trx_id_t trx_id)
 {
 #ifdef UNIV_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
@@ -187,7 +187,7 @@ static que_t *trx_purge_graph_build(void)
 /********************************************************************/ /**
 Creates the global purge system control structure and inits the history
 mutex. */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_sys_create(void)
 /*======================*/
 {
@@ -226,7 +226,7 @@ void trx_purge_sys_create(void)
 
 /************************************************************************
 Frees the global purge system control structure. */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_sys_close(void)
 /*======================*/
 {
@@ -266,7 +266,7 @@ void trx_purge_sys_close(void)
 /********************************************************************/ /**
 Adds the update undo log as the first log in the history list. Removes the
 update undo log segment from the rseg slot if it is too big for reuse. */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_add_update_undo_to_history(
 	/*=================================*/
 	trx_t *trx,		   /*!< in: transaction */
@@ -893,7 +893,7 @@ Fetches the next undo log record from the history list to purge. It must be
 released with the corresponding release function.
 @return copy of an undo log record or pointer to trx_purge_dummy_rec,
 if the whole undo log can skipped in purge; NULL if none left */
-UNIV_INTERN
+IB_INTERN
 trx_undo_rec_t *trx_purge_fetch_next_rec(
 	/*=====================*/
 	roll_ptr_t *roll_ptr,  /*!< out: roll pointer to undo record */
@@ -965,7 +965,7 @@ trx_undo_rec_t *trx_purge_fetch_next_rec(
 /**Releases a reserved purge undo record. 
 in: storage cell 
 */
-UNIV_INTERN void trx_purge_rec_release(trx_undo_inf_t *cell)
+IB_INTERN void trx_purge_rec_release(trx_undo_inf_t *cell)
 {
 	mutex_enter(&(purge_sys->mutex));
 	trx_undo_arr_t *arr = purge_sys->arr;
@@ -979,7 +979,7 @@ UNIV_INTERN void trx_purge_rec_release(trx_undo_inf_t *cell)
 This function runs a purge batch.
 @return	number of undo log pages handled in the batch 
 */
-UNIV_INTERN ulint trx_purge(void)
+IB_INTERN ulint trx_purge(void)
 {
 	que_thr_t *thr;
 
@@ -1039,7 +1039,7 @@ UNIV_INTERN ulint trx_purge(void)
 
 /******************************************************************/ /**
 Prints information of the purge system to ib_stream. */
-UNIV_INTERN
+IB_INTERN
 void trx_purge_sys_print(void)
 /*=====================*/
 {

@@ -189,7 +189,7 @@ buf_flush_block_cmp(
 Initialize the red-black tree to speed up insertions into the flush_list
 during recovery process. Should be called at the start of recovery
 process before any page has been read/written. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_init_flush_rbt(void)
 /*==========================*/
@@ -204,7 +204,7 @@ buf_flush_init_flush_rbt(void)
 
 /********************************************************************//**
 Frees up the red-black tree. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_free_flush_rbt(void)
 /*==========================*/
@@ -223,7 +223,7 @@ buf_flush_free_flush_rbt(void)
 
 /********************************************************************//**
 Inserts a modified block into the flush list. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_insert_into_flush_list(
 /*=============================*/
@@ -258,7 +258,7 @@ buf_flush_insert_into_flush_list(
 Inserts a modified block into the flush list in the right sorted position.
 This function is used by recovery, because there the modifications do not
 necessarily come in the order of lsn's. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_insert_sorted_into_flush_list(
 /*====================================*/
@@ -316,7 +316,7 @@ buf_flush_insert_sorted_into_flush_list(
 Returns TRUE if the file page block is immediately suitable for replacement,
 i.e., the transition FILE_PAGE => NOT_USED allowed.
 @return	TRUE if can replace immediately */
-UNIV_INTERN
+IB_INTERN
 ibool
 buf_flush_ready_for_replace(
 /*========================*/
@@ -384,7 +384,7 @@ buf_flush_ready_for_flush(
 
 /********************************************************************//**
 Remove a block from the flush list of modified blocks. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_remove(
 /*=============*/
@@ -433,7 +433,7 @@ buf_flush_remove(
 Relocates a buffer control block on the flush_list.
 Note that it is assumed that the contents of bpage has already been
 copied to dpage. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_relocate_on_flush_list(
 /*=============================*/
@@ -488,7 +488,7 @@ buf_flush_relocate_on_flush_list(
 
 /********************************************************************//**
 Updates the flush system data structures when a write is completed. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_write_complete(
 /*=====================*/
@@ -847,7 +847,7 @@ try_again:
 
 /********************************************************************//**
 Initializes a page for writing to the tablespace. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_init_for_writing(
 /*=======================*/
@@ -1225,7 +1225,7 @@ end up waiting for these latches! NOTE 2: in the case of a flush list flush,
 the calling thread is not allowed to own any latches on pages!
 @return number of blocks for which the write request was queued;
 ULINT_UNDEFINED if there was a flush of the same type already running */
-UNIV_INTERN
+IB_INTERN
 ulint
 buf_flush_batch(
 /*============*/
@@ -1382,7 +1382,7 @@ flush_next:
 
 /******************************************************************//**
 Waits until a flush batch of the given type ends */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_wait_batch_end(
 /*=====================*/
@@ -1451,7 +1451,7 @@ of replaceable pages there or in the free list. VERY IMPORTANT: this function
 is called also by threads which have locks on pages. To avoid deadlocks, we
 flush only pages such that the s-lock required for flushing can be acquired
 immediately, without waiting. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_free_margin(void)
 /*=======================*/
@@ -1477,7 +1477,7 @@ Update the historical stats that we are collecting for flush rate
 heuristics at the end of each interval.
 Flush rate heuristic depends on (a) rate of redo log generation and
 (b) the rate at which LRU flush is happening. */
-UNIV_INTERN
+IB_INTERN
 void
 buf_flush_stat_update(void)
 /*=======================*/
@@ -1527,7 +1527,7 @@ in the number of dirty pages (for example, an in-memory workload)
 it can cause IO bursts of flushing. This function implements heuristics
 to avoid this burstiness.
 @return	number of dirty pages to be flushed / second */
-UNIV_INTERN
+IB_INTERN
 ulint
 buf_flush_get_desired_flush_rate(void)
 /*==================================*/
@@ -1637,7 +1637,7 @@ buf_flush_validate_low(void)
 /******************************************************************//**
 Validates the flush list.
 @return	TRUE if ok */
-UNIV_INTERN
+IB_INTERN
 ibool
 buf_flush_validate(void)
 /*====================*/

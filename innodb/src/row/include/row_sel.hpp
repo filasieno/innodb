@@ -41,7 +41,7 @@ Created 12/19/1997 Heikki Tuuri
 /*********************************************************************//**
 Creates a select node struct.
 @return	own: select node struct */
-UNIV_INTERN
+IB_INTERN
 sel_node_t*
 sel_node_create(
 /*============*/
@@ -49,7 +49,7 @@ sel_node_create(
 /*********************************************************************//**
 Frees the memory private to a select node when a query graph is freed,
 does not free the heap where the node was originally created. */
-UNIV_INTERN
+IB_INTERN
 void
 sel_node_free_private(
 /*==================*/
@@ -57,7 +57,7 @@ sel_node_free_private(
 /*********************************************************************//**
 Frees a prefetch buffer for a column, including the dynamically allocated
 memory for data stored there. */
-UNIV_INTERN
+IB_INTERN
 void
 sel_col_prefetch_buf_free(
 /*======================*/
@@ -75,7 +75,7 @@ sel_node_get_nth_plan(
 Performs a select step. This is a high-level function used in SQL execution
 graphs.
 @return	query thread to run next or NULL */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 row_sel_step(
 /*=========*/
@@ -91,7 +91,7 @@ open_step(
 /**********************************************************************//**
 Performs a fetch for a cursor.
 @return	query thread to run next or NULL */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 fetch_step(
 /*=======*/
@@ -99,7 +99,7 @@ fetch_step(
 /****************************************************************//**
 Sample callback function for fetch that prints each row.
 @return	always returns non-NULL */
-UNIV_INTERN
+IB_INTERN
 void*
 row_fetch_print(
 /*============*/
@@ -110,7 +110,7 @@ Callback function for fetch that stores an unsigned 4 byte integer to the
 location pointed. The column's type must be DATA_INT, DATA_UNSIGNED, length
 = 4.
 @return	always returns NULL */
-UNIV_INTERN
+IB_INTERN
 void*
 row_fetch_store_uint4(
 /*==================*/
@@ -119,14 +119,14 @@ row_fetch_store_uint4(
 /***********************************************************//**
 Prints a row in a select result.
 @return	query thread to run next or NULL */
-UNIV_INTERN
+IB_INTERN
 que_thr_t*
 row_printf_step(
 /*============*/
 	que_thr_t*	thr);	/*!< in: query thread */
 /***********************************************************************//**
 Builds a dummy query graph used in selects. */
-UNIV_INTERN
+IB_INTERN
 void
 row_sel_prebuild_graph(
 /*===================*/
@@ -146,7 +146,7 @@ prev. NOTE that if we do a search with a full key value from a unique
 index (ROW_SEL_EXACT), then we will not store the cursor position and
 fetch next or fetch prev must not be tried to the cursor!
 @return	DB_SUCCESS, DB_RECORD_NOT_FOUND, DB_END_OF_INDEX, DB_DEADLOCK, DB_LOCK_TABLE_FULL, DB_CORRUPTION, or DB_TOO_BIG_RECORD */
-UNIV_INTERN
+IB_INTERN
 enum db_err
 row_search_for_client(
 /*==================*/
@@ -169,7 +169,7 @@ row_search_for_client(
 /**********************************************************************//**
 Reads the current row from the fetch cache.
 @return current row from the row cache. */
-UNIV_INTERN
+IB_INTERN
 const rec_t*
 row_sel_row_cache_get(
 /*==================*/
@@ -178,7 +178,7 @@ row_sel_row_cache_get(
 /**********************************************************************//**
 Pops a cached row from the fetch cache.
 @return	DB_SUCCESS if all OK else error code */
-UNIV_INTERN
+IB_INTERN
 void
 row_sel_row_cache_next(
 /*===================*/
@@ -187,7 +187,7 @@ row_sel_row_cache_next(
 /**********************************************************************//**
 Check if there are any rows in the cache.
 @return true if row cache is empty. */
-UNIV_INTERN
+IB_INTERN
 ibool
 row_sel_row_cache_is_empty(
 /*=======================*/

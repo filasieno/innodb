@@ -72,7 +72,7 @@ ut_memcmp(const void* str1, const void* str2, ulint n);
 
 /**********************************************************************//**
 Initializes the mem block list at database startup. */
-UNIV_INTERN
+IB_INTERN
 void
 ut_mem_init(void);
 /*=============*/
@@ -81,7 +81,7 @@ ut_mem_init(void);
 Allocates memory. Sets it also to zero if UNIV_SET_MEM_TO_ZERO is
 defined and set_to_zero is TRUE.
 @return	own: allocated memory */
-UNIV_INTERN
+IB_INTERN
 void*
 ut_malloc_low(
 /*==========*/
@@ -96,7 +96,7 @@ ut_malloc_low(
 Allocates memory. Sets it also to zero if UNIV_SET_MEM_TO_ZERO is
 defined.
 @return	own: allocated memory */
-UNIV_INTERN
+IB_INTERN
 void*
 ut_malloc(
 /*======*/
@@ -107,7 +107,7 @@ Tests if malloc of n bytes would succeed. ut_malloc() asserts if memory runs
 out. It cannot be used if we want to return an error message. Prints to
 stderr a message if fails.
 @return	TRUE if succeeded */
-UNIV_INTERN
+IB_INTERN
 ibool
 ut_test_malloc(
 /*===========*/
@@ -115,7 +115,7 @@ ut_test_malloc(
 #endif /* !UNIV_HOTBACKUP */
 /**********************************************************************//**
 Frees a memory block allocated with ut_malloc. */
-UNIV_INTERN
+IB_INTERN
 void
 ut_free(
 /*====*/
@@ -146,7 +146,7 @@ RETURN VALUE
        original	 block	is  left  untouched  - it is not freed or
        moved.
 @return	own: pointer to new mem block or NULL */
-UNIV_INTERN
+IB_INTERN
 void*
 ut_realloc(
 /*=======*/
@@ -154,7 +154,7 @@ ut_realloc(
 	ulint	size);	/*!< in: desired size */
 /**********************************************************************//**
 Frees in shutdown all allocated memory not freed yet. */
-UNIV_INTERN
+IB_INTERN
 void
 ut_free_all_mem(void);
 /*=================*/
@@ -189,7 +189,7 @@ Copies up to size - 1 characters from the NUL-terminated string src to
 dst, NUL-terminating the result. Returns strlen(src), so truncation
 occurred if the return value >= size.
 @return	strlen(src) */
-UNIV_INTERN
+IB_INTERN
 ulint
 ut_strlcpy(
 /*=======*/
@@ -201,7 +201,7 @@ ut_strlcpy(
 Like ut_strlcpy, but if src doesn't fit in dst completely, copies the last
 (size - 1) bytes of src, not the first.
 @return	strlen(src) */
-UNIV_INTERN
+IB_INTERN
 ulint
 ut_strlcpy_rev(
 /*===========*/
@@ -224,7 +224,7 @@ Make a quoted copy of a NUL-terminated string.	Leading and trailing
 quotes will not be included; only embedded quotes will be escaped.
 See also ut_strlenq() and ut_memcpyq().
 @return	pointer to end of dest */
-UNIV_INTERN
+IB_INTERN
 char*
 ut_strcpyq(
 /*=======*/
@@ -237,7 +237,7 @@ Make a quoted copy of a fixed-length string.  Leading and trailing
 quotes will not be included; only embedded quotes will be escaped.
 See also ut_strlenq() and ut_strcpyq().
 @return	pointer to end of dest */
-UNIV_INTERN
+IB_INTERN
 char*
 ut_memcpyq(
 /*=======*/
@@ -250,7 +250,7 @@ ut_memcpyq(
 Return the number of times s2 occurs in s1. Overlapping instances of s2
 are only counted once.
 @return	the number of times s2 occurs in s1 */
-UNIV_INTERN
+IB_INTERN
 ulint
 ut_strcount(
 /*========*/
@@ -261,7 +261,7 @@ ut_strcount(
 Replace every occurrence of s1 in str with s2. Overlapping instances of s1
 are only replaced once.
 @return	own: modified string, must be freed with mem_free() */
-UNIV_INTERN
+IB_INTERN
 char*
 ut_strreplace(
 /*==========*/
@@ -301,7 +301,7 @@ ut_str_sql_format(
 					in bytes */
 /**************************************************************************
 Reset the variables. */
-UNIV_INTERN
+IB_INTERN
 void
 ut_mem_var_init(void);
 /*=================*/
