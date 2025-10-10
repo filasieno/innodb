@@ -18,7 +18,8 @@
 /// Created 1/30/1994 Heikki Tuuri
 
 #include "ut_dbg.hpp"
-#include "univ.i"
+
+#include "univ.inl"
 
 #if defined(__GNUC__) && (__GNUC__ > 2)
 #else
@@ -41,25 +42,19 @@ UNIV_INTERN ibool panic_shutdown = FALSE;
 UNIV_INTERN ulint *ut_dbg_null_ptr = NULL;
 #endif
 
+
 /// \brief Report a failed assertion.
 /// \param expr in: the failed assertion (optional)
 /// \param file in: source file containing the assertion
 /// \param line in: line number of the assertion
-UNIV_INTERN
-void ut_dbg_assertion_failed(const char *expr, const char *file, ulint line)
+UNIV_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint line)
 {
 	ut_print_timestamp(ib_stream);
+
 #ifdef UNIV_HOTBACKUP
 	ib_logger(ib_stream, "  InnoDB: Assertion failure in file %s line %lu\n", file, line);
 #else  /* UNIV_HOTBACKUP */
-	ib_logger(
-		ib_stream,
-		"  InnoDB: Assertion failure in thread %lu"
-		" in file %s line %lu\n",
-		os_thread_pf(os_thread_get_curr_id()),
-		file,
-		line
-	);
+	ib_logger(ib_stream, "  InnoDB: Assertion failure in thread %lu in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
 #endif /* UNIV_HOTBACKUP */
 	if (expr) {
 		ib_logger(ib_stream, "InnoDB: Failing assertion: %s\n", expr);
@@ -68,46 +63,45 @@ void ut_dbg_assertion_failed(const char *expr, const char *file, ulint line)
 	ib_logger(
 		ib_stream,
 		"InnoDB: We intentionally generate a memory trap.\n"
-		"InnoDB: Submit a detailed bug report, "
-		"check the InnoDB website for details\n"
-		"InnoDB: If you get repeated assertion failures"
-		" or crashes, even\n"
+		"InnoDB: Submit a detailed bug report, check the InnoDB website for details\n"
+		"InnoDB: If you get repeated assertion failures or crashes, even\n"
 		"InnoDB: immediately after the server startup, there may be\n"
 		"InnoDB: corruption in the InnoDB tablespace. Please refer to\n"
 		"InnoDB: the InnoDB website for details\n"
 		"InnoDB: about forcing recovery.\n"
 	);
+
 #if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
 	ut_dbg_stop_threads = TRUE;
 #endif
+
 }
 
 #ifdef __NETWARE__
-/// \brief Shut down InnoDB after assertion failure.
-UNIV_INTERN
-void ut_dbg_panic(void)
-{
-	if (!panic_shutdown) {
-		panic_shutdown = TRUE;
-		innobase_shutdown(IB_SHUTDOWN_NORMAL);
+	/// \brief Shut down InnoDB after assertion failure.
+	UNIV_INTERN void ut_dbg_panic(void)
+	{
+		if (!panic_shutdown) {
+			panic_shutdown = TRUE;
+			innobase_shutdown(IB_SHUTDOWN_NORMAL);
+		}
+		exit(1);
 	}
-	exit(1);
-}
-#else /* __NETWARE__ */
-#if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
-/// \brief Stop a thread after assertion failure.
-/// \param file in: source file name
-/// \param line in: line number
-UNIV_INTERN
-void ut_dbg_stop_thread(const char *file, ulint line)
-{
-#ifndef UNIV_HOTBACKUP
-	ib_logger(ib_stream, "InnoDB: Thread %lu stopped in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
-	os_thread_sleep(1000000000);
-#endif /* !UNIV_HOTBACKUP */
-}
-#endif
-#endif /* __NETWARE__ */
+#else // __NETWARE__
+	#if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
+	/// \brief Stop a thread after assertion failure.
+	/// \param file in: source file name
+	/// \param line in: line number
+	UNIV_INTERN
+	void ut_dbg_stop_thread(const char *file, ulint line)
+	{
+	#ifndef UNIV_HOTBACKUP
+		ib_logger(ib_stream, "InnoDB: Thread %lu stopped in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
+		os_thread_sleep(1000000000);
+	#endif /* !UNIV_HOTBACKUP */
+	}
+	#endif
+#endif // __NETWARE__
 
 #ifdef UNIV_COMPILE_TEST_FUNCS
 
@@ -116,53 +110,48 @@ void ut_dbg_stop_thread(const char *file, ulint line)
 #include <sys/types.h>
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+  #include <unistd.h>
 #endif
 
 #ifndef timersub
-#define timersub(a, b, r)                           \
-	do {                                            \
-		(r)->tv_sec = (a)->tv_sec - (b)->tv_sec;    \
-		(r)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
-		if ((r)->tv_usec < 0) {                     \
-			(r)->tv_sec--;                          \
-			(r)->tv_usec += 1000000;                \
-		}                                           \
-	} while (0)
-#endif /* timersub */
+
+	#define timersub(a, b, r)                           \
+		do {                                            \
+			(r)->tv_sec = (a)->tv_sec - (b)->tv_sec;    \
+			(r)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
+			if ((r)->tv_usec < 0) {                     \
+				(r)->tv_sec--;                          \
+				(r)->tv_usec += 1000000;                \
+			}                                           \
+		} while (0)
+
+#endif // timersub
 
 /// \brief Resets a speedo (records the current time in it).
 /// \param speedo out: speedo
-UNIV_INTERN
-void speedo_reset(speedo_t *speedo)
+UNIV_INTERN void speedo_reset(speedo_t *speedo)
 {
 	gettimeofday(&speedo->tv, NULL);
-
 	getrusage(RUSAGE_SELF, &speedo->ru);
 }
 
-/// \brief Shows the time elapsed and usage statistics since the last reset of a
-/// speedo.
-/// \param speedo in: speedo
-UNIV_INTERN
-void speedo_show(const speedo_t *speedo)
+/// \brief Shows the time elapsed and usage statistics since the last reset of a speedo.
+/// \param [in] speedo speedo
+UNIV_INTERN void speedo_show(const speedo_t *speedo)
 {
 	struct rusage ru_now;
 	struct timeval tv_now;
 	struct timeval tv_diff;
 
 	getrusage(RUSAGE_SELF, &ru_now);
-
 	gettimeofday(&tv_now, NULL);
 
 #define PRINT_TIMEVAL(prefix, tvp) ib_logger(ib_stream, "%s% 5ld.%06ld sec\n", prefix, (tvp)->tv_sec, (tvp)->tv_usec)
 
 	timersub(&tv_now, &speedo->tv, &tv_diff);
 	PRINT_TIMEVAL("real", &tv_diff);
-
 	timersub(&ru_now.ru_utime, &speedo->ru.ru_utime, &tv_diff);
 	PRINT_TIMEVAL("user", &tv_diff);
-
 	timersub(&ru_now.ru_stime, &speedo->ru.ru_stime, &tv_diff);
 	PRINT_TIMEVAL("sys ", &tv_diff);
 }

@@ -20,7 +20,7 @@
 #include "ut_byte.hpp"
 
 #ifdef UNIV_NONINL
-#include "ut_byte.inl"
+  #include "ut_byte.inl"
 #endif
 
 /// @brief Zero value for a dulint
@@ -30,6 +30,8 @@ UNIV_INTERN const dulint ut_dulint_zero = { 0, 0 };
 /// \brief Maximum value for a dulint
 ///
 UNIV_INTERN const dulint ut_dulint_max = { 0xFFFFFFFFUL, 0xFFFFFFFFUL };
+
+
 
 #ifdef notdefined /* unused code */
 
@@ -44,4 +46,5 @@ UNIV_INTERN void ut_dulint_sort(dulint *arr, dulint *aux_arr, ulint low, ulint h
 {
 	UT_SORT_FUNCTION_BODY(ut_dulint_sort, arr, aux_arr, low, high, ut_dulint_cmp);
 }
+
 #endif	  // notdefined
