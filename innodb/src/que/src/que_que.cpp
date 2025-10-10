@@ -48,11 +48,11 @@ Created 5/27/1996 Heikki Tuuri
 #define QUE_ROUND_ROBIN_LIMIT	(64 * 256 * 256 * 256)
 #define QUE_MAX_LOOPS_WITHOUT_CHECK	16
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /* If the following flag is set TRUE, the module will print trace info
-of SQL execution in the UNIV_SQL_DEBUG version */
+of SQL execution in the IB_SQL_DEBUG version */
 IB_INTERN ibool	que_trace_on		= FALSE;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /* Short introduction to query graphs
    ==================================
@@ -131,9 +131,9 @@ void
 que_var_init(void)
 /*=============*/
 {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	que_trace_on = FALSE;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 }
 
 /***********************************************************************//**
@@ -1172,7 +1172,7 @@ que_thr_step(
 
 	old_thr = thr;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (que_trace_on) {
 		ib_logger(ib_stream, "To execute: ");
 		que_node_print_info(node);

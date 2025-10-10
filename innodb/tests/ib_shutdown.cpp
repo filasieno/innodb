@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "test_aux.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 
 		/* Note: We check for whether variables are reset
 		to their default values externally. */
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 		VALGRIND_DO_LEAK_CHECK;
 #endif
 	}

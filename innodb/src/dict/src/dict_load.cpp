@@ -255,14 +255,14 @@ dict_sys_tables_get_flags(
 
 	flags = mach_read_from_4(field);
 
-	if (UNIV_LIKELY(flags == DICT_TABLE_ORDINARY)) {
+	if (IB_LIKELY(flags == DICT_TABLE_ORDINARY)) {
 		return(0);
 	}
 
 	field = rec_get_nth_field_old(rec, 4/*N_COLS*/, &len);
 	n_cols = mach_read_from_4(field);
 
-	if (UNIV_UNLIKELY(!(n_cols & 0x80000000UL))) {
+	if (IB_UNLIKELY(!(n_cols & 0x80000000UL))) {
 		/* New file formats require ROW_FORMAT=COMPACT. */
 		return(ULINT_UNDEFINED);
 	}
@@ -283,13 +283,13 @@ dict_sys_tables_get_flags(
 		break;
 	}
 
-	if (UNIV_UNLIKELY((flags & DICT_TF_ZSSIZE_MASK)
+	if (IB_UNLIKELY((flags & DICT_TF_ZSSIZE_MASK)
 			  > (DICT_TF_ZSSIZE_MAX << DICT_TF_ZSSIZE_SHIFT))) {
 		/* Unsupported compressed page size. */
 		return(ULINT_UNDEFINED);
 	}
 
-	if (UNIV_UNLIKELY(flags & (~0 << DICT_TF_BITS))) {
+	if (IB_UNLIKELY(flags & (~0 << DICT_TF_BITS))) {
 		/* Some unused bits are set. */
 		return(ULINT_UNDEFINED);
 	}
@@ -681,7 +681,7 @@ dict_load_indexes(
 	const rec_t*	rec;
 	const byte*	field;
 	ulint		len;
-	ulint		name_len;
+	ulint		IB_NAME_LEN;
 	char*		name_buf;
 	ulint		type;
 	ulint		space;
@@ -743,8 +743,8 @@ dict_load_indexes(
 
 		ut_a(name_of_col_is(sys_indexes, sys_index, 4, "NAME"));
 
-		field = rec_get_nth_field_old(rec, 4, &name_len);
-		name_buf = mem_heap_strdupl(heap, (char*) field, name_len);
+		field = rec_get_nth_field_old(rec, 4, &IB_NAME_LEN);
+		name_buf = mem_heap_strdupl(heap, (char*) field, IB_NAME_LEN);
 
 		field = rec_get_nth_field_old(rec, 5, &len);
 		n_fields = mach_read_from_4(field);
@@ -797,9 +797,9 @@ dict_load_indexes(
 		} else if (is_sys_table
 			   && ((type & DICT_CLUSTERED)
 			       || ((table == dict_sys->sys_tables)
-				   && (name_len == (sizeof "ID_IND") - 1)
+				   && (IB_NAME_LEN == (sizeof "ID_IND") - 1)
 				   && (0 == ut_memcmp(name_buf,
-						      "ID_IND", name_len))))) {
+						      "ID_IND", IB_NAME_LEN))))) {
 
 			/* The index was created in memory already at booting
 			of the database server */
@@ -816,7 +816,7 @@ dict_load_indexes(
 			and simply did not load this index definition, the
 			.frm file would disagree with the index definitions
 			inside InnoDB. */
-			if (UNIV_UNLIKELY(error != DB_SUCCESS)) {
+			if (IB_UNLIKELY(error != DB_SUCCESS)) {
 
 				goto func_exit;
 			}
@@ -931,7 +931,7 @@ err_exit:
 			goto err_exit;
 		} else 
 #endif /* WITH_ZIP */
-		if (UNIV_UNLIKELY(flags == ULINT_UNDEFINED)) {
+		if (IB_UNLIKELY(flags == ULINT_UNDEFINED)) {
 			field = rec_get_nth_field_old(rec, 5, &len);
 			flags = mach_read_from_4(field);
 

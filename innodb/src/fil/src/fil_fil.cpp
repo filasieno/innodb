@@ -40,16 +40,16 @@ Created 10/25/1995 Heikki Tuuri
 #include "dict_dict.hpp"
 #include "page_page.hpp"
 #include "page_zip.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "buf0lru.h"
 # include "ibuf0ibuf.h"
 # include "sync0sync.h"
 # include "os0sync.h"
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 static ulint srv_data_read, srv_data_written;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -208,10 +208,10 @@ struct fil_space_struct {
 				is forbidden if this is positive */
 	hash_node_t	hash;	/*!< hash chain node */
 	hash_node_t	name_hash;/*!< hash chain the name_hash table */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	rw_lock_t	latch;	/*!< latch protecting the file space storage
 				allocation */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	UT_LIST_NODE_T(fil_space_t) unflushed_spaces;
 				/*!< list of spaces with at least one unflushed
 				file we have written to */
@@ -233,9 +233,9 @@ data space) is stored here; below we talk about tablespaces, but also
 the ib_logfiles form a 'space' and it is handled here */
 
 struct fil_system_struct {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	mutex_t		mutex;		/*!< The mutex protecting the cache */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	hash_table_t*	spaces;		/*!< The hash table of spaces in the
 					system; they are hashed on the space
 					id */
@@ -501,7 +501,7 @@ fil_space_get_by_name(
 	return(space);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Returns the version number of a tablespace, -1 if not found.
 @return version number, -1 if the tablespace does not exist in the
@@ -582,7 +582,7 @@ fil_space_get_type(
 
 	return(space->purpose);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Checks if all the file nodes in a space are flushed. The caller must hold
@@ -735,17 +735,17 @@ fil_node_open_file(
 
 		size_bytes = (((ib_int64_t)size_high) << 32)
 			+ (ib_int64_t)size_low;
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 		if (space->id == 0) {
-			node->size = (ulint) (size_bytes / UNIV_PAGE_SIZE);
+			node->size = (ulint) (size_bytes / IB_PAGE_SIZE);
 			os_file_close(node->handle);
 			goto add_size;
 		}
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 		ut_a(space->purpose != FIL_LOG);
 		ut_a(space->id != 0);
 
-		if (size_bytes < FIL_IBD_FILE_INITIAL_SIZE * UNIV_PAGE_SIZE) {
+		if (size_bytes < FIL_IBD_FILE_INITIAL_SIZE * IB_PAGE_SIZE) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: the size of single-table"
 				" tablespace file %s\n"
@@ -755,20 +755,20 @@ fil_node_open_file(
 				(ulong) size_high,
 				(ulong) size_low,
 				(ulong) (FIL_IBD_FILE_INITIAL_SIZE
-					 * UNIV_PAGE_SIZE));
+					 * IB_PAGE_SIZE));
 
 			ut_a(0);
 		}
 
 		/* Read the first page of the tablespace */
 
-		buf2 = ut_malloc(2 * UNIV_PAGE_SIZE);
+		buf2 = ut_malloc(2 * IB_PAGE_SIZE);
 		/* Align the memory for file i/o if we might have O_DIRECT
 		set */
-		page = ut_align(buf2, UNIV_PAGE_SIZE);
+		page = ut_align(buf2, IB_PAGE_SIZE);
 
 		success = os_file_read(node->handle, page, 0, 0,
-				       UNIV_PAGE_SIZE);
+				       IB_PAGE_SIZE);
 		space_id = fsp_header_get_space_id(page);
 		flags = fsp_header_get_flags(page);
 
@@ -778,7 +778,7 @@ fil_node_open_file(
 
 		os_file_close(node->handle);
 
-		if (UNIV_UNLIKELY(space_id != space->id)) {
+		if (IB_UNLIKELY(space_id != space->id)) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: tablespace id is %lu"
 				" in the data dictionary\n"
@@ -788,7 +788,7 @@ fil_node_open_file(
 			ut_error;
 		}
 
-		if (UNIV_UNLIKELY(space_id == ULINT_UNDEFINED
+		if (IB_UNLIKELY(space_id == ULINT_UNDEFINED
 				  || space_id == 0)) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: tablespace id %lu"
@@ -798,7 +798,7 @@ fil_node_open_file(
 			ut_error;
 		}
 
-		if (UNIV_UNLIKELY(space->flags != flags)) {
+		if (IB_UNLIKELY(space->flags != flags)) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: table flags are %lx"
 				" in the data dictionary\n"
@@ -814,16 +814,16 @@ fil_node_open_file(
 		}
 
 		if (!(flags & DICT_TF_ZSSIZE_MASK)) {
-			node->size = (ulint) (size_bytes / UNIV_PAGE_SIZE);
+			node->size = (ulint) (size_bytes / IB_PAGE_SIZE);
 		} else {
 			node->size = (ulint)
 				(size_bytes
 				 / dict_table_flags_to_zip_size(flags));
 		}
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 add_size:
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 		space->size += node->size;
 	}
 
@@ -1052,7 +1052,7 @@ close_more:
 
 	mutex_exit(&fil_system->mutex);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/* Wake the i/o-handler threads to make sure pending i/o's are
 	performed */
 	os_aio_simulated_wake_handler_threads();
@@ -1111,7 +1111,7 @@ fil_node_free(
 	mem_free(node);
 }
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /****************************************************************//**
 Drops files from the start of a file space, so that its size is cut by
 the amount given. */
@@ -1136,16 +1136,16 @@ fil_space_truncate_start(
 	while (trunc_len > 0) {
 		node = UT_LIST_GET_FIRST(space->chain);
 
-		ut_a(node->size * UNIV_PAGE_SIZE <= trunc_len);
+		ut_a(node->size * IB_PAGE_SIZE <= trunc_len);
 
-		trunc_len -= node->size * UNIV_PAGE_SIZE;
+		trunc_len -= node->size * IB_PAGE_SIZE;
 
 		fil_node_free(node, fil_system, space);
 	}
 
 	mutex_exit(&fil_system->mutex);
 }
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 /*******************************************************************//**
 Creates a space memory object and puts it to the tablespace memory cache. If
@@ -1184,7 +1184,7 @@ try_again:
 
 	space = fil_space_get_by_name(name);
 
-	if (UNIV_LIKELY_NULL(space)) {
+	if (IB_LIKELY_NULL(space)) {
 		ulint	namesake_id;
 
 		ut_print_timestamp(ib_stream);
@@ -1232,7 +1232,7 @@ try_again:
 
 	space = fil_space_get_by_id(id);
 
-	if (UNIV_LIKELY_NULL(space)) {
+	if (IB_LIKELY_NULL(space)) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: trying to add tablespace %lu"
 			" of name ", (ulong) id);
@@ -1487,7 +1487,7 @@ fil_space_get_flags(
 
 	ut_ad(fil_system);
 
-	if (UNIV_UNLIKELY(!id)) {
+	if (IB_UNLIKELY(!id)) {
 		return(0);
 	}
 
@@ -1739,18 +1739,18 @@ fil_write_lsn_and_arch_no_to_file(
 	byte*	buf1;
 	byte*	buf;
 
-	buf1 = mem_alloc(2 * UNIV_PAGE_SIZE);
-	buf = ut_align(buf1, UNIV_PAGE_SIZE);
+	buf1 = mem_alloc(2 * IB_PAGE_SIZE);
+	buf = ut_align(buf1, IB_PAGE_SIZE);
 
-	fil_read(TRUE, 0, 0, sum_of_sizes, 0, UNIV_PAGE_SIZE, buf, NULL);
+	fil_read(TRUE, 0, 0, sum_of_sizes, 0, IB_PAGE_SIZE, buf, NULL);
 
 	mach_write_ull(buf + FIL_PAGE_FILE_FLUSH_LSN, lsn);
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	// FIXME: ARCHIVE: We still haven't decided where this will go
 	//mach_write_to_4(buf + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, arch_log_no);
 #endif
 
-	fil_write(TRUE, 0, 0, sum_of_sizes, 0, UNIV_PAGE_SIZE, buf, NULL);
+	fil_write(TRUE, 0, 0, sum_of_sizes, 0, IB_PAGE_SIZE, buf, NULL);
 
 	mem_free(buf1);
 
@@ -1825,28 +1825,28 @@ fil_read_flushed_lsn_and_arch_log_no(
 	ibool		one_read_already,	/*!< in: TRUE if min and max
 						parameters below already
 						contain sensible data */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint*		min_arch_log_no,	/*!< in/out: */
 	ulint*		max_arch_log_no,	/*!< in/out: */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	ib_uint64_t*	min_flushed_lsn,	/*!< in/out: */
 	ib_uint64_t*	max_flushed_lsn)	/*!< in/out: */
 {
 	byte*		buf;
 	byte*		buf2;
 	ib_uint64_t	flushed_lsn;
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint		arch_log_no = 0;
 #endif
 
-	buf2 = ut_malloc(2 * UNIV_PAGE_SIZE);
+	buf2 = ut_malloc(2 * IB_PAGE_SIZE);
 	/* Align the memory for a possible read from a raw device */
-	buf = ut_align(buf2, UNIV_PAGE_SIZE);
+	buf = ut_align(buf2, IB_PAGE_SIZE);
 
-	os_file_read(data_file, buf, 0, 0, UNIV_PAGE_SIZE);
+	os_file_read(data_file, buf, 0, 0, IB_PAGE_SIZE);
 
 	flushed_lsn = mach_read_ull(buf + FIL_PAGE_FILE_FLUSH_LSN);
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	// FIXME: ARCHIVE: We still haven't decided where this will go
 	//arch_log_no = mach_read_from_4(buf + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID);
 #endif
@@ -1856,10 +1856,10 @@ fil_read_flushed_lsn_and_arch_log_no(
 	if (!one_read_already) {
 		*min_flushed_lsn = flushed_lsn;
 		*max_flushed_lsn = flushed_lsn;
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		*min_arch_log_no = arch_log_no;
 		*max_arch_log_no = arch_log_no;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 		return;
 	}
 
@@ -1869,19 +1869,19 @@ fil_read_flushed_lsn_and_arch_log_no(
 	if (*max_flushed_lsn < flushed_lsn) {
 		*max_flushed_lsn = flushed_lsn;
 	}
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if (*min_arch_log_no > arch_log_no) {
 		*min_arch_log_no = arch_log_no;
 	}
 	if (*max_arch_log_no < arch_log_no) {
 		*max_arch_log_no = arch_log_no;
 	}
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 }
 
 /*================ SINGLE-TABLE TABLESPACES ==========================*/
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Increments the count of pending insert buffer page merges, if space is not
 being deleted.
@@ -1945,7 +1945,7 @@ fil_decr_pending_ibuf_merges(
 
 	mutex_exit(&fil_system->mutex);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /********************************************************//**
 Creates the database directory for a table if it does not exist yet. */
@@ -1978,7 +1978,7 @@ fil_create_directory_for_tablename(
 	mem_free(path);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************//**
 Writes a log record about an .ibd file create/rename/delete. */
 static
@@ -2074,8 +2074,8 @@ fil_op_log_parse_or_replay(
 	ulint	log_flags)	/*!< in: redo log flags
 				(stored in the page number parameter) */
 {
-	ulint		name_len;
-	ulint		new_name_len;
+	ulint		IB_NAME_LEN;
+	ulint		new_IB_NAME_LEN;
 	const char*	name;
 	const char*	new_name	= NULL;
 	ulint		flags		= 0;
@@ -2095,18 +2095,18 @@ fil_op_log_parse_or_replay(
 		return(NULL);
 	}
 
-	name_len = mach_read_from_2(ptr);
+	IB_NAME_LEN = mach_read_from_2(ptr);
 
 	ptr += 2;
 
-	if (end_ptr < ptr + name_len) {
+	if (end_ptr < ptr + IB_NAME_LEN) {
 
 		return(NULL);
 	}
 
 	name = (const char*) ptr;
 
-	ptr += name_len;
+	ptr += IB_NAME_LEN;
 
 	if (type == MLOG_FILE_RENAME) {
 		if (end_ptr < ptr + 2) {
@@ -2114,18 +2114,18 @@ fil_op_log_parse_or_replay(
 			return(NULL);
 		}
 
-		new_name_len = mach_read_from_2(ptr);
+		new_IB_NAME_LEN = mach_read_from_2(ptr);
 
 		ptr += 2;
 
-		if (end_ptr < ptr + new_name_len) {
+		if (end_ptr < ptr + new_IB_NAME_LEN) {
 
 			return(NULL);
 		}
 
 		new_name = (const char*) ptr;
 
-		ptr += new_name_len;
+		ptr += new_IB_NAME_LEN;
 	}
 
 	/* We managed to parse a full log record body */
@@ -2324,7 +2324,7 @@ try_again:
 	path = mem_strdup(space->name);
 
 	mutex_exit(&fil_system->mutex);
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/* Invalidate in the buffer pool all pages belonging to the
 	tablespace. Since we have set space->is_being_deleted = TRUE, readahead
 	or ibuf merge can no longer read more pages of this tablespace to the
@@ -2347,7 +2347,7 @@ try_again:
 	}
 
 	if (success) {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		/* Write a log record about the deletion of the .ibd
 		file, so that ibbackup can replay it in the
 		--apply-log phase. We use a dummy mtr and the familiar
@@ -2371,7 +2371,7 @@ try_again:
 	return(FALSE);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Discards a single-table tablespace. The tablespace must be cached in the
 memory cache. Discarding is like deleting a tablespace, but
@@ -2406,7 +2406,7 @@ fil_discard_tablespace(
 
 	return(success);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*******************************************************************//**
 Renames the memory cache structures of a single-table tablespace.
@@ -2622,7 +2622,7 @@ retry:
 
 	mutex_exit(&fil_system->mutex);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (success) {
 		mtr_t		mtr;
 
@@ -2725,11 +2725,11 @@ fil_create_new_single_table_tablespace(
 		return(DB_ERROR);
 	}
 
-	buf2 = ut_malloc(3 * UNIV_PAGE_SIZE);
+	buf2 = ut_malloc(3 * IB_PAGE_SIZE);
 	/* Align the memory for file i/o if we might have O_DIRECT set */
-	page = ut_align(buf2, UNIV_PAGE_SIZE);
+	page = ut_align(buf2, IB_PAGE_SIZE);
 
-	ret = os_file_set_size(path, file, size * UNIV_PAGE_SIZE, 0);
+	ret = os_file_set_size(path, file, size * IB_PAGE_SIZE, 0);
 
 	if (!ret) {
 		ut_free(buf2);
@@ -2766,14 +2766,14 @@ error_exit2:
 	with zeros from the call of os_file_set_size(), until a buffer pool
 	flush would write to it. */
 
-	memset(page, '\0', UNIV_PAGE_SIZE);
+	memset(page, '\0', IB_PAGE_SIZE);
 
 	fsp_header_init_fields(page, *space_id, flags);
 	mach_write_to_4(page + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, *space_id);
 
 	if (!(flags & DICT_TF_ZSSIZE_MASK)) {
 		buf_flush_init_for_writing(page, NULL, 0);
-		ret = os_file_write(path, file, page, 0, 0, UNIV_PAGE_SIZE);
+		ret = os_file_write(path, file, page, 0, 0, IB_PAGE_SIZE);
 	}
          else {
 		page_zip_des_t	page_zip;
@@ -2784,10 +2784,10 @@ error_exit2:
 				>> DICT_TF_ZSSIZE_SHIFT));
 
 		page_zip_set_size(&page_zip, zip_size);
-		page_zip.data = page + UNIV_PAGE_SIZE;
-#ifdef UNIV_DEBUG
+		page_zip.data = page + IB_PAGE_SIZE;
+#ifdef IB_DEBUG
 		page_zip.m_start =
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 			page_zip.m_end = page_zip.m_nonempty =
 			page_zip.n_blobs = 0;
 		buf_flush_init_for_writing(page, &page_zip, 0);
@@ -2829,7 +2829,7 @@ error_exit2:
 
 	fil_node_create(path, size, *space_id, FALSE);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	{
 		mtr_t		mtr;
 
@@ -2850,7 +2850,7 @@ error_exit2:
 	return(DB_SUCCESS);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 It is possible, though very improbable, that the lsn's in the tablespace to be
 imported have risen above the current system lsn, if a lengthy purge, ibuf
@@ -2905,11 +2905,11 @@ fil_reset_too_high_lsns(
 
 	/* Read the first page of the tablespace */
 
-	buf2 = ut_malloc(3 * UNIV_PAGE_SIZE);
+	buf2 = ut_malloc(3 * IB_PAGE_SIZE);
 	/* Align the memory for file i/o if we might have O_DIRECT set */
-	page = ut_align(buf2, UNIV_PAGE_SIZE);
+	page = ut_align(buf2, IB_PAGE_SIZE);
 
-	success = os_file_read(file, page, 0, 0, UNIV_PAGE_SIZE);
+	success = os_file_read(file, page, 0, 0, IB_PAGE_SIZE);
 	if (!success) {
 
 		goto func_exit;
@@ -2932,7 +2932,7 @@ fil_reset_too_high_lsns(
 	page_zip_des_init(&page_zip);
 	page_zip_set_size(&page_zip, zip_size);
 	if (zip_size) {
-		page_zip.data = page + UNIV_PAGE_SIZE;
+		page_zip.data = page + IB_PAGE_SIZE;
 	}
 
 	ut_print_timestamp(ib_stream);
@@ -2948,7 +2948,7 @@ fil_reset_too_high_lsns(
 	ib_logger(ib_stream, ".\n");
 
 	ut_a(ut_is_2pow(zip_size));
-	ut_a(zip_size <= UNIV_PAGE_SIZE);
+	ut_a(zip_size <= IB_PAGE_SIZE);
 
 	/* Loop through all the pages in the tablespace and reset the lsn and
 	the page checksum if necessary */
@@ -2956,11 +2956,11 @@ fil_reset_too_high_lsns(
 	file_size = os_file_get_size_as_iblonglong(file);
 
 	for (offset = 0; offset < file_size;
-	     offset += zip_size ? zip_size : UNIV_PAGE_SIZE) {
+	     offset += zip_size ? zip_size : IB_PAGE_SIZE) {
 		success = os_file_read(file, page,
 				       (ulint)(offset & 0xFFFFFFFFUL),
 				       (ulint)(offset >> 32),
-				       zip_size ? zip_size : UNIV_PAGE_SIZE);
+				       zip_size ? zip_size : IB_PAGE_SIZE);
 		if (!success) {
 
 			goto func_exit;
@@ -2983,7 +2983,7 @@ fil_reset_too_high_lsns(
 					filepath, file, page,
 					(ulint)(offset & 0xFFFFFFFFUL),
 					(ulint)(offset >> 32),
-					UNIV_PAGE_SIZE);
+					IB_PAGE_SIZE);
 			}
 
 			if (!success) {
@@ -3001,7 +3001,7 @@ fil_reset_too_high_lsns(
 
 	/* We now update the flush_lsn stamp at the start of the file */
 	success = os_file_read(file, page, 0, 0,
-			       zip_size ? zip_size : UNIV_PAGE_SIZE);
+			       zip_size ? zip_size : IB_PAGE_SIZE);
 	if (!success) {
 
 		goto func_exit;
@@ -3010,7 +3010,7 @@ fil_reset_too_high_lsns(
 	mach_write_ull(page + FIL_PAGE_FILE_FLUSH_LSN, current_lsn);
 
 	success = os_file_write(filepath, file, page, 0, 0,
-				zip_size ? zip_size : UNIV_PAGE_SIZE);
+				zip_size ? zip_size : IB_PAGE_SIZE);
 	if (!success) {
 
 		goto func_exit;
@@ -3106,11 +3106,11 @@ fil_open_single_table_tablespace(
 
 	/* Read the first page of the tablespace */
 
-	buf2 = ut_malloc(2 * UNIV_PAGE_SIZE);
+	buf2 = ut_malloc(2 * IB_PAGE_SIZE);
 	/* Align the memory for file i/o if we might have O_DIRECT set */
-	page = ut_align(buf2, UNIV_PAGE_SIZE);
+	page = ut_align(buf2, IB_PAGE_SIZE);
 
-	success = os_file_read(file, page, 0, 0, UNIV_PAGE_SIZE);
+	success = os_file_read(file, page, 0, 0, IB_PAGE_SIZE);
 
 	/* We have to read the tablespace id and flags from the file. */
 
@@ -3119,7 +3119,7 @@ fil_open_single_table_tablespace(
 
 	ut_free(buf2);
 
-	if (UNIV_UNLIKELY(space_id != id
+	if (IB_UNLIKELY(space_id != id
 			  || space_flags != (flags & ~(~0 << DICT_TF_BITS)))) {
 		ut_print_timestamp(ib_stream);
 
@@ -3160,9 +3160,9 @@ func_exit:
 
 	return(success);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /*******************************************************************//**
 Allocates a file name for an old version of a single-table tablespace.
 The string must be freed by caller with mem_free()!
@@ -3182,7 +3182,7 @@ fil_make_ibbackup_old_name(
 	ut_sprintf_timestamp_without_extra_chars(path + len + sizeof suffix);
 	return(path);
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 /********************************************************************//**
 Opens an .ibd file and adds the associated single-table tablespace to the
@@ -3208,7 +3208,7 @@ fil_load_single_table_tablespace(
 	ib_int64_t	size;
 	ulint		len;
 	const char*	ptr;
-	ulint		dbname_len;
+	ulint		dbIB_NAME_LEN;
 	char		dir[OS_FILE_MAX_PATH];
 
 	ut_strcpy(dir, srv_data_home);
@@ -3216,19 +3216,19 @@ fil_load_single_table_tablespace(
 
 	ptr = fil_normalize_path(dir);
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 	fil_space_t*	space;
 #endif
 
 	len = ut_strlen(dbname) + ut_strlen(filename) + ut_strlen(dir) + 3;
 	filepath = mem_alloc(len);
 
-	dbname_len = ut_strlen(dbname);
+	dbIB_NAME_LEN = ut_strlen(dbname);
 
 	if (ut_strlen(ptr) > 0) {
 		ut_snprintf(filepath, len, "%s%s/%s", ptr, dbname, filename);
-	} else if (dbname_len == 0
-		   || dbname[dbname_len - 1] == SRV_PATH_SEPARATOR) {	
+	} else if (dbIB_NAME_LEN == 0
+		   || dbname[dbIB_NAME_LEN - 1] == SRV_PATH_SEPARATOR) {	
 
 		ut_snprintf(filepath, len, "%s%s", dbname, filename);
 	} else {
@@ -3237,7 +3237,7 @@ fil_load_single_table_tablespace(
 
 	srv_normalize_path_for_win(filepath);
 #ifdef __WIN__
-# ifndef UNIV_HOTBACKUP
+# ifndef IB_HOTBACKUP
 	/* If lower_case_table_names is 0 or 2, then allow database
 	directory names with upper case letters. On Windows, all table and
 	database names in InnoDB are internally always in lower case. Put the
@@ -3245,7 +3245,7 @@ fil_load_single_table_tablespace(
 	internal data dictionary. */
 
 	dict_casedn_str(filepath);
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 #endif
 	file = os_file_create_simple_no_error_handling(
 		filepath, OS_FILE_OPEN, OS_FILE_READ_ONLY, &success);
@@ -3349,15 +3349,15 @@ fil_load_single_table_tablespace(
 	cannot be ok. */
 
 	size = (((ib_int64_t)size_high) << 32) + (ib_int64_t)size_low;
-#ifndef UNIV_HOTBACKUP
-	if (size < FIL_IBD_FILE_INITIAL_SIZE * UNIV_PAGE_SIZE) {
+#ifndef IB_HOTBACKUP
+	if (size < FIL_IBD_FILE_INITIAL_SIZE * IB_PAGE_SIZE) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: the size of single-table tablespace"
 			" file %s\n"
 			"InnoDB: is only %lu %lu, should be at least %lu!",
 			filepath,
 			(ulong) size_high,
-			(ulong) size_low, (ulong) (4 * UNIV_PAGE_SIZE));
+			(ulong) size_low, (ulong) (4 * IB_PAGE_SIZE));
 		os_file_close(file);
 		mem_free(filepath);
 
@@ -3366,12 +3366,12 @@ fil_load_single_table_tablespace(
 #endif
 	/* Read the first page of the tablespace if the size big enough */
 
-	buf2 = ut_malloc(2 * UNIV_PAGE_SIZE);
+	buf2 = ut_malloc(2 * IB_PAGE_SIZE);
 	/* Align the memory for file i/o if we might have O_DIRECT set */
-	page = ut_align(buf2, UNIV_PAGE_SIZE);
+	page = ut_align(buf2, IB_PAGE_SIZE);
 
-	if (size >= FIL_IBD_FILE_INITIAL_SIZE * UNIV_PAGE_SIZE) {
-		success = os_file_read(file, page, 0, 0, UNIV_PAGE_SIZE);
+	if (size >= FIL_IBD_FILE_INITIAL_SIZE * IB_PAGE_SIZE) {
+		success = os_file_read(file, page, 0, 0, IB_PAGE_SIZE);
 
 		/* We have to read the tablespace id from the file */
 
@@ -3382,7 +3382,7 @@ fil_load_single_table_tablespace(
 		flags = 0;
 	}
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (space_id == ULINT_UNDEFINED || space_id == 0) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: tablespace id %lu in file %s"
@@ -3975,7 +3975,7 @@ fil_extend_space_to_desired_size(
 
 	page_size = dict_table_flags_to_zip_size(space->flags);
 	if (!page_size) {
-		page_size = UNIV_PAGE_SIZE;
+		page_size = IB_PAGE_SIZE;
 	}
 
 	node = UT_LIST_GET_LAST(space->chain);
@@ -4001,7 +4001,7 @@ fil_extend_space_to_desired_size(
 		offset_low  = ((start_page_no - file_start_page_no)
 			       % (4096 * ((1024 * 1024) / page_size)))
 			* page_size;
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 		success = os_file_write(node->name, node->handle, buf,
 					offset_low, offset_high,
 					page_size * n_pages);
@@ -4041,7 +4041,7 @@ fil_extend_space_to_desired_size(
 
 	*actual_size = space->size;
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (space_id == 0) {
 		ulint pages_per_mb = (1024 * 1024) / page_size;
 
@@ -4051,7 +4051,7 @@ fil_extend_space_to_desired_size(
 		srv_data_file_sizes[srv_n_data_files - 1]
 			= (node->size / pages_per_mb) * pages_per_mb;
 	}
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	/*
 	printf("Extended %s to %lu, actual size %lu pages\n", space->name,
@@ -4063,7 +4063,7 @@ fil_extend_space_to_desired_size(
 	return(success);
 }
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /********************************************************************//**
 Extends all tablespaces to the size stored in the space header. During the
 ibbackup --apply-log phase we extended the spaces on-demand so that log records
@@ -4081,7 +4081,7 @@ fil_extend_tablespaces_to_stored_len(void)
 	ulint		error;
 	ibool		success;
 
-	buf = mem_alloc(UNIV_PAGE_SIZE);
+	buf = mem_alloc(IB_PAGE_SIZE);
 
 	mutex_enter(&fil_system->mutex);
 
@@ -4095,7 +4095,7 @@ fil_extend_tablespaces_to_stored_len(void)
 					      single-threaded operation */
 		error = fil_read(TRUE, space->id,
 				 dict_table_flags_to_zip_size(space->flags),
-				 0, 0, UNIV_PAGE_SIZE, buf, NULL);
+				 0, 0, IB_PAGE_SIZE, buf, NULL);
 		ut_a(error == DB_SUCCESS);
 
 		size_in_header = fsp_get_size_low(buf);
@@ -4379,24 +4379,24 @@ fil_io(
 	wake_later = type & OS_AIO_SIMULATED_WAKE_LATER;
 	type = type & ~OS_AIO_SIMULATED_WAKE_LATER;
 
-	ut_ad(byte_offset < UNIV_PAGE_SIZE);
+	ut_ad(byte_offset < IB_PAGE_SIZE);
 	ut_ad(!zip_size || !byte_offset);
 	ut_ad(ut_is_2pow(zip_size));
 	ut_ad(buf);
 	ut_ad(len > 0);
-#if (1 << UNIV_PAGE_SIZE_SHIFT) != UNIV_PAGE_SIZE
-# error "(1 << UNIV_PAGE_SIZE_SHIFT) != UNIV_PAGE_SIZE"
+#if (1 << IB_PAGE_SIZE_SHIFT) != IB_PAGE_SIZE
+# error "(1 << IB_PAGE_SIZE_SHIFT) != IB_PAGE_SIZE"
 #endif
 	ut_ad(fil_validate());
-#ifndef UNIV_HOTBACKUP
-# ifndef UNIV_LOG_DEBUG
+#ifndef IB_HOTBACKUP
+# ifndef IB_LOG_DEBUG
 	/* ibuf bitmap pages must be read in the sync aio mode: */
 	ut_ad(recv_no_ibuf_operations || (type == OS_FILE_WRITE)
 	      || !ibuf_bitmap_page(zip_size, block_offset)
 	      || sync || is_log);
 	ut_ad(!ibuf_inside() || is_log || (type == OS_FILE_WRITE)
 	      || ibuf_page(space_id, zip_size, block_offset, NULL));
-# endif /* UNIV_LOG_DEBUG */
+# endif /* IB_LOG_DEBUG */
 	if (sync) {
 		mode = OS_AIO_SYNC;
 	} else if (is_log) {
@@ -4408,10 +4408,10 @@ fil_io(
 	} else {
 		mode = OS_AIO_NORMAL;
 	}
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 	ut_a(sync);
 	mode = OS_AIO_SYNC;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	if (type == OS_FILE_READ) {
 		srv_data_read+= len;
@@ -4446,7 +4446,7 @@ fil_io(
 	node = UT_LIST_GET_FIRST(space->chain);
 
 	for (;;) {
-		if (UNIV_UNLIKELY(node == NULL)) {
+		if (IB_UNLIKELY(node == NULL)) {
 			fil_report_invalid_page_access(
 				block_offset, space_id, space->name,
 				byte_offset, len, type);
@@ -4475,7 +4475,7 @@ fil_io(
 
 	/* Check that at least the start offset is within the bounds of a
 	single-table tablespace */
-	if (UNIV_UNLIKELY(node->size <= block_offset)
+	if (IB_UNLIKELY(node->size <= block_offset)
 	    && space->id != 0 && space->purpose == FIL_TABLESPACE) {
 
 		fil_report_invalid_page_access(
@@ -4491,13 +4491,13 @@ fil_io(
 	/* Calculate the low 32 bits and the high 32 bits of the file offset */
 
 	if (!zip_size) {
-		offset_high = (block_offset >> (32 - UNIV_PAGE_SIZE_SHIFT));
-		offset_low  = ((block_offset << UNIV_PAGE_SIZE_SHIFT)
+		offset_high = (block_offset >> (32 - IB_PAGE_SIZE_SHIFT));
+		offset_low  = ((block_offset << IB_PAGE_SIZE_SHIFT)
 			       & 0xFFFFFFFFUL) + byte_offset;
 
 		ut_a(node->size - block_offset
-		     >= ((byte_offset + len + (UNIV_PAGE_SIZE - 1))
-			 / UNIV_PAGE_SIZE));
+		     >= ((byte_offset + len + (IB_PAGE_SIZE - 1))
+			 / IB_PAGE_SIZE));
 	} else {
 		ulint	zip_size_shift;
 		switch (zip_size) {
@@ -4520,7 +4520,7 @@ fil_io(
 	ut_a(byte_offset % OS_FILE_LOG_BLOCK_SIZE == 0);
 	ut_a((len % OS_FILE_LOG_BLOCK_SIZE) == 0);
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 	/* In ibbackup do normal i/o, not aio */
 	if (type == OS_FILE_READ) {
 		ret = os_file_read(node->handle, buf, offset_low, offset_high,
@@ -4552,7 +4552,7 @@ fil_io(
 	return(DB_SUCCESS);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Waits for an aio operation to complete. This function is used to write the
 handler for completed requests. The aio array of pending requests is divided
@@ -4614,7 +4614,7 @@ fil_aio_wait(
 		log_io_complete(message);
 	}
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 /**********************************************************************//**
 Flushes to disk possible writes cached by the OS. If the space does not exist
@@ -4977,7 +4977,7 @@ fil_rmdir(
 	ut_snprintf(dir, sizeof(dir), "%s%s", srv_data_home, dbname);
 	srv_normalize_path_for_win(dir);
 
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 	if (rmdir(dbname) != 0) {
 		ib_logger(ib_stream,
 			"InnoDB: Error removing directory: %s\n",

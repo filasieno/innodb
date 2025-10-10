@@ -41,7 +41,7 @@ Created 1/8/1996 Heikki Tuuri
 #include "trx_types.hpp"
 #include "srv_srv.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "sync0sync.h"
 # include "sync0rw.h"
 /******************************************************************//**
@@ -56,7 +56,7 @@ Get the database name length in a table name.
 @return	database name length */
 IB_INTERN
 ulint
-dict_get_db_name_len(
+dict_get_db_IB_NAME_LEN(
 /*=================*/
 	const char*	name);	/*!< in: table name in the form
 				dbname '/' tablename */
@@ -115,8 +115,8 @@ dict_col_copy_type(
 /*===============*/
 	const dict_col_t*	col,	/*!< in: column */
 	dtype_t*		type);	/*!< out: data type */
-#endif /* !UNIV_HOTBACKUP */
-#ifdef UNIV_DEBUG
+#endif /* !IB_HOTBACKUP */
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Assert that a column and a data type match.
 @return	TRUE */
@@ -126,8 +126,8 @@ dict_col_type_assert_equal(
 /*=======================*/
 	const dict_col_t*	col,	/*!< in: column */
 	const dtype_t*		type);	/*!< in: data type */
-#endif /* UNIV_DEBUG */
-#ifndef UNIV_HOTBACKUP
+#endif /* IB_DEBUG */
+#ifndef IB_HOTBACKUP
 /***********************************************************************//**
 Returns the minimum size of the column.
 @return	minimum size */
@@ -189,7 +189,7 @@ ibool
 dict_col_name_is_reserved(
 /*======================*/
 	const char*	name);	/*!< in: column name */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /**********************************************************************//**
 Adds system columns to a table object. */
 IB_INTERN
@@ -198,7 +198,7 @@ dict_table_add_system_columns(
 /*==========================*/
 	dict_table_t*	table,	/*!< in/out: table */
 	mem_heap_t*	heap);	/*!< in: temporary heap */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Adds a table object to the dictionary cache. */
 IB_INTERN
@@ -494,7 +494,7 @@ dict_index_name_print(
 	ib_stream_t		stream,	/*!< in: output stream */
 	trx_t*			trx,	/*!< in: transaction */
 	const dict_index_t*	index);	/*!< in: index to print */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /********************************************************************//**
 Gets the first index on the table (the clustered index).
 @return	index, NULL if none exists */
@@ -511,11 +511,11 @@ dict_index_t*
 dict_table_get_next_index(
 /*======================*/
 	const dict_index_t*	index);	/*!< in: index */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define dict_table_get_first_index(table) UT_LIST_GET_FIRST((table)->indexes)
 # define dict_table_get_next_index(index) UT_LIST_GET_NEXT(indexes, index)
-#endif /* UNIV_DEBUG */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* IB_DEBUG */
+#endif /* !IB_HOTBACKUP */
 /********************************************************************//**
 Check whether the index is the clustered index.
 @return	nonzero for clustered index, zero for other indexes */
@@ -579,7 +579,7 @@ ulint
 dict_table_get_n_cols(
 /*==================*/
 	const dict_table_t*	table);	/*!< in: table */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /********************************************************************//**
 Gets the nth column of a table.
 @return	pointer to column object */
@@ -598,12 +598,12 @@ dict_table_get_sys_col(
 /*===================*/
 	const dict_table_t*	table,	/*!< in: table */
 	ulint			sys);	/*!< in: DATA_ROW_ID, ... */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 #define dict_table_get_nth_col(table, pos) \
 ((table)->cols + (pos))
 #define dict_table_get_sys_col(table, sys) \
 ((table)->cols + (table)->n_cols + (sys) - DATA_N_SYS_COLS)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /********************************************************************//**
 Gets the given system column number of a table.
 @return	column number */
@@ -613,7 +613,7 @@ dict_table_get_sys_col_no(
 /*======================*/
 	const dict_table_t*	table,	/*!< in: table */
 	ulint			sys);	/*!< in: DATA_ROW_ID, ... */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Returns the minimum data size of an index record.
 @return	minimum data size in bytes */
@@ -622,7 +622,7 @@ ulint
 dict_index_get_min_size(
 /*====================*/
 	const dict_index_t*	index);	/*!< in: index */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /********************************************************************//**
 Check whether the table uses the compact page format.
 @return	TRUE if table uses the compact page format */
@@ -674,7 +674,7 @@ dict_table_col_in_clustered_key(
 /*============================*/
 	const dict_table_t*	table,	/*!< in: table */
 	ulint			n);	/*!< in: column number */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Copies types of columns contained in table to tuple and sets all
 fields of the tuple to the SQL NULL value.  This function should
@@ -717,7 +717,7 @@ dict_index_remove_from_cache(
 /*=========================*/
 	dict_table_t*	table,	/*!< in/out: table */
 	dict_index_t*	index);	/*!< in, own: index */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /********************************************************************//**
 Gets the number of fields in the internal representation of an index,
 including fields added by the dictionary system.
@@ -764,7 +764,7 @@ dict_index_get_n_ordering_defined_by_user(
 /*======================================*/
 	const dict_index_t*	index);	/*!< in: an internal representation
 					of index (in the dictionary cache) */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /********************************************************************//**
 Gets the nth field of an index.
 @return	pointer to field object */
@@ -774,9 +774,9 @@ dict_index_get_nth_field(
 /*=====================*/
 	const dict_index_t*	index,	/*!< in: index */
 	ulint			pos);	/*!< in: position of field */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define dict_index_get_nth_field(index, pos) ((index)->fields + (pos))
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /********************************************************************//**
 Gets pointer to the nth column in an index.
 @return	column */
@@ -856,7 +856,7 @@ dict_index_add_col(
 	const dict_table_t*	table,		/*!< in: table */
 	dict_col_t*		col,		/*!< in: column */
 	ulint			prefix_len);	/*!< in: column prefix length */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Copies types of fields contained in index to tuple. */
 IB_INTERN
@@ -867,7 +867,7 @@ dict_index_copy_types(
 	const dict_index_t*	index,		/*!< in: index */
 	ulint			n_fields);	/*!< in: number of
 						field types to copy */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*********************************************************************//**
 Gets the field column.
 @return	field->col, pointer to the table column */
@@ -876,7 +876,7 @@ const dict_col_t*
 dict_field_get_col(
 /*===============*/
 	const dict_field_t*	field);	/*!< in: index field */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Returns an index object if it is found in the dictionary cache.
 Assumes that dict_sys->mutex is already being held.
@@ -886,7 +886,7 @@ dict_index_t*
 dict_index_get_if_in_cache_low(
 /*===========================*/
 	dulint	index_id);	/*!< in: index id */
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 /**********************************************************************//**
 Returns an index object if it is found in the dictionary cache.
 @return	index, NULL if not found */
@@ -895,8 +895,8 @@ dict_index_t*
 dict_index_get_if_in_cache(
 /*=======================*/
 	dulint	index_id);	/*!< in: index id */
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
-#ifdef UNIV_DEBUG
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
+#ifdef IB_DEBUG
 /**********************************************************************//**
 Checks that a tuple has n_fields_cmp value in a sensible range, so that
 no comparison can occur with the page number field in a node pointer.
@@ -908,7 +908,7 @@ dict_index_check_search_tuple(
 	const dict_index_t*	index,	/*!< in: index tree */
 	const dtuple_t*		tuple);	/*!< in: tuple used in a search */
 
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /**********************************************************************//**
 Builds a node pointer out of a physical record and a page number.
 @return	own: node pointer */
@@ -1058,7 +1058,7 @@ Checks if the database name in two table names is the same.
 @return	TRUE if same db name */
 IB_INTERN
 ibool
-dict_tables_have_same_db(
+dict_tables_IB_HAVE_same_db(
 /*=====================*/
 	const char*	name1,	/*!< in: table name in the form
 				dbname '/' tablename */
@@ -1166,7 +1166,7 @@ struct dict_sys_struct{
 	dict_table_t*	sys_indexes;	/*!< SYS_INDEXES table */
 	dict_table_t*	sys_fields;	/*!< SYS_FIELDS table */
 };
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** dummy index for ROW_FORMAT=REDUNDANT supremum and infimum records */
 extern dict_index_t*	dict_ind_redundant;

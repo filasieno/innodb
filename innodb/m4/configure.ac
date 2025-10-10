@@ -73,24 +73,24 @@ AC_CHECK_HEADERS(valgrind/memcheck.h)
 case "$target_os" in
 lin*)
 	TARGET_LINUX="true";
-	CFLAGS="$CFLAGS -DUNIV_LINUX";;
+	CFLAGS="$CFLAGS -DIB_LINUX";;
 hpux10*)
-	CFLAGS="$CFLAGS -DUNIV_MUST_NOT_INLINE -DUNIV_HPUX -DUNIV_HPUX10";;
+	CFLAGS="$CFLAGS -DIB_MUST_NOT_INLINE -DIB_HPUX -DIB_HPUX10";;
 hp*)
-	CFLAGS="$CFLAGS -DUNIV_MUST_NOT_INLINE -DUNIV_HPUX";;
+	CFLAGS="$CFLAGS -DIB_MUST_NOT_INLINE -DIB_HPUX";;
 aix*)
-	CFLAGS="$CFLAGS -DUNIV_AIX";;
+	CFLAGS="$CFLAGS -DIB_AIX";;
 irix*|osf*|sysv5uw7*|openbsd*)
-	CFLAGS="$CFLAGS -DUNIV_MUST_NOT_INLINE";;
+	CFLAGS="$CFLAGS -DIB_MUST_NOT_INLINE";;
 *solaris*|*SunOS*)
-	CFLAGS="$CFLAGS -DUNIV_SOLARIS";;
+	CFLAGS="$CFLAGS -DIB_SOLARIS";;
 esac
 
   # do not reindent the following lines, they are copied from InnoDB Plugin's
   # plug.in and this way it is easier for maintenance
 
   AC_MSG_CHECKING(whether GCC atomic builtins are available)
-  # either define HAVE_IB_GCC_ATOMIC_BUILTINS or not
+  # either define IB_HAVE_IB_GCC_ATOMIC_BUILTINS or not
   AC_TRY_RUN(
     [
       int main()
@@ -131,7 +131,7 @@ esac
       }
     ],
     [
-      AC_DEFINE([HAVE_IB_GCC_ATOMIC_BUILTINS], [1],
+      AC_DEFINE([IB_HAVE_IB_GCC_ATOMIC_BUILTINS], [1],
                 [GCC atomic builtins are available])
       AC_MSG_RESULT(yes)
     ],
@@ -141,7 +141,7 @@ esac
   )
 
   AC_MSG_CHECKING(whether pthread_t can be used by GCC atomic builtins)
-  # either define HAVE_IB_ATOMIC_PTHREAD_T_GCC or not
+  # either define IB_HAVE_IB_ATOMIC_PTHREAD_T_GCC or not
   AC_TRY_RUN(
     [
       #include <pthread.h>
@@ -162,7 +162,7 @@ esac
       }
     ],
     [
-      AC_DEFINE([HAVE_IB_ATOMIC_PTHREAD_T_GCC], [1],
+      AC_DEFINE([IB_HAVE_IB_ATOMIC_PTHREAD_T_GCC], [1],
                 [pthread_t can be used by GCC atomic builtins])
       AC_MSG_RESULT(yes)
     ],
@@ -172,19 +172,19 @@ esac
   )
 
   AC_MSG_CHECKING(whether Solaris libc atomic functions are available)
-  # either define HAVE_IB_SOLARIS_ATOMICS or not
+  # either define IB_HAVE_IB_SOLARIS_ATOMICS or not
   AC_CHECK_FUNCS(atomic_add_long \
 		 atomic_cas_32 \
 		 atomic_cas_64 \
 		 atomic_cas_ulong,
 
-		 AC_DEFINE([HAVE_IB_SOLARIS_ATOMICS], [1],
+		 AC_DEFINE([IB_HAVE_IB_SOLARIS_ATOMICS], [1],
 			   [Define to 1 if Solaris libc atomic functions \
 			    are available])
   )
 
   AC_MSG_CHECKING(whether pthread_t can be used by Solaris libc atomic functions)
-  # either define HAVE_IB_ATOMIC_PTHREAD_T_SOLARIS or not
+  # either define IB_HAVE_IB_ATOMIC_PTHREAD_T_SOLARIS or not
   AC_TRY_RUN(
     [
       #include <pthread.h>
@@ -216,7 +216,7 @@ esac
       }
     ],
     [
-      AC_DEFINE([HAVE_IB_ATOMIC_PTHREAD_T_SOLARIS], [1],
+      AC_DEFINE([IB_HAVE_IB_ATOMIC_PTHREAD_T_SOLARIS], [1],
                 [pthread_t can be used by solaris atomics])
       AC_MSG_RESULT(yes)
     ],
@@ -245,7 +245,7 @@ esac
       }
     ],
     [
-      AC_DEFINE([HAVE_IB_PAUSE_INSTRUCTION], [1], [Does x86 PAUSE instruction exist])
+      AC_DEFINE([IB_HAVE_IB_PAUSE_INSTRUCTION], [1], [Does x86 PAUSE instruction exist])
       AC_MSG_RESULT(yes)
     ],
     [
@@ -278,7 +278,7 @@ AC_ARG_WITH([atomic-ops],
 case "$with_atomic_ops" in
 "gcc_builtins") 
 	AC_CHECK_DECLS(
-		HAVE_IB_GCC_ATOMIC_BUILTINS,
+		IB_HAVE_IB_GCC_ATOMIC_BUILTINS,
 		AC_MSG_NOTICE(will use the requested GCC atomic builtins),
 		AC_MSG_ERROR(the requested GCC atomic builtins are not available)
 	)
@@ -287,7 +287,7 @@ case "$with_atomic_ops" in
        	;;
 "solaris")
 	AC_CHECK_DECLS(
-		HAVE_IB_SOLARIS_ATOMICS,
+		IB_HAVE_IB_SOLARIS_ATOMICS,
 		AC_MSG_NOTICE(will use the requested Solaris atomic functions),
 		AC_MSG_ERROR(the requested Solaris atomic functions are not available)
 	)
@@ -302,7 +302,7 @@ case "$with_atomic_ops" in
 	;;
 "")
 	AC_CHECK_DECLS(
-          HAVE_IB_GCC_ATOMIC_BUILTINS,
+          IB_HAVE_IB_GCC_ATOMIC_BUILTINS,
 	  [
             AC_MSG_NOTICE(will use the GCC atomic builtins (auto selected));
             AC_DEFINE([IB_ATOMIC_MODE_GCC_ATOMIC_BUILTINS], [1],
@@ -310,7 +310,7 @@ case "$with_atomic_ops" in
           ],
           [
             AC_CHECK_DECLS(
-              HAVE_IB_SOLARIS_ATOMICS,
+              IB_HAVE_IB_SOLARIS_ATOMICS,
               [
                 AC_MSG_NOTICE(will use the Solaris atomic functions (auto selected));
                 AC_DEFINE([IB_ATOMIC_MODE_SOLARIS_ATOMICS], [1],
@@ -331,7 +331,7 @@ esac
 if test "$TARGET_LINUX" = "true"; then
 	# For SHM_HUGETLB on Linux
 	AC_CHECK_DECLS(SHM_HUGETLB, 
-		AC_DEFINE([HAVE_LARGE_PAGES], [1], 
+		AC_DEFINE([IB_HAVE_LARGE_PAGES], [1], 
 			[Define if you have large pages support])
 		AC_DEFINE([HUGETLB_USE_PROC_MEMINFO], [1],
 			[Define if /proc/meminfo shows the huge page size \
@@ -444,7 +444,7 @@ AC_CHECK_FUNCS( \
 	strtoul \
 	tell)
 
-AM_CONDITIONAL([HAVE_PTHREAD_BARRIER], [test "$HAVE_PTHREAD_BARRIER_INIT" = yes])
+AM_CONDITIONAL([IB_HAVE_PTHREAD_BARRIER], [test "$IB_HAVE_PTHREAD_BARRIER_INIT" = yes])
 
 AM_CPPFLAGS="${AM_CPPFLAGS} -I\$(top_srcdir)/include -I\$(top_builddir)/include"
 AM_CFLAGS="${AM_CFLAGS} ${NO_WERROR}"

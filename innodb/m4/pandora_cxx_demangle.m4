@@ -21,7 +21,7 @@ AC_DEFUN([PANDORA_CXX_DEMANGLE],[
   AC_LANG_POP()
 
   AS_IF([test "x$pandora_cv_cxa_demangle" = xyes],[
-    AC_DEFINE(HAVE_ABI_CXA_DEMANGLE, 1,
+    AC_DEFINE(IB_HAVE_ABI_CXA_DEMANGLE, 1,
               [Define to 1 if you have the `abi::__cxa_demangle' function.])
   ])
 ])

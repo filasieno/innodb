@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSQLITE3],[
     [ac_enable_libsqlite3="yes"])
 
   AS_IF([test "x$ac_enable_libsqlite3" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(sqlite3,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(sqlite3,,[
       #include <stdio.h>
       #include <sqlite3.h>
     ],[
@@ -28,10 +28,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSQLITE3],[
     ac_cv_libsqlite3="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBSQLITE3, [test "x${ac_cv_libsqlite3}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBSQLITE3, [test "x${ac_cv_libsqlite3}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBSQLITE3],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBSQLITE3],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBSQLITE3])
 ])
 

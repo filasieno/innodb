@@ -11,7 +11,7 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_IOSTREAMS],[
   dnl --------------------------------------------------------------------
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_iostreams-mt,,[
+  AC_LIB_IB_HAVE_LINKFLAGS(boost_iostreams-mt,,[
     #include <boost/iostreams/stream.hpp>
     #include <boost/iostreams/device/array.hpp>
   ],[
@@ -19,7 +19,7 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_IOSTREAMS],[
     boost::iostreams::stream<boost::iostreams::array_source> in(input, strlen(input));
   ])
   AS_IF([test "x${ac_cv_libboost_iostreams_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_iostreams,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(boost_iostreams,,[
       #include <boost/iostreams/stream.hpp>
       #include <boost/iostreams/device/array.hpp>
     ],[
@@ -29,14 +29,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_IOSTREAMS],[
   ])
   AC_LANG_POP()
   
-  AM_CONDITIONAL(HAVE_BOOST_IOSTREAMS,
+  AM_CONDITIONAL(IB_HAVE_BOOST_IOSTREAMS,
     [test "x${ac_cv_libboost_iostreams}" = "xyes" -o "x${ac_cv_libboost_iostreams_mt}" = "xyes"])
   BOOST_LIBS="${BOOST_LIBS} ${LTLIBBOOST_IOSTREAMS_MT} ${LTLIBBOOST_IOSTREAMS}"
   AC_SUBST(BOOST_LIBS) 
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST_IOSTREAMS],[
-  PANDORA_HAVE_BOOST($1)
+AC_DEFUN([PANDORA_IB_HAVE_BOOST_IOSTREAMS],[
+  PANDORA_IB_HAVE_BOOST($1)
   _PANDORA_SEARCH_BOOST_IOSTREAMS($1)
 ])
 

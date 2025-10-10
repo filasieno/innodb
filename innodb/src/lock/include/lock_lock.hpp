@@ -38,9 +38,9 @@ Created 5/7/1996 Heikki Tuuri
 #include "hash_hash.hpp"
 #include "ut_vec.hpp"
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 extern ibool	lock_print_waits;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /* Buffer for storing information about the most recent deadlock error */
 extern ib_stream_t	lock_latest_err_stream;
 

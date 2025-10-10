@@ -45,15 +45,15 @@ if test -n "$1"; then
     ]
     AC_MSG_RESULT([$INTLTOOL_APPLIED_VERSION found])
     AS_IF([test "$INTLTOOL_APPLIED_VERSION_AS_INT" -ge "$INTLTOOL_REQUIRED_VERSION_AS_INT"],[
-      pandora_have_intltool=yes
+      pandora_IB_HAVE_intltool=yes
     ],[
-      pandora_have_intltool=no
+      pandora_IB_HAVE_intltool=no
       AC_MSG_WARN([Your intltool is too old.  You need intltool $1 or later.])
     ])
 fi
 AC_CHECK_HEADERS([libintl.h])
 AS_IF([test "x${ac_cv_header_libintl_h}" = "xfalse" -o "x${ac_cv_header_libintl_h}" = "xno"],[
-  pandora_have_intltool=no
+  pandora_IB_HAVE_intltool=no
 ])
 
 AC_PATH_PROG(INTLTOOL_UPDATE, [intltool-update])

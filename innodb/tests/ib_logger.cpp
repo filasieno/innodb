@@ -28,7 +28,7 @@ messages to stderr. It should simply startup and shutdown InnoDB. */
 
 #include "test_aux.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 

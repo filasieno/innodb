@@ -26,7 +26,7 @@ Created 1/16/1996 Heikki Tuuri
 #include "api_ucode.hpp"
 #include "mach_data.hpp"
 #include "api_ucode.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 /*************************************************************************
 Gets the client charset-collation code for user string types. */
@@ -96,9 +96,9 @@ dtype_set_mblen(
 
 	ut_ad(dtype_validate(type));
 }
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define dtype_set_mblen(type) (void) 0
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Sets a data type structure. */
@@ -177,7 +177,7 @@ dtype_get_len(
 	return(type->len);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Gets the minimum length of a character, in bytes.
 @return minimum length of a char, in bytes, or 0 if this is not a
@@ -218,7 +218,7 @@ dtype_get_pad_char(
 	switch (mtype) {
 	case DATA_FIXBINARY:
 	case DATA_BINARY:
-		if (UNIV_UNLIKELY(dtype_get_charset_coll(prtype)
+		if (IB_UNLIKELY(dtype_get_charset_coll(prtype)
 				  == DATA_CLIENT_BINARY_CHARSET_COLL)) {
 			/* Starting from 5.0.18, do not pad
 			VARBINARY or BINARY columns. */
@@ -362,7 +362,7 @@ dtype_new_read_for_order_and_null_size(
 	}
 	dtype_set_mblen(type);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************************//**
 Returns the size of a fixed size data type, 0 if not a fixed size type.
@@ -380,7 +380,7 @@ dtype_get_fixed_size_low(
 {
 	switch (mtype) {
 	case DATA_SYS:
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		switch (prtype & DATA_CLIENT_TYPE_MASK) {
 		case DATA_ROW_ID:
 			ut_ad(len == DATA_ROW_ID_LEN);
@@ -395,7 +395,7 @@ dtype_get_fixed_size_low(
 			ut_ad(0);
 			return(0);
 		}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	case DATA_CHAR:
 	case DATA_FIXBINARY:
 	case DATA_INT:
@@ -420,7 +420,7 @@ dtype_get_fixed_size_low(
 	return(0);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************************//**
 Returns the minimum size of a data type.
 @return	minimum size */
@@ -436,7 +436,7 @@ dtype_get_min_size_low(
 {
 	switch (mtype) {
 	case DATA_SYS:
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		switch (prtype & DATA_CLIENT_TYPE_MASK) {
 		case DATA_ROW_ID:
 			ut_ad(len == DATA_ROW_ID_LEN);
@@ -451,7 +451,7 @@ dtype_get_min_size_low(
 			ut_ad(0);
 			return(0);
 		}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	case DATA_CHAR:
 	case DATA_FIXBINARY:
 	case DATA_INT:
@@ -512,7 +512,7 @@ dtype_get_max_size_low(
 
 	return(ULINT_MAX);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************************//**
 Returns the ROW_FORMAT=REDUNDANT stored SQL NULL size of a type.
@@ -525,11 +525,11 @@ dtype_get_sql_null_size(
 	const dtype_t*	type,	/*!< in: type */
 	ulint		comp)	/*!< in: nonzero=ROW_FORMAT=COMPACT  */
 {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	return(dtype_get_fixed_size_low(type->mtype, type->prtype, type->len,
 					type->mbminlen, type->mbmaxlen, comp));
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 	return(dtype_get_fixed_size_low(type->mtype, type->prtype, type->len,
 					0, 0, 0));
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 }

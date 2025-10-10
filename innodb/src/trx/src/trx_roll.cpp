@@ -418,13 +418,13 @@ trx_undo_arr_create(void)
 	arr = mem_heap_alloc(heap, sizeof(trx_undo_arr_t));
 
 	arr->infos = mem_heap_alloc(heap, sizeof(trx_undo_inf_t)
-				    * UNIV_MAX_PARALLELISM);
-	arr->n_cells = UNIV_MAX_PARALLELISM;
+				    * IB_MAX_PARALLELISM);
+	arr->n_cells = IB_MAX_PARALLELISM;
 	arr->n_used = 0;
 
 	arr->heap = heap;
 
-	for (i = 0; i < UNIV_MAX_PARALLELISM; i++) {
+	for (i = 0; i < IB_MAX_PARALLELISM; i++) {
 
 		(trx_undo_arr_get_nth_info(arr, i))->in_use = FALSE;
 	}
@@ -1039,12 +1039,12 @@ trx_finish_rollback_off_kernel(
 		return;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (lock_print_waits) {
 		ib_logger(ib_stream, "Trx %lu rollback finished\n",
 			(ulong) ut_dulint_get_low(trx->id));
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	trx_commit_off_kernel(trx);
 

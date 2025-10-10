@@ -54,30 +54,30 @@ void
 ha_node_set_data_func(
 /*==================*/
 	ha_node_t*	node,	/*!< in: hash chain node */
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	buf_block_t*	block,	/*!< in: buffer block containing the data */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	void*		data)	/*!< in: pointer to the data */
 {
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	node->block = block;
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	node->data = data;
 }
 
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 /** Sets hash node data.
 @param n	in: hash chain node
 @param b	in: buffer block containing the data
 @param d	in: pointer to the data */
 # define ha_node_set_data(n,b,d) ha_node_set_data_func(n,b,d)
-#else /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#else /* IB_AHI_DEBUG || IB_DEBUG */
 /** Sets hash node data.
 @param n	in: hash chain node
 @param b	in: buffer block containing the data
 @param d	in: pointer to the data */
 # define ha_node_set_data(n,b,d) ha_node_set_data_func(n,d)
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 
 /******************************************************************//**
 Gets the next node in a hash chain.

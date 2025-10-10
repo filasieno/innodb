@@ -325,7 +325,7 @@ for
 // equal to mode2.
 #define LOCK_MODE_STRONGER_OR_EQ 0 | LK(LOCK_IS, LOCK_IS) | LK(LOCK_IX, LOCK_IS) | LK(LOCK_IX, LOCK_IX) | LK(LOCK_S, LOCK_IS) | LK(LOCK_S, LOCK_S) | LK(LOCK_AUTO_INC, LOCK_AUTO_INC) | LK(LOCK_X, LOCK_IS) | LK(LOCK_X, LOCK_IX) | LK(LOCK_X, LOCK_S) | LK(LOCK_X, LOCK_AUTO_INC) | LK(LOCK_X, LOCK_X)
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		IB_INTERN ibool lock_print_waits = FALSE;
 
 ///
@@ -345,7 +345,7 @@ static ibool lock_rec_validate_page(
 	//======================
 	ulint space, ulint zip_size, ulint page_no
 )
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	// The lock system
 	IB_INTERN lock_sys_t *lock_sys = NULL;
@@ -391,9 +391,9 @@ static ibool lock_deadlock_occurs(
 	IB_INTERN void lock_var_init(void)
 //======================
 {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	lock_print_waits = FALSE;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	lock_sys = NULL;
 	lock_deadlock_found = FALSE;
 	lock_latest_err_stream = NULL;
@@ -643,7 +643,7 @@ lock_get_wait(
 {
 	ut_ad(lock);
 
-	if (UNIV_UNLIKELY(lock->type_mode & LOCK_WAIT)) {
+	if (IB_UNLIKELY(lock->type_mode & LOCK_WAIT)) {
 
 		return(TRUE);
 	}
@@ -1481,7 +1481,7 @@ lock_rec_has_expl(
 	return(NULL);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************/
 /**
 Checks if some other transaction has a lock request in the queue.
@@ -1529,7 +1529,7 @@ lock_rec_other_has_expl_req(
 
 	return(NULL);
 }
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 /*********************************************************************/
 /**
@@ -1555,8 +1555,8 @@ lock_rec_other_has_conflicting(
 
 	lock = lock_rec_get_first(block, heap_no);
 
-	if (UNIV_LIKELY_NULL(lock)) {
-		if (UNIV_UNLIKELY(heap_no == PAGE_HEAP_NO_SUPREMUM)) {
+	if (IB_LIKELY_NULL(lock)) {
+		if (IB_UNLIKELY(heap_no == PAGE_HEAP_NO_SUPREMUM)) {
 
 			do {
 				if (lock_rec_has_to_wait(trx, mode, lock,
@@ -1726,7 +1726,7 @@ lock_rec_create_low(
 	LOCK_REC_NOT_GAP bits, as all locks on the supremum are
 	automatically of the gap type 
 
-	if (UNIV_UNLIKELY(heap_no == PAGE_HEAP_NO_SUPREMUM)) {
+	if (IB_UNLIKELY(heap_no == PAGE_HEAP_NO_SUPREMUM)) {
 		ut_ad(!(type_mode & LOCK_REC_NOT_GAP));
 
 		type_mode = type_mode & ~(LOCK_GAP | LOCK_REC_NOT_GAP);
@@ -1758,7 +1758,7 @@ lock_rec_create_low(
 
 	HASH_INSERT(lock_t, hash, lock_sys->rec_hash,
 		    lock_rec_fold(space, page_no), lock);
-	if (UNIV_UNLIKELY(type_mode & LOCK_WAIT)) {
+	if (IB_UNLIKELY(type_mode & LOCK_WAIT)) {
 
 		lock_set_lock_and_trx_wait(lock, trx);
 	}
@@ -1838,7 +1838,7 @@ lock_rec_enqueue_waiting(
 	we do not enqueue a lock request if the query thread should be
 	stopped anyway 
 
-	if (UNIV_UNLIKELY(que_thr_stop(thr))) {
+	if (IB_UNLIKELY(que_thr_stop(thr))) {
 
 		ut_error;
 
@@ -1871,7 +1871,7 @@ lock_rec_enqueue_waiting(
 	// Check if a deadlock occurs: if yes, remove the lock request and
 	return an error code 
 
-	if (UNIV_UNLIKELY(lock_deadlock_occurs(lock, trx))) {
+	if (IB_UNLIKELY(lock_deadlock_occurs(lock, trx))) {
 
 		lock_reset_lock_and_trx_wait(lock);
 		lock_rec_reset_nth_bit(lock, heap_no);
@@ -1893,13 +1893,13 @@ lock_rec_enqueue_waiting(
 
 	ut_a(que_thr_stop(thr));
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (lock_print_waits) {
 		ib_logger(ib_stream, "Lock wait for trx %lu in index ",
 			(ulong) ut_dulint_get_low(trx->id));
 		ut_print_name(ib_stream, trx, FALSE, index->name);
 	}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 	return(DB_LOCK_WAIT);
 }
@@ -1929,7 +1929,7 @@ lock_rec_add_to_queue(
 	lock_t*	lock;
 
 	ut_ad(mutex_own(&kernel_mutex));
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	switch (type_mode & LOCK_MODE_MASK) {
 	case LOCK_X:
 	case LOCK_S:
@@ -1947,7 +1947,7 @@ lock_rec_add_to_queue(
 						      block, heap_no, trx);
 		ut_a(!other_lock);
 	}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 	type_mode |= LOCK_REC;
 
@@ -1956,7 +1956,7 @@ lock_rec_add_to_queue(
 	try to avoid unnecessary memory consumption of a new record lock
 	struct for a gap type lock 
 
-	if (UNIV_UNLIKELY(heap_no == PAGE_HEAP_NO_SUPREMUM)) {
+	if (IB_UNLIKELY(heap_no == PAGE_HEAP_NO_SUPREMUM)) {
 		ut_ad(!(type_mode & LOCK_REC_NOT_GAP));
 
 		// There should never be LOCK_REC_NOT_GAP on a supremum
@@ -1979,7 +1979,7 @@ lock_rec_add_to_queue(
 		lock = lock_rec_get_next_on_page(lock);
 	}
 
-	if (UNIV_LIKELY(!(type_mode & LOCK_WAIT))) {
+	if (IB_LIKELY(!(type_mode & LOCK_WAIT))) {
 
 		// Look for a similar record lock on the same page:
 		if one is found and there are no waiting lock requests,
@@ -2249,12 +2249,12 @@ lock_grant(
 
 	lock_reset_lock_and_trx_wait(lock);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (lock_print_waits) {
 		ib_logger(ib_stream, "Lock wait for trx %lu ends\n",
 			(ulong) ut_dulint_get_low(lock->trx->id));
 	}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 	// If we are resolving a deadlock by choosing another transaction
 	as a victim, then our original transaction may not be in the
@@ -2552,7 +2552,7 @@ lock_rec_move(
 
 		lock_rec_reset_nth_bit(lock, donator_heap_no);
 
-		if (UNIV_UNLIKELY(type_mode & LOCK_WAIT)) {
+		if (IB_UNLIKELY(type_mode & LOCK_WAIT)) {
 			lock_reset_lock_and_trx_wait(lock);
 		}
 
@@ -2646,7 +2646,7 @@ lock_move_reorganize_page(
 					      rec_get_data_size_old(
 						      page_cur_get_rec(
 							      &cur2))));
-			if (UNIV_LIKELY(comp)) {
+			if (IB_LIKELY(comp)) {
 				old_heap_no = rec_get_heap_no_new(
 					page_cur_get_rec(&cur2));
 				new_heap_no = rec_get_heap_no_new(
@@ -2679,7 +2679,7 @@ lock_move_reorganize_page(
 				} 
 			}
 
-			if (UNIV_UNLIKELY
+			if (IB_UNLIKELY
 			    (new_heap_no == PAGE_HEAP_NO_SUPREMUM)) {
 
 				ut_ad(old_heap_no == PAGE_HEAP_NO_SUPREMUM);
@@ -2690,12 +2690,12 @@ lock_move_reorganize_page(
 			page_cur_move_to_next(&cur2);
 		}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		{
 			ulint	i = lock_rec_find_set_bit(lock);
 
 			// Check that all locks were moved.
-			if (UNIV_UNLIKELY(i != ULINT_UNDEFINED)) {
+			if (IB_UNLIKELY(i != ULINT_UNDEFINED)) {
 				ib_logger(ib_stream,
 					"lock_move_reorganize_page():"
 					" %lu not moved in %p\n",
@@ -2703,14 +2703,14 @@ lock_move_reorganize_page(
 				ut_error;
 			}
 		}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 	}
 
 	lock_mutex_exit_kernel();
 
 	mem_heap_free(heap);
 
-#ifdef UNIV_DEBUG_LOCK_VALIDATE
+#ifdef IB_DEBUG_LOCK_VALIDATE
 	ut_ad(lock_rec_validate_page(buf_block_get_space(block),
 				     buf_block_get_zip_size(block),
 				     buf_block_get_page_no(block)));
@@ -2777,7 +2777,7 @@ lock_move_rec_list_end(
 			if (lock_rec_get_nth_bit(lock, heap_no)) {
 				lock_rec_reset_nth_bit(lock, heap_no);
 
-				if (UNIV_UNLIKELY(type_mode & LOCK_WAIT)) {
+				if (IB_UNLIKELY(type_mode & LOCK_WAIT)) {
 					lock_reset_lock_and_trx_wait(lock);
 				}
 
@@ -2801,7 +2801,7 @@ lock_move_rec_list_end(
 
 	lock_mutex_exit_kernel();
 
-#ifdef UNIV_DEBUG_LOCK_VALIDATE
+#ifdef IB_DEBUG_LOCK_VALIDATE
 	ut_ad(lock_rec_validate_page(buf_block_get_space(block),
 				     buf_block_get_zip_size(block),
 				     buf_block_get_page_no(block)));
@@ -2872,7 +2872,7 @@ lock_move_rec_list_start(
 			if (lock_rec_get_nth_bit(lock, heap_no)) {
 				lock_rec_reset_nth_bit(lock, heap_no);
 
-				if (UNIV_UNLIKELY(type_mode & LOCK_WAIT)) {
+				if (IB_UNLIKELY(type_mode & LOCK_WAIT)) {
 					lock_reset_lock_and_trx_wait(lock);
 				}
 
@@ -2893,13 +2893,13 @@ lock_move_rec_list_start(
 			page_cur_move_to_next(&cur2);
 		}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (page_rec_is_supremum(rec)) {
 			ulint	i;
 
 			for (i = PAGE_HEAP_NO_USER_LOW;
 			     i < lock_rec_get_n_bits(lock); i++) {
-				if (UNIV_UNLIKELY
+				if (IB_UNLIKELY
 				    (lock_rec_get_nth_bit(lock, i))) {
 
 					ib_logger(ib_stream,
@@ -2910,12 +2910,12 @@ lock_move_rec_list_start(
 				}
 			}
 		}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 	}
 
 	lock_mutex_exit_kernel();
 
-#ifdef UNIV_DEBUG_LOCK_VALIDATE
+#ifdef IB_DEBUG_LOCK_VALIDATE
 	ut_ad(lock_rec_validate_page(buf_block_get_space(block),
 				     buf_block_get_zip_size(block),
 				     buf_block_get_page_no(block)));
@@ -3565,12 +3565,12 @@ lock_deadlock_recursive(
 					lock_table_print(
 						ib_stream, start->wait_lock);
 				}
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 				if (lock_print_waits) {
 					ib_logger(ib_stream,
 						"Deadlock detected\n");
 				}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 				if (trx_weight_cmp(wait_lock->trx,
 						   start) >= 0) {
@@ -3608,13 +3608,13 @@ lock_deadlock_recursive(
 
 			if (too_far) {
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 				if (lock_print_waits) {
 					ib_logger(ib_stream,
 						  "Deadlock search exceeds"
 						  " max steps or depth.\n");
 				}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 				// The information about transaction/lock
 				to be rolled back is available in the top
 				level. Do not print anything here. 
@@ -3687,7 +3687,7 @@ lock_table_create(
 
 	UT_LIST_ADD_LAST(un_member.tab_lock.locks, table->locks, lock);
 
-	if (UNIV_UNLIKELY(type_mode & LOCK_WAIT)) {
+	if (IB_UNLIKELY(type_mode & LOCK_WAIT)) {
 
 		lock_set_lock_and_trx_wait(lock, trx);
 	}
@@ -4017,7 +4017,7 @@ lock_rec_unlock(
 
 	// If a record lock is found, release the record lock
 
-	if (UNIV_LIKELY(release_lock != NULL)) {
+	if (IB_LIKELY(release_lock != NULL)) {
 		lock_rec_reset_nth_bit(release_lock, heap_no);
 	} else {
 		mutex_exit(&kernel_mutex);
@@ -4384,16 +4384,16 @@ lock_rec_print(
 	}
 
 	mtr_commit(&mtr);
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 // Print the number of lock structs from lock_print_info_summary() only
 in non-production builds for performance reasons. 
 #define PRINT_NUM_OF_LOCK_STRUCTS
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 #ifdef PRINT_NUM_OF_LOCK_STRUCTS
 /*********************************************************************/
@@ -4601,7 +4601,7 @@ loop:
 			ulint	zip_size= fil_space_get_zip_size(space);
 			ulint	page_no = lock->un_member.rec_lock.page_no;
 
-			if (UNIV_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
+			if (IB_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
 
 				// It is a single table tablespace and
 				the .ibd file is missing (TRUNCATE
@@ -4657,7 +4657,7 @@ print_rec:
 	goto loop;
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************/
 /**
 Validates the lock queue on a table.
@@ -4906,13 +4906,13 @@ loop:
 	     || lock->trx->conc_state == TRX_PREPARED
 	     || lock->trx->conc_state == TRX_COMMITTED_IN_MEMORY);
 
-# ifdef UNIV_SYNC_DEBUG
+# ifdef IB_SYNC_DEBUG
 	// Only validate the record queues when this thread is not
 	holding a space->latch.  Deadlocks are possible due to
-	latching order violation when UNIV_DEBUG is defined while
-	UNIV_SYNC_DEBUG is not. 
+	latching order violation when IB_DEBUG is defined while
+	IB_SYNC_DEBUG is not. 
 	if (!sync_thread_levels_contains(SYNC_FSP))
-# endif // UNIV_SYNC_DEBUG
+# endif // IB_SYNC_DEBUG
 	for (i = nth_bit; i < lock_rec_get_n_bits(lock); i++) {
 
 		if (i == 1 || lock_rec_get_nth_bit(lock, i)) {
@@ -4954,7 +4954,7 @@ function_exit:
 
 	mtr_commit(&mtr);
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(TRUE);
@@ -5039,7 +5039,7 @@ lock_validate(void)
 
 	return(TRUE);
 }
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 //============ RECORD LOCK CHECKS FOR ROW OPERATIONS ====================
 
 /*********************************************************************/
@@ -5094,7 +5094,7 @@ lock_rec_insert_check_and_lock(
 
 	lock = lock_rec_get_first(block, next_rec_heap_no);
 
-	if (UNIV_LIKELY(lock == NULL)) {
+	if (IB_LIKELY(lock == NULL)) {
 		// We optimize CPU time usage in the simplest case
 
 		lock_mutex_exit_kernel();
@@ -5145,7 +5145,7 @@ lock_rec_insert_check_and_lock(
 				       trx->id, mtr);
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	{
 		mem_heap_t*	heap		= NULL;
 		ulint		offsets_[REC_OFFS_NORMAL_SIZE];
@@ -5156,11 +5156,11 @@ lock_rec_insert_check_and_lock(
 					  ULINT_UNDEFINED, &heap);
 		ut_ad(lock_rec_queue_validate(block,
 					      next_rec, index, offsets));
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 	return(err);
 }
@@ -5314,7 +5314,7 @@ lock_sec_rec_modify_check_and_lock(
 
 	lock_mutex_exit_kernel();
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	{
 		mem_heap_t*	heap		= NULL;
 		ulint		offsets_[REC_OFFS_NORMAL_SIZE];
@@ -5324,11 +5324,11 @@ lock_sec_rec_modify_check_and_lock(
 		offsets = rec_get_offsets(rec, index, offsets_,
 					  ULINT_UNDEFINED, &heap);
 		ut_ad(lock_rec_queue_validate(block, rec, index, offsets));
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 	if (err == DB_SUCCESS) {
 		// Update the page max trx id field
@@ -5467,7 +5467,7 @@ lock_clust_rec_read_check_and_lock(
 	ut_ad(mode != LOCK_S
 	      || lock_table_has(thr_get_trx(thr), index->table, LOCK_IS));
 
-	if (UNIV_LIKELY(heap_no != PAGE_HEAP_NO_SUPREMUM)) {
+	if (IB_LIKELY(heap_no != PAGE_HEAP_NO_SUPREMUM)) {
 
 		lock_rec_convert_impl_to_expl(block, rec, index, offsets);
 	}

@@ -138,7 +138,7 @@ struct sync_array_struct {
 					since creation of the array */
 };
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 This function is called only in the debug version. Detects a deadlock
 of one or more threads because of waits of semaphores.
@@ -152,7 +152,7 @@ sync_array_detect_deadlock(
 	sync_cell_t*	start,	/*!< in: cell where recursive search started */
 	sync_cell_t*	cell,	/*!< in: cell to search */
 	ulint		depth);	/*!< in: recursion depth */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /*****************************************************************//**
 Gets the nth cell in array.
@@ -429,7 +429,7 @@ sync_array_wait_event(
 	event = sync_cell_get_event(cell);
 		cell->waiting = TRUE;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 
 	/* We use simple enter to the mutex below, because if
 	we cannot acquire it at once, mutex_enter would call
@@ -484,15 +484,15 @@ sync_array_cell_print(
 
 		ib_logger(ib_stream,
 			"Mutex at %p created file %s line %lu, lock var %lu\n"
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 			"Last time reserved in file %s line %lu, "
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 			"waiters flag %lu\n",
 			(void*) mutex, mutex->cfile_name, (ulong) mutex->cline,
 			(ulong) mutex->lock_word,
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 			mutex->file_name, (ulong) mutex->line,
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 			(ulong) mutex->waiters);
 
 	} else if (type == RW_LOCK_EX
@@ -540,7 +540,7 @@ sync_array_cell_print(
 	}
 }
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Looks for a cell with the given thread id.
 @return	pointer to cell or NULL if not found */
@@ -765,7 +765,7 @@ print:
 	return(TRUE);	/* Execution never reaches this line: for compiler
 			fooling only */
 }
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /******************************************************************//**
 Determines if we can wake up the thread waiting for a sempahore. */
@@ -855,7 +855,7 @@ sync_array_object_signalled(
 /*========================*/
 	sync_array_t*	arr)	/*!< in: wait array */
 {
-#ifdef HAVE_ATOMIC_BUILTINS
+#ifdef IB_HAVE_ATOMIC_BUILTINS
 	(void) os_atomic_increment_ulint(&arr->sg_count, 1);
 #else
 	sync_array_enter(arr);

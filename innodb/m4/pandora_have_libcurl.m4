@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBCURL],[
     [ac_enable_libcurl="yes"])
 
   AS_IF([test "x$ac_enable_libcurl" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(curl,,
+    AC_LIB_IB_HAVE_LINKFLAGS(curl,,
       [#include <curl/curl.h>],
       [
         CURL *handle;
@@ -28,7 +28,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBCURL],[
     ])
 
   AC_CACHE_CHECK([if libcurl has CURLOPT_USERNAME],
-                 [pandora_cv_curl_have_username],[
+                 [pandora_cv_curl_IB_HAVE_username],[
      AC_COMPILE_IFELSE([
        AC_LANG_PROGRAM(
          [[
@@ -36,18 +36,18 @@ AC_DEFUN([_PANDORA_SEARCH_LIBCURL],[
            handle=curl_easy_init();
            rv= curl_easy_setopt(curl_handle, CURLOPT_USERNAME, "foo");
          ]])],
-       [pandora_cv_curl_have_username=yes],
-       [pandora_cv_curl_have_username=no])
+       [pandora_cv_curl_IB_HAVE_username=yes],
+       [pandora_cv_curl_IB_HAVE_username=no])
      ])
 
-  AM_CONDITIONAL(HAVE_LIBCURL,[test "x${ac_cv_libcurl}" = "xyes"])
-  AS_IF([test "x$pandora_cv_curl_have_username" = "xyes"],
-        AC_DEFINE([HAVE_CURLOPT_USERNAME],[1],
+  AM_CONDITIONAL(IB_HAVE_LIBCURL,[test "x${ac_cv_libcurl}" = "xyes"])
+  AS_IF([test "x$pandora_cv_curl_IB_HAVE_username" = "xyes"],
+        AC_DEFINE([IB_HAVE_CURLOPT_USERNAME],[1],
                   [Does libcurl provide the CURLOPT_USERNAME constant]))
 
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBCURL],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBCURL],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBCURL])
   AS_IF([test "x${ac_cv_libcurl}" = "xno"],[
     AC_MSG_WARN([libcurl development lib not found. On Debian this is found in libcurl4-gnutls-dev. On RHEL5/Fedora11 it's in curl-devel. On RHEL6/Fedora12 it's in libcurl-devel.])
@@ -55,7 +55,7 @@ AC_DEFUN([PANDORA_HAVE_LIBCURL],[
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBCURL],[
-  PANDORA_HAVE_LIBCURL($1)
+  PANDORA_IB_HAVE_LIBCURL($1)
   AS_IF([test "x${ac_cv_libcurl}" = "xno"],[
     AC_MSG_ERROR([libcurl is required for ${PACKAGE}])
   ])

@@ -52,7 +52,7 @@ Created 10/16/1994 Heikki Tuuri
 #endif
 
 #include "row_upd.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "mtr_log.hpp"
 #include "page_page.hpp"
 #include "page_zip.hpp"
@@ -69,11 +69,11 @@ Created 10/16/1994 Heikki Tuuri
 #include "ibuf_ibuf.hpp"
 #include "lock_lock.hpp"
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /** If the following is set to TRUE, this module prints a lot of
 trace information of individual record operations */
 IB_INTERN ibool	btr_cur_print_record_ops = FALSE;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /** Number of searches down the B-tree in btr_cur_search_to_nth_level(). */
 IB_INTERN ulint	btr_cur_n_non_sea	= 0;
@@ -91,7 +91,7 @@ IB_INTERN ulint	btr_cur_n_sea_old	= 0;
 
 /** In the optimistic insert, if the insert does not fit, but this much space
 can be released by page reorganize, then it is reorganized */
-#define BTR_CUR_PAGE_REORGANIZE_LIMIT	(UNIV_PAGE_SIZE / 32)
+#define BTR_CUR_PAGE_REORGANIZE_LIMIT	(IB_PAGE_SIZE / 32)
 
 /** The structure of a BLOB part header */
 /* @{ */
@@ -104,14 +104,14 @@ can be released by page reorganize, then it is reorganized */
 #define BTR_BLOB_HDR_SIZE		8	/*!< Size of a BLOB
 						part header, in bytes */
 /* @} */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** A BLOB field reference full of zero, for use in assertions and tests.
 Initially, BLOB field references are set to zero, in
 dtuple_convert_big_rec(). */
 IB_INTERN const byte field_ref_zero[BTR_EXTERN_FIELD_REF_SIZE];
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Marks all extern fields in a record as owned by the record. This function
 should be called if the delete mark of a record is removed: a not delete
@@ -179,7 +179,7 @@ btr_rec_get_externally_stored_len(
 /*==============================*/
 	rec_t*		rec,	/*!< in: record */
 	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /******************************************************//**
 The following function is used to set the deleted bit of a record. */
@@ -199,7 +199,7 @@ btr_rec_set_deleted_flag(
 	}
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*==================== B-TREE SEARCH =========================*/
 
 /********************************************************************//**
@@ -215,9 +215,9 @@ btr_cur_var_init(void)
 	btr_cur_n_non_sea_old	= 0;
 	btr_cur_n_sea_old	= 0;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	btr_cur_print_record_ops = FALSE;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 }
 
 /************************************************************************
@@ -248,9 +248,9 @@ btr_cur_latch_leaves(
 	case BTR_MODIFY_LEAF:
 		mode = latch_mode == BTR_SEARCH_LEAF ? RW_S_LATCH : RW_X_LATCH;
 		get_block = btr_block_get(space, zip_size, page_no, mode, mtr);
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 		ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 		get_block->check_index_page_at_flush = TRUE;
 		return;
 	case BTR_MODIFY_TREE:
@@ -261,20 +261,20 @@ btr_cur_latch_leaves(
 			get_block = btr_block_get(space, zip_size,
 						  left_page_no,
 						  RW_X_LATCH, mtr);
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 			ut_a(page_is_comp(get_block->frame)
 			     == page_is_comp(page));
 			ut_a(btr_page_get_next(get_block->frame, mtr)
 			     == page_get_page_no(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 			get_block->check_index_page_at_flush = TRUE;
 		}
 
 		get_block = btr_block_get(space, zip_size, page_no,
 					  RW_X_LATCH, mtr);
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 		ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 		get_block->check_index_page_at_flush = TRUE;
 
 		right_page_no = btr_page_get_next(page, mtr);
@@ -283,12 +283,12 @@ btr_cur_latch_leaves(
 			get_block = btr_block_get(space, zip_size,
 						  right_page_no,
 						  RW_X_LATCH, mtr);
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 			ut_a(page_is_comp(get_block->frame)
 			     == page_is_comp(page));
 			ut_a(btr_page_get_prev(get_block->frame, mtr)
 			     == page_get_page_no(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 			get_block->check_index_page_at_flush = TRUE;
 		}
 
@@ -304,19 +304,19 @@ btr_cur_latch_leaves(
 			get_block = btr_block_get(space, zip_size,
 						  left_page_no, mode, mtr);
 			cursor->left_block = get_block;
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 			ut_a(page_is_comp(get_block->frame)
 			     == page_is_comp(page));
 			ut_a(btr_page_get_next(get_block->frame, mtr)
 			     == page_get_page_no(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 			get_block->check_index_page_at_flush = TRUE;
 		}
 
 		get_block = btr_block_get(space, zip_size, page_no, mode, mtr);
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 		ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 		get_block->check_index_page_at_flush = TRUE;
 		return;
 	}
@@ -399,7 +399,7 @@ btr_cur_search_to_nth_level(
 	ut_ad(!dict_index_is_ibuf(dict_index) || ibuf_inside());
 	ut_ad(dtuple_check_typed(tuple));
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	cursor->up_match = ULINT_UNDEFINED;
 	cursor->low_match = ULINT_UNDEFINED;
 #endif
@@ -423,7 +423,7 @@ btr_cur_search_to_nth_level(
 
 #ifdef BTR_CUR_HASH_ADAPT
 
-#ifdef UNIV_SEARCH_PERF_STAT
+#ifdef IB_SEARCH_PERF_STAT
 	info->n_searches++;
 #endif
 	if (rw_lock_get_writer(&btr_search_latch) == RW_LOCK_NOT_LOCKED
@@ -435,7 +435,7 @@ btr_cur_search_to_nth_level(
 	    /* If !has_search_latch, we do a dirty read of
 	    btr_search_enabled below, and btr_search_guess_on_hash()
 	    will have to check it again. */
-	    && UNIV_LIKELY(btr_search_enabled)
+	    && IB_LIKELY(btr_search_enabled)
 	    && btr_search_guess_on_hash(dict_index, info, tuple, mode,
 					latch_mode, cursor,
 					has_search_latch, mtr)) {
@@ -556,7 +556,7 @@ retry_page_get:
 					page_no, cursor->thr)) {
 				/* Insertion to the insert buffer succeeded */
 				cursor->flag = BTR_CUR_INSERT_TO_IBUF;
-				if (UNIV_LIKELY_NULL(heap)) {
+				if (IB_LIKELY_NULL(heap)) {
 					mem_heap_free(heap);
 				}
 				goto func_exit;
@@ -575,11 +575,11 @@ retry_page_get:
 		block->check_index_page_at_flush = TRUE;
 
 		if (rw_latch != RW_NO_LATCH) {
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 			const page_zip_des_t*	page_zip
 				= buf_block_get_page_zip(block);
 			ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 			buf_block_dbg_add_level(block, SYNC_TREE_NODE);
 		}
@@ -587,7 +587,7 @@ retry_page_get:
 		ut_ad(0 == ut_dulint_cmp(dict_index->id,
 					 btr_page_get_index_id(page)));
 
-		if (UNIV_UNLIKELY(height == ULINT_UNDEFINED)) {
+		if (IB_UNLIKELY(height == ULINT_UNDEFINED)) {
 			/* We are in the root node */
 
 			height = btr_page_get_level(page, mtr);
@@ -661,7 +661,7 @@ retry_page_get:
 		page_no = btr_node_ptr_get_child_page_no(node_ptr, offsets);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -676,7 +676,7 @@ retry_page_get:
 		will properly check btr_search_enabled again in
 		btr_search_build_page_hash_index() before building a
 		page hash index, while holding btr_search_latch. */
-		if (UNIV_LIKELY(btr_search_enabled)) {
+		if (IB_LIKELY(btr_search_enabled)) {
 
 			btr_search_info_update(dict_index, cursor);
 		}
@@ -824,7 +824,7 @@ btr_cur_open_at_index_side_func(
 		page_no = btr_node_ptr_get_child_page_no(node_ptr, offsets);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }
@@ -908,7 +908,7 @@ btr_cur_open_at_rnd_pos_func(
 		page_no = btr_node_ptr_get_child_page_no(node_ptr, offsets);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }
@@ -947,7 +947,7 @@ btr_cur_insert_if_possible(
 	rec = page_cur_tuple_insert(page_cursor, tuple,
 				    cursor->index, n_ext, mtr);
 
-	if (UNIV_UNLIKELY(!rec)) {
+	if (IB_UNLIKELY(!rec)) {
 		/* If record did not fit, reorganize */
 
 		if (btr_page_reorganize(block, cursor->index, mtr)) {
@@ -1024,7 +1024,7 @@ btr_cur_ins_lock_and_undo(
 	return(DB_SUCCESS);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*************************************************************//**
 Report information about a transaction. */
 static
@@ -1041,7 +1041,7 @@ btr_cur_trx_report(
 	dict_index_name_print(ib_stream, trx, index);
 	ib_logger(ib_stream, "\n");
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*************************************************************//**
 Tries to perform an insert to a page in an index tree, next to cursor.
@@ -1093,24 +1093,24 @@ btr_cur_optimistic_insert(
 	page = buf_block_get_frame(block);
 	dict_index = cursor->index;
 	zip_size = buf_block_get_zip_size(block);
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	if (zip_size) {
-		UNIV_MEM_ASSERT_RW(page, UNIV_PAGE_SIZE);
-		UNIV_MEM_ASSERT_RW(block->page.zip.data, zip_size);
+		IB_MEM_ASSERT_RW(page, IB_PAGE_SIZE);
+		IB_MEM_ASSERT_RW(block->page.zip.data, zip_size);
 	}
-#endif /* UNIV_DEBUG_VALGRIND */
+#endif /* IB_DEBUG_VALGRIND */
 
 	if (!dtuple_check_typed_no_assert(entry)) {
 		ib_logger(ib_stream,
 			"InnoDB: Error in a tuple to insert into ");
 		dict_index_name_print(ib_stream, thr_get_trx(thr), dict_index);
 	}
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), dict_index, "insert into ");
 		dtuple_print(ib_stream, entry);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	ut_ad(mtr_memo_contains(mtr, block, MTR_MEMO_PAGE_X_FIX));
 	max_size = page_get_max_insert_size_after_reorganize(page, 1);
@@ -1126,7 +1126,7 @@ btr_cur_optimistic_insert(
 		externally on separate database pages */
 		big_rec_vec = dtuple_convert_big_rec(dict_index, entry, &n_ext);
 
-		if (UNIV_UNLIKELY(big_rec_vec == NULL)) {
+		if (IB_UNLIKELY(big_rec_vec == NULL)) {
 
 			return(DB_TOO_BIG_RECORD);
 		}
@@ -1134,7 +1134,7 @@ btr_cur_optimistic_insert(
 		rec_size = rec_get_converted_size(dict_index, entry, n_ext);
 	}
 
-	if (UNIV_UNLIKELY(zip_size)) {
+	if (IB_UNLIKELY(zip_size)) {
 		/* Estimate the free space of an empty compressed page.
 		Subtract one byte for the encoded heap_no in the
 		modification log. */
@@ -1148,8 +1148,8 @@ btr_cur_optimistic_insert(
 		records on an empty non-leaf page.  This prevents
 		infinite page splits. */
 
-		if (UNIV_LIKELY(entry->n_fields >= n_uniq)
-		    && UNIV_UNLIKELY(REC_NODE_PTR_SIZE
+		if (IB_LIKELY(entry->n_fields >= n_uniq)
+		    && IB_UNLIKELY(REC_NODE_PTR_SIZE
 				     + rec_get_converted_size_comp_prefix(
 					     dict_index, entry->fields, n_uniq,
 					     NULL)
@@ -1175,7 +1175,7 @@ btr_cur_optimistic_insert(
 
 	if (dict_index_is_clust(dict_index)
 	    && (page_get_n_recs(page) >= 2)
-	    && UNIV_LIKELY(leaf)
+	    && IB_LIKELY(leaf)
 	    && (dict_index_get_space_reserve() + rec_size > max_size)
 	    && (btr_page_get_split_rec_to_right(cursor, &dummy_rec)
 		|| btr_page_get_split_rec_to_left(cursor, &dummy_rec))) {
@@ -1191,9 +1191,9 @@ fail_err:
 		return(err);
 	}
 
-	if (UNIV_UNLIKELY(max_size < BTR_CUR_PAGE_REORGANIZE_LIMIT
+	if (IB_UNLIKELY(max_size < BTR_CUR_PAGE_REORGANIZE_LIMIT
 			  || max_size < rec_size)
-	    && UNIV_LIKELY(page_get_n_recs(page) > 1)
+	    && IB_LIKELY(page_get_n_recs(page) > 1)
 	    && page_get_max_insert_size(page, 1) < rec_size) {
 
 		goto fail;
@@ -1203,7 +1203,7 @@ fail_err:
 	err = btr_cur_ins_lock_and_undo(flags, cursor, entry,
 					thr, mtr, &inherit);
 
-	if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
+	if (IB_UNLIKELY(err != DB_SUCCESS)) {
 
 		goto fail_err;
 	}
@@ -1218,15 +1218,15 @@ fail_err:
 					     n_ext, mtr);
 		reorg = page_cursor_rec != page_cur_get_rec(page_cursor);
 
-		if (UNIV_UNLIKELY(reorg)) {
+		if (IB_UNLIKELY(reorg)) {
 			ut_a(zip_size);
 			ut_a(*rec);
 		}
 	}
 
-	if (UNIV_UNLIKELY(!*rec) && UNIV_LIKELY(!reorg)) {
+	if (IB_UNLIKELY(!*rec) && IB_LIKELY(!reorg)) {
 		/* If the record did not fit, reorganize */
-		if (UNIV_UNLIKELY(!btr_page_reorganize(block, dict_index, mtr))) {
+		if (IB_UNLIKELY(!btr_page_reorganize(block, dict_index, mtr))) {
 			ut_a(zip_size);
 
 			goto fail;
@@ -1243,8 +1243,8 @@ fail_err:
 		*rec = page_cur_tuple_insert(page_cursor, entry, dict_index,
 					     n_ext, mtr);
 
-		if (UNIV_UNLIKELY(!*rec)) {
-			if (UNIV_LIKELY(zip_size != 0)) {
+		if (IB_UNLIKELY(!*rec)) {
+			if (IB_LIKELY(zip_size != 0)) {
 
 				goto fail;
 			}
@@ -1405,7 +1405,7 @@ btr_cur_pessimistic_insert(
 		/* The record is so big that we have to store some fields
 		externally on separate database pages */
 
-		if (UNIV_LIKELY_NULL(big_rec_vec)) {
+		if (IB_LIKELY_NULL(big_rec_vec)) {
 			/* This should never happen, but we handle
 			the situation in a robust manner. */
 			ut_ad(0);
@@ -1434,7 +1434,7 @@ btr_cur_pessimistic_insert(
 		*rec = btr_page_split_and_insert(cursor, entry, n_ext, mtr);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -1506,7 +1506,7 @@ btr_cur_upd_lock_and_undo(
 			flags, btr_cur_get_block(cursor), rec, dict_index,
 			rec_get_offsets(rec, dict_index, offsets_,
 					ULINT_UNDEFINED, &heap), thr);
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 		if (err != DB_SUCCESS) {
@@ -1571,7 +1571,7 @@ btr_cur_update_in_place_log(
 
 	row_upd_index_write_log(update, log_ptr, mtr);
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 /***********************************************************//**
 Parses a redo log record of updating a record in-place.
@@ -1619,7 +1619,7 @@ btr_cur_parse_update_in_place(
 	rec_offset = mach_read_from_2(ptr);
 	ptr += 2;
 
-	ut_a(rec_offset <= UNIV_PAGE_SIZE);
+	ut_a(rec_offset <= IB_PAGE_SIZE);
 
 	heap = mem_heap_create(256);
 
@@ -1651,7 +1651,7 @@ func_exit:
 	return(ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 See if there is enough place in the page modification log to log
 an update-in-place.
@@ -1753,18 +1753,18 @@ btr_cur_update_in_place(
 	trx = thr_get_trx(thr);
 	offsets = rec_get_offsets(rec, dict_index, offsets,
 				  ULINT_UNDEFINED, &heap);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(trx, dict_index, "update ");
 		rec_print_new(ib_stream, rec, offsets);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	block = btr_cur_get_block(cursor);
 	page_zip = buf_block_get_page_zip(block);
 
 	/* Check that enough space is available on the compressed page. */
-	if (UNIV_LIKELY_NULL(page_zip)
+	if (IB_LIKELY_NULL(page_zip)
 	    && !btr_cur_update_alloc_zip(page_zip, block, dict_index,
 					 rec_offs_size(offsets), FALSE, mtr)) {
 		return(DB_ZIP_OVERFLOW);
@@ -1773,9 +1773,9 @@ btr_cur_update_in_place(
 	/* Do lock checking and undo logging */
 	err = btr_cur_upd_lock_and_undo(flags, cursor, update, cmpl_info,
 					thr, mtr, &roll_ptr);
-	if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
+	if (IB_UNLIKELY(err != DB_SUCCESS)) {
 
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 		return(err);
@@ -1830,7 +1830,7 @@ btr_cur_update_in_place(
 					     rec, dict_index, offsets, mtr);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(DB_SUCCESS);
@@ -1892,12 +1892,12 @@ btr_cur_optimistic_update(
 	heap = mem_heap_create(1024);
 	offsets = rec_get_offsets(rec, index, NULL, ULINT_UNDEFINED, &heap);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), index, "update ");
 		rec_print_new(ib_stream, rec, offsets);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	if (!row_upd_changes_field_size_or_external(index, offsets, update)) {
 
@@ -1943,18 +1943,18 @@ any_extern:
 	new_rec_size = rec_get_converted_size(index, new_entry, 0);
 
 	page_zip = buf_block_get_page_zip(block);
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
-	if (UNIV_LIKELY_NULL(page_zip)
+	if (IB_LIKELY_NULL(page_zip)
 	    && !btr_cur_update_alloc_zip(page_zip, block, index,
 					 new_rec_size, TRUE, mtr)) {
 		err = DB_ZIP_OVERFLOW;
 		goto err_exit;
 	}
 
-	if (UNIV_UNLIKELY(new_rec_size
+	if (IB_UNLIKELY(new_rec_size
 			  >= (page_get_free_space_of_empty(page_is_comp(page))
 			      / 2))) {
 
@@ -1962,7 +1962,7 @@ any_extern:
 		goto err_exit;
 	}
 
-	if (UNIV_UNLIKELY(page_get_data_size(page)
+	if (IB_UNLIKELY(page_get_data_size(page)
 			  - old_rec_size + new_rec_size
 			  < BTR_CUR_PAGE_COMPRESS_LIMIT)) {
 
@@ -2079,10 +2079,10 @@ btr_cur_pess_upd_restore_supremum(
 	ut_ad(prev_page_no != FIL_NULL);
 	prev_block = buf_page_get_with_no_latch(space, zip_size,
 						prev_page_no, mtr);
-#ifdef UNIV_BTR_DEBUG
+#ifdef IB_BTR_DEBUG
 	ut_a(btr_page_get_next(prev_block->frame, mtr)
 	     == page_get_page_no(page));
-#endif /* UNIV_BTR_DEBUG */
+#endif /* IB_BTR_DEBUG */
 
 	/* We must already have an x-latch on prev_block! */
 	ut_ad(mtr_memo_contains(mtr, prev_block, MTR_MEMO_PAGE_X_FIX));
@@ -2148,9 +2148,9 @@ btr_cur_pessimistic_update(
 	ut_ad(mtr_memo_contains(mtr, dict_index_get_lock(index),
 				MTR_MEMO_X_LOCK));
 	ut_ad(mtr_memo_contains(mtr, block, MTR_MEMO_PAGE_X_FIX));
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 	/* The insert buffer tree should never be updated in place. */
 	ut_ad(!dict_index_is_ibuf(index));
 
@@ -2247,7 +2247,7 @@ btr_cur_pessimistic_update(
 	offsets = rec_get_offsets(rec, index, offsets, ULINT_UNDEFINED, heap);
 	n_ext += btr_push_update_extern_fields(new_entry, update, *heap);
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		ut_ad(page_is_comp(page));
 		if (page_zip_rec_needs_ext(
 			    rec_get_converted_size(index, new_entry, n_ext),
@@ -2263,7 +2263,7 @@ btr_cur_pessimistic_update(
 			   page_is_comp(page), 0, 0)) {
 make_external:
 		big_rec_vec = dtuple_convert_big_rec(index, new_entry, &n_ext);
-		if (UNIV_UNLIKELY(big_rec_vec == NULL)) {
+		if (IB_UNLIKELY(big_rec_vec == NULL)) {
 
 			err = DB_TOO_BIG_RECORD;
 			goto return_after_reservations;
@@ -2283,9 +2283,9 @@ make_external:
 
 	btr_search_update_hash_on_delete(cursor);
 
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 	page_cursor = btr_cur_get_page_cur(cursor);
 
 	page_cur_delete_rec(page_cursor, index, offsets, mtr);
@@ -2362,10 +2362,10 @@ make_external:
 		stored fields */
 		buf_block_t*	rec_block = btr_cur_get_block(cursor);
 
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 		ut_a(!page_zip || page_zip_validate(page_zip, page));
 		page = buf_block_get_frame(rec_block);
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 		page_zip = buf_block_get_page_zip(rec_block);
 
 		offsets = rec_get_offsets(rec, index, offsets,
@@ -2388,9 +2388,9 @@ make_external:
 	}
 
 return_after_reservations:
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 	if (n_extents > 0) {
 		fil_space_release_free_extents(index->space, n_reserved);
@@ -2448,7 +2448,7 @@ btr_cur_del_mark_set_clust_rec_log(
 
 	mlog_close(mtr, log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /****************************************************************//**
 Parses the redo log record for delete marking or unmarking of a clustered
@@ -2500,7 +2500,7 @@ btr_cur_parse_del_mark_set_clust_rec(
 	offset = mach_read_from_2(ptr);
 	ptr += 2;
 
-	ut_a(offset <= UNIV_PAGE_SIZE);
+	ut_a(offset <= IB_PAGE_SIZE);
 
 	if (page) {
 		rec = page + offset;
@@ -2521,7 +2521,7 @@ btr_cur_parse_del_mark_set_clust_rec(
 				rec_get_offsets(rec, index, offsets_,
 						ULINT_UNDEFINED, &heap),
 				pos, trx_id, roll_ptr);
-			if (UNIV_LIKELY_NULL(heap)) {
+			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
 			}
 		}
@@ -2530,7 +2530,7 @@ btr_cur_parse_del_mark_set_clust_rec(
 	return(ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************//**
 Marks a clustered index record deleted. Writes an undo log record to
 undo log on this delete marking. Writes in the trx id field the id
@@ -2564,12 +2564,12 @@ btr_cur_del_mark_set_clust_rec(
 	ut_ad(!!page_rec_is_comp(rec) == dict_table_is_comp(index->table));
 	offsets = rec_get_offsets(rec, index, offsets, ULINT_UNDEFINED, &heap);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), index, "del mark ");
 		rec_print_new(ib_stream, rec, offsets);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	ut_ad(dict_index_is_clust(index));
 	ut_ad(!rec_get_deleted_flag(rec, rec_offs_comp(offsets)));
@@ -2616,7 +2616,7 @@ btr_cur_del_mark_set_clust_rec(
 					   roll_ptr, mtr);
 
 func_exit:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(err);
@@ -2654,7 +2654,7 @@ btr_cur_del_mark_set_sec_rec_log(
 
 	mlog_close(mtr, log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /****************************************************************//**
 Parses the redo log record for delete marking or unmarking of a secondary
@@ -2684,7 +2684,7 @@ btr_cur_parse_del_mark_set_sec_rec(
 	offset = mach_read_from_2(ptr);
 	ptr += 2;
 
-	ut_a(offset <= UNIV_PAGE_SIZE);
+	ut_a(offset <= IB_PAGE_SIZE);
 
 	if (page) {
 		rec = page + offset;
@@ -2699,7 +2699,7 @@ btr_cur_parse_del_mark_set_sec_rec(
 	return(ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************//**
 Sets a secondary index record delete mark to TRUE or FALSE.
 @return	DB_SUCCESS, DB_LOCK_WAIT, or error number */
@@ -2720,13 +2720,13 @@ btr_cur_del_mark_set_sec_rec(
 	block = btr_cur_get_block(cursor);
 	rec = btr_cur_get_rec(cursor);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), cursor->index,
 				   "del mark ");
 		rec_print(ib_stream, rec, cursor->index);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	err = lock_sec_rec_modify_check_and_lock(flags,
 						 btr_cur_get_block(cursor),
@@ -2860,14 +2860,14 @@ btr_cur_optimistic_delete(
 			max_ins = page_get_max_insert_size_after_reorganize(
 				page, 1);
 		}
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 		ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 		page_cur_delete_rec(btr_cur_get_page_cur(cursor),
 				    cursor->index, offsets, mtr);
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 		ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 		if (dict_index_is_clust(cursor->index)
 		    || dict_index_is_ibuf(cursor->index)
@@ -2883,7 +2883,7 @@ btr_cur_optimistic_delete(
 		}
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -2960,9 +2960,9 @@ btr_cur_pessimistic_delete(
 	heap = mem_heap_create(1024);
 	rec = btr_cur_get_rec(cursor);
 	page_zip = buf_block_get_page_zip(block);
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 	offsets = rec_get_offsets(rec, index, NULL, ULINT_UNDEFINED, &heap);
 
@@ -2970,13 +2970,13 @@ btr_cur_pessimistic_delete(
 		btr_rec_free_externally_stored_fields(index,
 						      rec, offsets, page_zip,
 						      rb_ctx, mtr);
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 		ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 	}
 
-	if (UNIV_UNLIKELY(page_get_n_recs(page) < 2)
-	    && UNIV_UNLIKELY(dict_index_get_page(index)
+	if (IB_UNLIKELY(page_get_n_recs(page) < 2)
+	    && IB_UNLIKELY(dict_index_get_page(index)
 			     != buf_block_get_page_no(block))) {
 
 		/* If there is only one record, drop the whole page in
@@ -2994,7 +2994,7 @@ btr_cur_pessimistic_delete(
 	level = btr_page_get_level(page, mtr);
 
 	if (level > 0
-	    && UNIV_UNLIKELY(rec == page_rec_get_next(
+	    && IB_UNLIKELY(rec == page_rec_get_next(
 				     page_get_infimum_rec(page)))) {
 
 		rec_t*	next_rec = page_rec_get_next(rec);
@@ -3031,9 +3031,9 @@ btr_cur_pessimistic_delete(
 	btr_search_update_hash_on_delete(cursor);
 
 	page_cur_delete_rec(btr_cur_get_page_cur(cursor), index, offsets, mtr);
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 	ut_ad(btr_check_node_ptr(index, block, mtr));
 
@@ -3423,7 +3423,7 @@ btr_estimate_number_of_different_key_vals(
 	dict_index_stat_mutex_exit(index);
 
 	mem_free(n_diff);
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }
@@ -3461,11 +3461,11 @@ btr_rec_get_externally_stored_len(
 						      + BTR_EXTERN_LEN + 4);
 
 			total_extern_len += ut_calc_align(extern_len,
-							  UNIV_PAGE_SIZE);
+							  IB_PAGE_SIZE);
 		}
 	}
 
-	return(total_extern_len / UNIV_PAGE_SIZE);
+	return(total_extern_len / IB_PAGE_SIZE);
 }
 
 /*******************************************************************//**
@@ -3501,11 +3501,11 @@ btr_cur_set_ownership_of_extern_field(
 		byte_val = byte_val | BTR_EXTERN_OWNER_FLAG;
 	}
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		mach_write_to_1(data + local_len + BTR_EXTERN_LEN, byte_val);
 		page_zip_write_blob_ptr(page_zip, rec, index, offsets, i, mtr);
 	} else
-	       	if (UNIV_LIKELY(mtr != NULL)) {
+	       	if (IB_LIKELY(mtr != NULL)) {
 
 		mlog_write_ulint(data + local_len + BTR_EXTERN_LEN, byte_val,
 				 MLOG_1BYTE, mtr);
@@ -3875,7 +3875,7 @@ btr_store_big_rec_extern_fields(
 	rec_page_no = buf_block_get_page_no(rec_block);
 	ut_a(fil_page_get_type(page_align(rec)) == FIL_PAGE_INDEX);
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		int	err;
 
 		/* Zlib deflate needs 128 kilobytes for the default
@@ -3912,7 +3912,7 @@ btr_store_big_rec_extern_fields(
 
 		prev_page_no = FIL_NULL;
 
-		if (UNIV_LIKELY_NULL(page_zip)) {
+		if (IB_LIKELY_NULL(page_zip)) {
 			int	err = deflateReset(&c_stream);
 			ut_a(err == Z_OK);
 
@@ -3934,11 +3934,11 @@ btr_store_big_rec_extern_fields(
 
 			block = btr_page_alloc(index, hint_page_no,
 					       FSP_NO_DIR, 0, &mtr);
-			if (UNIV_UNLIKELY(block == NULL)) {
+			if (IB_UNLIKELY(block == NULL)) {
 
 				mtr_commit(&mtr);
 
-				if (UNIV_LIKELY_NULL(page_zip)) {
+				if (IB_LIKELY_NULL(page_zip)) {
 					deflateEnd(&c_stream);
 					mem_heap_free(heap);
 				}
@@ -3960,7 +3960,7 @@ btr_store_big_rec_extern_fields(
 							SYNC_EXTERN_STORAGE);
 				prev_page = buf_block_get_frame(prev_block);
 
-				if (UNIV_LIKELY_NULL(page_zip)) {
+				if (IB_LIKELY_NULL(page_zip)) {
 					mlog_write_ulint(
 						prev_page + FIL_PAGE_NEXT,
 						page_no, MLOG_4BYTES, &mtr);
@@ -3978,7 +3978,7 @@ btr_store_big_rec_extern_fields(
 
 			}
 
-			if (UNIV_LIKELY_NULL(page_zip)) {
+			if (IB_LIKELY_NULL(page_zip)) {
 				int		err;
 				page_zip_des_t*	blob_page_zip;
 
@@ -4112,11 +4112,11 @@ next_zip_page:
 						 FIL_PAGE_TYPE_BLOB,
 						 MLOG_2BYTES, &mtr);
 
-				if (extern_len > (UNIV_PAGE_SIZE
+				if (extern_len > (IB_PAGE_SIZE
 						  - FIL_PAGE_DATA
 						  - BTR_BLOB_HDR_SIZE
 						  - FIL_PAGE_DATA_END)) {
-					store_len = UNIV_PAGE_SIZE
+					store_len = IB_PAGE_SIZE
 						- FIL_PAGE_DATA
 						- BTR_BLOB_HDR_SIZE
 						- FIL_PAGE_DATA_END;
@@ -4182,7 +4182,7 @@ next_zip_page:
 		}
 	}
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		deflateEnd(&c_stream);
 		mem_heap_free(heap);
 	}
@@ -4206,10 +4206,10 @@ btr_check_blob_fil_page_type(
 	ut_a(space_id == page_get_space_id(page));
 	ut_a(page_no == page_get_page_no(page));
 
-	if (UNIV_UNLIKELY(type != FIL_PAGE_TYPE_BLOB)) {
+	if (IB_UNLIKELY(type != FIL_PAGE_TYPE_BLOB)) {
 		ulint	flags = fil_space_get_flags(space_id);
 
-		if (UNIV_LIKELY
+		if (IB_LIKELY
 		    ((flags & DICT_TF_FORMAT_MASK) == DICT_TF_FORMAT_51)) {
 			/* Old versions of InnoDB did not initialize
 			FIL_PAGE_TYPE on BLOB pages.  Do not print
@@ -4266,7 +4266,7 @@ btr_free_externally_stored_field(
 	ulint		page_no;
 	ulint		next_page_no;
 	mtr_t		mtr;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ut_ad(mtr_memo_contains(local_mtr, dict_index_get_lock(index),
 				MTR_MEMO_X_LOCK));
 	ut_ad(mtr_memo_contains_page(local_mtr, field_ref,
@@ -4282,9 +4282,9 @@ btr_free_externally_stored_field(
 		f += local_len;
 		ut_ad(f == field_ref);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
-	if (UNIV_UNLIKELY(!memcmp(field_ref, field_ref_zero,
+	if (IB_UNLIKELY(!memcmp(field_ref, field_ref_zero,
 				  BTR_EXTERN_FIELD_REF_SIZE))) {
 		/* In the rollback of uncommitted transactions, we may
 		encounter a clustered index record whose BLOBs have
@@ -4295,7 +4295,7 @@ btr_free_externally_stored_field(
 
 	space_id = mach_read_from_4(field_ref + BTR_EXTERN_SPACE_ID);
 
-	if (UNIV_UNLIKELY(space_id != dict_index_get_space(index))) {
+	if (IB_UNLIKELY(space_id != dict_index_get_space(index))) {
 		ext_zip_size = fil_space_get_zip_size(space_id);
 		/* This must be an undo log record in the system tablespace,
 		that is, in row_purge_upd_exist_or_extern().
@@ -4364,7 +4364,7 @@ btr_free_externally_stored_field(
 
 			btr_page_free_low(index, ext_block, 0, &mtr);
 
-			if (UNIV_LIKELY(page_zip != NULL)) {
+			if (IB_LIKELY(page_zip != NULL)) {
 				mach_write_to_4(field_ref + BTR_EXTERN_PAGE_NO,
 						next_page_no);
 				mach_write_to_4(field_ref + BTR_EXTERN_LEN + 4,
@@ -4575,7 +4575,7 @@ btr_copy_zblob_prefix(
 
 	ut_ad(ut_is_2pow(zip_size));
 	ut_ad(zip_size >= PAGE_ZIP_MIN_SIZE);
-	ut_ad(zip_size <= UNIV_PAGE_SIZE);
+	ut_ad(zip_size <= IB_PAGE_SIZE);
 	ut_ad(space_id);
 
 	for (;;) {
@@ -4589,7 +4589,7 @@ btr_copy_zblob_prefix(
 		in row_merge_copy_blobs(), by an exclusive table lock. */
 		bpage = buf_page_get_zip(space_id, zip_size, page_no);
 
-		if (UNIV_UNLIKELY(!bpage)) {
+		if (IB_UNLIKELY(!bpage)) {
 			ut_print_timestamp(ib_stream);
 			ib_logger(ib_stream,
 				"  InnoDB: Cannot load"
@@ -4599,7 +4599,7 @@ btr_copy_zblob_prefix(
 			return;
 		}
 
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (fil_page_get_type(bpage->zip.data) != page_type)) {
 			ut_print_timestamp(ib_stream);
 			ib_logger(ib_stream,
@@ -4613,7 +4613,7 @@ btr_copy_zblob_prefix(
 
 		next_page_no = mach_read_from_4(bpage->zip.data + offset);
 
-		if (UNIV_LIKELY(offset == FIL_PAGE_NEXT)) {
+		if (IB_LIKELY(offset == FIL_PAGE_NEXT)) {
 			/* When the BLOB begins at page header,
 			the compressed data payload does not
 			immediately follow the next page pointer. */
@@ -4704,11 +4704,11 @@ btr_copy_externally_stored_field_prefix_low(
 	ulint		page_no,/*!< in: page number of the first BLOB page */
 	ulint		offset)	/*!< in: offset on the first BLOB page */
 {
-	if (UNIV_UNLIKELY(len == 0)) {
+	if (IB_UNLIKELY(len == 0)) {
 		return(0);
 	}
 
-	if (UNIV_UNLIKELY(zip_size)) {
+	if (IB_UNLIKELY(zip_size)) {
 		int		err;
 		z_stream	d_stream;
 		mem_heap_t*	heap;
@@ -4764,7 +4764,7 @@ btr_copy_externally_stored_field_prefix(
 
 	local_len -= BTR_EXTERN_FIELD_REF_SIZE;
 
-	if (UNIV_UNLIKELY(local_len >= len)) {
+	if (IB_UNLIKELY(local_len >= len)) {
 		memcpy(buf, data, len);
 		return(len);
 	}
@@ -4883,4 +4883,4 @@ btr_rec_copy_externally_stored_field(
 	return(btr_copy_externally_stored_field(len, data,
 						zip_size, local_len, heap));
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

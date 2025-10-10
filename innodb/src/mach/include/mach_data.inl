@@ -283,7 +283,7 @@ IB_INLINE dulint mach_dulint_read_much_compressed(const byte* b)
 	return ut_dulint_create(high, low);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 IB_INLINE double mach_double_read(const byte*	b)	
 {
 	double d;

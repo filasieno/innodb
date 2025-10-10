@@ -20,30 +20,30 @@
 
 //  In the debug version each allocated field is surrounded with check fields whose sizes are given below
 
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 
-	# ifndef UNIV_HOTBACKUP
+	# ifndef IB_HOTBACKUP
 		/// \brief The mutex which protects in the debug version the hash table
 		/// containing the list of live memory heaps, and also the global
 		/// variables in mem0dbg.c.
 		extern mutex_tmem_hash_mutex;
-	# endif // UNIV_HOTBACKUP
+	# endif // IB_HOTBACKUP
 
-	#define MEM_FIELD_HEADER_SIZE	ut_calc_align(2 * sizeof(ulint), UNIV_MEM_ALIGNMENT)
+	#define MEM_FIELD_HEADER_SIZE	ut_calc_align(2 * sizeof(ulint), IB_MEM_ALIGNMENT)
 	#define MEM_FIELD_TRAILER_SIZE	sizeof(ulint)
-	#define MEM_SPACE_NEEDED(N) ut_calc_align((N) + MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE, UNIV_MEM_ALIGNMENT)
+	#define MEM_SPACE_NEEDED(N) ut_calc_align((N) + MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE, IB_MEM_ALIGNMENT)
 
 #else
 
   #define MEM_FIELD_HEADER_SIZE	0
   
   /// \brief Space needed when allocating for a user a field of length N.
-  /// \details The space is allocated only in multiples of UNIV_MEM_ALIGNMENT. 
+  /// \details The space is allocated only in multiples of IB_MEM_ALIGNMENT. 
   /// In the debug version there are also check fields at the both ends of the field.
-  #define MEM_SPACE_NEEDED(N)      ut_calc_align((N), UNIV_MEM_ALIGNMENT)
+  #define MEM_SPACE_NEEDED(N)      ut_calc_align((N), IB_MEM_ALIGNMENT)
 #endif
 
-#if defined UNIV_MEM_DEBUG || defined UNIV_DEBUG
+#if defined IB_MEM_DEBUG || defined IB_DEBUG
 
 	/// \brief Checks a memory heap for consistency and prints the contents if requested.
 	/// \param [in] heap memory heap
@@ -61,9 +61,9 @@
 	/// \return TRUE if ok
 	IB_INTERN ibool mem_heap_validate(mem_heap_t* heap);
 
-#endif // UNIV_MEM_DEBUG || UNIV_DEBUG
+#endif // IB_MEM_DEBUG || IB_DEBUG
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 
 	/// \brief Checks that an object is a memory heap (or a block of it)
 	/// \param [in] heap memory heap
@@ -71,7 +71,7 @@
 
 	IB_INTERN ibool mem_heap_check(mem_heap_t* heap);
 
-#endif // UNIV_DEBUG
+#endif // IB_DEBUG
 
 /// \brief Validates the dynamic memory
 /// \return TRUE if ok

@@ -32,7 +32,7 @@ Created 11/11/1995 Heikki Tuuri
 #include "buf_buf.hpp"
 #include "srv_srv.hpp"
 #include "page_zip.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "ut_byte.hpp"
 #include "ut_lst.hpp"
 #include "page_page.hpp"
@@ -77,7 +77,7 @@ static ulint buf_lru_flush_page_count = 0;
 
 /* @} */
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 /******************************************************************//**
 Validates the flush list.
 @return	TRUE if ok */
@@ -85,7 +85,7 @@ static
 ibool
 buf_flush_validate_low(void);
 /*========================*/
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 
 /********************************************************************//**
 Insert a block in the flush_rbt and returns a pointer to its
@@ -211,9 +211,9 @@ buf_flush_free_flush_rbt(void)
 {
 	buf_pool_mutex_enter();
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 	ut_a(buf_flush_validate_low());
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 
 	rbt_free(buf_pool->flush_rbt);
 	buf_pool->flush_rbt = NULL;
@@ -236,7 +236,7 @@ buf_flush_insert_into_flush_list(
 
 	/* If we are in the recovery then we need to update the flush
 	red-black tree as well. */
-	if (UNIV_LIKELY_NULL(buf_pool->flush_rbt)) {
+	if (IB_LIKELY_NULL(buf_pool->flush_rbt)) {
 		buf_flush_insert_sorted_into_flush_list(block);
 		return;
 	}
@@ -249,9 +249,9 @@ buf_flush_insert_into_flush_list(
 	ut_d(block->page.in_flush_list = TRUE);
 	UT_LIST_ADD_FIRST(list, buf_pool->flush_list, &block->page);
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 	ut_a(buf_flush_validate_low());
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 }
 
 /********************************************************************//**
@@ -307,9 +307,9 @@ buf_flush_insert_sorted_into_flush_list(
 				     prev_b, &block->page);
 	}
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 	ut_a(buf_flush_validate_low());
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 }
 
 /********************************************************************//**
@@ -327,7 +327,7 @@ buf_flush_ready_for_replace(
 	ut_ad(mutex_own(buf_page_get_mutex(bpage)));
 	ut_ad(bpage->in_LRU_list);
 
-	if (UNIV_LIKELY(buf_page_in_file(bpage))) {
+	if (IB_LIKELY(buf_page_in_file(bpage))) {
 
 		return(bpage->oldest_modification == 0
 		       && buf_page_get_io_fix(bpage) == BUF_IO_NONE
@@ -415,7 +415,7 @@ buf_flush_remove(
 	}
 
 	/* If the flush_rbt is active then delete from it as well. */
-	if (UNIV_LIKELY_NULL(buf_pool->flush_rbt)) {
+	if (IB_LIKELY_NULL(buf_pool->flush_rbt)) {
 		buf_flush_delete_from_flush_rbt(bpage);
 	}
 
@@ -452,7 +452,7 @@ buf_flush_relocate_on_flush_list(
 
 	/* If recovery is active we must swap the control blocks in
 	the flush_rbt as well. */
-	if (UNIV_LIKELY_NULL(buf_pool->flush_rbt)) {
+	if (IB_LIKELY_NULL(buf_pool->flush_rbt)) {
 		buf_flush_delete_from_flush_rbt(bpage);
 		prev_b = buf_flush_insert_in_flush_rbt(dpage);
 	}
@@ -481,9 +481,9 @@ buf_flush_relocate_on_flush_list(
 	should be the same control block as in flush_rbt. */
 	ut_a(!buf_pool->flush_rbt || prev_b == prev);
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 	ut_a(buf_flush_validate_low());
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 }
 
 /********************************************************************//**
@@ -594,9 +594,9 @@ buf_flush_buffered_writes(void)
 			continue;
 		}
 
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (memcmp(block->frame + (FIL_PAGE_LSN + 4),
-			    block->frame + (UNIV_PAGE_SIZE
+			    block->frame + (IB_PAGE_SIZE
 					    - FIL_PAGE_END_LSN_OLD_CHKSUM + 4),
 			    4))) {
 			ut_print_timestamp(ib_stream);
@@ -611,7 +611,7 @@ buf_flush_buffered_writes(void)
 
 		if (!block->check_index_page_at_flush) {
 		} else if (page_is_comp(block->frame)) {
-			if (UNIV_UNLIKELY
+			if (IB_UNLIKELY
 			    (!page_simple_validate_new(block->frame))) {
 corrupted_page:
 				buf_page_print(block->frame, 0);
@@ -630,7 +630,7 @@ corrupted_page:
 
 				ut_error;
 			}
-		} else if (UNIV_UNLIKELY
+		} else if (IB_UNLIKELY
 			   (!page_simple_validate_old(block->frame))) {
 
 			goto corrupted_page;
@@ -642,7 +642,7 @@ corrupted_page:
 	srv_dblwr_writes++;
 
 	len = ut_min(TRX_SYS_DOUBLEWRITE_BLOCK_SIZE,
-		     trx_doublewrite->first_free) * UNIV_PAGE_SIZE;
+		     trx_doublewrite->first_free) * IB_PAGE_SIZE;
 
 	write_buf = trx_doublewrite->write_buf;
 	i = 0;
@@ -651,19 +651,19 @@ corrupted_page:
 	       trx_doublewrite->block1, 0, len,
 	       (void*) write_buf, NULL);
 
-	for (len2 = 0; len2 + UNIV_PAGE_SIZE <= len;
-	     len2 += UNIV_PAGE_SIZE, i++) {
+	for (len2 = 0; len2 + IB_PAGE_SIZE <= len;
+	     len2 += IB_PAGE_SIZE, i++) {
 		const buf_block_t* block = (buf_block_t*)
 			trx_doublewrite->buf_block_arr[i];
 
 		if (
-		    UNIV_LIKELY(!block->page.zip.data) &&
-		    UNIV_LIKELY(buf_block_get_state(block)
+		    IB_LIKELY(!block->page.zip.data) &&
+		    IB_LIKELY(buf_block_get_state(block)
 				   == BUF_BLOCK_FILE_PAGE)
-		    && UNIV_UNLIKELY
+		    && IB_UNLIKELY
 		    (memcmp(write_buf + len2 + (FIL_PAGE_LSN + 4),
 			    write_buf + len2
-			    + (UNIV_PAGE_SIZE
+			    + (IB_PAGE_SIZE
 			       - FIL_PAGE_END_LSN_OLD_CHKSUM + 4), 4))) {
 			ut_print_timestamp(ib_stream);
 			ib_logger(ib_stream,
@@ -679,29 +679,29 @@ corrupted_page:
 	}
 
 	len = (trx_doublewrite->first_free - TRX_SYS_DOUBLEWRITE_BLOCK_SIZE)
-		* UNIV_PAGE_SIZE;
+		* IB_PAGE_SIZE;
 
 	write_buf = trx_doublewrite->write_buf
-		+ TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * UNIV_PAGE_SIZE;
+		+ TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * IB_PAGE_SIZE;
 	ut_ad(i == TRX_SYS_DOUBLEWRITE_BLOCK_SIZE);
 
 	fil_io(OS_FILE_WRITE, TRUE, TRX_SYS_SPACE, 0,
 	       trx_doublewrite->block2, 0, len,
 	       (void*) write_buf, NULL);
 
-	for (len2 = 0; len2 + UNIV_PAGE_SIZE <= len;
-	     len2 += UNIV_PAGE_SIZE, i++) {
+	for (len2 = 0; len2 + IB_PAGE_SIZE <= len;
+	     len2 += IB_PAGE_SIZE, i++) {
 		const buf_block_t* block = (buf_block_t*)
 			trx_doublewrite->buf_block_arr[i];
 
 		if (
-		    UNIV_LIKELY(!block->page.zip.data) &&
-		    UNIV_LIKELY(buf_block_get_state(block)
+		    IB_LIKELY(!block->page.zip.data) &&
+		    IB_LIKELY(buf_block_get_state(block)
 				   == BUF_BLOCK_FILE_PAGE)
-		    && UNIV_UNLIKELY
+		    && IB_UNLIKELY
 		    (memcmp(write_buf + len2 + (FIL_PAGE_LSN + 4),
 			    write_buf + len2
-			    + (UNIV_PAGE_SIZE
+			    + (IB_PAGE_SIZE
 			       - FIL_PAGE_END_LSN_OLD_CHKSUM + 4), 4))) {
 			ut_print_timestamp(ib_stream);
 			ib_logger(ib_stream,
@@ -727,7 +727,7 @@ flush:
 			trx_doublewrite->buf_block_arr[i];
 
 		ut_a(buf_page_in_file(&block->page));
-		if (UNIV_LIKELY_NULL(block->page.zip.data)) {
+		if (IB_LIKELY_NULL(block->page.zip.data)) {
 			fil_io(OS_FILE_WRITE | OS_AIO_SIMULATED_WAKE_LATER,
 			       FALSE, buf_page_get_space(&block->page),
 			       buf_page_get_zip_size(&block->page),
@@ -745,9 +745,9 @@ flush:
 
 		ut_a(buf_block_get_state(block) == BUF_BLOCK_FILE_PAGE);
 
-		if (UNIV_UNLIKELY(memcmp(block->frame + (FIL_PAGE_LSN + 4),
+		if (IB_UNLIKELY(memcmp(block->frame + (FIL_PAGE_LSN + 4),
 					 block->frame
-					 + (UNIV_PAGE_SIZE
+					 + (IB_PAGE_SIZE
 					    - FIL_PAGE_END_LSN_OLD_CHKSUM + 4),
 					 4))) {
 			ut_print_timestamp(ib_stream);
@@ -767,7 +767,7 @@ flush:
 
 		fil_io(OS_FILE_WRITE | OS_AIO_SIMULATED_WAKE_LATER,
 		       FALSE, buf_block_get_space(block), 0,
-		       buf_block_get_page_no(block), 0, UNIV_PAGE_SIZE,
+		       buf_block_get_page_no(block), 0, IB_PAGE_SIZE,
 		       (void*)block->frame, (void*)block);
 
 		/* Increment the counter of I/O operations used
@@ -811,21 +811,21 @@ try_again:
 
 	zip_size = buf_page_get_zip_size(bpage);
 
-	if (UNIV_UNLIKELY(zip_size)) {
+	if (IB_UNLIKELY(zip_size)) {
 		/* Copy the compressed page and clear the rest. */
 		memcpy(trx_doublewrite->write_buf
-		       + UNIV_PAGE_SIZE * trx_doublewrite->first_free,
+		       + IB_PAGE_SIZE * trx_doublewrite->first_free,
 		       bpage->zip.data, zip_size);
 		memset(trx_doublewrite->write_buf
-		       + UNIV_PAGE_SIZE * trx_doublewrite->first_free
-		       + zip_size, 0, UNIV_PAGE_SIZE - zip_size);
+		       + IB_PAGE_SIZE * trx_doublewrite->first_free
+		       + zip_size, 0, IB_PAGE_SIZE - zip_size);
 	} else
        		{
 		ut_a(buf_page_get_state(bpage) == BUF_BLOCK_FILE_PAGE);
 
 		memcpy(trx_doublewrite->write_buf
-		       + UNIV_PAGE_SIZE * trx_doublewrite->first_free,
-		       ((buf_block_t*) bpage)->frame, UNIV_PAGE_SIZE);
+		       + IB_PAGE_SIZE * trx_doublewrite->first_free,
+		       ((buf_block_t*) bpage)->frame, IB_PAGE_SIZE);
 	}
 
 	trx_doublewrite->buf_block_arr[trx_doublewrite->first_free] = bpage;
@@ -843,7 +843,7 @@ try_again:
 
 	mutex_exit(&(trx_doublewrite->mutex));
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /********************************************************************//**
 Initializes a page for writing to the tablespace. */
@@ -863,9 +863,9 @@ buf_flush_init_for_writing(
 		ulint		zip_size = page_zip_get_size(page_zip);
 		ut_ad(zip_size);
 		ut_ad(ut_is_2pow(zip_size));
-		ut_ad(zip_size <= UNIV_PAGE_SIZE);
+		ut_ad(zip_size <= IB_PAGE_SIZE);
 
-		switch (UNIV_EXPECT(fil_page_get_type(page), FIL_PAGE_INDEX)) {
+		switch (IB_EXPECT(fil_page_get_type(page), FIL_PAGE_INDEX)) {
 		case FIL_PAGE_TYPE_ALLOCATED:
 		case FIL_PAGE_INODE:
 		case FIL_PAGE_IBUF_BITMAP:
@@ -904,7 +904,7 @@ buf_flush_init_for_writing(
 	/* Write the newest modification lsn to the page header and trailer */
 	mach_write_ull(page + FIL_PAGE_LSN, newest_lsn);
 
-	mach_write_ull(page + UNIV_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM,
+	mach_write_ull(page + IB_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM,
 		       newest_lsn);
 
 	/* Store the new formula checksum */
@@ -919,13 +919,13 @@ buf_flush_init_for_writing(
 	FIL_PAGE_SPACE_OR_CHKSUM, it has to be calculated after storing the
 	new formula checksum. */
 
-	mach_write_to_4(page + UNIV_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM,
+	mach_write_to_4(page + IB_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM,
 			srv_use_checksums
 			? buf_calc_page_old_checksum(page)
 			: BUF_NO_CHECKSUM_MAGIC);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Does an asynchronous write of a buffer page. NOTE: in simulated aio and
 also when the doublewrite buffer is used, we must call
@@ -938,9 +938,9 @@ buf_flush_write_block_low(
 {
 	ulint	zip_size	= buf_page_get_zip_size(bpage);
 	page_t*	frame		= NULL;
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	static ibool univ_log_debug_warned;
-#endif /* UNIV_LOG_DEBUG */
+#endif /* IB_LOG_DEBUG */
 
 	ut_ad(buf_page_in_file(bpage));
 
@@ -954,16 +954,16 @@ buf_flush_write_block_low(
 	ut_ad(buf_page_get_io_fix(bpage) == BUF_IO_WRITE);
 	ut_ad(bpage->oldest_modification != 0);
 
-#ifdef UNIV_IBUF_COUNT_DEBUG
+#ifdef IB_IBUF_COUNT_DEBUG
 	ut_a(ibuf_count_get(bpage->space, bpage->offset) == 0);
 #endif
 	ut_ad(bpage->newest_modification != 0);
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	if (!univ_log_debug_warned) {
 		univ_log_debug_warned = TRUE;
 		ib_logger(ib_stream, "Warning: cannot force log to disk if"
-		      " UNIV_LOG_DEBUG is defined!\n"
+		      " IB_LOG_DEBUG is defined!\n"
 		      "Crash recovery will not work!\n");
 	}
 #else
@@ -981,7 +981,7 @@ buf_flush_write_block_low(
 		break;
 	case BUF_BLOCK_ZIP_DIRTY:
 		frame = bpage->zip.data;
-		if (UNIV_LIKELY(srv_use_checksums)) {
+		if (IB_LIKELY(srv_use_checksums)) {
 			ut_a(mach_read_from_4(frame + FIL_PAGE_SPACE_OR_CHKSUM)
 			     == page_zip_calc_checksum(frame, zip_size));
 		}
@@ -1005,7 +1005,7 @@ buf_flush_write_block_low(
 		fil_io(OS_FILE_WRITE | OS_AIO_SIMULATED_WAKE_LATER,
 		       FALSE, buf_page_get_space(bpage), zip_size,
 		       buf_page_get_page_no(bpage), 0,
-		       zip_size ? zip_size : UNIV_PAGE_SIZE,
+		       zip_size ? zip_size : IB_PAGE_SIZE,
 		       frame, bpage);
 	} else {
 		buf_flush_post_to_doublewrite_buf(bpage);
@@ -1116,13 +1116,13 @@ buf_flush_page(
 	oldest_modification != 0.  Thus, it cannot be relocated in the
 	buffer pool or removed from flush_list or LRU_list. */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (buf_debug_prints) {
 		ib_logger(ib_stream,
 			"Flushing %u space %u page %u\n",
 			flush_type, bpage->space, bpage->offset);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	buf_flush_write_block_low(bpage);
 }
 
@@ -1250,10 +1250,10 @@ buf_flush_batch(
 
 	ut_ad((flush_type == BUF_FLUSH_LRU)
 	      || (flush_type == BUF_FLUSH_LIST));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad((flush_type != BUF_FLUSH_LIST)
 	      || sync_thread_levels_empty_gen(TRUE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	buf_pool_mutex_enter();
 
 	if ((buf_pool->n_flush[flush_type] > 0)
@@ -1357,7 +1357,7 @@ flush_next:
 
 	buf_flush_buffered_writes();
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (buf_debug_prints && page_count > 0) {
 		ut_a(flush_type == BUF_FLUSH_LRU
 		     || flush_type == BUF_FLUSH_LIST);
@@ -1366,7 +1366,7 @@ flush_next:
 			: "Flushed %lu pages in flush list flush\n",
 			(ulong) page_count);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	srv_buf_pool_flushed += page_count;
 
@@ -1583,7 +1583,7 @@ buf_flush_get_desired_flush_rate(void)
 	return(rate > 0 ? (ulint) rate : 0);
 }
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 /******************************************************************//**
 Validates the flush list.
 @return	TRUE if ok */
@@ -1603,7 +1603,7 @@ buf_flush_validate_low(void)
 	/* If we are in recovery mode i.e.: flush_rbt != NULL
 	then each block in the flush_list must also be present
 	in the flush_rbt. */
-	if (UNIV_LIKELY_NULL(buf_pool->flush_rbt)) {
+	if (IB_LIKELY_NULL(buf_pool->flush_rbt)) {
 		rnode = rbt_first(buf_pool->flush_rbt);
 	}
 
@@ -1613,7 +1613,7 @@ buf_flush_validate_low(void)
 		ut_a(buf_page_in_file(bpage));
 		ut_a(om > 0);
 
-		if (UNIV_LIKELY_NULL(buf_pool->flush_rbt)) {
+		if (IB_LIKELY_NULL(buf_pool->flush_rbt)) {
 			ut_a(rnode);
 			buf_page_t* rpage = *rbt_value(buf_page_t*,
 						       rnode);
@@ -1652,5 +1652,5 @@ buf_flush_validate(void)
 
 	return(ret);
 }
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
+#endif /* !IB_HOTBACKUP */

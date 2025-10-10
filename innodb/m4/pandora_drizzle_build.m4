@@ -44,20 +44,20 @@ AC_DEFUN([PANDORA_DRIZZLE_BUILD],[
   
   #--------------------------------------------------------------------
   # Check for system libraries. Adds the library to $LIBS
-  # and defines HAVE_LIBM etc
+  # and defines IB_HAVE_LIBM etc
   #--------------------------------------------------------------------
   
     # For the sched_yield() function on Solaris
   AC_CHECK_FUNC(sched_yield, [],
     [AC_CHECK_LIB(posix4, [sched_yield],
-      [AC_DEFINE(HAVE_SCHED_YIELD, 1, [Have sched_yield function]) LIBS="$LIBS -lposix4"])])
+      [AC_DEFINE(IB_HAVE_SCHED_YIELD, 1, [Have sched_yield function]) LIBS="$LIBS -lposix4"])])
   
   AS_IF([test "$ac_cv_header_termio_h" = "no" -a "$ac_cv_header_termios_h" = "no"],[
     AC_CHECK_FUNC(gtty, [], [AC_CHECK_LIB(compat, gtty)])
   ])
   
   AC_CHECK_HEADERS([curses.h term.h],[],[],[[
-    #ifdef HAVE_CURSES_H
+    #ifdef IB_HAVE_CURSES_H
     # include <curses.h>
     #endif
   ]])

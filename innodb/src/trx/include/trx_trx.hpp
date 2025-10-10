@@ -29,7 +29,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "univ.inl"
 #include "trx_types.hpp"
 #include "dict_types.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "lock_types.hpp"
 #include "usr_types.hpp"
 #include "que_types.hpp"
@@ -781,6 +781,6 @@ struct commit_node_struct{
 #ifndef IB_DO_NOT_INLINE
 #include "trx0trx.inl"
 #endif
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #endif

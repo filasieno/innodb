@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBGEARMAN],[
     [ac_enable_libgearman="yes"])
 
   AS_IF([test "x$ac_enable_libgearman" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(gearman,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(gearman,,[
       #include <libgearman/gearman.h>
     ],[
       gearman_client_st gearman_client;
@@ -27,15 +27,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBGEARMAN],[
     ac_cv_libgearman="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBGEARMAN, [test "x${ac_cv_libgearman}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBGEARMAN, [test "x${ac_cv_libgearman}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBGEARMAN],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBGEARMAN],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBGEARMAN])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBGEARMAN],[
-  AC_REQUIRE([PANDORA_HAVE_LIBGEARMAN])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBGEARMAN])
   AS_IF([test "x${ac_cv_libgearman}" = "xno"],
       AC_MSG_ERROR([At least version 0.10 of libgearman is required for ${PACKAGE}]))
 ])

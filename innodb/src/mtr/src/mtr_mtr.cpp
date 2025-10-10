@@ -28,7 +28,7 @@
 #include "mtr_log.hpp"
 #include "page_types.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "log0recv.h"
 
 ///
@@ -47,16 +47,16 @@ void mtr_memo_slot_release(mtr_t *mtr, mtr_memo_slot_t *slot)
 	object = slot->object;
 	type = slot->type;
 
-	if (UNIV_LIKELY(object != NULL)) {
+	if (IB_LIKELY(object != NULL)) {
 		if (type <= MTR_MEMO_BUF_FIX) {
 			buf_page_release((buf_block_t *)object, type, mtr);
 		} else if (type == MTR_MEMO_S_LOCK) {
 			rw_lock_s_unlock((rw_lock_t *)object);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		} else if (type != MTR_MEMO_X_LOCK) {
 			ut_ad(type == MTR_MEMO_MODIFY);
 			ut_ad(mtr_memo_contains(mtr, object, MTR_MEMO_PAGE_X_FIX));
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 		} else {
 			rw_lock_x_unlock((rw_lock_t *)object);
 		}
@@ -155,7 +155,7 @@ static void mtr_log_reserve_and_write(mtr_t *mtr, ulint recovery)
 
 	mtr->end_lsn = log_close(recovery);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 ///
 /// @brief Commits a mini-transaction.
@@ -164,16 +164,16 @@ static void mtr_log_reserve_and_write(mtr_t *mtr, ulint recovery)
 IB_INTERN
 void mtr_commit(mtr_t *mtr)
 {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ibool write_log;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_ad(mtr);
 	ut_ad(mtr->magic_n == MTR_MAGIC_N);
 	ut_ad(mtr->state == MTR_ACTIVE);
 	ut_d(mtr->state = MTR_COMMITTING);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	// This is a dirty read, for debugging.
 	ut_ad(!recv_no_log_write);
 	write_log = mtr->modifications && mtr->n_log_recs;
@@ -195,14 +195,14 @@ void mtr_commit(mtr_t *mtr)
 	if (write_log) {
 		log_release();
 	}
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_d(mtr->state = MTR_COMMITTED);
 	dyn_array_free(&(mtr->memo));
 	dyn_array_free(&(mtr->log));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 ///
 /// @brief Releases the latches stored in an mtr memo down to a savepoint.
 /// NOTE! The mtr must not have made changes to buffer pages after the
@@ -270,7 +270,7 @@ void mtr_memo_release(mtr_t *mtr, void *object, ulint type)
 		}
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 ///
 /// @brief Reads 1 - 4 bytes from a file page buffered in the buffer pool.
@@ -308,8 +308,8 @@ dulint mtr_read_dulint(const byte *ptr, mtr_t *mtr __attribute__((unused)))
 	return (mach_read_from_8(ptr));
 }
 
-#ifdef UNIV_DEBUG
-#ifndef UNIV_HOTBACKUP
+#ifdef IB_DEBUG
+#ifndef IB_HOTBACKUP
 ///
 /// @brief Checks if memo contains the given page.
 /// @param mtr in: mtr
@@ -338,5 +338,5 @@ void mtr_print(mtr_t *mtr)
 		(ulong)dyn_array_get_data_size(&(mtr->log))
 	);
 }
-#endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_DEBUG */
+#endif /* !IB_HOTBACKUP */
+#endif /* IB_DEBUG */

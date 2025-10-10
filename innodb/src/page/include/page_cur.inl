@@ -26,7 +26,7 @@ Created 10/4/1994 Heikki Tuuri
 #include "page_page.hpp"
 #include "buf_types.hpp"
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************//**
 Gets pointer to the page frame where the cursor is positioned.
 @return	page */
@@ -82,7 +82,7 @@ page_cur_get_rec(
 
 	return(cur->rec);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*********************************************************//**
 Sets the cursor object to point before the first user record
@@ -198,7 +198,7 @@ page_cur_move_to_prev(
 	cur->rec = page_rec_get_prev(cur->rec);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Searches the right position for a page cursor.
 @return	number of matched fields on the left */
@@ -274,7 +274,7 @@ page_cur_tuple_insert(
 	mem_heap_free(heap);
 	return(rec);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Inserts a record next to page cursor. Returns pointer to inserted record if

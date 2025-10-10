@@ -27,7 +27,7 @@
 IB_INTERN ulint ut_dbg_zero = 0;
 #endif
 
-#if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
+#if defined(IB_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
 /// \brief If this is set to TRUE by ut_dbg_assertion_failed(), all threads
 /// will stop at the next ut_a() or ut_ad().
 IB_INTERN ibool ut_dbg_stop_threads = FALSE;
@@ -51,11 +51,11 @@ IB_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint
 {
 	ut_print_timestamp(ib_stream);
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 	ib_logger(ib_stream, "  InnoDB: Assertion failure in file %s line %lu\n", file, line);
-#else  /* UNIV_HOTBACKUP */
+#else  /* IB_HOTBACKUP */
 	ib_logger(ib_stream, "  InnoDB: Assertion failure in thread %lu in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 	if (expr) {
 		ib_logger(ib_stream, "InnoDB: Failing assertion: %s\n", expr);
 	}
@@ -71,7 +71,7 @@ IB_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint
 		"InnoDB: about forcing recovery.\n"
 	);
 
-#if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
+#if defined(IB_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
 	ut_dbg_stop_threads = TRUE;
 #endif
 
@@ -88,28 +88,28 @@ IB_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint
 		exit(1);
 	}
 #else // __NETWARE__
-	#if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
+	#if defined(IB_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
 	/// \brief Stop a thread after assertion failure.
 	/// \param file in: source file name
 	/// \param line in: line number
 	IB_INTERN
 	void ut_dbg_stop_thread(const char *file, ulint line)
 	{
-	#ifndef UNIV_HOTBACKUP
+	#ifndef IB_HOTBACKUP
 		ib_logger(ib_stream, "InnoDB: Thread %lu stopped in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
 		os_thread_sleep(1000000000);
-	#endif /* !UNIV_HOTBACKUP */
+	#endif /* !IB_HOTBACKUP */
 	}
 	#endif
 #endif // __NETWARE__
 
-#ifdef UNIV_COMPILE_TEST_FUNCS
+#ifdef IB_COMPILE_TEST_FUNCS
 
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
 
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
   #include <unistd.h>
 #endif
 
@@ -156,4 +156,4 @@ IB_INTERN void speedo_show(const speedo_t *speedo)
 	PRINT_TIMEVAL("sys ", &tv_diff);
 }
 
-#endif /* UNIV_COMPILE_TEST_FUNCS */
+#endif /* IB_COMPILE_TEST_FUNCS */

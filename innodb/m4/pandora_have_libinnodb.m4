@@ -18,27 +18,27 @@ AC_DEFUN([_PANDORA_SEARCH_LIBINNODB],[
 
 
   AS_IF([test "x$ac_enable_libinnodb" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(haildb,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(haildb,,[
       #include <haildb.h>
     ],[
       ib_u64_t
       ib_api_version(void);
     ])
     AS_IF([test "x${ac_cv_libhaildb}" = "xyes"],[
-      AC_DEFINE([HAVE_HAILDB_H],[1],[Do we have haildb.h])
+      AC_DEFINE([IB_HAVE_HAILDB_H],[1],[Do we have haildb.h])
       INNODB_LIBS="${LTLIBHAILDB}"
-      ac_cv_have_innodb=yes
+      ac_cv_IB_HAVE_innodb=yes
     ],[
-      AC_LIB_HAVE_LINKFLAGS(innodb,,[
+      AC_LIB_IB_HAVE_LINKFLAGS(innodb,,[
         #include <embedded_innodb-1.0/innodb.h>
       ],[
         ib_u64_t
         ib_api_version(void);
       ])
       AS_IF([test "x{ac_cv_libinnodb}" = "xyes"],[
-        AC_DEFINE([HAVE_INNODB_H],[1],[Do we have innodb.h])
+        AC_DEFINE([IB_HAVE_INNODB_H],[1],[Do we have innodb.h])
         INNODB_LIBS="${LTLIBINNODB}"
-        ac_cv_have_innodb=yes
+        ac_cv_IB_HAVE_innodb=yes
       ])
     ])
   ],[
@@ -46,15 +46,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBINNODB],[
     ac_cv_libinnodb="no"
   ])
   AC_SUBST([INNODB_LIBS])
-  AM_CONDITIONAL(HAVE_LIBINNODB, [test "x${ac_cv_have_innodb}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBINNODB, [test "x${ac_cv_IB_HAVE_innodb}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBINNODB],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBINNODB],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBINNODB])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBINNODB],[
-  AC_REQUIRE([PANDORA_HAVE_LIBINNODB])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBINNODB])
   AS_IF([test "x${ac_cv_libinnodb}" = "xno"],
       AC_MSG_ERROR([libhaildb or libinnodb is required for ${PACKAGE}]))
 ])

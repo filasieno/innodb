@@ -102,7 +102,7 @@ ib_vector_pop(
 	elem = vec->data[vec->used];
 
 	ut_d(vec->data[vec->used] = NULL);
-	UNIV_MEM_INVALID(&vec->data[vec->used], sizeof(*vec->data));
+	IB_MEM_INVALID(&vec->data[vec->used], sizeof(*vec->data));
 
 	return(elem);
 }

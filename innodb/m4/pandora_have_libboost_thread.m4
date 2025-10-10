@@ -17,13 +17,13 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_THREAD],[
   CXXFLAGS="${PTHREAD_CFLAGS} ${CXXFLAGS}"
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_thread-mt,,[
+  AC_LIB_IB_HAVE_LINKFLAGS(boost_thread-mt,,[
     #include <boost/thread.hpp>
   ],[
     boost::thread id;
   ])
   AS_IF([test "x${ac_cv_libboost_thread_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_thread,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(boost_thread,,[
       #include <boost/thread.hpp>
     ],[
       boost::thread id;
@@ -34,14 +34,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_THREAD],[
   CXXFLAGS="${save_CXXFLAGS}"
 
   
-  AM_CONDITIONAL(HAVE_BOOST_THREAD,
+  AM_CONDITIONAL(IB_HAVE_BOOST_THREAD,
     [test "x${ac_cv_libboost_thread}" = "xyes" -o "x${ac_cv_libboost_thread_mt}" = "xyes"])
   BOOST_LIBS="${BOOST_LIBS} ${LTLIBBOOST_THREAD_MT} ${LTLIBBOOST_THREAD}"
   AC_SUBST(BOOST_LIBS) 
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST_THREAD],[
-  PANDORA_HAVE_BOOST($1)
+AC_DEFUN([PANDORA_IB_HAVE_BOOST_THREAD],[
+  PANDORA_IB_HAVE_BOOST($1)
   _PANDORA_SEARCH_BOOST_THREAD($1)
 ])
 

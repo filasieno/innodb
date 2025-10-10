@@ -32,7 +32,7 @@ Created 12/27/1996 Heikki Tuuri
 #include "dict_dict.hpp"
 #include "trx_undo.hpp"
 #include "rem_rec.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "dict_boot.hpp"
 #include "dict_crea.hpp"
 #include "mach_data.hpp"
@@ -294,7 +294,7 @@ upd_node_create(
 	upd_node_t*	node;
 
 	node = mem_heap_alloc(heap, sizeof(upd_node_t));
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	memset(node, '\0', sizeof(*node));
 #endif
 	node->common.type = QUE_NODE_UPDATE;
@@ -322,7 +322,7 @@ upd_node_create(
 
 	return(node);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Updates the trx id and roll ptr field in a clustered index record in database
@@ -340,7 +340,7 @@ row_upd_rec_sys_fields_in_recovery(
 {
 	ut_ad(rec_offs_validate(rec, NULL, offsets));
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		page_zip_write_trx_id_and_roll_ptr(
 			page_zip, rec, offsets, pos, trx_id, roll_ptr);
 	} else 
@@ -358,7 +358,7 @@ row_upd_rec_sys_fields_in_recovery(
 	}
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Sets the trx id or roll ptr field of a clustered index entry. */
 IB_INTERN
@@ -445,7 +445,7 @@ row_upd_changes_field_size_or_external(
 			use one byte! Thus, we cannot use update-in-place
 			if we update an SQL NULL varchar to an empty string! */
 
-			old_len = UNIV_SQL_NULL;
+			old_len = IB_SQL_NULL;
 		}
 
 		if (dfield_is_ext(new_val) || old_len != new_len
@@ -457,7 +457,7 @@ row_upd_changes_field_size_or_external(
 
 	return(FALSE);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Replaces the new column values stored in the update vector to the record
@@ -499,12 +499,12 @@ row_upd_rec_in_place(
 				  dfield_get_len(new_val));
 	}
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		page_zip_write_rec(page_zip, rec, index, offsets, 0);
 	}
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Writes into the redo log the values of trx id and roll ptr and enough info
 to determine their positions within a clustered index record.
@@ -534,7 +534,7 @@ row_upd_write_sys_vals_to_log(
 
 	return(log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Parses the log data of system field values.
@@ -569,7 +569,7 @@ row_upd_parse_sys_vals(
 	return(ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************//**
 Writes to the redo log the new values of the fields occurring in the index. */
 IB_INTERN
@@ -620,7 +620,7 @@ row_upd_index_write_log(
 		log_ptr += mach_write_compressed(log_ptr, upd_field->field_no);
 		log_ptr += mach_write_compressed(log_ptr, len);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			if (log_ptr + len < buf_end) {
 				memcpy(log_ptr, dfield_get_data(new_val), len);
 
@@ -640,7 +640,7 @@ row_upd_index_write_log(
 
 	mlog_close(mtr, log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Parses the log data written by row_upd_index_write_log.
@@ -701,7 +701,7 @@ row_upd_index_parse(
 			return(NULL);
 		}
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 
 			if (end_ptr < ptr + len) {
 
@@ -721,7 +721,7 @@ row_upd_index_parse(
 	return(ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***************************************************************//**
 Builds an update vector from those fields which in a secondary index entry
 differ from a record that has the equal ordering fields. NOTE: we compare
@@ -847,7 +847,7 @@ row_upd_build_difference_binary(
 			goto skip_compare;
 		}
 
-		if (UNIV_UNLIKELY(!dfield_is_ext(dfield)
+		if (IB_UNLIKELY(!dfield_is_ext(dfield)
 				  != !rec_offs_nth_extern(offsets, i))
 		    || !dfield_data_is_binary_equal(dfield, len, data)) {
 
@@ -1140,7 +1140,7 @@ row_upd_replace(
 			= dict_col_get_clust_pos(col, index);
 		dfield_t*		dfield;
 
-		if (UNIV_UNLIKELY(clust_pos == ULINT_UNDEFINED)) {
+		if (IB_UNLIKELY(clust_pos == ULINT_UNDEFINED)) {
 
 			continue;
 		}
@@ -1419,7 +1419,7 @@ row_upd_store_row(
 				clust_index, node->update, node->heap);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }
@@ -1466,7 +1466,7 @@ row_upd_sec_index_entry(
 
 	rec = btr_cur_get_rec(btr_cur);
 
-	if (UNIV_UNLIKELY(!found)) {
+	if (IB_UNLIKELY(!found)) {
 		ib_logger(ib_stream,
 		      "InnoDB: error in sec index entry update in\n"
 		      "InnoDB: ");
@@ -1619,7 +1619,7 @@ row_upd_clust_rec_by_insert(
 				node, pcur, table, index, offsets, thr, mtr);
 			if (err != DB_SUCCESS) {
 				mtr_commit(mtr);
-				if (UNIV_LIKELY_NULL(heap)) {
+				if (IB_LIKELY_NULL(heap)) {
 					mem_heap_free(heap);
 				}
 				return(err);
@@ -1706,7 +1706,7 @@ row_upd_clust_rec(
 
 	mtr_commit(mtr);
 
-	if (UNIV_LIKELY(err == DB_SUCCESS)) {
+	if (IB_LIKELY(err == DB_SUCCESS)) {
 
 		return(DB_SUCCESS);
 	}
@@ -1753,7 +1753,7 @@ row_upd_clust_rec(
 		mtr_commit(mtr);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -1918,7 +1918,7 @@ row_upd_clust_step(
 			node->index = dict_table_get_next_index(index);
 		}
 exit_func:
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 		return(err);
@@ -1927,7 +1927,7 @@ exit_func:
 	/* If the update is made for a user, we already have the update vector
 	ready, else we have to do some evaluation: */
 
-	if (UNIV_UNLIKELY(!node->in_client_interface)) {
+	if (IB_UNLIKELY(!node->in_client_interface)) {
 		/* Copy the necessary columns from clust_rec and calculate the
 		new values to set */
 		row_upd_copy_columns(rec, offsets,
@@ -1935,7 +1935,7 @@ exit_func:
 		row_upd_eval_new_vals(node->update);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -2002,7 +2002,7 @@ row_upd(
 
 	ut_ad(node && thr);
 
-	if (UNIV_LIKELY(node->in_client_interface)) {
+	if (IB_LIKELY(node->in_client_interface)) {
 
 		/* We do not get the cmpl_info value from the user
 		interpreter: we must calculate it on the fly: */
@@ -2208,4 +2208,4 @@ row_create_update_node(
 
 	return(node);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

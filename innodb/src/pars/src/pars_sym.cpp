@@ -316,7 +316,7 @@ sym_tab_add_id(
 	node->indirection = NULL;
 
 	node->name = mem_heap_strdupl(sym_tab->heap, (char*) name, len);
-	node->name_len = len;
+	node->IB_NAME_LEN = len;
 
 	UT_LIST_ADD_LAST(sym_list, sym_tab->sym_list, node);
 
@@ -355,7 +355,7 @@ sym_tab_add_bound_id(
 	node->indirection = NULL;
 
 	node->name = mem_heap_strdup(sym_tab->heap, bid->id);
-	node->name_len = strlen(node->name);
+	node->IB_NAME_LEN = strlen(node->name);
 
 	UT_LIST_ADD_LAST(sym_list, sym_tab->sym_list, node);
 

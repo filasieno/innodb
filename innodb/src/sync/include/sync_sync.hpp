@@ -41,7 +41,7 @@ Created 9/5/1995 Heikki Tuuri
 #include "os_sync.hpp"
 #include "sync_arr.hpp"
 
-#ifdef HAVE_WINDOWS_ATOMICS
+#ifdef IB_HAVE_WINDOWS_ATOMICS
 typedef LONG lock_word_t;	/*!< On Windows, InterlockedExchange operates
 				on LONG variable */
 #else
@@ -66,8 +66,8 @@ location (which must be appropriately aligned). The mutex is initialized
 in the reset state. Explicit freeing of the mutex with mutex_free is
 necessary only if the memory block containing it is freed. */
 
-#ifdef UNIV_DEBUG
-# ifdef UNIV_SYNC_DEBUG
+#ifdef IB_DEBUG
+# ifdef IB_SYNC_DEBUG
 #  define mutex_create(M, level)					\
 	mutex_create_func((M), #M, (level), __FILE__, __LINE__)
 # else
@@ -89,12 +89,12 @@ void
 mutex_create_func(
 /*==============*/
 	mutex_t*	mutex,		/*!< in: pointer to memory */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	const char*	cmutex_name,	/*!< in: mutex name */
-# ifdef UNIV_SYNC_DEBUG
+# ifdef IB_SYNC_DEBUG
 	ulint		level,		/*!< in: level */
-# endif /* UNIV_SYNC_DEBUG */
-#endif /* UNIV_DEBUG */
+# endif /* IB_SYNC_DEBUG */
+#endif /* IB_DEBUG */
 	const char*	cfile_name,	/*!< in: file name where created */
 	ulint		cline);		/*!< in: file line where created */
 
@@ -159,7 +159,7 @@ void
 mutex_exit(
 /*=======*/
 	mutex_t*	mutex);	/*!< in: pointer to mutex */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Returns TRUE if no mutex or rw-lock is currently locked.
 Works only in the debug version.
@@ -168,7 +168,7 @@ IB_INTERN
 ibool
 sync_all_freed(void);
 /*================*/
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 /*#####################################################################
 FUNCTION PROTOTYPES FOR DEBUGGING */
 /*******************************************************************//**
@@ -185,7 +185,7 @@ void
 sync_print(
 /*=======*/
 	ib_stream_t	ib_stream);	/*!< in: stream where to print */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /******************************************************************//**
 Checks that the mutex has been initialized.
 @return	TRUE */
@@ -204,8 +204,8 @@ mutex_own(
 /*======*/
 	const mutex_t*	mutex)	/*!< in: mutex */
 	__attribute__((warn_unused_result));
-#endif /* UNIV_DEBUG */
-#ifdef UNIV_SYNC_DEBUG
+#endif /* IB_DEBUG */
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Adds a latch and its level in the thread level array. Allocates the memory
 for the array if called first time for this OS thread. Makes the checks
@@ -274,7 +274,7 @@ IB_INTERN
 ulint
 mutex_n_reserved(void);
 /*==================*/
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 /******************************************************************//**
 NOT to be used outside this module except in debugging! Gets the value
 of the lock word. */
@@ -283,7 +283,7 @@ lock_word_t
 mutex_get_lock_word(
 /*================*/
 	const mutex_t*	mutex);	/*!< in: mutex */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 NOT to be used outside this module except in debugging! Gets the waiters
 field in a mutex.
@@ -293,7 +293,7 @@ ulint
 mutex_get_waiters(
 /*==============*/
 	const mutex_t*	mutex);	/*!< in: mutex */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 /**********************************************************************
 Reset variables. */
 IB_INTERN
@@ -514,7 +514,7 @@ struct mutex_struct {
 				of the atomic test-and-set instruction when
 				atomic operations are enabled. */
 
-#if !defined(HAVE_ATOMIC_BUILTINS)
+#if !defined(IB_HAVE_ATOMIC_BUILTINS)
 	os_fast_mutex_t
 		os_fast_mutex;	/*!< We use this OS mutex in place of lock_word
 				when atomic operations are not enabled */
@@ -525,22 +525,22 @@ struct mutex_struct {
 				Otherwise, this is 0. */
 	UT_LIST_NODE_T(mutex_t)	list; /*!< All allocated mutexes are put into
 				a list.	Pointers to the next and prev. */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	const char*	file_name;	/*!< File where the mutex was locked */
 	ulint	line;		/*!< Line where the mutex was locked */
 	ulint	level;		/*!< Level in the global latching order */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	const char*	cfile_name;/*!< File name where mutex created */
 	ulint		cline;	/*!< Line where created */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	os_thread_id_t thread_id; /*!< The thread id of the thread
 				which locked the mutex. */
 	ulint		magic_n;	/*!< MUTEX_MAGIC_N */
 /** Value of mutex_struct::magic_n */
 # define MUTEX_MAGIC_N	(ulint)979585
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	ulong		count_os_wait;	/*!< count of os_wait */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulong		count_using;	/*!< count of times mutex used */
 	ulong		count_spin_loop; /*!< count of spin loops */
 	ulong		count_spin_rounds;/*!< count of spin rounds */
@@ -549,7 +549,7 @@ struct mutex_struct {
 	ib_uint64_t	lmax_spent_time;/*!< mutex os_wait timer msec */
 	const char*	cmutex_name;	/*!< mutex name */
 	ulint		mutex_type;	/*!< 0=usual mutex, 1=rw_lock mutex */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 };
 
 /** The global array of wait cells for implementation of the databases own
@@ -566,10 +566,10 @@ to 20 microseconds. */
 /** The number of mutex_exit calls. Intended for performance monitoring. */
 extern	ib_int64_t	mutex_exit_count;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /** Latching order checks start when this is set TRUE */
 extern ibool	sync_order_checks_on;
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /** This variable is set to TRUE when sync_init is called */
 extern ibool	sync_initialized;

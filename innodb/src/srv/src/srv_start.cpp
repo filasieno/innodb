@@ -60,7 +60,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ibuf_ibuf.hpp"
 #include "srv_start.hpp"
 #include "srv_srv.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "os0proc.h"
 # include "sync0sync.h"
 # include "buf0flu.h"
@@ -84,11 +84,11 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 # include "btr0pcur.h"
 # include "thr0loc.h"
 # include "os0sync.h" /* for INNODB_RW_LOCKS_USE_ATOMICS */
-#ifdef HAVE_ZIP
+#ifdef IB_HAVE_ZIP
  # include "zlib.h" /* for ZLIB_VERSION */
-#endif /* HAVE_ZIP */
+#endif /* IB_HAVE_ZIP */
 
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -99,10 +99,10 @@ IB_INTERN ib_uint64_t	srv_start_lsn;
 /** Log sequence number at shutdown */
 IB_INTERN ib_uint64_t	srv_shutdown_lsn;
 
-#ifdef HAVE_DARWIN_THREADS
+#ifdef IB_HAVE_DARWIN_THREADS
 # include <sys/utsname.h>
 /** TRUE if the F_FULLFSYNC option is available */
-IB_INTERN ibool	srv_have_fullfsync = FALSE;
+IB_INTERN ibool	srv_IB_HAVE_fullfsync = FALSE;
 #endif
 
 /** TRUE if a raw partition is in use */
@@ -153,7 +153,7 @@ static	char**		srv_data_file_names = NULL;
 /** The system log file names */
 static	char**		srv_log_group_home_dirs = NULL;
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /****************************************************************//**
 All threads end up waiting for certain events. Put those events
@@ -582,7 +582,7 @@ srv_free_paths_and_sizes(void)
 	}
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 I/o-handler thread function.
 @return	OS_THREAD_DUMMY_RETURN */
@@ -598,7 +598,7 @@ io_handler_thread(
 
 	segment = *((ulint*)arg);
 
-#ifdef UNIV_DEBUG_THREAD_CREATION
+#ifdef IB_DEBUG_THREAD_CREATION
 	ib_logger(ib_stream, "Io handler thread %lu starts, id %lu\n", segment,
 		os_thread_pf(os_thread_get_curr_id()));
 #endif
@@ -621,7 +621,7 @@ io_handler_thread(
 
 	OS_THREAD_DUMMY_RETURN;
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Normalizes a directory path for Windows: converts slashes to backslashes. */
@@ -642,7 +642,7 @@ srv_normalize_path_for_win(
 #endif
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Calculates the low 32 bits when a file size which is given as a number
 database pages is converted to the number of bytes.
@@ -653,7 +653,7 @@ srv_calc_low32(
 /*===========*/
 	ulint	file_size)	/*!< in: file size in database pages */
 {
-	return(0xFFFFFFFFUL & (file_size << UNIV_PAGE_SIZE_SHIFT));
+	return(0xFFFFFFFFUL & (file_size << IB_PAGE_SIZE_SHIFT));
 }
 
 /*********************************************************************//**
@@ -666,7 +666,7 @@ srv_calc_high32(
 /*============*/
 	ulint	file_size)	/*!< in: file size in database pages */
 {
-	return(file_size >> (32 - UNIV_PAGE_SIZE_SHIFT));
+	return(file_size >> (32 - IB_PAGE_SIZE_SHIFT));
 }
 
 /*********************************************************************//**
@@ -705,7 +705,7 @@ open_or_create_log_file(
 				  OS_LOG_FILE, &ret);
 	if (ret == FALSE) {
 		if (os_file_get_last_error(FALSE) != OS_FILE_ALREADY_EXISTS
-#ifdef UNIV_AIX
+#ifdef IB_AIX
 		    /* AIX 5.1 after security patch ML7 may have errno set
 		    to 0 here, which causes our function to return 100;
 		    work around that AIX problem */
@@ -761,7 +761,7 @@ open_or_create_log_file(
 		ib_logger(ib_stream,
 			"InnoDB: Setting log file %s size to %lu MB\n",
 			name, (ulong) srv_log_file_size
-			>> (20 - UNIV_PAGE_SIZE_SHIFT));
+			>> (20 - IB_PAGE_SIZE_SHIFT));
 
 		ib_logger(ib_stream,
 			"InnoDB: Database physically writes the file"
@@ -795,7 +795,7 @@ open_or_create_log_file(
 
 	fil_node_create(name, srv_log_file_size,
 			2 * k + SRV_LOG_SPACE_FIRST_ID, FALSE);
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	/* If this is the first log group, create the file space object
 	for archived logs.  */
 
@@ -810,10 +810,10 @@ open_or_create_log_file(
 		// FIXME: ARCHIVE: Where is this defined ?
 		//arch_space_id = ULINT_UNDEFINED;
 	}
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	if (i == 0) {
 		log_group_init(k, srv_n_log_files,
-			       srv_log_file_size * UNIV_PAGE_SIZE,
+			       srv_log_file_size * IB_PAGE_SIZE,
 			       2 * k + SRV_LOG_SPACE_FIRST_ID,
 			       SRV_LOG_SPACE_FIRST_ID + 1); /* dummy arch
 							    space id */
@@ -831,12 +831,12 @@ open_or_create_data_files(
 /*======================*/
 	ibool*		create_new_db,	/*!< out: TRUE if new database should be
 					created */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint*		min_arch_log_no,/*!< out: min of archived log
 					numbers in data files */
 	ulint*		max_arch_log_no,/*!< out: max of archived log
 					numbers in data files */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	ib_uint64_t*	min_flushed_lsn,/*!< out: min of flushed lsn
 					values in data files */
 	ib_uint64_t*	max_flushed_lsn,/*!< out: max of flushed lsn
@@ -921,7 +921,7 @@ open_or_create_data_files(
 			if (ret == FALSE
 			    && os_file_get_last_error(FALSE)
 			       != OS_FILE_ALREADY_EXISTS
-#ifdef UNIV_AIX
+#ifdef IB_AIX
 			    /* AIX 5.1 after security patch ML7 may have
 			    errno set to 0 here, which causes our function
 			    to return 100; work around that AIX problem */
@@ -1006,7 +1006,7 @@ open_or_create_data_files(
 
 			rounded_size_pages
 				= (size / (1024 * 1024) + 4096 * size_high)
-					<< (20 - UNIV_PAGE_SIZE_SHIFT);
+					<< (20 - IB_PAGE_SIZE_SHIFT);
 
 			if (i == srv_n_data_files - 1
 			    && srv_auto_extend_last_data_file) {
@@ -1056,9 +1056,9 @@ open_or_create_data_files(
 skip_size_check:
 			fil_read_flushed_lsn_and_arch_log_no(
 				files[i], one_opened,
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 				min_arch_log_no, max_arch_log_no,
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 				min_flushed_lsn, max_flushed_lsn);
 			one_opened = TRUE;
 		} else {
@@ -1087,7 +1087,7 @@ skip_size_check:
 				"  InnoDB: Setting file %s size to %lu MB\n",
 				name,
 				(ulong) (srv_data_file_sizes[i]
-					 >> (20 - UNIV_PAGE_SIZE_SHIFT)));
+					 >> (20 - IB_PAGE_SIZE_SHIFT)));
 
 			ib_logger(ib_stream,
 				"InnoDB: Database physically writes the"
@@ -1179,10 +1179,10 @@ innobase_start_or_create(void)
 	ibool		log_opened	= FALSE;
 	ib_uint64_t	min_flushed_lsn;
 	ib_uint64_t	max_flushed_lsn;
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint		min_arch_log_no;
 	ulint		max_arch_log_no;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	ulint		sum_of_new_sizes;
 	ulint		sum_of_data_file_sizes;
 	ulint		tablespace_size_in_header;
@@ -1194,11 +1194,11 @@ innobase_start_or_create(void)
 
 	srv_file_per_table_original_value = srv_file_per_table;
 
-#ifdef HAVE_DARWIN_THREADS
+#ifdef IB_HAVE_DARWIN_THREADS
 # ifdef F_FULLFSYNC
 	/* This executable has been compiled on Mac OS X 10.3 or later.
 	Assume that F_FULLFSYNC is available at run-time. */
-	srv_have_fullfsync = TRUE;
+	srv_IB_HAVE_fullfsync = TRUE;
 # else /* F_FULLFSYNC */
 	/* This executable has been compiled on Mac OS X 10.2
 	or earlier.  Determine if the executable is running
@@ -1208,16 +1208,16 @@ innobase_start_or_create(void)
 		ib_logger(ib_stream,
 			"InnoDB: cannot determine Mac OS X version!\n");
 	} else {
-		srv_have_fullfsync = strcmp(utsname.release, "7.") >= 0;
+		srv_IB_HAVE_fullfsync = strcmp(utsname.release, "7.") >= 0;
 	}
-	if (!srv_have_fullfsync) {
+	if (!srv_IB_HAVE_fullfsync) {
 		ib_logger(ib_stream,
 			"InnoDB: On Mac OS X, fsync() may be"
 			" broken on internal drives,\n"
 			"InnoDB: making transactions unsafe!\n");
 	}
 # endif /* F_FULLFSYNC */
-#endif /* HAVE_DARWIN_THREADS */
+#endif /* IB_HAVE_DARWIN_THREADS */
 
 	if (sizeof(ulint) != sizeof(void*)) {
 		ib_logger(ib_stream,
@@ -1234,57 +1234,57 @@ innobase_start_or_create(void)
 	server will not accept connections (which could modify
 	file_per_table) until this function has returned. */
 	srv_file_per_table = FALSE;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ib_logger(ib_stream,
-		"InnoDB: !!!!!!!! UNIV_DEBUG switched on !!!!!!!!!\n");
+		"InnoDB: !!!!!!!! IB_DEBUG switched on !!!!!!!!!\n");
 #endif
 
-#ifdef UNIV_IBUF_DEBUG
+#ifdef IB_IBUF_DEBUG
 	ib_logger(ib_stream,
-		"InnoDB: !!!!!!!! UNIV_IBUF_DEBUG switched on !!!!!!!!!\n"
-# ifdef UNIV_IBUF_COUNT_DEBUG
-		"InnoDB: !!!!!!!! UNIV_IBUF_COUNT_DEBUG switched on !!!!!!!!!\n"
-		"InnoDB: Crash recovery will fail with UNIV_IBUF_COUNT_DEBUG\n"
+		"InnoDB: !!!!!!!! IB_IBUF_DEBUG switched on !!!!!!!!!\n"
+# ifdef IB_IBUF_COUNT_DEBUG
+		"InnoDB: !!!!!!!! IB_IBUF_COUNT_DEBUG switched on !!!!!!!!!\n"
+		"InnoDB: Crash recovery will fail with IB_IBUF_COUNT_DEBUG\n"
 # endif
 		);
 #endif
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ib_logger(ib_stream,
-		"InnoDB: !!!!!!!! UNIV_SYNC_DEBUG switched on !!!!!!!!!\n");
+		"InnoDB: !!!!!!!! IB_SYNC_DEBUG switched on !!!!!!!!!\n");
 #endif
 
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	ib_logger(ib_stream,
-		"InnoDB: !!!!!!!! UNIV_SEARCH_DEBUG switched on !!!!!!!!!\n");
+		"InnoDB: !!!!!!!! IB_SEARCH_DEBUG switched on !!!!!!!!!\n");
 #endif
 
-#ifdef UNIV_LOG_LSN_DEBUG
+#ifdef IB_LOG_LSN_DEBUG
 	ib_logger(ib_stream,
-		"InnoDB: !!!!!!!! UNIV_LOG_LSN_DEBUG switched on !!!!!!!!!\n");
-#endif /* UNIV_LOG_LSN_DEBUG */
-#ifdef UNIV_MEM_DEBUG
+		"InnoDB: !!!!!!!! IB_LOG_LSN_DEBUG switched on !!!!!!!!!\n");
+#endif /* IB_LOG_LSN_DEBUG */
+#ifdef IB_MEM_DEBUG
 	ib_logger(ib_stream,
-		"InnoDB: !!!!!!!! UNIV_MEM_DEBUG switched on !!!!!!!!!\n");
+		"InnoDB: !!!!!!!! IB_MEM_DEBUG switched on !!!!!!!!!\n");
 #endif
 
-	if (UNIV_LIKELY(srv_use_sys_malloc)) {
+	if (IB_LIKELY(srv_use_sys_malloc)) {
 		ib_logger(ib_stream,
 			"InnoDB: The InnoDB memory heap is disabled\n");
 	}
 
 	ib_logger(ib_stream,
 		  "InnoDB: " IB_ATOMICS_STARTUP_MSG
-#ifdef HAVE_ZIP
+#ifdef IB_HAVE_ZIP
 		  "\nInnoDB: Compressed tables use zlib " ZLIB_VERSION
-# ifdef UNIV_ZIP_DEBUG
+# ifdef IB_ZIP_DEBUG
 		  " with validation"
-# endif /* UNIV_ZIP_DEBUG */
-# ifdef UNIV_ZIP_COPY
+# endif /* IB_ZIP_DEBUG */
+# ifdef IB_ZIP_COPY
 		  " and extra copying"
-# endif /* UNIV_ZIP_COPY */
+# endif /* IB_ZIP_COPY */
 
-#endif /* HAVE_ZIP */
+#endif /* IB_HAVE_ZIP */
 		 "\n");
 
 	/* Print an error message if someone tries to start up InnoDB a
@@ -1299,9 +1299,9 @@ innobase_start_or_create(void)
 
 	srv_start_has_been_called = TRUE;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	log_do_write = TRUE;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	/*	yydebug = TRUE; */
 
 	srv_is_being_started = TRUE;
@@ -1359,7 +1359,7 @@ innobase_start_or_create(void)
 		io_limit = SRV_N_PENDING_IOS_PER_THREAD;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* We have observed deadlocks with a 5MB buffer pool but
 	the actual lower limit could very well be a little higher. */
 
@@ -1372,7 +1372,7 @@ innobase_start_or_create(void)
 	}
 #endif
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if (0 != ut_strcmp(srv_log_group_home_dirs[0], srv_arch_dir)) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: you must set the log group"
@@ -1380,7 +1380,7 @@ innobase_start_or_create(void)
 
 		return(DB_ERROR);
 	}
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 	if (srv_n_log_files * srv_log_file_size >= 262144) {
 		ib_logger(ib_stream,
@@ -1407,7 +1407,7 @@ innobase_start_or_create(void)
 		sum_of_new_sizes += srv_data_file_sizes[i];
 	}
 
-	if (sum_of_new_sizes < 10485760 / UNIV_PAGE_SIZE) {
+	if (sum_of_new_sizes < 10485760 / IB_PAGE_SIZE) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: tablespace size must be"
 			" at least 10 MB\n");
@@ -1449,9 +1449,9 @@ innobase_start_or_create(void)
 	}
 
 	err = open_or_create_data_files(&create_new_db,
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 					&min_arch_log_no, &max_arch_log_no,
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 					&min_flushed_lsn, &max_flushed_lsn,
 					&sum_of_new_sizes);
 	if (err != DB_SUCCESS) {
@@ -1475,10 +1475,10 @@ innobase_start_or_create(void)
 		return(err);
 	}
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	srv_normalize_path_for_win(srv_arch_dir);
 	srv_arch_dir = srv_add_path_separator_if_needed(srv_arch_dir);
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 	for (i = 0; i < srv_n_log_files; i++) {
 
@@ -1519,14 +1519,14 @@ innobase_start_or_create(void)
 	fil_open_log_and_system_tablespace_files();
 
 	if (log_created && !create_new_db
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	    && !srv_archive_recovery
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	    ) {
 		if (max_flushed_lsn != min_flushed_lsn
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		    || max_arch_log_no != min_arch_log_no
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 		    ) {
 			ib_logger(ib_stream,
 				"InnoDB: Cannot initialize created"
@@ -1557,13 +1557,13 @@ innobase_start_or_create(void)
 
 		mutex_enter(&(log_sys->mutex));
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		/* Do not + 1 arch_log_no because we do not use log
 		archiving */
 		recv_reset_logs(max_flushed_lsn, max_arch_log_no, TRUE);
 #else
 		recv_reset_logs(max_flushed_lsn, TRUE);
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 		mutex_exit(&(log_sys->mutex));
 	}
@@ -1580,7 +1580,7 @@ innobase_start_or_create(void)
 		dict_create();
 		srv_startup_is_before_trx_rollback_phase = FALSE;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	} else if (srv_archive_recovery) {
 		ib_logger(ib_stream,
 			"InnoDB: Starting archive"
@@ -1604,7 +1604,7 @@ innobase_start_or_create(void)
 		fsp_header_get_free_limit();
 
 		recv_recovery_from_archive_finish();
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	} else {
 
 		/* Check if we support the max format that is stamped
@@ -1704,7 +1704,7 @@ innobase_start_or_create(void)
 		log_buffer_flush_to_disk();
 	}
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if (!srv_log_archive_on) {
 		ut_a(DB_SUCCESS == log_archive_noarchivelog());
 	} else {
@@ -1725,7 +1725,7 @@ innobase_start_or_create(void)
 			ut_a(DB_SUCCESS == log_archive_archivelog());
 		}
 	}
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 	/* ib_logger(ib_stream, "Max allowed record size %lu\n",
 	page_get_free_space_of_empty() / 2); */
@@ -1764,9 +1764,9 @@ innobase_start_or_create(void)
 
 	os_thread_create(&srv_master_thread, NULL, thread_ids
 			 + (1 + SRV_MAX_N_IO_THREADS));
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* buf_debug_prints = TRUE; */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	sum_of_data_file_sizes = 0;
 
 	for (i = 0; i < srv_n_data_files; i++) {
@@ -2103,10 +2103,10 @@ innobase_shutdown(
 	/* This variable should come from the user and should not be
 	malloced by InnoDB. */
 	srv_data_home = NULL;
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	free(srv_arch_dir);
 	srv_arch_dir = NULL;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	/* This variable should come from the user and should not be
 	malloced by InnoDB. */
 
@@ -2158,4 +2158,4 @@ void set_panic_flag_for_netware()
 	panic_shutdown = TRUE;
 }
 #endif /* __NETWARE__ */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

@@ -19,7 +19,7 @@
 /// @file api_cfg.cpp
 /// \brief HailDB API configuration implementation
 
-#ifdef HAVE_STRINGS_H
+#ifdef IB_HAVE_STRINGS_H
   #include <strings.h>
 #endif
 

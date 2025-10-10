@@ -52,7 +52,7 @@ At the present, the comparison functions return 0 in the case,
 where two records disagree only in the way that one
 has more fields than the other. */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*************************************************************//**
 Used in debug checking of cmp_dtuple_... .
 This function is used to compare a data tuple to a physical record. If
@@ -75,7 +75,7 @@ cmp_debug_dtuple_rec_with_match(
 				completely  matched fields; when function
 				returns, contains the value for current
 				comparison */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************************//**
 Transforms the character code so that it is ordered appropriately for the
 language. This is only used for the latin1 char set. The client does the
@@ -160,10 +160,10 @@ cmp_whole_field(
 	ib_u16_t	prtype,		/*!< in: precise type */
 	const byte*	a,		/*!< in: data field */
 	unsigned int	a_length,	/*!< in: data field length,
-					not UNIV_SQL_NULL */
+					not IB_SQL_NULL */
 	const byte*	b,		/*!< in: data field */
 	unsigned int	b_length)	/*!< in: data field length,
-					not UNIV_SQL_NULL */
+					not IB_SQL_NULL */
 {
 	float		f_1;
 	float		f_2;
@@ -315,23 +315,23 @@ cmp_data_data_slow(
 	ulint		prtype,	/*!< in: precise type */
 	const byte*	data1,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len1,	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len1,	/*!< in: data field length or IB_SQL_NULL */
 	const byte*	data2,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len2)	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len2)	/*!< in: data field length or IB_SQL_NULL */
 {
 	ulint	data1_byte;
 	ulint	data2_byte;
 	ulint	cur_bytes;
 
-	if (len1 == UNIV_SQL_NULL || len2 == UNIV_SQL_NULL) {
+	if (len1 == IB_SQL_NULL || len2 == IB_SQL_NULL) {
 
 		if (len1 == len2) {
 
 			return(0);
 		}
 
-		if (len1 == UNIV_SQL_NULL) {
+		if (len1 == IB_SQL_NULL) {
 			/* We define the SQL null to be the smallest possible
 			value of a field in the alphabetical order */
 
@@ -479,10 +479,10 @@ cmp_dtuple_rec_with_match(
 						     rec_offs_comp(offsets));
 		ulint	tup_info = dtuple_get_info_bits(dtuple);
 
-		if (UNIV_UNLIKELY(rec_info & REC_INFO_MIN_REC_FLAG)) {
+		if (IB_UNLIKELY(rec_info & REC_INFO_MIN_REC_FLAG)) {
 			ret = !(tup_info & REC_INFO_MIN_REC_FLAG);
 			goto order_resolved;
-		} else if (UNIV_UNLIKELY(tup_info & REC_INFO_MIN_REC_FLAG)) {
+		} else if (IB_UNLIKELY(tup_info & REC_INFO_MIN_REC_FLAG)) {
 			ret = -1;
 			goto order_resolved;
 		}
@@ -515,7 +515,7 @@ cmp_dtuple_rec_with_match(
 		the predefined minimum record, or the field is externally
 		stored */
 
-		if (UNIV_LIKELY(cur_bytes == 0)) {
+		if (IB_LIKELY(cur_bytes == 0)) {
 			if (rec_offs_nth_extern(offsets, cur_field)) {
 				/* We do not compare to an externally
 				stored field */
@@ -525,15 +525,15 @@ cmp_dtuple_rec_with_match(
 				goto order_resolved;
 			}
 
-			if (dtuple_f_len == UNIV_SQL_NULL) {
-				if (rec_f_len == UNIV_SQL_NULL) {
+			if (dtuple_f_len == IB_SQL_NULL) {
+				if (rec_f_len == IB_SQL_NULL) {
 
 					goto next_field;
 				}
 
 				ret = -1;
 				goto order_resolved;
-			} else if (rec_f_len == UNIV_SQL_NULL) {
+			} else if (rec_f_len == IB_SQL_NULL) {
 				/* We define the SQL null to be the
 				smallest possible value of a field
 				in the alphabetical order */
@@ -572,7 +572,7 @@ cmp_dtuple_rec_with_match(
 		/* Compare then the fields */
 
 		for (;;) {
-			if (UNIV_UNLIKELY(rec_f_len <= cur_bytes)) {
+			if (IB_UNLIKELY(rec_f_len <= cur_bytes)) {
 				if (dtuple_f_len <= cur_bytes) {
 
 					goto next_field;
@@ -589,7 +589,7 @@ cmp_dtuple_rec_with_match(
 				rec_byte = *rec_b_ptr;
 			}
 
-			if (UNIV_UNLIKELY(dtuple_f_len <= cur_bytes)) {
+			if (IB_UNLIKELY(dtuple_f_len <= cur_bytes)) {
 				dtuple_byte = dtype_get_pad_char(mtype,
 								 prtype);
 
@@ -619,7 +619,7 @@ cmp_dtuple_rec_with_match(
 			}
 
 			ret = (int) (dtuple_byte - rec_byte);
-			if (UNIV_LIKELY(ret)) {
+			if (IB_LIKELY(ret)) {
 				if (ret < 0) {
 					ret = -1;
 					goto order_resolved;
@@ -777,14 +777,14 @@ cmp_rec_rec_simple(
 		rec2_b_ptr = rec_get_nth_field(rec2, offsets2,
 					       cur_field, &rec2_f_len);
 
-		if (rec1_f_len == UNIV_SQL_NULL
-		    || rec2_f_len == UNIV_SQL_NULL) {
+		if (rec1_f_len == IB_SQL_NULL
+		    || rec2_f_len == IB_SQL_NULL) {
 
 			if (rec1_f_len == rec2_f_len) {
 
 				goto next_field;
 
-			} else if (rec2_f_len == UNIV_SQL_NULL) {
+			} else if (rec2_f_len == IB_SQL_NULL) {
 
 				/* We define the SQL null to be the
 				smallest possible value of a field
@@ -934,7 +934,7 @@ cmp_rec_rec_with_match(
 		ulint		mtype;
 		ib_u16_t	prtype;
 
-		if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+		if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 			/* This is for the insert buffer B-tree. */
 			mtype = DATA_BINARY;
 			prtype = 0;
@@ -955,7 +955,7 @@ cmp_rec_rec_with_match(
 			if (cur_field == 0) {
 				/* Test if rec is the predefined minimum
 				record */
-				if (UNIV_UNLIKELY(rec_get_info_bits(rec1, comp)
+				if (IB_UNLIKELY(rec_get_info_bits(rec1, comp)
 						  & REC_INFO_MIN_REC_FLAG)) {
 
 					if (!(rec_get_info_bits(rec2, comp)
@@ -965,7 +965,7 @@ cmp_rec_rec_with_match(
 
 					goto order_resolved;
 
-				} else if (UNIV_UNLIKELY
+				} else if (IB_UNLIKELY
 					   (rec_get_info_bits(rec2, comp)
 					    & REC_INFO_MIN_REC_FLAG)) {
 
@@ -983,14 +983,14 @@ cmp_rec_rec_with_match(
 				goto order_resolved;
 			}
 
-			if (rec1_f_len == UNIV_SQL_NULL
-			    || rec2_f_len == UNIV_SQL_NULL) {
+			if (rec1_f_len == IB_SQL_NULL
+			    || rec2_f_len == IB_SQL_NULL) {
 
 				if (rec1_f_len == rec2_f_len) {
 
 					goto next_field;
 
-				} else if (rec2_f_len == UNIV_SQL_NULL) {
+				} else if (rec2_f_len == IB_SQL_NULL) {
 
 					/* We define the SQL null to be the
 					smallest possible value of a field
@@ -1112,7 +1112,7 @@ order_resolved:
 	return(ret);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*************************************************************//**
 Used in debug checking of cmp_dtuple_... .
 This function is used to compare a data tuple to a physical record. If
@@ -1157,7 +1157,7 @@ cmp_debug_dtuple_rec_with_match(
 	cur_field = *matched_fields;
 
 	if (cur_field == 0) {
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (rec_get_info_bits(rec, rec_offs_comp(offsets))
 		     & REC_INFO_MIN_REC_FLAG)) {
 
@@ -1167,7 +1167,7 @@ cmp_debug_dtuple_rec_with_match(
 			goto order_resolved;
 		}
 
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (dtuple_get_info_bits(dtuple) & REC_INFO_MIN_REC_FLAG)) {
 			ret = -1;
 
@@ -1225,4 +1225,4 @@ order_resolved:
 
 	return(ret);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */

@@ -25,11 +25,11 @@ AC_DEFUN([PANDORA_PRINT_CALLSTACK],[
 #define PANDORA_PRINTSTACK_STD_PREFIX
 #endif
 
-#if defined(HAVE_UCONTEXT_H) && defined(HAVE_PRINTSTACK)
+#if defined(IB_HAVE_UCONTEXT_H) && defined(IB_HAVE_PRINTSTACK)
 #include <ucontext.h>
 #define pandora_print_callstack(a) \
 printstack(PANDORA_PRINTSTACK_STD_PREFIX fileno(a))
-#elif defined(HAVE_EXECINFO_H) && defined(HAVE_BACKTRACE) && defined(HAVE_BACKTRACE_SYMBOLS_FD)
+#elif defined(IB_HAVE_EXECINFO_H) && defined(IB_HAVE_BACKTRACE) && defined(IB_HAVE_BACKTRACE_SYMBOLS_FD)
 
 #include <execinfo.h>
 
@@ -39,7 +39,7 @@ printstack(PANDORA_PRINTSTACK_STD_PREFIX fileno(a))
   int depth = backtrace(stack, 100); \
   backtrace_symbols_fd(stack, depth, PANDORA_PRINTSTACK_STD_PREFIX fileno(a)); \
 }
-#elif defined(HAVE_EXECINFO_H) && defined(HAVE_BACKTRACE) && defined(HAVE_BACKTRACE_SYMBOLS) && !defined(HAVE_BACKTRACE_SYMBOLS_FD)
+#elif defined(IB_HAVE_EXECINFO_H) && defined(IB_HAVE_BACKTRACE) && defined(IB_HAVE_BACKTRACE_SYMBOLS) && !defined(IB_HAVE_BACKTRACE_SYMBOLS_FD)
 
 #include <execinfo.h>
 

@@ -531,7 +531,7 @@ read_cursor_set(
 
 	mutex_enter(&kernel_mutex);
 
-	if (UNIV_LIKELY(curview != NULL)) {
+	if (IB_LIKELY(curview != NULL)) {
 		trx->read_view = curview->read_view;
 	} else {
 		trx->read_view = trx->global_read_view;

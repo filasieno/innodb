@@ -8,7 +8,7 @@ dnl with or without modifications, as long as this notice is preserved.
 #--------------------------------------------------------------------
 
 
-AC_DEFUN([PANDORA_HAVE_GCC_ATOMICS],[
+AC_DEFUN([PANDORA_IB_HAVE_GCC_ATOMICS],[
 	
   AC_CACHE_CHECK(
     [whether the compiler provides atomic builtins],
@@ -30,7 +30,7 @@ AC_DEFUN([PANDORA_HAVE_GCC_ATOMICS],[
       [ac_cv_gcc_atomic_builtins=no])])
 
   AS_IF([test "x$ac_cv_gcc_atomic_builtins" = "xyes"],[
-    AC_DEFINE(HAVE_GCC_ATOMIC_BUILTINS, 1,
+    AC_DEFINE(IB_HAVE_GCC_ATOMIC_BUILTINS, 1,
               [Define to 1 if compiler provides atomic builtins.])
   ])
 

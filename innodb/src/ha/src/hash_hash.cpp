@@ -30,7 +30,7 @@ Created 5/20/1997 Heikki Tuuri
 
 #include "mem_mem.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /************************************************************//**
 Reserves the mutex for a fold value in a hash table. */
 IB_INTERN
@@ -86,7 +86,7 @@ hash_mutex_exit_all(
 		mutex_exit(table->mutexes + i);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*************************************************************//**
 Creates a hash table with >= n array cells. The actual number of cells is
@@ -110,14 +110,14 @@ hash_create(
 
 	table->array = array;
 	table->n_cells = prime;
-#ifndef UNIV_HOTBACKUP
-# if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#ifndef IB_HOTBACKUP
+# if defined IB_AHI_DEBUG || defined IB_DEBUG
 	table->adaptive = FALSE;
-# endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+# endif /* IB_AHI_DEBUG || IB_DEBUG */
 	table->n_mutexes = 0;
 	table->mutexes = NULL;
 	table->heaps = NULL;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	table->heap = NULL;
 	ut_d(table->magic_n = HASH_TABLE_MAGIC_N);
 
@@ -137,15 +137,15 @@ hash_table_free(
 {
 	ut_ad(table);
 	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ut_a(table->mutexes == NULL);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_free(table->array);
 	mem_free(table);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Creates a mutex array to protect a hash table. */
 IB_INTERN
@@ -153,10 +153,10 @@ void
 hash_create_mutexes_func(
 /*=====================*/
 	hash_table_t*	table,		/*!< in: hash table */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		sync_level,	/*!< in: latching order level of the
 					mutexes: used in the debug version */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ulint		n_mutexes)	/*!< in: number of mutexes, must be a
 					power of 2 */
 {
@@ -188,11 +188,11 @@ hash_free_mutexes_func(
 
 	for (i = 0; i < table->n_mutexes; i++) {
 		mutex_free(&table->mutexes[i]);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		memset(&table->mutexes[i], 0x0, sizeof(table->mutexes[i]));
 #endif
 	}
 
 	mem_free(table->mutexes);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

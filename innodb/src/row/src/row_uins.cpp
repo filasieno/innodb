@@ -267,8 +267,8 @@ row_undo_ins_parse_undo_rec(
 		srv_force_recovery, table_id, node->trx);
 
 	/* Skip the UNDO if we can't find the table or the .ibd file. */
-	if (UNIV_UNLIKELY(node->table == NULL)) {
-	} else if (UNIV_UNLIKELY(node->table->ibd_file_missing)) {
+	if (IB_UNLIKELY(node->table == NULL)) {
+	} else if (IB_UNLIKELY(node->table->ibd_file_missing)) {
 		node->table = NULL;
 	} else {
 		clust_index = dict_table_get_first_index(node->table);
@@ -325,7 +325,7 @@ row_undo_ins(
 
 		entry = row_build_index_entry(node->row, node->ext,
 					      node->index, node->heap);
-		if (UNIV_UNLIKELY(!entry)) {
+		if (IB_UNLIKELY(!entry)) {
 			/* The database must have crashed after
 			inserting a clustered index record but before
 			writing all the externally stored columns of

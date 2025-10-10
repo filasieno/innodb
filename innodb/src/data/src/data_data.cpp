@@ -27,7 +27,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "data0data.inl"
 #endif
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "rem_rec.hpp"
 #include "rem_cmp.hpp"
 #include "page_page.hpp"
@@ -36,21 +36,21 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "btr_cur.hpp"
 
 #include <ctype.h>
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /** Dummy variable to catch access to uninitialized fields.  In the
 debug version, dtuple_create() will make all fields of dtuple_t point
 to data_error. */
 IB_INTERN byte	data_error;
 
-# ifndef UNIV_DEBUG_VALGRIND
+# ifndef IB_DEBUG_VALGRIND
 /** this is used to fool the compiler in dtuple_validate */
 IB_INTERN ulint	data_dummy;
-# endif /* !UNIV_DEBUG_VALGRIND */
-#endif /* UNIV_DEBUG */
+# endif /* !IB_DEBUG_VALGRIND */
+#endif /* IB_DEBUG */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Reset dfield variables. */
 IB_INTERN
@@ -58,12 +58,12 @@ void
 dfield_var_init(void)
 /*=================*/
 {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	data_error = 0;
-# ifndef UNIV_DEBUG_VALGRIND
+# ifndef IB_DEBUG_VALGRIND
 	data_dummy = 0;
-# endif /* !UNIV_DEBUG_VALGRIND */
-#endif /* UNIV_DEBUG */
+# endif /* !IB_DEBUG_VALGRIND */
+#endif /* IB_DEBUG */
 }
 
 /*************************************************************************
@@ -74,7 +74,7 @@ ibool
 dfield_data_is_binary_equal(
 /*========================*/
 	const dfield_t*	field,	/*!< in: field */
-	ulint		len,	/*!< in: data length or UNIV_SQL_NULL */
+	ulint		len,	/*!< in: data length or IB_SQL_NULL */
 	const byte*	data)	/*!< in: data */
 {
 	if (len != dfield_get_len(field)) {
@@ -82,7 +82,7 @@ dfield_data_is_binary_equal(
 		return(FALSE);
 	}
 
-	if (len == UNIV_SQL_NULL) {
+	if (len == IB_SQL_NULL) {
 
 		return(TRUE);
 	}
@@ -211,9 +211,9 @@ dump:
 
 	return(TRUE);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************//**
 Checks that a data field is typed. Asserts an error if not.
 @return	TRUE if ok */
@@ -289,7 +289,7 @@ dtuple_validate(
 		if (!dfield_is_null(field)) {
 
 			const byte*	data = dfield_get_data(field);
-#ifndef UNIV_DEBUG_VALGRIND
+#ifndef IB_DEBUG_VALGRIND
 			ulint		j;
 
 			for (j = 0; j < len; j++) {
@@ -299,9 +299,9 @@ dtuple_validate(
 						      code */
 				data++;
 			}
-#endif /* !UNIV_DEBUG_VALGRIND */
+#endif /* !IB_DEBUG_VALGRIND */
 
-			UNIV_MEM_ASSERT_RW(data, len);
+			IB_MEM_ASSERT_RW(data, len);
 		}
 	}
 
@@ -309,9 +309,9 @@ dtuple_validate(
 
 	return(TRUE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Pretty prints a dfield value according to its data type. */
 IB_INTERN
@@ -603,7 +603,7 @@ dtuple_convert_big_rec(
 	ulint		local_len;
 	ulint		local_prefix_len;
 
-	if (UNIV_UNLIKELY(!dict_index_is_clust(index))) {
+	if (IB_UNLIKELY(!dict_index_is_clust(index))) {
 		return(NULL);
 	}
 
@@ -619,7 +619,7 @@ dtuple_convert_big_rec(
 
 	size = rec_get_converted_size(index, entry, *n_ext);
 
-	if (UNIV_UNLIKELY(size > 1000000000)) {
+	if (IB_UNLIKELY(size > 1000000000)) {
 		ib_logger(ib_stream,
 			"InnoDB: Warning: tuple size very big: %lu\n",
 			(ulong) size);
@@ -737,7 +737,7 @@ skip_field:
 		page_cur_insert_rec_low() and page_cur_insert_rec_zip().
 		The BLOB pointers in the record will be initialized after
 		the record and the BLOBs have been written. */
-		UNIV_MEM_ALLOC(data + local_prefix_len,
+		IB_MEM_ALLOC(data + local_prefix_len,
 			       BTR_EXTERN_FIELD_REF_SIZE);
 #endif
 
@@ -790,4 +790,4 @@ dtuple_convert_back_big_rec(
 
 	mem_heap_free(vector->heap);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

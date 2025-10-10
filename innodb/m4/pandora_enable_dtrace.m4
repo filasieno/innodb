@@ -31,7 +31,7 @@ _ACEOF
         rm -f conftest.h conftest.d
       ])
       AS_IF([test "x$ac_cv_dtrace_works" = "xyes"],[
-        AC_DEFINE([HAVE_DTRACE], [1], [Enables DTRACE Support])
+        AC_DEFINE([IB_HAVE_DTRACE], [1], [Enables DTRACE Support])
       ])
       AC_CACHE_CHECK([if dtrace should instrument object files],
         [ac_cv_dtrace_needs_objects],[
@@ -47,10 +47,10 @@ _ACEOF
           rm -f conftest.d.o conftest.d
       ])
       AC_SUBST(DTRACEFLAGS) dnl TODO: test for -G on OSX
-      ac_cv_have_dtrace=yes
+      ac_cv_IB_HAVE_dtrace=yes
     ])])
 
-AM_CONDITIONAL([HAVE_DTRACE], [test "x$ac_cv_dtrace_works" = "xyes"])
+AM_CONDITIONAL([IB_HAVE_DTRACE], [test "x$ac_cv_dtrace_works" = "xyes"])
 AM_CONDITIONAL([DTRACE_NEEDS_OBJECTS],
                [test "x$ac_cv_dtrace_needs_objects" = "xyes"])
 

@@ -68,7 +68,7 @@ Create four type of worker threads (total threads being NUM_THREADS)
 
 #include "test_aux.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -280,7 +280,7 @@ create_table(
 	ib_tbl_sch_t	ib_tbl_sch = NULL;
 	ib_idx_sch_t	idx_sch = NULL;
 	ib_tbl_fmt_t	tbl_fmt = IB_TBL_COMPACT;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 	snprintf(table_name, sizeof(table_name), "%s/%s", dbname, name);
 
@@ -394,7 +394,7 @@ open_table(
 	ib_crsr_t*	crsr)		/*!< out: innodb cursor */
 {
 	ib_err_t	err = DB_SUCCESS;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 	snprintf(table_name, sizeof(table_name), "%s/%s", dbname, name);
 	err = ib_cursor_open_table(table_name, ib_trx, crsr);
@@ -1215,7 +1215,7 @@ int main(int argc, char* argv[])
 
 	clean_up();
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	VALGRIND_DO_LEAK_CHECK;
 #endif
 

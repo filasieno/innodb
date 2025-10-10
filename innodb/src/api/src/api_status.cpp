@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 /// @file api_status.cpp
 /// \brief HailDB API status functions
 
-#ifdef HAVE_STRINGS_H
+#ifdef IB_HAVE_STRINGS_H
 #include <strings.h>
 #endif
 
@@ -87,7 +87,7 @@ static const ib_status_t status_vars[] = {
 	{ "row_total_updated",            IB_STATUS_ULINT,   &export_vars.innodb_rows_updated},
 	{ "row_total_deleted",            IB_STATUS_ULINT,   &export_vars.innodb_rows_deleted},
 	{ "page_size",                    IB_STATUS_ULINT,   &export_vars.innodb_page_size },              // Miscellaneous
-	{ "have_atomic_builtins",         IB_STATUS_IBOOL,   &export_vars.innodb_have_atomic_builtins},
+	{ "IB_HAVE_atomic_builtins",         IB_STATUS_IBOOL,   &export_vars.innodb_IB_HAVE_atomic_builtins},
 	{ NULL, 0, 0}
 };
 

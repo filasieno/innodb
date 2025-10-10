@@ -28,9 +28,9 @@ Created 5/20/1997 Heikki Tuuri
 
 #include "univ.i"
 #include "mem_mem.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "sync0sync.h"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 typedef struct hash_table_struct hash_table_t;
 typedef struct hash_cell_struct hash_cell_t;
@@ -49,7 +49,7 @@ hash_table_t*
 hash_create(
 /*========*/
 	ulint	n);	/*!< in: number of array cells */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Creates a mutex array to protect a hash table. */
 IB_INTERN
@@ -57,17 +57,17 @@ void
 hash_create_mutexes_func(
 /*=====================*/
 	hash_table_t*	table,		/*!< in: hash table */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		sync_level,	/*!< in: latching order level of the
 					mutexes: used in the debug version */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ulint		n_mutexes);	/*!< in: number of mutexes */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 # define hash_create_mutexes(t,n,level) hash_create_mutexes_func(t,level,n)
-#else /* UNIV_SYNC_DEBUG */
+#else /* IB_SYNC_DEBUG */
 # define hash_create_mutexes(t,n,level) hash_create_mutexes_func(t,n)
-#endif /* UNIV_SYNC_DEBUG */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* IB_SYNC_DEBUG */
+#endif /* !IB_HOTBACKUP */
 
 /*************************************************************//**
 Frees a mutex array created with hash_create_mutexes_func(). */
@@ -94,14 +94,14 @@ hash_calc_hash(
 /*===========*/
 	ulint		fold,	/*!< in: folded value */
 	hash_table_t*	table);	/*!< in: hash table */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Assert that the mutex for the table in a hash operation is owned. */
 # define HASH_ASSERT_OWNED(TABLE, FOLD)					\
 ut_ad(!(TABLE)->mutexes || mutex_own(hash_get_mutex(TABLE, FOLD)));
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define HASH_ASSERT_OWNED(TABLE, FOLD)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*******************************************************************//**
 Inserts a struct to a hash table. */
@@ -131,7 +131,7 @@ do {\
 	}\
 } while (0)
 
-#ifdef UNIV_HASH_DEBUG
+#ifdef IB_HASH_DEBUG
 # define HASH_ASSERT_VALID(DATA) ut_a((void*) (DATA) != (void*) -1)
 # define HASH_INVALIDATE(DATA, NAME) DATA->NAME = (void*) -1
 #else
@@ -311,7 +311,7 @@ do {\
 	mem_heap_free_top(hash_get_heap(TABLE, fold111), sizeof(TYPE));\
 } while (0)
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Move all hash table entries from OLD_TABLE to NEW_TABLE. */
 
@@ -412,11 +412,11 @@ void
 hash_mutex_exit_all(
 /*================*/
 	hash_table_t*	table);	/*!< in: hash table */
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define hash_get_heap(table, fold)	((table)->heap)
 # define hash_mutex_enter(table, fold)	((void) 0)
 # define hash_mutex_exit(table, fold)	((void) 0)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 struct hash_cell_struct{
 	void*	node;	/*!< hash chain node, NULL if none */
@@ -424,15 +424,15 @@ struct hash_cell_struct{
 
 /* The hash table structure */
 struct hash_table_struct {
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
+# ifndef IB_HOTBACKUP
 	ibool		adaptive;/* TRUE if this is the hash table of the
 				adaptive hash index */
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	ulint		n_cells;/* number of cells in the hash table */
 	hash_cell_t*	array;	/*!< pointer to cell array */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint		n_mutexes;/* if mutexes != NULL, then the number of
 				mutexes, must be a power of 2 */
 	mutex_t*	mutexes;/* NULL, or an array of mutexes used to
@@ -441,12 +441,12 @@ struct hash_table_struct {
 				external chaining can be allocated from these
 				memory heaps; there are then n_mutexes many of
 				these heaps */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	mem_heap_t*	heap;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint		magic_n;
 # define HASH_TABLE_MAGIC_N	76561114
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 };
 
 #ifndef IB_DO_NOT_INLINE

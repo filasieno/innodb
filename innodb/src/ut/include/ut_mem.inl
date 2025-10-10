@@ -301,7 +301,7 @@ ut_str_sql_format(
 		switch (ch) {
 		case '\0':
 
-			if (UNIV_UNLIKELY(buf_size - buf_i < 4)) {
+			if (IB_UNLIKELY(buf_size - buf_i < 4)) {
 
 				goto func_exit;
 			}
@@ -313,7 +313,7 @@ ut_str_sql_format(
 		case '\'':
 		case '\\':
 
-			if (UNIV_UNLIKELY(buf_size - buf_i < 4)) {
+			if (IB_UNLIKELY(buf_size - buf_i < 4)) {
 
 				goto func_exit;
 			}

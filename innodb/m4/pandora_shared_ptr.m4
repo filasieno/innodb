@@ -12,7 +12,7 @@ dnl  GCC 4.3: namespace: std::  #include <memory>
 dnl  GCC 4.2: namespace: tr1::  #include <tr1/memory>
 dnl  GCC 4.2: namespace: boost::  #include <boost/shared_ptr.hpp>
 dnl
-dnl We define one of HAVE_HAVE_TR1_SHARED_PTR or HAVE_BOOST_SHARED_PTR
+dnl We define one of IB_HAVE_IB_HAVE_TR1_SHARED_PTR or IB_HAVE_BOOST_SHARED_PTR
 dnl depending on location, and SHARED_PTR_NAMESPACE to be the namespace in
 dnl which shared_ptr is defined.
 dnl 
@@ -29,13 +29,13 @@ AC_DEFUN([PANDORA_SHARED_PTR],[
       do
         AC_COMPILE_IFELSE(
           [AC_LANG_PROGRAM([[
-#if defined(HAVE_MEMORY)
+#if defined(IB_HAVE_MEMORY)
 # include <memory>
 #endif
-#if defined(HAVE_TR1_MEMORY)
+#if defined(IB_HAVE_TR1_MEMORY)
 # include <tr1/memory>
 #endif
-#if defined(HAVE_BOOST_SHARED_PTR_HPP)
+#if defined(IB_HAVE_BOOST_SHARED_PTR_HPP)
 # include <boost/shared_ptr.hpp>
 #endif
 #include <string>

@@ -134,7 +134,7 @@ row_undo_mod_clust_low(
 			node->cmpl_info, thr, mtr);
 
 		ut_a(!dummy_big_rec);
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
@@ -457,7 +457,7 @@ row_undo_mod_del_unmark_sec_and_undo_update(
 	trx_t*		trx		= thr_get_trx(thr);
 
 	/* Ignore indexes that are being created. */
-	if (UNIV_UNLIKELY(*index->name == TEMP_INDEX_PREFIX)) {
+	if (IB_UNLIKELY(*index->name == TEMP_INDEX_PREFIX)) {
 
 		return(DB_SUCCESS);
 	}
@@ -465,7 +465,7 @@ row_undo_mod_del_unmark_sec_and_undo_update(
 	log_free_check();
 	mtr_start(&mtr);
 
-	if (UNIV_UNLIKELY(!row_search_index_entry(index, entry,
+	if (IB_UNLIKELY(!row_search_index_entry(index, entry,
 						  mode, &pcur, &mtr))) {
 		ib_logger(ib_stream,
 		      "InnoDB: error in sec index entry del undo in\n"
@@ -548,7 +548,7 @@ row_undo_mod_upd_del_sec(
 
 		entry = row_build_index_entry(node->row, node->ext,
 					      index, heap);
-		if (UNIV_UNLIKELY(!entry)) {
+		if (IB_UNLIKELY(!entry)) {
 			/* The database must have crashed after
 			inserting a clustered index record but before
 			writing all the externally stored columns of

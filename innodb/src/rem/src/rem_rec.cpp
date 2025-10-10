@@ -191,7 +191,7 @@ rec_get_n_extern_new(
 		if (!(dict_field_get_col(field)->prtype & DATA_NOT_NULL)) {
 			/* nullable field => read the null flag */
 
-			if (UNIV_UNLIKELY(!(byte) null_mask)) {
+			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
 				null_mask = 1;
 			}
@@ -204,7 +204,7 @@ rec_get_n_extern_new(
 			null_mask <<= 1;
 		}
 
-		if (UNIV_UNLIKELY(!field->fixed_len)) {
+		if (IB_UNLIKELY(!field->fixed_len)) {
 			/* Variable-length field: read the length */
 			const dict_col_t*	col
 				= dict_field_get_col(field);
@@ -216,8 +216,8 @@ rec_get_n_extern_new(
 			stored in one byte for 0..127.  The length
 			will be encoded in two bytes when it is 128 or
 			more, or when the field is stored externally. */
-			if (UNIV_UNLIKELY(col->len > 255)
-			    || UNIV_UNLIKELY(col->mtype == DATA_BLOB)) {
+			if (IB_UNLIKELY(col->len > 255)
+			    || IB_UNLIKELY(col->mtype == DATA_BLOB)) {
 				if (len & 0x80) {
 					/* 1exxxxxxx xxxxxxxx */
 					if (len & 0x40) {
@@ -259,13 +259,13 @@ rec_init_offsets_comp_ordinary(
 	dict_field_t*	field;
 	ulint		null_mask	= 1;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* We cannot invoke rec_offs_make_valid() here, because it can hold
 	that extra != REC_N_NEW_EXTRA_BYTES.  Similarly, rec_offs_validate()
 	will fail in that case, because it invokes rec_get_status(). */
 	offsets[2] = (ulint) rec;
 	offsets[3] = (ulint) index;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	/* read the lengths of fields 0..n */
 	do {
@@ -276,7 +276,7 @@ rec_init_offsets_comp_ordinary(
 		      & DATA_NOT_NULL)) {
 			/* nullable field => read the null flag */
 
-			if (UNIV_UNLIKELY(!(byte) null_mask)) {
+			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
 				null_mask = 1;
 			}
@@ -293,7 +293,7 @@ rec_init_offsets_comp_ordinary(
 			null_mask <<= 1;
 		}
 
-		if (UNIV_UNLIKELY(!field->fixed_len)) {
+		if (IB_UNLIKELY(!field->fixed_len)) {
 			/* Variable-length field: read the length */
 			const dict_col_t*	col
 				= dict_field_get_col(field);
@@ -305,8 +305,8 @@ rec_init_offsets_comp_ordinary(
 			stored in one byte for 0..127.  The length
 			will be encoded in two bytes when it is 128 or
 			more, or when the field is stored externally. */
-			if (UNIV_UNLIKELY(col->len > 255)
-			    || UNIV_UNLIKELY(col->mtype
+			if (IB_UNLIKELY(col->len > 255)
+			    || IB_UNLIKELY(col->mtype
 					     == DATA_BLOB)) {
 				if (len & 0x80) {
 					/* 1exxxxxxx xxxxxxxx */
@@ -314,7 +314,7 @@ rec_init_offsets_comp_ordinary(
 					len |= *lens--;
 
 					offs += len & 0x3fff;
-					if (UNIV_UNLIKELY(len
+					if (IB_UNLIKELY(len
 							  & 0x4000)) {
 						ut_ad(dict_index_is_clust
 						      (index));
@@ -377,7 +377,7 @@ rec_init_offsets(
 		ulint		status = rec_get_status(rec);
 		ulint		n_node_ptr_field = ULINT_UNDEFINED;
 
-		switch (UNIV_EXPECT(status, REC_STATUS_ORDINARY)) {
+		switch (IB_EXPECT(status, REC_STATUS_ORDINARY)) {
 		case REC_STATUS_INFIMUM:
 		case REC_STATUS_SUPREMUM:
 			/* the field is 8 bytes long */
@@ -404,7 +404,7 @@ rec_init_offsets(
 		/* read the lengths of fields 0..n */
 		do {
 			ulint	len;
-			if (UNIV_UNLIKELY(i == n_node_ptr_field)) {
+			if (IB_UNLIKELY(i == n_node_ptr_field)) {
 				len = offs += 4;
 				goto resolved;
 			}
@@ -414,7 +414,7 @@ rec_init_offsets(
 			      & DATA_NOT_NULL)) {
 				/* nullable field => read the null flag */
 
-				if (UNIV_UNLIKELY(!(byte) null_mask)) {
+				if (IB_UNLIKELY(!(byte) null_mask)) {
 					nulls--;
 					null_mask = 1;
 				}
@@ -431,7 +431,7 @@ rec_init_offsets(
 				null_mask <<= 1;
 			}
 
-			if (UNIV_UNLIKELY(!field->fixed_len)) {
+			if (IB_UNLIKELY(!field->fixed_len)) {
 				/* Variable-length field: read the length */
 				const dict_col_t*	col
 					= dict_field_get_col(field);
@@ -445,8 +445,8 @@ rec_init_offsets(
 				encoded in two bytes when it is 128 or
 				more, or when the field is stored
 				externally. */
-				if (UNIV_UNLIKELY(col->len > 255)
-				    || UNIV_UNLIKELY(col->mtype
+				if (IB_UNLIKELY(col->len > 255)
+				    || IB_UNLIKELY(col->mtype
 						     == DATA_BLOB)) {
 					if (len & 0x80) {
 						/* 1exxxxxxx xxxxxxxx */
@@ -541,7 +541,7 @@ rec_get_offsets_func(
 	ut_ad(heap);
 
 	if (dict_table_is_comp(index->table)) {
-		switch (UNIV_EXPECT(rec_get_status(rec),
+		switch (IB_EXPECT(rec_get_status(rec),
 				    REC_STATUS_ORDINARY)) {
 		case REC_STATUS_ORDINARY:
 			n = dict_index_get_n_fields(index);
@@ -562,15 +562,15 @@ rec_get_offsets_func(
 		n = rec_get_n_fields_old(rec);
 	}
 
-	if (UNIV_UNLIKELY(n_fields < n)) {
+	if (IB_UNLIKELY(n_fields < n)) {
 		n = n_fields;
 	}
 
 	size = n + (1 + REC_OFFS_HEADER_SIZE);
 
-	if (UNIV_UNLIKELY(!offsets)
-	    || UNIV_UNLIKELY(rec_offs_get_n_alloc(offsets) < size)) {
-		if (UNIV_UNLIKELY(!*heap)) {
+	if (IB_UNLIKELY(!offsets)
+	    || IB_UNLIKELY(rec_offs_get_n_alloc(offsets) < size)) {
+		if (IB_UNLIKELY(!*heap)) {
 			*heap = mem_heap_create_func(size * sizeof(ulint),
 						     MEM_HEAP_DYNAMIC,
 						     file, line);
@@ -616,7 +616,7 @@ rec_get_offsets_reverse(
 	ut_ad(offsets);
 	ut_ad(dict_table_is_comp(index->table));
 
-	if (UNIV_UNLIKELY(node_ptr)) {
+	if (IB_UNLIKELY(node_ptr)) {
 		n_node_ptr_field = dict_index_get_n_unique_in_tree(index);
 		n = n_node_ptr_field + 1;
 	} else {
@@ -636,7 +636,7 @@ rec_get_offsets_reverse(
 	/* read the lengths of fields 0..n */
 	do {
 		ulint	len;
-		if (UNIV_UNLIKELY(i == n_node_ptr_field)) {
+		if (IB_UNLIKELY(i == n_node_ptr_field)) {
 			len = offs += 4;
 			goto resolved;
 		}
@@ -645,7 +645,7 @@ rec_get_offsets_reverse(
 		if (!(dict_field_get_col(field)->prtype & DATA_NOT_NULL)) {
 			/* nullable field => read the null flag */
 
-			if (UNIV_UNLIKELY(!(byte) null_mask)) {
+			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls++;
 				null_mask = 1;
 			}
@@ -662,7 +662,7 @@ rec_get_offsets_reverse(
 			null_mask <<= 1;
 		}
 
-		if (UNIV_UNLIKELY(!field->fixed_len)) {
+		if (IB_UNLIKELY(!field->fixed_len)) {
 			/* Variable-length field: read the length */
 			const dict_col_t*	col
 				= dict_field_get_col(field);
@@ -674,15 +674,15 @@ rec_get_offsets_reverse(
 			stored in one byte for 0..127.  The length
 			will be encoded in two bytes when it is 128 or
 			more, or when the field is stored externally. */
-			if (UNIV_UNLIKELY(col->len > 255)
-			    || UNIV_UNLIKELY(col->mtype == DATA_BLOB)) {
+			if (IB_UNLIKELY(col->len > 255)
+			    || IB_UNLIKELY(col->mtype == DATA_BLOB)) {
 				if (len & 0x80) {
 					/* 1exxxxxxx xxxxxxxx */
 					len <<= 8;
 					len |= *lens++;
 
 					offs += len & 0x3fff;
-					if (UNIV_UNLIKELY(len & 0x4000)) {
+					if (IB_UNLIKELY(len & 0x4000)) {
 						any_ext = REC_OFFS_EXTERNAL;
 						len = offs | REC_OFFS_EXTERNAL;
 					} else {
@@ -717,7 +717,7 @@ rec_get_nth_field_offs_old(
 	const rec_t*	rec,	/*!< in: record */
 	ulint		n,	/*!< in: index of the field */
 	ulint*		len)	/*!< out: length of the field;
-				UNIV_SQL_NULL if SQL null */
+				IB_SQL_NULL if SQL null */
 {
 	ulint	os;
 	ulint	next_os;
@@ -732,7 +732,7 @@ rec_get_nth_field_offs_old(
 		next_os = rec_1_get_field_end_info(rec, n);
 
 		if (next_os & REC_1BYTE_SQL_NULL_MASK) {
-			*len = UNIV_SQL_NULL;
+			*len = IB_SQL_NULL;
 
 			return(os);
 		}
@@ -744,7 +744,7 @@ rec_get_nth_field_offs_old(
 		next_os = rec_2_get_field_end_info(rec, n);
 
 		if (next_os & REC_2BYTE_SQL_NULL_MASK) {
-			*len = UNIV_SQL_NULL;
+			*len = IB_SQL_NULL;
 
 			return(os);
 		}
@@ -755,7 +755,7 @@ rec_get_nth_field_offs_old(
 
 	*len = next_os - os;
 
-	ut_ad(*len < UNIV_PAGE_SIZE);
+	ut_ad(*len < IB_PAGE_SIZE);
 
 	return(os);
 }
@@ -836,7 +836,7 @@ rec_get_converted_size_comp_prefix(
 		data_size += len;
 	}
 
-	if (UNIV_LIKELY_NULL(extra)) {
+	if (IB_LIKELY_NULL(extra)) {
 		*extra = extra_size;
 	}
 
@@ -864,7 +864,7 @@ rec_get_converted_size_comp(
 	ut_ad(fields);
 	ut_ad(n_fields > 0);
 
-	switch (UNIV_EXPECT(status, REC_STATUS_ORDINARY)) {
+	switch (IB_EXPECT(status, REC_STATUS_ORDINARY)) {
 	case REC_STATUS_ORDINARY:
 		ut_ad(n_fields == dict_index_get_n_fields(index));
 		size = 0;
@@ -878,7 +878,7 @@ rec_get_converted_size_comp(
 	case REC_STATUS_INFIMUM:
 	case REC_STATUS_SUPREMUM:
 		/* infimum or supremum record, 8 data bytes */
-		if (UNIV_LIKELY_NULL(extra)) {
+		if (IB_LIKELY_NULL(extra)) {
 			*extra = REC_N_NEW_EXTRA_BYTES;
 		}
 		return(REC_N_NEW_EXTRA_BYTES + 8);
@@ -981,11 +981,11 @@ rec_convert_dtuple_to_rec_old(
 	/* Calculate the offset of the origin in the physical record */
 
 	rec = buf + rec_get_converted_extra_size(data_size, n_fields, n_ext);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* Suppress Valgrind warnings of ut_ad()
 	in mach_write_to_1(), mach_write_to_2() et al. */
 	memset(buf, 0xff, rec - buf + data_size);
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	/* Store the number of fields */
 	rec_set_n_fields_old(rec, n_fields);
 
@@ -1093,7 +1093,7 @@ rec_convert_dtuple_to_rec_comp(
 	ut_ad(extra == 0 || extra == REC_N_NEW_EXTRA_BYTES);
 	ut_ad(n_fields > 0);
 
-	switch (UNIV_EXPECT(status, REC_STATUS_ORDINARY)) {
+	switch (IB_EXPECT(status, REC_STATUS_ORDINARY)) {
 	case REC_STATUS_ORDINARY:
 		ut_ad(n_fields <= dict_index_get_n_fields(index));
 		n_node_ptr_field = ULINT_UNDEFINED;
@@ -1126,7 +1126,7 @@ rec_convert_dtuple_to_rec_comp(
 		type = dfield_get_type(field);
 		len = dfield_get_len(field);
 
-		if (UNIV_UNLIKELY(i == n_node_ptr_field)) {
+		if (IB_UNLIKELY(i == n_node_ptr_field)) {
 			ut_ad(dtype_get_prtype(type) & DATA_NOT_NULL);
 			ut_ad(len == 4);
 			memcpy(end, dfield_get_data(field), len);
@@ -1138,7 +1138,7 @@ rec_convert_dtuple_to_rec_comp(
 			/* nullable field */
 			ut_ad(index->n_nullable > 0);
 
-			if (UNIV_UNLIKELY(!(byte) null_mask)) {
+			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
 				null_mask = 1;
 			}
@@ -1255,7 +1255,7 @@ rec_convert_dtuple_to_rec(
 		rec = rec_convert_dtuple_to_rec_old(buf, dtuple, n_ext);
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	{
 		mem_heap_t*	heap	= NULL;
 		ulint		offsets_[REC_OFFS_NORMAL_SIZE];
@@ -1274,11 +1274,11 @@ rec_convert_dtuple_to_rec(
 			      == !rec_offs_nth_extern(offsets, i));
 		}
 
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	return(rec);
 }
 
@@ -1317,7 +1317,7 @@ rec_copy_prefix_to_dtuple(
 		field = dtuple_get_nth_field(tuple, i);
 		data = rec_get_nth_field(rec, offsets, i, &len);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			dfield_set_data(field,
 					mem_heap_dup(heap, data, len), len);
 			ut_ad(!rec_offs_nth_extern(offsets, i));
@@ -1395,7 +1395,7 @@ rec_copy_prefix_to_buf(
 	ulint		null_mask;
 	ulint		status;
 
-	UNIV_PREFETCH_RW(*buf);
+	IB_PREFETCH_RW(*buf);
 
 	if (!dict_table_is_comp(index->table)) {
 		ut_ad(rec_validate_old(rec));
@@ -1425,7 +1425,7 @@ rec_copy_prefix_to_buf(
 
 	nulls = rec - (REC_N_NEW_EXTRA_BYTES + 1);
 	lens = nulls - UT_BITS_IN_BYTES(index->n_nullable);
-	UNIV_PREFETCH_R(lens);
+	IB_PREFETCH_R(lens);
 	prefix_len = 0;
 	null_mask = 1;
 
@@ -1439,7 +1439,7 @@ rec_copy_prefix_to_buf(
 
 		if (!(col->prtype & DATA_NOT_NULL)) {
 			/* nullable field => read the null flag */
-			if (UNIV_UNLIKELY(!(byte) null_mask)) {
+			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
 				null_mask = 1;
 			}
@@ -1469,14 +1469,14 @@ rec_copy_prefix_to_buf(
 					len &= 0x3f;
 					len <<= 8;
 					len |= *lens--;
-					UNIV_PREFETCH_R(lens);
+					IB_PREFETCH_R(lens);
 				}
 			}
 			prefix_len += len;
 		}
 	}
 
-	UNIV_PREFETCH_R(rec + prefix_len);
+	IB_PREFETCH_R(rec + prefix_len);
 
 	prefix_len += rec - (lens + 1);
 
@@ -1521,7 +1521,7 @@ rec_validate_old(
 	for (i = 0; i < n_fields; i++) {
 		data = rec_get_nth_field_old(rec, i, &len);
 
-		if (!((len < UNIV_PAGE_SIZE) || (len == UNIV_SQL_NULL))) {
+		if (!((len < IB_PAGE_SIZE) || (len == IB_SQL_NULL))) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: record field %lu len %lu\n",
 				(ulong) i,
@@ -1529,7 +1529,7 @@ rec_validate_old(
 			return(FALSE);
 		}
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			len_sum += len;
 			sum += *(data + len -1); /* dereference the
 						 end of the field to
@@ -1582,7 +1582,7 @@ rec_validate(
 	for (i = 0; i < n_fields; i++) {
 		data = rec_get_nth_field(rec, offsets, i, &len);
 
-		if (!((len < UNIV_PAGE_SIZE) || (len == UNIV_SQL_NULL))) {
+		if (!((len < IB_PAGE_SIZE) || (len == IB_SQL_NULL))) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: record field %lu len %lu\n",
 				(ulong) i,
@@ -1590,7 +1590,7 @@ rec_validate(
 			return(FALSE);
 		}
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			len_sum += len;
 			sum += *(data + len -1); /* dereference the
 						 end of the field to
@@ -1646,7 +1646,7 @@ rec_print_old(
 
 		ib_logger(ib_stream, " %lu:", (ulong) i);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			if (len <= 30) {
 
 				ut_print_buf(ib_stream, data, len);
@@ -1667,7 +1667,7 @@ rec_print_old(
 	rec_validate_old(rec);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***************************************************************//**
 Prints a physical record in ROW_FORMAT=COMPACT.  Ignores the
 record header. */
@@ -1690,7 +1690,7 @@ rec_print_comp(
 
 		ib_logger(ib_stream, " %lu:", (ulong) i);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			if (len <= 30) {
 
 				ut_print_buf(ib_stream, data, len);
@@ -1759,9 +1759,9 @@ rec_print(
 		rec_print_new(ib_stream, rec,
 			      rec_get_offsets(rec, index, offsets_,
 					      ULINT_UNDEFINED, &heap));
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

@@ -8,22 +8,22 @@ Generator expressions are CMake's way of creating conditional content that gets 
 - **Generation time**: When CMake creates the actual build files (Makefile, Ninja, etc.)
 - Generator expressions are evaluated at generation time
 
-## 1. `$<$<CONFIG:Debug>:UNIV_DEBUG>` - Configuration-Based Condition
+## 1. `$<$<CONFIG:Debug>:IB_DEBUG>` - Configuration-Based Condition
 
 ### How it works
 
 - `$<CONFIG:Debug>` checks if the current build configuration is "Debug"
-- If true, it expands to `UNIV_DEBUG`
+- If true, it expands to `IB_DEBUG`
 - If false, it expands to nothing (empty string)
 
 ### Expansion examples
 
-- **Debug build**: `target_compile_definitions(innodb_pch INTERFACE UNIV_DEBUG UNIV_LINUX)`
-- **Release build**: `target_compile_definitions(innodb_pch INTERFACE UNIV_LINUX)`
+- **Debug build**: `target_compile_definitions(innodb_pch INTERFACE IB_DEBUG IB_LINUX)`
+- **Release build**: `target_compile_definitions(innodb_pch INTERFACE IB_LINUX)`
 
 ### Why this works
 
-`UNIV_DEBUG` only gets defined in Debug builds, while `UNIV_LINUX` is always defined.
+`IB_DEBUG` only gets defined in Debug builds, while `IB_LINUX` is always defined.
 
 ## 2. `$<$<COMPILE_LANGUAGE:CXX>:header.h>` - Language-Based Condition
 
@@ -48,7 +48,7 @@ The pattern is: `$<CONDITION:RESULT_IF_TRUE>`
 
 ### Advanced nesting
 
-`$<$<CONFIG:Debug>:UNIV_DEBUG>` (condition inside condition)
+`$<$<CONFIG:Debug>:IB_DEBUG>` (condition inside condition)
 
 ## Why Generator Expressions Matter
 
@@ -66,7 +66,7 @@ Apply settings only where they're needed (per-file, per-target, per-config)
 
 ### In your case, this ensures that
 
-- `UNIV_DEBUG` is only defined in Debug builds
+- `IB_DEBUG` is only defined in Debug builds
 - PCH headers are only used for C++ compilation
 - The same `CMakeLists.txt` works across different build types and platforms
 

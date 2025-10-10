@@ -697,7 +697,7 @@ dict_drop_index_tree(
 	space = mtr_read_ulint(ptr, MLOG_4BYTES, mtr);
 	zip_size = fil_space_get_zip_size(space);
 
-	if (UNIV_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
+	if (IB_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
 		/* It is a single table tablespace and the .ibd file is
 		missing: do nothing */
 
@@ -780,7 +780,7 @@ dict_truncate_index_tree(
 
 	zip_size = fil_space_get_zip_size(space);
 
-	if (UNIV_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
+	if (IB_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
 		/* It is a single table tablespace and the .ibd file is
 		missing: do nothing */
 

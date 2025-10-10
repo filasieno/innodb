@@ -34,7 +34,7 @@ Created 9/20/1997 Heikki Tuuri
 #include "srv_srv.hpp"
 #include "api_api.hpp"
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 extern ibool	recv_replay_file_ops;
 
 /*******************************************************************//**
@@ -73,7 +73,7 @@ recv_scan_log_seg_for_backup(
 	ulint*		n_bytes_scanned);/*!< out: how much we were able to
 					scan, smaller than buf_len if log
 					data ended here */
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 /*******************************************************************//**
 Returns TRUE if recovery is currently running.
 @return	recv_recovery_on */
@@ -81,7 +81,7 @@ IB_INLINE
 ibool
 recv_recovery_is_on(void);
 /*=====================*/
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /*******************************************************************//**
 Returns TRUE if recovery from backup is currently running.
 @return	recv_recovery_from_backup_on */
@@ -89,7 +89,7 @@ IB_INLINE
 ibool
 recv_recovery_from_backup_is_on(void);
 /*=================================*/
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 /************************************************************************//**
 Applies the hashed log records to the page, if the page lsn is less than the
 lsn of a log record. This can be called when a buffer page has just been
@@ -98,13 +98,13 @@ IB_INTERN
 void
 recv_recover_page_func(
 /*===================*/
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ibool		just_read_in,
 				/*!< in: TRUE if the i/o handler calls
 				this for a freshly read page */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	buf_block_t*	block);	/*!< in/out: buffer block */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** Wrapper for recv_recover_page_func().
 Applies the hashed log records to the page, if the page lsn is less than the
 lsn of a log record. This can be called when a buffer page has just been
@@ -114,7 +114,7 @@ a freshly read page)
 @param block	in/out: the buffer block
 */
 # define recv_recover_page(jri, block)	recv_recover_page_func(jri, block)
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 /** Wrapper for recv_recover_page_func().
 Applies the hashed log records to the page, if the page lsn is less than the
 lsn of a log record. This can be called when a buffer page has just been
@@ -124,7 +124,7 @@ a freshly read page)
 @param block	in/out: the buffer block
 */
 # define recv_recover_page(jri, block)	recv_recover_page_func(block)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /********************************************************//**
 Recovers from a checkpoint. When this function returns, the database is able
 to start processing of new user transactions, but the function
@@ -136,17 +136,17 @@ ulint
 recv_recovery_from_checkpoint_start_func(
 /*=====================================*/
 	ib_recovery_t	recovery,	/*!< in: recovery flag */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint		type,		/*!< in: LOG_CHECKPOINT or
 					LOG_ARCHIVE */
 	ib_uint64_t	limit_lsn,	/*!< in: recover up to this lsn
 					if possible */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	ib_uint64_t	min_flushed_lsn,/*!< in: min flushed lsn from
 					data files */
 	ib_uint64_t	max_flushed_lsn);/*!< in: max flushed lsn from
 					 data files */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /** Wrapper for recv_recovery_from_checkpoint_start_func().
 Recovers from a checkpoint. When this function returns, the database is able
 to start processing of new user transactions, but the function
@@ -159,7 +159,7 @@ the recovery and free the resources used in it.
 @return	error code or DB_SUCCESS */
 # define recv_recovery_from_checkpoint_start(recv,type,lim,min,max)	\
 	recv_recovery_from_checkpoint_start_func(recv,type,lim,min,max)
-#else /* UNIV_LOG_ARCHIVE */
+#else /* IB_LOG_ARCHIVE */
 /** Wrapper for recv_recovery_from_checkpoint_start_func().
 Recovers from a checkpoint. When this function returns, the database is able
 to start processing of new user transactions, but the function
@@ -172,7 +172,7 @@ the recovery and free the resources used in it.
 @return	error code or DB_SUCCESS */
 # define recv_recovery_from_checkpoint_start(recv,type,lim,min,max)	\
 	recv_recovery_from_checkpoint_start_func(recv,min,max)
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 /********************************************************//**
 Completes recovery from a checkpoint. */
 IB_INTERN
@@ -189,7 +189,7 @@ recv_recovery_rollback_active(void);
 /*******************************************************//**
 Scans log from a buffer and stores new log data to the parsing buffer.
 Parses and hashes the log records if new data found.  Unless
-UNIV_HOTBACKUP is defined, this function will apply log records
+IB_HOTBACKUP is defined, this function will apply log records
 automatically when the hash table becomes full.
 @return TRUE if limit_lsn has been reached, or not able to scan any
 more in this log group */
@@ -224,14 +224,14 @@ recv_reset_logs(
 					OS_FILE_LOG_BLOCK_SIZE, after
 					which we add
 					LOG_BLOCK_HDR_SIZE */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint		arch_log_no,	/*!< in: next archived log file number */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	ibool		new_logs_created);/*!< in: TRUE if resetting logs
 					is done at the log creation;
 					FALSE if it is done after
 					archive recovery */
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /******************************************************//**
 Creates new log files after a backup has been restored. */
 IB_INTERN
@@ -243,7 +243,7 @@ recv_reset_log_files_for_backup(
 	ulint		log_file_size,	/*!< in: log file size */
 	ib_uint64_t	lsn);		/*!< in: new start lsn, must be
 					divisible by OS_FILE_LOG_BLOCK_SIZE */
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 /********************************************************//**
 Creates the recovery system. */
 IB_INTERN
@@ -269,14 +269,14 @@ void
 recv_sys_init(
 /*==========*/
 	ulint	available_memory);	/*!< in: available memory in bytes */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************//**
 Reset the state of the recovery system variables. */
 IB_INTERN
 void
 recv_sys_var_init(void);
 /*===================*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*******************************************************************//**
 Empties the hash table of stored log records, applying them to appropriate
 pages. */
@@ -291,7 +291,7 @@ recv_apply_hashed_log_recs(
 				disk and invalidated in buffer pool: this
 				alternative means that no new log records
 				can be generated during the application */
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /*******************************************************************//**
 Applies log records in the hash table to a backup. */
 IB_INTERN
@@ -299,7 +299,7 @@ void
 recv_apply_log_recs_for_backup(void);
 /*================================*/
 #endif
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /********************************************************//**
 Recovers from archived log files, and also from log files, if they exist.
 @return	error code or DB_SUCCESS */
@@ -322,7 +322,7 @@ IB_INTERN
 void
 recv_recovery_from_archive_finish(void);
 /*===================================*/
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 /** Block of log record data */
 typedef struct recv_data_struct	recv_data_t;
@@ -384,11 +384,11 @@ struct recv_addr_struct{
 typedef struct recv_sys_struct	recv_sys_t;
 /** Recovery system data structure */
 struct recv_sys_struct{
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	mutex_t		mutex;	/*!< mutex protecting the fields apply_log_recs,
 				n_addrs, and the state field in each recv_addr
 				struct */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	ibool		apply_log_recs;
 				/*!< this is TRUE when log rec application to
 				pages is allowed; this flag tells the
@@ -433,11 +433,11 @@ struct recv_sys_struct{
 				scan find a corrupt log block, or a corrupt
 				log record, or there is a log parsing
 				buffer overflow */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	log_group_t*	archive_group;
 				/*!< in archive recovery: the log group whose
 				archive is read */
-#endif /* !UNIV_LOG_ARCHIVE */
+#endif /* !IB_LOG_ARCHIVE */
 	mem_heap_t*	heap;	/*!< memory heap of log records and file
 				addresses*/
 	hash_table_t*	addr_hash;/*!< hash table of file addresses of pages */
@@ -464,21 +464,21 @@ are allowed yet: the variable name is misleading. */
 extern ibool		recv_no_ibuf_operations;
 /** TRUE when recv_init_crash_recovery() has been called. */
 extern ibool		recv_needed_recovery;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /** TRUE if writing to the redo log (mtr_commit) is forbidden.
 Protected by log_sys->mutex. */
 extern ibool		recv_no_log_write;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /** TRUE if buf_page_is_corrupted() should check if the log sequence
 number (FIL_PAGE_LSN) is in the future.  Initially FALSE, and set by
 recv_recovery_from_checkpoint_start_func(). */
 extern ibool		recv_lsn_checks_on;
 extern ib_cb_t		recv_pre_rollback_hook;
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /** TRUE when the redo log is being backed up */
 extern ibool		recv_is_making_a_backup;
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 /** Maximum page number encountered in the redo log */
 extern ulint		recv_max_parsed_page_no;
 
@@ -488,7 +488,7 @@ times! */
 
 /** Size of block reads when the log groups are scanned forward to do a
 roll-forward */
-#define RECV_SCAN_SIZE		(4 * UNIV_PAGE_SIZE)
+#define RECV_SCAN_SIZE		(4 * IB_PAGE_SIZE)
 
 /** This many frames must be left free in the buffer pool when we scan
 the log and store the scanned log records in the buffer pool: we will

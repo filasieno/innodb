@@ -37,7 +37,7 @@ Created 2/2/1994 Heikki Tuuri
 #include "fsp_fsp.hpp"
 #include "mtr_mtr.hpp"
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 #undef IB_INLINE
 #define IB_INLINE
 #endif
@@ -253,7 +253,7 @@ page_header_set_ptr(
 				uncompressed part will be updated, or NULL */
 	ulint		field,	/*!< in/out: PAGE_FREE, ... */
 	const byte*	ptr);	/*!< in: pointer or NULL*/
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Resets the last insert info field in the page header. Writes to mlog
 about this operation. */
@@ -265,7 +265,7 @@ page_header_reset_last_insert(
 	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose
 				uncompressed part will be updated, or NULL */
 	mtr_t*		mtr);	/*!< in: mtr */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /************************************************************//**
 Gets the offset of the first record on the page.
 @return	offset of the first record in record list, relative from page */
@@ -293,7 +293,7 @@ rec_t*
 page_get_middle_rec(
 /*================*/
 	page_t*	page);	/*!< in: page */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Compares a data tuple to a physical record. Differs from the function
 cmp_dtuple_rec_with_match in the way that the record must reside on an
@@ -320,7 +320,7 @@ page_cmp_dtuple_rec_with_match(
 				bytes within the first field not completely
 				matched; when function returns contains the
 				value for current comparison */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*************************************************************//**
 Gets the page number.
 @return	page number */
@@ -394,7 +394,7 @@ page_dir_set_n_slots(
 	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose
 				uncompressed part will be updated, or NULL */
 	ulint		n_slots);/*!< in: number of slots */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*************************************************************//**
 Gets pointer to nth directory slot.
 @return	pointer to dir slot */
@@ -404,11 +404,11 @@ page_dir_get_nth_slot(
 /*==================*/
 	const page_t*	page,	/*!< in: index page */
 	ulint		n);	/*!< in: position */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define page_dir_get_nth_slot(page, n)		\
-	((page) + UNIV_PAGE_SIZE - PAGE_DIR	\
+	((page) + IB_PAGE_SIZE - PAGE_DIR	\
 	 - (n + 1) * PAGE_DIR_SLOT_SIZE)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /**************************************************************//**
 Used to check the consistency of a record on a page.
 @return	TRUE if succeed */
@@ -1016,7 +1016,7 @@ page_rec_needs_ext(
 	ulint	n_fields,	/*!< in: number of fields in the record;
 				ignored if zip_size == 0 */
 	ulint	zip_size);	/*!< in: compressed page size in bytes, or 0 */
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 #undef IB_INLINE
 #define IB_INLINE  IB_INLINE_ORIGINAL
 #endif

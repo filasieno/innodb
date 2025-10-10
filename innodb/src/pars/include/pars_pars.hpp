@@ -44,11 +44,11 @@ typedef void* (*pars_user_func_cb_t)(void* arg, void* user_arg);
 information */
 extern int	yydebug;
 
-#ifdef UNIV_SQL_DEBUG
+#ifdef IB_SQL_DEBUG
 /** If the following is set TRUE, the lexer will print the SQL string
 as it tokenizes it */
 extern ibool	pars_print_lexed;
-#endif /* UNIV_SQL_DEBUG */
+#endif /* IB_SQL_DEBUG */
 
 /* Global variable used while parsing a single procedure or query : the code is
 NOT re-entrant */

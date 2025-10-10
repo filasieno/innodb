@@ -18,8 +18,8 @@ AC_DEFUN([_PANDORA_SEARCH_LIBPQ],[
 
   AS_IF([test "x$ac_enable_libpq" = "xyes"],[
     AC_CHECK_HEADERS([libpq-fe.h])
-    AC_LIB_HAVE_LINKFLAGS(pq,,[
-      #ifdef HAVE_LIBPQ_FE_H
+    AC_LIB_IB_HAVE_LINKFLAGS(pq,,[
+      #ifdef IB_HAVE_LIBPQ_FE_H
       # include <libpq-fe.h>
       #else
       # include <postgresql/libpq-fe.h>
@@ -32,15 +32,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBPQ],[
     ac_cv_libpq="no"
   ])
   
-  AM_CONDITIONAL(HAVE_LIBPQ, [test "x${ac_cv_libpq}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBPQ, [test "x${ac_cv_libpq}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBPQ],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBPQ],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBPQ])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBPQ],[
-  AC_REQUIRE([PANDORA_HAVE_LIBPQ])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBPQ])
   AS_IF([test "x${ac_cv_libpq}" = "xno"],
     AC_MSG_ERROR([libpq is required for ${PACKAGE}]))
 ])

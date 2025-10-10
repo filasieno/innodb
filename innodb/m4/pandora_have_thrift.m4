@@ -18,7 +18,7 @@ AC_DEFUN([_PANDORA_SEARCH_THRIFT],[
 
   AS_IF([test "x$ac_enable_thrift" = "xyes"],[
     AC_LANG_PUSH(C++)
-    AC_LIB_HAVE_LINKFLAGS(thrift,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(thrift,,[
       #include <thrift/Thrift.h>
     ],[
       apache::thrift::TOutput test_output;
@@ -28,16 +28,16 @@ AC_DEFUN([_PANDORA_SEARCH_THRIFT],[
     ac_cv_thrift="no"
   ])
   
-  AM_CONDITIONAL(HAVE_THRIFT, [test "x${ac_cv_thrift}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_THRIFT, [test "x${ac_cv_thrift}" = "xyes"])
   
 ])
 
-AC_DEFUN([PANDORA_HAVE_THRIFT],[
+AC_DEFUN([PANDORA_IB_HAVE_THRIFT],[
   AC_REQUIRE([_PANDORA_SEARCH_THRIFT])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_THRIFT],[
-  AC_REQUIRE([PANDORA_HAVE_THRIFT])
+  AC_REQUIRE([PANDORA_IB_HAVE_THRIFT])
   AS_IF([test x$ac_cv_thrift= xno],[
       AC_MSG_ERROR([thrift required for ${PACKAGE}])
   ])

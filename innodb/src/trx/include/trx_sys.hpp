@@ -32,7 +32,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "fsp_types.hpp"
 #include "fil_fil.hpp"
 #include "buf_buf.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "mtr_mtr.hpp"
 #include "ut_byte.hpp"
 #include "mem_mem.hpp"
@@ -209,7 +209,7 @@ IB_INLINE
 trx_id_t
 trx_sys_get_new_trx_no(void);
 /*========================*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*****************************************************************//**
 Writes a trx id to an index page. In case that the id size changes in
 some future version, this function should be used instead of
@@ -220,7 +220,7 @@ trx_write_trx_id(
 /*=============*/
 	byte*		ptr,	/*!< in: pointer to memory where written */
 	trx_id_t	id);	/*!< in: id */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*****************************************************************//**
 Reads a trx id from an index page. In case that the id size changes in
 some future version, this function should be used instead of
@@ -292,14 +292,14 @@ IB_INTERN
 void
 trx_sys_file_format_tag_init(void);
 /*==============================*/
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*****************************************************************//**
 Shutdown/Close the transaction system. */
 IB_INTERN
 void
 trx_sys_close(void);
 /*===============*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*****************************************************************//**
 Get the name representation of the file format from its id.
 @return	pointer to the name */
@@ -392,7 +392,7 @@ trx_sys_file_format_id_to_name(
 /*===========================*/
 	const ulint	id);	/*!< in: id of the file format */
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /* The automatically created system rollback segment has this id */
 #define TRX_SYS_SYSTEM_RSEG_ID	0
 
@@ -433,14 +433,14 @@ id must fit in one byte, therefore 256; each slot is currently 8 bytes
 in size */
 #define	TRX_SYS_N_RSEGS		256
 
-#if UNIV_PAGE_SIZE < 4096
-# error "UNIV_PAGE_SIZE < 4096"
+#if IB_PAGE_SIZE < 4096
+# error "IB_PAGE_SIZE < 4096"
 #endif
 
 /** Doublewrite buffer */
 /* @{ */
 /** The offset of the doublewrite buffer header on the trx system header page */
-#define TRX_SYS_DOUBLEWRITE		(UNIV_PAGE_SIZE - 200)
+#define TRX_SYS_DOUBLEWRITE		(IB_PAGE_SIZE - 200)
 /*-------------------------------------------------------------*/
 #define TRX_SYS_DOUBLEWRITE_FSEG	0	/*!< fseg header of the fseg
 						containing the doublewrite
@@ -488,12 +488,12 @@ FIL_PAGE_ARCH_LOG_NO_OR_SPACE_NO. */
 #define TRX_SYS_DOUBLEWRITE_BLOCK_SIZE	FSP_EXTENT_SIZE
 /* @} */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** File format tag */
 /* @{ */
 /** The offset of the file format tag on the trx system header page
 (TRX_SYS_PAGE_NO of TRX_SYS_SPACE) */
-#define TRX_SYS_FILE_FORMAT_TAG		(UNIV_PAGE_SIZE - 16)
+#define TRX_SYS_FILE_FORMAT_TAG		(IB_PAGE_SIZE - 16)
 
 /** Contents of TRX_SYS_FILE_FORMAT_TAG when valid.  The file format
 identifier is added to this constant. */
@@ -510,10 +510,10 @@ struct trx_doublewrite_struct{
 				doublewrite block (64 pages) */
 	ulint	block2;		/*!< page number of the second block */
 	ulint	first_free;	/*!< first free position in write_buf measured
-				in units of UNIV_PAGE_SIZE */
+				in units of IB_PAGE_SIZE */
 	byte*	write_buf;	/*!< write buffer used in writing to the
 				doublewrite buffer, aligned to an
-				address divisible by UNIV_PAGE_SIZE
+				address divisible by IB_PAGE_SIZE
 				(which is required by Windows aio) */
 	byte*	write_buf_unaligned;
 				/*!< pointer to write_buf, but unaligned */
@@ -557,7 +557,7 @@ struct trx_sys_struct{
 two) is assigned, the field TRX_SYS_TRX_ID_STORE on the transaction system
 page is updated */
 #define TRX_SYS_TRX_ID_WRITE_MARGIN	256
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifndef IB_DO_NOT_INLINE
 #include "trx0sys.inl"

@@ -104,7 +104,7 @@ row_build_index_entry(
 	entry_len = dict_index_get_n_fields(index);
 	entry = dtuple_create(heap, entry_len);
 
-	if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+	if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 		dtuple_set_n_fields_cmp(entry, entry_len);
 		/* There may only be externally stored columns
 		in a clustered index B-tree of a user table. */
@@ -137,12 +137,12 @@ row_build_index_entry(
 		dfield_copy(dfield, dfield2);
 
 		if (dfield_is_null(dfield)) {
-		} else if (UNIV_LIKELY_NULL(ext)) {
+		} else if (IB_LIKELY_NULL(ext)) {
 			/* See if the column is stored externally. */
 			const byte*	buf = row_ext_lookup(ext, col_no,
 							     &len);
-			if (UNIV_LIKELY_NULL(buf)) {
-				if (UNIV_UNLIKELY(buf == field_ref_zero)) {
+			if (IB_LIKELY_NULL(buf)) {
+				if (IB_UNLIKELY(buf == field_ref_zero)) {
 					return(NULL);
 				}
 				dfield_set_data(dfield, buf, len);
@@ -280,7 +280,7 @@ row_build(
 		if (rec_offs_nth_extern(offsets, i)) {
 			dfield_set_ext(dfield);
 
-			if (UNIV_LIKELY_NULL(col_table)) {
+			if (IB_LIKELY_NULL(col_table)) {
 				ut_a(col_no
 				     < dict_table_get_n_cols(col_table));
 				col = dict_table_get_nth_col(
@@ -510,7 +510,7 @@ row_build_row_ref(
 			clust_index, i)->prefix_len;
 
 		if (clust_col_prefix_len > 0) {
-			if (len != UNIV_SQL_NULL) {
+			if (len != IB_SQL_NULL) {
 
 				const dtype_t*	dtype
 					= dfield_get_type(dfield);
@@ -573,7 +573,7 @@ row_build_row_ref_in_tuple(
 	ut_a(rec);
 	ut_ad(!dict_index_is_clust(index));
 
-	if (UNIV_UNLIKELY(!index->table)) {
+	if (IB_UNLIKELY(!index->table)) {
 		ib_logger(ib_stream, "InnoDB: table ");
 notfound:
 		ut_print_name(ib_stream, trx, TRUE, index->table_name);
@@ -585,7 +585,7 @@ notfound:
 
 	clust_index = dict_table_get_first_index(index->table);
 
-	if (UNIV_UNLIKELY(!clust_index)) {
+	if (IB_UNLIKELY(!clust_index)) {
 		ib_logger(ib_stream, "InnoDB: clust index for table ");
 		goto notfound;
 	}
@@ -625,7 +625,7 @@ notfound:
 			clust_index, i)->prefix_len;
 
 		if (clust_col_prefix_len > 0) {
-			if (len != UNIV_SQL_NULL) {
+			if (len != IB_SQL_NULL) {
 
 				const dtype_t*	dtype
 					= dfield_get_type(dfield);
@@ -642,7 +642,7 @@ notfound:
 	}
 
 	ut_ad(dtuple_check_typed(ref));
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }

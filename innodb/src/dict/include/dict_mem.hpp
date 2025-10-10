@@ -32,11 +32,11 @@ Created 1/8/1996 Heikki Tuuri
 #include "mem_mem.hpp"
 #include "rem_types.hpp"
 #include "btr_types.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "lock0types.h"
 # include "que0types.h"
 # include "sync0rw.h"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 #include "ut_mem.hpp"
 #include "ut_lst.hpp"
 #include "ut_rnd.hpp"
@@ -74,7 +74,7 @@ combination of types */
 /* @{ */
 #define DICT_TF_ZSSIZE_SHIFT		1
 #define DICT_TF_ZSSIZE_MASK		(15 << DICT_TF_ZSSIZE_SHIFT)
-#define DICT_TF_ZSSIZE_MAX (UNIV_PAGE_SIZE_SHIFT - PAGE_ZIP_MIN_SIZE_SHIFT + 1)
+#define DICT_TF_ZSSIZE_MAX (IB_PAGE_SIZE_SHIFT - PAGE_ZIP_MIN_SIZE_SHIFT + 1)
 /* @} */
 
 /** File format */
@@ -236,11 +236,11 @@ struct dict_index_struct{
 	const char*	name;	/*!< index name */
 	const char*	table_name;/*!< table name */
 	dict_table_t*	table;	/*!< back pointer to table */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	unsigned	space:32;
 				/*!< space where the index tree is placed */
 	unsigned	page:32;/*!< index tree root page number */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	unsigned	type:4;	/*!< index type (DICT_CLUSTERED, DICT_UNIQUE,
 				DICT_UNIVERSAL, DICT_IBUF) */
 	unsigned	trx_id_offset:10;/*!< position of the trx id column
@@ -264,7 +264,7 @@ struct dict_index_struct{
 				dropped in ha_innobase::prepare_drop_index(),
 				otherwise FALSE */
 	dict_field_t*	fields;	/*!< array of field descriptions */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	UT_LIST_NODE_T(dict_index_t)
 			indexes;/*!< list of indexes of the table */
 	btr_search_t*	search_info; /*!< info used in optimistic searches */
@@ -295,8 +295,8 @@ struct dict_index_struct{
 				index, or 0 if the index existed
 				when InnoDB was started up */
 	/* @} */
-#endif /* !UNIV_HOTBACKUP */
-#ifdef UNIV_DEBUG
+#endif /* !IB_HOTBACKUP */
+#ifdef IB_DEBUG
 	ulint		magic_n;/*!< magic number */
 /** Value of dict_index_struct::magic_n */
 # define DICT_INDEX_MAGIC_N	76789786
@@ -391,7 +391,7 @@ struct dict_table_struct{
 				the string contains n_cols, it will be
 				allocated from a temporary heap.  The final
 				string will be allocated from table->heap. */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	hash_node_t	name_hash; /*!< hash chain node */
 	hash_node_t	id_hash; /*!< hash chain node */
 	UT_LIST_BASE_NODE_T(dict_index_t)
@@ -417,7 +417,7 @@ struct dict_table_struct{
 				it! */
 	UT_LIST_BASE_NODE_T(lock_t)
 			locks; /*!< list of locks on the table */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/*----------------------*/
 	ibool		does_not_fit_in_memory;
 				/*!< this field is used to specify in
@@ -430,7 +430,7 @@ struct dict_table_struct{
 				will forget about value TRUE if it has
 				to reload the table definition from
 				disk */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	/*----------------------*/
 	unsigned	big_rows:1;
 				/*!< flag: TRUE if the maximum length of
@@ -462,12 +462,12 @@ struct dict_table_struct{
 			       	this is only used for heuristics */
 				/* @} */
 	/*----------------------*/
-#endif /* !UNIV_HOTBACKUP */
-#ifdef UNIV_DEBUG
+#endif /* !IB_HOTBACKUP */
+#ifdef IB_DEBUG
 	ulint		magic_n;/*!< magic number */
 /** Value of dict_table_struct::magic_n */
 # define DICT_TABLE_MAGIC_N	76333786
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 };
 
 #ifndef IB_DO_NOT_INLINE

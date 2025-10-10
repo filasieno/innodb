@@ -56,7 +56,7 @@ CREATE TABLE t1
 #include "ib_mt_drv.hpp"
 #include "ib_mt_base.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -75,7 +75,7 @@ create_t1(
 	ib_err_t	err2 = DB_SUCCESS;
 	ib_tbl_sch_t	ib_tbl_sch = NULL;
 	ib_idx_sch_t	ib_idx_sch = NULL;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 	cb_args_t*	cb_arg = (cb_args_t *)arg;
 	tbl_class_t*	tbl = cb_arg->tbl;
 

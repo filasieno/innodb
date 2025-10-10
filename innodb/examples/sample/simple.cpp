@@ -123,7 +123,7 @@ create_table(const char* dbname, const char* name)
     ib_tbl_sch_t ib_tbl_sch = NULL;
     ib_idx_sch_t ib_idx_sch = NULL;
 
-    char table_name[IB_MAX_TABLE_NAME_LEN];
+    char table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
     snprintf(table_name, sizeof(table_name), "%s/%s", dbname, name);
 
@@ -173,7 +173,7 @@ static ib_err_t
 open_table(const char* dbname, const char* name, ib_trx_t ib_trx, ib_crsr_t* crsr)
 {
     ib_err_t err = DB_SUCCESS;
-    char table_name[IB_MAX_TABLE_NAME_LEN];
+    char table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
     snprintf(table_name, sizeof(table_name), "%s/%s", dbname, name);
 

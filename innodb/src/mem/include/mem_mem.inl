@@ -33,13 +33,13 @@ IB_INTERN mem_block_t* mem_heap_create_block(mem_heap_t* heap, ulint n, ulint ty
 /// \param [in] block in: block to free
 IB_INTERN void mem_heap_block_free(mem_heap_t* heap, mem_block_t* block);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 	/// \brief Frees the free_block field from a memory heap.
 	/// \param [in] heap in: heap
 	IB_INTERN void mem_heap_free_block_free(mem_heap_t* heap);
 
-#endif // !UNIV_HOTBACKUP
+#endif // !IB_HOTBACKUP
 
 /// \brief Adds a new block to a memory heap.
 /// \param [in] heap in: memory heap
@@ -123,19 +123,19 @@ IB_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
 	void* buf = (byte*)block + free_sz;
 	mem_block_set_free(block, free_sz + MEM_SPACE_NEEDED(n));
 
-#ifdef UNIV_MEM_DEBUG
-	UNIV_MEM_ALLOC(buf, n + MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE);
+#ifdef IB_MEM_DEBUG
+	IB_MEM_ALLOC(buf, n + MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE);
 	// In the debug version write debugging info to the field
 	mem_field_init((byte*)buf, n);
 	// Advance buf to point at the storage which will be given to the caller
 	buf = (byte*)buf + MEM_FIELD_HEADER_SIZE;
 #endif
 
-#ifdef UNIV_SET_MEM_TO_ZERO
-	UNIV_MEM_ALLOC(buf, n);
+#ifdef IB_SET_MEM_TO_ZERO
+	IB_MEM_ALLOC(buf, n);
 	memset(buf, '\0', n);
 #endif
-	UNIV_MEM_ALLOC(buf, n);
+	IB_MEM_ALLOC(buf, n);
 
 	return buf;
 }
@@ -148,14 +148,14 @@ IB_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
 /// \param [in] old_top in: pointer to old top of heap
 IB_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
 {
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	ibool		error;
 	ulint		total_size;
 	ulint		size;
 #endif
 
 	ut_ad(mem_heap_check(heap));
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	// Validate the heap and get its total allocated size 
 	mem_heap_validate_or_print(heap, NULL, FALSE, &error, &total_size, NULL, NULL);
 	ut_a(!error);
@@ -179,7 +179,7 @@ IB_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
 	// Set the free field of block
 	mem_block_set_free(block, old_top - (byte*)block);
 
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	ut_ad(mem_block_get_start(block) <= mem_block_get_free(block));
 	// In the debug version erase block from top up 
 	mem_erase_buf(old_top, (byte*)block + block->len - old_top);
@@ -187,10 +187,10 @@ IB_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
 	mutex_enter(&mem_hash_mutex);
 	mem_current_allocated_memory -= (total_size - size);
 	mutex_exit(&mem_hash_mutex);
-#else // UNIV_MEM_DEBUG 
-	UNIV_MEM_ASSERT_W(old_top, (byte*)block + block->len - old_top);
-#endif // UNIV_MEM_DEBUG 
-	UNIV_MEM_ALLOC(old_top, (byte*)block + block->len - old_top);
+#else // IB_MEM_DEBUG 
+	IB_MEM_ASSERT_W(old_top, (byte*)block + block->len - old_top);
+#endif // IB_MEM_DEBUG 
+	IB_MEM_ALLOC(old_top, (byte*)block + block->len - old_top);
 	// If free == start, we may free the block if it is not the first one 
 	if ((heap != block) && (mem_block_get_free(block) == mem_block_get_start(block))) {
 		mem_heap_block_free(heap, block);
@@ -202,11 +202,11 @@ IB_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
 IB_INLINE void mem_heap_empty(mem_heap_t*	heap)
 {
 	mem_heap_free_heap_top(heap, (byte*)heap + mem_block_get_start(heap));
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (heap->free_block) {
 		mem_heap_free_block_free(heap);
 	}
-#endif // !UNIV_HOTBACKUP 
+#endif // !IB_HOTBACKUP 
 }
 
 /// \brief Returns a pointer to the topmost element in a memory heap. The size of the element must be given.
@@ -218,7 +218,7 @@ IB_INLINE void* mem_heap_get_top( mem_heap_t*	heap, ulint n)
 	ut_ad(mem_heap_check(heap));
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
 	void* buf = (byte*)block + mem_block_get_free(block) - MEM_SPACE_NEEDED(n);
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	ut_ad(mem_block_get_start(block) <=(ulint)((byte*)buf - (byte*)block));
 	// In the debug version, advance buf to point at the storage which was given to the caller in the allocation
 	buf = (byte*)buf + MEM_FIELD_HEADER_SIZE;
@@ -238,8 +238,8 @@ IB_INLINE void mem_heap_free_top( mem_heap_t*	heap, ulint n)
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
 	// Subtract the free field of block
 	mem_block_set_free(block, mem_block_get_free(block) - MEM_SPACE_NEEDED(n));
-	UNIV_MEM_ASSERT_W((byte*) block + mem_block_get_free(block), n);
-#ifdef UNIV_MEM_DEBUG
+	IB_MEM_ASSERT_W((byte*) block + mem_block_get_free(block), n);
+#ifdef IB_MEM_DEBUG
 	ut_ad(mem_block_get_start(block) <= mem_block_get_free(block));
 	// In the debug version check the consistency, and erase field
 	mem_field_erase((byte*)block + mem_block_get_free(block), n);
@@ -248,9 +248,9 @@ IB_INLINE void mem_heap_free_top( mem_heap_t*	heap, ulint n)
 	if ((heap != block) && (mem_block_get_free(block) == mem_block_get_start(block))) {
 		mem_heap_block_free(heap, block);
 	} else {
-		// Avoid a bogus UNIV_MEM_ASSERT_W() warning in a subsequent invocation of mem_heap_free_top().
-		// Originally, this was UNIV_MEM_FREE(), to catch writes to freed memory. 
-		UNIV_MEM_ALLOC((byte*) block + mem_block_get_free(block), n);
+		// Avoid a bogus IB_MEM_ASSERT_W() warning in a subsequent invocation of mem_heap_free_top().
+		// Originally, this was IB_MEM_FREE(), to catch writes to freed memory. 
+		IB_MEM_ALLOC((byte*) block + mem_block_get_free(block), n);
 	}
 }
 
@@ -274,7 +274,7 @@ IB_INLINE mem_heap_t* mem_heap_create_func(ulint n, ulint type, const char* file
 	// Add the created block itself as the first block in the list
 	UT_LIST_ADD_FIRST(list, block->base, block);
 
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	mem_hash_insert(block, file_name, line);
 #endif
 	return block;
@@ -290,16 +290,16 @@ IB_INLINE void mem_heap_free_func(mem_heap_t*	heap, const char* file_name __attr
 {
 	ut_ad(mem_heap_check(heap));
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	// In the debug version remove the heap from the hash table of heaps and check its consistency 
 	mem_hash_remove(heap, file_name, line);
 #endif
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (heap->free_block) {
 		mem_heap_free_block_free(heap);
 	}
-#endif // !UNIV_HOTBACKUP
+#endif // !IB_HOTBACKUP
 
 	while (block != NULL) { // Store the contents of info before freeing current block (it is erased in freeing) 
 		mem_block_t* prev_block = UT_LIST_GET_PREV(list, block);
@@ -325,12 +325,12 @@ IB_INLINE void* mem_alloc_func(ulint n, ulint* size, const char*	file_name, ulin
 	// first block and thus we can calculate the pointer to the heap from
 	// the pointer to the buffer when we free the memory buffer. 
 
-	if (UNIV_LIKELY_NULL(size)) {
+	if (IB_LIKELY_NULL(size)) {
 		// Adjust the allocation to the actual size of the memory block.
 		ulint m = mem_block_get_len(heap) - mem_block_get_free(heap);
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 		m -= MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE;
-#endif // UNIV_MEM_DEBUG 
+#endif // IB_MEM_DEBUG 
 		ut_ad(m >= n);
 		*size = n = m;
 	}
@@ -363,11 +363,11 @@ IB_INLINE ulint mem_heap_get_size(mem_heap_t*	heap)
 {
 	ut_ad(mem_heap_check(heap));
 	ulint size = heap->total_size;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (heap->free_block) {
-		size += UNIV_PAGE_SIZE;
+		size += IB_PAGE_SIZE;
 	}
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	return size;
 }

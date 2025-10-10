@@ -44,7 +44,7 @@ rw_lock_s_lock_spin(
 				be passed to another thread to unlock */
 	const char*	file_name,/*!< in: file name where lock requested */
 	ulint		line);	/*!< in: line where requested */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Inserts the debug information for an rw-lock. */
 IB_INTERN
@@ -65,7 +65,7 @@ rw_lock_remove_debug_info(
 	rw_lock_t*	lock,		/*!< in: rw-lock */
 	ulint		pass,		/*!< in: pass value */
 	ulint		lock_type);	/*!< in: lock type */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /********************************************************************//**
 Check if there are threads waiting for the rw-lock.
@@ -275,7 +275,7 @@ rw_lock_set_writer_id_and_recursion_flag(
 	uninitialized.  It does not matter if writer_thread is
 	uninitialized, because we are comparing writer_thread against
 	itself, and the operation should always succeed. */
-	UNIV_MEM_VALID(&lock->writer_thread, sizeof lock->writer_thread);
+	IB_MEM_VALID(&lock->writer_thread, sizeof lock->writer_thread);
 
 	local_thread = lock->writer_thread;
 	success = os_compare_and_swap_thread_id(
@@ -308,13 +308,13 @@ rw_lock_s_lock_low(
 	const char*	file_name, /*!< in: file name where lock requested */
 	ulint		line)	/*!< in: line where requested */
 {
-	/* TODO: study performance of UNIV_LIKELY branch prediction hints. */
+	/* TODO: study performance of IB_LIKELY branch prediction hints. */
 	if (!rw_lock_lock_word_decr(lock, 1)) {
 		/* Locking did not succeed */
 		return(FALSE);
 	}
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_add_debug_info(lock, pass, RW_LOCK_SHARED, file_name, line);
 #endif
 	/* These debugging values are not set safely: they may be incorrect
@@ -345,7 +345,7 @@ rw_lock_s_lock_direct(
 	lock->last_s_file_name = file_name;
 	lock->last_s_line = line;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_add_debug_info(lock, 0, RW_LOCK_SHARED, file_name, line);
 #endif
 }
@@ -372,7 +372,7 @@ rw_lock_x_lock_direct(
 	lock->last_x_file_name = file_name;
 	lock->last_x_line = line;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_add_debug_info(lock, 0, RW_LOCK_EX, file_name, line);
 #endif
 }
@@ -404,11 +404,11 @@ rw_lock_s_lock_func(
 	the threads which have s-locked a latch. This would use some CPU
 	time. */
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(!rw_lock_own(lock, RW_LOCK_SHARED)); /* see NOTE above */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
-	/* TODO: study performance of UNIV_LIKELY branch prediction hints. */
+	/* TODO: study performance of IB_LIKELY branch prediction hints. */
 	if (rw_lock_s_lock_low(lock, pass, file_name, line)) {
 
 		return; /* Success */
@@ -467,7 +467,7 @@ rw_lock_x_lock_func_nowait(
 		/* Failure */
 		return(FALSE);
 	}
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_add_debug_info(lock, 0, RW_LOCK_EX, file_name, line);
 #endif
 
@@ -485,7 +485,7 @@ IB_INLINE
 void
 rw_lock_s_unlock_func(
 /*==================*/
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		pass,	/*!< in: pass value; != 0, if the lock may have
 				been passed to another thread to unlock */
 #endif
@@ -493,7 +493,7 @@ rw_lock_s_unlock_func(
 {
 	ut_ad((lock->lock_word % X_LOCK_DECR) != 0);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_remove_debug_info(lock, pass, RW_LOCK_SHARED);
 #endif
 
@@ -510,7 +510,7 @@ rw_lock_s_unlock_func(
 
 	ut_ad(rw_lock_validate(lock));
 
-#ifdef UNIV_SYNC_PERF_STAT
+#ifdef IB_SYNC_PERF_STAT
 	rw_s_exit_count++;
 #endif
 }
@@ -526,7 +526,7 @@ rw_lock_s_unlock_direct(
 {
 	ut_ad(lock->lock_word < X_LOCK_DECR);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_remove_debug_info(lock, 0, RW_LOCK_SHARED);
 #endif
 
@@ -535,7 +535,7 @@ rw_lock_s_unlock_direct(
 
 	ut_ad(!lock->waiters);
 	ut_ad(rw_lock_validate(lock));
-#ifdef UNIV_SYNC_PERF_STAT
+#ifdef IB_SYNC_PERF_STAT
 	rw_s_exit_count++;
 #endif
 }
@@ -546,7 +546,7 @@ IB_INLINE
 void
 rw_lock_x_unlock_func(
 /*==================*/
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		pass,	/*!< in: pass value; != 0, if the lock may have
 				been passed to another thread to unlock */
 #endif
@@ -563,11 +563,11 @@ rw_lock_x_unlock_func(
 	if (lock->lock_word == 0) {
 		/* Last caller in a possible recursive chain. */
 		lock->recursive = FALSE;
-		UNIV_MEM_INVALID(&lock->writer_thread,
+		IB_MEM_INVALID(&lock->writer_thread,
 				 sizeof lock->writer_thread);
 	}
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_remove_debug_info(lock, pass, RW_LOCK_EX);
 #endif
 
@@ -584,7 +584,7 @@ rw_lock_x_unlock_func(
 
 	ut_ad(rw_lock_validate(lock));
 
-#ifdef UNIV_SYNC_PERF_STAT
+#ifdef IB_SYNC_PERF_STAT
 	rw_x_exit_count++;
 #endif
 }
@@ -603,13 +603,13 @@ rw_lock_x_unlock_direct(
 
 	ut_ad((lock->lock_word % X_LOCK_DECR) == 0);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_remove_debug_info(lock, 0, RW_LOCK_EX);
 #endif
 
 	if (lock->lock_word == 0) {
 		lock->recursive = FALSE;
-		UNIV_MEM_INVALID(&lock->writer_thread,
+		IB_MEM_INVALID(&lock->writer_thread,
 				 sizeof lock->writer_thread);
 	}
 
@@ -618,7 +618,7 @@ rw_lock_x_unlock_direct(
 	ut_ad(!lock->waiters);
 	ut_ad(rw_lock_validate(lock));
 
-#ifdef UNIV_SYNC_PERF_STAT
+#ifdef IB_SYNC_PERF_STAT
 	rw_x_exit_count++;
 #endif
 }

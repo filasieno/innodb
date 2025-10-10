@@ -146,7 +146,7 @@ resulted during shared (read) locks */
 IB_INTERN ib_int64_t	rw_s_os_wait_count	= 0;
 
 /** number of unlocks (that unlock shared locks),
-set only when UNIV_SYNC_PERF_STAT is defined */
+set only when IB_SYNC_PERF_STAT is defined */
 IB_INTERN ib_int64_t	rw_s_exit_count		= 0;
 
 /** number of spin waits on rw-latches,
@@ -161,14 +161,14 @@ resulted during exclusive (write) locks */
 IB_INTERN ib_int64_t	rw_x_os_wait_count	= 0;
 
 /** number of unlocks (that unlock exclusive locks),
-set only when UNIV_SYNC_PERF_STAT is defined */
+set only when IB_SYNC_PERF_STAT is defined */
 IB_INTERN ib_int64_t	rw_x_exit_count		= 0;
 
 /* The global list of rw-locks */
 IB_INTERN rw_lock_list_t	rw_lock_list;
 IB_INTERN mutex_t		rw_lock_list_mutex;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /* The global mutex which protects debug info lists of all rw-locks.
 To modify the debug info list of an rw-lock, this mutex has to be
 acquired in addition to the mutex protecting the lock. */
@@ -215,7 +215,7 @@ rw_lock_debug_free(
 {
 	mem_free(info);
 }
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /******************************************************************//**
 Reset the variables. */
@@ -234,7 +234,7 @@ rw_lock_var_init(void)
 	memset(&rw_lock_list, 0x0, sizeof(rw_lock_list));
 	memset(&rw_lock_list_mutex, 0x0, sizeof(rw_lock_list_mutex));
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	memset(&rw_lock_debug_mutex, 0x0, sizeof(rw_lock_debug_mutex));
 	memset(&rw_lock_debug_event, 0x0, sizeof(rw_lock_debug_event));
 	memset(&rw_lock_debug_waiters, 0x0, sizeof(rw_lock_debug_waiters));
@@ -251,12 +251,12 @@ void
 rw_lock_create_func(
 /*================*/
 	rw_lock_t*	lock,		/*!< in: pointer to memory */
-#ifdef UNIV_DEBUG
-# ifdef UNIV_SYNC_DEBUG
+#ifdef IB_DEBUG
+# ifdef IB_SYNC_DEBUG
 	ulint		level,		/*!< in: level */
-# endif /* UNIV_SYNC_DEBUG */
+# endif /* IB_SYNC_DEBUG */
 	const char*	cmutex_name, 	/*!< in: mutex name */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	const char*	cfile_name,	/*!< in: file name where created */
 	ulint		cline)		/*!< in: file line where created */
 {
@@ -272,7 +272,7 @@ rw_lock_create_func(
 	ut_d(lock->mutex.cmutex_name = cmutex_name);
 	ut_d(lock->mutex.mutex_type = 1);
 #else /* INNODB_RW_LOCKS_USE_ATOMICS */
-# ifdef UNIV_DEBUG
+# ifdef IB_DEBUG
 	UT_NOT_USED(cmutex_name);
 # endif
 #endif /* INNODB_RW_LOCKS_USE_ATOMICS */
@@ -285,11 +285,11 @@ rw_lock_create_func(
 	recursive x-locking. */
 	lock->recursive = FALSE;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	UT_LIST_INIT(lock->debug_list);
 
 	lock->level = level;
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	lock->magic_n = RW_LOCK_MAGIC_N;
 
@@ -352,7 +352,7 @@ rw_lock_free(
 	mutex_exit(&rw_lock_list_mutex);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /******************************************************************//**
 Checks that the rw-lock has been initialized and that there are no
 simultaneous shared and exclusive locks.
@@ -374,7 +374,7 @@ rw_lock_validate(
 
 	return(TRUE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /******************************************************************//**
 Lock an rw-lock in shared mode for the current thread. If the rw-lock is
@@ -496,7 +496,7 @@ void
 rw_lock_x_lock_wait(
 /*================*/
 	rw_lock_t*	lock,	/*!< in: pointer to rw-lock */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		pass,	/*!< in: pass value; != 0, if the lock will
 				be passed to another thread to unlock */
 #endif
@@ -535,14 +535,14 @@ rw_lock_x_lock_wait(
                         /* Add debug info as it is needed to detect possible
                         deadlock. We must add info for WAIT_EX thread for
                         deadlock detection to work properly. */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 			rw_lock_add_debug_info(lock, pass, RW_LOCK_WAIT_EX,
 					       file_name, line);
 #endif
 
 			sync_array_wait_event(sync_primary_wait_array,
 					      index);
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 			rw_lock_remove_debug_info(lock, pass,
 					       RW_LOCK_WAIT_EX);
 #endif
@@ -584,7 +584,7 @@ rw_lock_x_lock_low(
 						pass ? FALSE : TRUE);
 
 		rw_lock_x_lock_wait(lock,
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 				    pass,
 #endif
                                     file_name, line);
@@ -600,7 +600,7 @@ rw_lock_x_lock_low(
 			return(FALSE);
 		}
 	}
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_add_debug_info(lock, pass, RW_LOCK_EX,
 			       file_name, line);
 #endif
@@ -711,7 +711,7 @@ lock_loop:
 	goto lock_loop;
 }
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Acquires the debug mutex. We cannot use the mutex defined in sync0sync,
 because the debug mutex is also acquired in sync0arr while holding the OS
@@ -835,9 +835,9 @@ rw_lock_remove_debug_info(
 
 	ut_error;
 }
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Checks if the thread has locked the rw-lock in the specified mode, with
 the pass value == 0.
@@ -877,7 +877,7 @@ rw_lock_own(
 
 	return(FALSE);
 }
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /******************************************************************//**
 Checks if somebody has locked the rw-lock in the specified mode.
@@ -910,7 +910,7 @@ rw_lock_is_locked(
 	return(ret);
 }
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /***************************************************************//**
 Prints debug info of currently locked rw-locks. */
 IB_INTERN
@@ -984,7 +984,7 @@ rw_lock_print(
 
 #ifndef INNODB_RW_LOCKS_USE_ATOMICS
 	/* We used to acquire lock->mutex here, but it would cause a
-	recursive call to sync_thread_add_level() if UNIV_SYNC_DEBUG
+	recursive call to sync_thread_add_level() if IB_SYNC_DEBUG
 	is defined.  Since this function is only invoked from
 	sync_thread_levels_g(), let us choose the smaller evil:
 	performing dirty reads instead of causing bogus deadlocks or
@@ -1065,4 +1065,4 @@ rw_lock_n_locked(void)
 
 	return(count);
 }
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */

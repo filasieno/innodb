@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBVBUCKET],[
     [ac_enable_libvbucket="yes"])
 
   AS_IF([test "x$ac_enable_libvbucket" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(vbucket,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(vbucket,,[
       #include <libvbucket/vbucket.h>
     ],[
       VBUCKET_CONFIG_HANDLE config = vbucket_config_parse_file(NULL);
@@ -26,15 +26,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBVBUCKET],[
     ac_cv_libvbucket="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBVBUCKET, [test "x${ac_cv_libvbucket}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBVBUCKET, [test "x${ac_cv_libvbucket}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBVBUCKET],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBVBUCKET],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBVBUCKET])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBVBUCKET],[
-  AC_REQUIRE([PANDORA_HAVE_LIBVBUCKET])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBVBUCKET])
   AS_IF([test x$ac_cv_libvbucket = xno],
       AC_MSG_ERROR([libvbucket is required for ${PACKAGE}]))
 ])

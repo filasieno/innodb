@@ -1,16 +1,16 @@
 #
 # SYNOPSIS
 #
-#   PANDORA_HAVE_LIBREADLINE
+#   PANDORA_IB_HAVE_LIBREADLINE
 #
 # DESCRIPTION
 #
 #   Searches for a readline compatible library. If found, defines
-#   `HAVE_LIBREADLINE'. If the found library has the `add_history'
-#   function, sets also `HAVE_READLINE_HISTORY'. Also checks for the
-#   locations of the necessary include files and sets `HAVE_READLINE_H'
-#   or `HAVE_READLINE_READLINE_H' and `HAVE_READLINE_HISTORY_H' or
-#   'HAVE_HISTORY_H' if the corresponding include files exists.
+#   `IB_HAVE_LIBREADLINE'. If the found library has the `add_history'
+#   function, sets also `IB_HAVE_READLINE_HISTORY'. Also checks for the
+#   locations of the necessary include files and sets `IB_HAVE_READLINE_H'
+#   or `IB_HAVE_READLINE_READLINE_H' and `IB_HAVE_READLINE_HISTORY_H' or
+#   'IB_HAVE_HISTORY_H' if the corresponding include files exists.
 #
 #   The libraries that may be readline compatible are `libedit',
 #   `libeditline' and `libreadline'. Sometimes we need to link a
@@ -22,31 +22,31 @@
 #   macro to perform the necessary includes or declarations in a C
 #   file:
 #
-#     #ifdef HAVE_LIBREADLINE
-#     #  if defined(HAVE_READLINE_READLINE_H)
+#     #ifdef IB_HAVE_LIBREADLINE
+#     #  if defined(IB_HAVE_READLINE_READLINE_H)
 #     #    include <readline/readline.h>
-#     #  elif defined(HAVE_READLINE_H)
+#     #  elif defined(IB_HAVE_READLINE_H)
 #     #    include <readline.h>
-#     #  else /* !defined(HAVE_READLINE_H) */
+#     #  else /* !defined(IB_HAVE_READLINE_H) */
 #     extern char *readline ();
-#     #  endif /* !defined(HAVE_READLINE_H) */
+#     #  endif /* !defined(IB_HAVE_READLINE_H) */
 #     char *cmdline = NULL;
-#     #else /* !defined(HAVE_READLINE_READLINE_H) */
+#     #else /* !defined(IB_HAVE_READLINE_READLINE_H) */
 #       /* no readline */
-#     #endif /* HAVE_LIBREADLINE */
+#     #endif /* IB_HAVE_LIBREADLINE */
 #
-#     #ifdef HAVE_READLINE_HISTORY
-#     #  if defined(HAVE_READLINE_HISTORY_H)
+#     #ifdef IB_HAVE_READLINE_HISTORY
+#     #  if defined(IB_HAVE_READLINE_HISTORY_H)
 #     #    include <readline/history.h>
-#     #  elif defined(HAVE_HISTORY_H)
+#     #  elif defined(IB_HAVE_HISTORY_H)
 #     #    include <history.h>
-#     #  else /* !defined(HAVE_HISTORY_H) */
+#     #  else /* !defined(IB_HAVE_HISTORY_H) */
 #     extern void add_history ();
 #     extern int write_history ();
 #     extern int read_history ();
-#     #  endif /* defined(HAVE_READLINE_HISTORY_H) */
+#     #  endif /* defined(IB_HAVE_READLINE_HISTORY_H) */
 #       /* no history */
-#     #endif /* HAVE_READLINE_HISTORY */
+#     #endif /* IB_HAVE_READLINE_HISTORY */
 #
 # LAST MODIFICATION
 #
@@ -101,7 +101,7 @@ rl_compentry_func_t *func2= (rl_compentry_func_t*)0;
     ])
   ])
   AS_IF([test "$pandora_cv_rl_compentry" = "yes"],[
-    AC_DEFINE([HAVE_RL_COMPENTRY], [1],
+    AC_DEFINE([IB_HAVE_RL_COMPENTRY], [1],
               [Does system provide rl_compentry_func_t])
   ])
 
@@ -123,7 +123,7 @@ rl_completion_entry_function= (rl_compentry_func_t*)NULL;
     ])
   ])
   AS_IF([test "$pandora_cv_rl_compentry_works" = "yes"],[
-    AC_DEFINE([HAVE_WORKING_RL_COMPENTRY], [1],
+    AC_DEFINE([IB_HAVE_WORKING_RL_COMPENTRY], [1],
               [Does system provide an rl_compentry_func_t that is usable])
   ])
   CXXFLAGS="${save_CXXFLAGS}"
@@ -147,7 +147,7 @@ rl_completion_func_t *func1= (rl_completion_func_t*)0;
     ])
   ])
   AS_IF([test "$pandora_cv_rl_completion" = "yes"],[
-    AC_DEFINE([HAVE_RL_COMPLETION], [1],
+    AC_DEFINE([IB_HAVE_RL_COMPLETION], [1],
               [Does system provide rl_completion_func_t])
   ])
 ])
@@ -184,7 +184,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBREADLINE], [
   ])
 
   if test "$ac_cv_libreadline" != "no"; then
-    AC_DEFINE(HAVE_LIBREADLINE, 1,
+    AC_DEFINE(IB_HAVE_LIBREADLINE, 1,
               [Define if you have a readline compatible library])
     AC_CHECK_HEADERS(readline.h readline/readline.h)
     AC_CACHE_CHECK([whether readline supports history],
@@ -193,7 +193,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBREADLINE], [
       AC_TRY_LINK_FUNC(add_history, ac_cv_libreadline_history="yes")
     ])
     if test "$ac_cv_libreadline_history" = "yes"; then
-      AC_DEFINE(HAVE_READLINE_HISTORY, 1,
+      AC_DEFINE(IB_HAVE_READLINE_HISTORY, 1,
                 [Define if your readline library has \`add_history'])
       AC_CHECK_HEADERS(history.h readline/history.h)
     fi
@@ -207,10 +207,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBREADLINE], [
   LIBS="${save_LIBS}"
   AC_SUBST(READLINE_LIBS)
 
-  AM_CONDITIONAL(HAVE_LIBREADLINE, [test "x${ac_cv_libreadline}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBREADLINE, [test "x${ac_cv_libreadline}" = "xyes"])
 ])
 
-AC_DEFUN([_PANDORA_HAVE_LIBREADLINE],[
+AC_DEFUN([_PANDORA_IB_HAVE_LIBREADLINE],[
 
   AC_ARG_ENABLE([libreadline],
     [AS_HELP_STRING([--disable-libreadline],
@@ -222,8 +222,8 @@ AC_DEFUN([_PANDORA_HAVE_LIBREADLINE],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_LIBREADLINE],[
-  AC_REQUIRE([_PANDORA_HAVE_LIBREADLINE])
+AC_DEFUN([PANDORA_IB_HAVE_LIBREADLINE],[
+  AC_REQUIRE([_PANDORA_IB_HAVE_LIBREADLINE])
 ])
 
 AC_DEFUN([_PANDORA_REQUIRE_LIBREADLINE],[

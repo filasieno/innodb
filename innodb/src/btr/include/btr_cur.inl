@@ -23,10 +23,10 @@ The index tree cursor
 Created 10/16/1994 Heikki Tuuri
 *******************************************************/
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "btr_btr.hpp"
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************//**
 Returns the page cursor component of a tree cursor.
 @return	pointer to page cursor component */
@@ -38,7 +38,7 @@ btr_cur_get_page_cur(
 {
 	return(&((btr_cur_t*) cursor)->page_cur);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************//**
 Returns the buffer block on which the tree cursor is positioned.
 @return	pointer to buffer block */
@@ -199,4 +199,4 @@ btr_cur_can_delete_without_compress(
 
 	return(TRUE);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

@@ -48,11 +48,11 @@ on 1/27/1998 */
 #include "lock_lock.hpp"
 #include "eval_eval.hpp"
 
-#ifdef UNIV_SQL_DEBUG
+#ifdef IB_SQL_DEBUG
 /** If the following is set TRUE, the lexer will print the SQL string
 as it tokenizes it */
 IB_INTERN ibool	pars_print_lexed	= FALSE;
-#endif /* UNIV_SQL_DEBUG */
+#endif /* IB_SQL_DEBUG */
 
 /* Global variable used while parsing a single procedure or query : the code is
 NOT re-entrant */
@@ -103,9 +103,9 @@ void
 pars_var_init(void)
 /*===============*/
 {
-#ifdef UNIV_SQL_DEBUG
+#ifdef IB_SQL_DEBUG
         pars_print_lexed = FALSE;
-#endif /* UNIV_SQL_DEBUG */
+#endif /* IB_SQL_DEBUG */
 
 	pars_lexer_var_init();
 
@@ -451,9 +451,9 @@ pars_resolve_exp_variables_and_types(
 			|| (node->token_type == SYM_CURSOR)
 			|| (node->token_type == SYM_FUNCTION))
 		    && node->name
-		    && (sym_node->name_len == node->name_len)
+		    && (sym_node->IB_NAME_LEN == node->IB_NAME_LEN)
 		    && (ut_memcmp(sym_node->name, node->name,
-				  node->name_len) == 0)) {
+				  node->IB_NAME_LEN) == 0)) {
 
 			/* Found a variable or a cursor declared with
 			the same name */
@@ -562,9 +562,9 @@ pars_resolve_exp_columns(
 			const char*		col_name
 				= dict_table_get_col_name(table, i);
 
-			if ((sym_node->name_len == ut_strlen(col_name))
+			if ((sym_node->IB_NAME_LEN == ut_strlen(col_name))
 			    && (0 == ut_memcmp(sym_node->name, col_name,
-					       sym_node->name_len))) {
+					       sym_node->IB_NAME_LEN))) {
 				/* Found */
 				sym_node->resolved = TRUE;
 				sym_node->token_type = SYM_COLUMN;
@@ -1680,11 +1680,11 @@ pars_create_table(
 	create tables in the old (not compact) record format. */
 	table = dict_mem_table_create(table_sym->name, 0, n_cols, 0);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (not_fit_in_memory != NULL) {
 		table->does_not_fit_in_memory = TRUE;
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	column = column_defs;
 
 	while (column) {
@@ -1856,7 +1856,7 @@ pars_get_lex_chars(
 		len = max_size;
 	}
 
-#ifdef UNIV_SQL_DEBUG
+#ifdef IB_SQL_DEBUG
 	if (pars_print_lexed) {
 
 		if (len >= 5) {
@@ -1867,7 +1867,7 @@ pars_get_lex_chars(
 		       + pars_sym_tab_global->next_char_pos,
 		       1, len, ib_stream);
 	}
-#endif /* UNIV_SQL_DEBUG */
+#endif /* IB_SQL_DEBUG */
 
 	ut_memcpy(buf, pars_sym_tab_global->sql_string
 		  + pars_sym_tab_global->next_char_pos, len);

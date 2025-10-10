@@ -172,7 +172,7 @@ struct dyn_block_struct{
 				used only in the first block */
 	UT_LIST_NODE_T(dyn_block_t) list;
 				/*!< linear list node: used in all blocks */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint		buf_end;/*!< only in the debug version: if dyn
 				array is opened, this is the buffer
 				end offset, else this is 0 */

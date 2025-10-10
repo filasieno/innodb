@@ -20,7 +20,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBXML2],[
     [ac_enable_libxml2="yes"])
 
   AS_IF([test "x$ac_enable_libxml2" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(xml2,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(xml2,,[
 #include <libxml/xmlversion.h>
     ],[
 const char *test= LIBXML_DOTTED_VERSION;
@@ -38,10 +38,10 @@ const char *test= LIBXML_DOTTED_VERSION;
     ],[])
   ])
 
-  AM_CONDITIONAL(HAVE_LIBXML2, [test "${ac_cv_libxml2}" = "yes"])
+  AM_CONDITIONAL(IB_HAVE_LIBXML2, [test "${ac_cv_libxml2}" = "yes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBXML2],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBXML2],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBXML2])
 ])
 

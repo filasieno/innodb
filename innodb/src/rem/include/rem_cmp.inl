@@ -36,10 +36,10 @@ cmp_data_data(
 	ulint		prtype,	/*!< in: precise type */
 	const byte*	data1,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len1,	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len1,	/*!< in: data field length or IB_SQL_NULL */
 	const byte*	data2,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len2)	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len2)	/*!< in: data field length or IB_SQL_NULL */
 {
 	return(cmp_data_data_slow(
 		cmp_ctx, mtype, prtype, data1, len1, data2, len2));

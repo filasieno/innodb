@@ -36,24 +36,24 @@ AC_DEFUN([AC_LIB_LINKFLAGS],
   AC_SUBST([LIB]NAME)
   AC_SUBST([LTLIB]NAME)
   AC_SUBST([LIB]NAME[_PREFIX])
-  dnl Also set HAVE_LIB[]NAME so that AC_LIB_HAVE_LINKFLAGS can reuse the
+  dnl Also set IB_HAVE_LIB[]NAME so that AC_LIB_IB_HAVE_LINKFLAGS can reuse the
   dnl results of this search when this library appears as a dependency.
-  HAVE_LIB[]NAME=yes
+  IB_HAVE_LIB[]NAME=yes
   popdef([NAME])
   popdef([Name])
 ])
 
-dnl AC_LIB_HAVE_LINKFLAGS(name, dependencies, includes, testcode, [system])
+dnl AC_LIB_IB_HAVE_LINKFLAGS(name, dependencies, includes, testcode, [system])
 dnl searches for libname and the libraries corresponding to explicit and
 dnl implicit dependencies, together with the specified include files and
 dnl the ability to compile and link the specified testcode. If found, it
-dnl sets and AC_SUBSTs HAVE_LIB${NAME}=yes and the LIB${NAME} and
+dnl sets and AC_SUBSTs IB_HAVE_LIB${NAME}=yes and the LIB${NAME} and
 dnl LTLIB${NAME} variables and augments the CPPFLAGS variable, and
-dnl #defines HAVE_LIB${NAME} to 1. Otherwise, it sets and AC_SUBSTs
-dnl HAVE_LIB${NAME}=no and LIB${NAME} and LTLIB${NAME} to empty.
+dnl #defines IB_HAVE_LIB${NAME} to 1. Otherwise, it sets and AC_SUBSTs
+dnl IB_HAVE_LIB${NAME}=no and LIB${NAME} and LTLIB${NAME} to empty.
 dnl Sets and AC_SUBSTs the LIB${NAME}_PREFIX variable to nonempty if libname
 dnl was found in ${LIB${NAME}_PREFIX}/$acl_libdirstem.
-AC_DEFUN([AC_LIB_HAVE_LINKFLAGS],
+AC_DEFUN([AC_LIB_IB_HAVE_LINKFLAGS],
 [
   AC_REQUIRE([AC_LIB_PREPARE_PREFIX])
   AC_REQUIRE([AC_LIB_RPATH])
@@ -78,12 +78,12 @@ AC_DEFUN([AC_LIB_HAVE_LINKFLAGS],
     LIBS="$ac_save_LIBS"
   ])
   if test "$ac_cv_lib[]Name" = yes; then
-    HAVE_LIB[]NAME=yes
-    AC_DEFINE([HAVE_LIB]NAME, 1, [Define if you have the $1 library.])
+    IB_HAVE_LIB[]NAME=yes
+    AC_DEFINE([IB_HAVE_LIB]NAME, 1, [Define if you have the $1 library.])
     AC_MSG_CHECKING([how to link with lib[]$1])
     AC_MSG_RESULT([$LIB[]NAME])
   else
-    HAVE_LIB[]NAME=no
+    IB_HAVE_LIB[]NAME=no
     dnl If $LIB[]NAME didn't lead to a usable library, we don't need
     dnl $INC[]NAME either.
     CPPFLAGS="$ac_save_CPPFLAGS"
@@ -91,7 +91,7 @@ AC_DEFUN([AC_LIB_HAVE_LINKFLAGS],
     LTLIB[]NAME=
     LIB[]NAME[]_PREFIX=
   fi
-  AC_SUBST([HAVE_LIB]NAME)
+  AC_SUBST([IB_HAVE_LIB]NAME)
   AC_SUBST([LIB]NAME)
   AC_SUBST([LTLIB]NAME)
   AC_SUBST([LIB]NAME[_PREFIX])
@@ -234,9 +234,9 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
       if test -z "$already_handled"; then
         names_already_handled="$names_already_handled $name"
         dnl See if it was already located by an earlier AC_LIB_LINKFLAGS
-        dnl or AC_LIB_HAVE_LINKFLAGS call.
+        dnl or AC_LIB_IB_HAVE_LINKFLAGS call.
         uppername=`echo "$name" | sed -e 'y|abcdefghijklmnopqrstuvwxyz./-|ABCDEFGHIJKLMNOPQRSTUVWXYZ___|'`
-        eval value=\"\$HAVE_LIB$uppername\"
+        eval value=\"\$IB_HAVE_LIB$uppername\"
         if test -n "$value"; then
           if test "$value" = yes; then
             eval value=\"\$LIB$uppername\"
@@ -244,7 +244,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
             eval value=\"\$LTLIB$uppername\"
             test -z "$value" || LTLIB[]NAME="${LTLIB[]NAME}${LTLIB[]NAME:+ }$value"
           else
-            dnl An earlier call to AC_LIB_HAVE_LINKFLAGS has determined
+            dnl An earlier call to AC_LIB_IB_HAVE_LINKFLAGS has determined
             dnl that this library doesn't exist. So just drop it.
             :
           fi

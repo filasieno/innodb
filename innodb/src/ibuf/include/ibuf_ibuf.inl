@@ -27,13 +27,13 @@ Created 7/19/1997 Heikki Tuuri
 #ifdef WITH_ZIP
 #include "page_zip.hpp"
 #endif /* WITH_ZIP */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "buf_lru.hpp"
 
 /** Counter for ibuf_should_try() */
 extern ulint	ibuf_flush_count;
 
-/** An index page must contain at least UNIV_PAGE_SIZE /
+/** An index page must contain at least IB_PAGE_SIZE /
 IBUF_PAGE_SIZE_PER_FREE_SPACE bytes of free space for ibuf to try to
 buffer inserts to this page.  If there is this much of free space, the
 corresponding bits are set in the ibuf bitmap. */
@@ -74,17 +74,17 @@ ibuf_set_free_bits_func(
 /*====================*/
 	buf_block_t*	block,	/*!< in: index page of a non-clustered index;
 				free bit is reset if page level is 0 */
-#ifdef UNIV_IBUF_DEBUG
+#ifdef IB_IBUF_DEBUG
 	ulint		max_val,/*!< in: ULINT_UNDEFINED or a maximum
 				value which the bits must have before
 				setting; this is for debugging */
-#endif /* UNIV_IBUF_DEBUG */
+#endif /* IB_IBUF_DEBUG */
 	ulint		val);	/*!< in: value to set: < 4 */
-#ifdef UNIV_IBUF_DEBUG
+#ifdef IB_IBUF_DEBUG
 # define ibuf_set_free_bits(b,v,max) ibuf_set_free_bits_func(b,max,v)
-#else /* UNIV_IBUF_DEBUG */
+#else /* IB_IBUF_DEBUG */
 # define ibuf_set_free_bits(b,v,max) ibuf_set_free_bits_func(b,v)
-#endif /* UNIV_IBUF_DEBUG */
+#endif /* IB_IBUF_DEBUG */
 
 /**********************************************************************//**
 A basic partial test if an insert to the insert buffer could be possible and
@@ -131,11 +131,11 @@ ibuf_bitmap_page(
 	ut_ad(ut_is_2pow(zip_size));
 
 	if (!zip_size) {
-		return(UNIV_UNLIKELY((page_no & (UNIV_PAGE_SIZE - 1))
+		return(IB_UNLIKELY((page_no & (IB_PAGE_SIZE - 1))
 				     == FSP_IBUF_BITMAP_OFFSET));
 	}
 
-	return(UNIV_UNLIKELY((page_no & (zip_size - 1))
+	return(IB_UNLIKELY((page_no & (zip_size - 1))
 			     == FSP_IBUF_BITMAP_OFFSET));
 }
 
@@ -154,14 +154,14 @@ ibuf_index_page_calc_free_bits(
 	ulint	n;
 	ut_ad(ut_is_2pow(zip_size));
 	ut_ad(!zip_size || zip_size > IBUF_PAGE_SIZE_PER_FREE_SPACE);
-	ut_ad(zip_size <= UNIV_PAGE_SIZE);
+	ut_ad(zip_size <= IB_PAGE_SIZE);
 
 	if (zip_size) {
 		n = max_ins_size
 			/ (zip_size / IBUF_PAGE_SIZE_PER_FREE_SPACE);
 	} else {
 		n = max_ins_size
-			/ (UNIV_PAGE_SIZE / IBUF_PAGE_SIZE_PER_FREE_SPACE);
+			/ (IB_PAGE_SIZE / IBUF_PAGE_SIZE_PER_FREE_SPACE);
 	}
 
 	if (n == 3) {
@@ -189,7 +189,7 @@ ibuf_index_page_calc_free_from_bits(
 	ut_ad(bits < 4);
 	ut_ad(ut_is_2pow(zip_size));
 	ut_ad(!zip_size || zip_size > IBUF_PAGE_SIZE_PER_FREE_SPACE);
-	ut_ad(zip_size <= UNIV_PAGE_SIZE);
+	ut_ad(zip_size <= IB_PAGE_SIZE);
 
 	if (zip_size) {
 		if (bits == 3) {
@@ -200,10 +200,10 @@ ibuf_index_page_calc_free_from_bits(
 	}
 
 	if (bits == 3) {
-		return(4 * UNIV_PAGE_SIZE / IBUF_PAGE_SIZE_PER_FREE_SPACE);
+		return(4 * IB_PAGE_SIZE / IBUF_PAGE_SIZE_PER_FREE_SPACE);
 	}
 
-	return(bits * (UNIV_PAGE_SIZE / IBUF_PAGE_SIZE_PER_FREE_SPACE));
+	return(bits * (IB_PAGE_SIZE / IBUF_PAGE_SIZE_PER_FREE_SPACE));
 }
 
 #ifdef  WITH_ZIP
@@ -232,9 +232,9 @@ ibuf_index_page_calc_free_zip(
 	zip_max_ins = page_zip_max_ins_size(page_zip,
 					    FALSE/* not clustered */);
 
-	if (UNIV_UNLIKELY(zip_max_ins < 0)) {
+	if (IB_UNLIKELY(zip_max_ins < 0)) {
 		return(0);
-	} else if (UNIV_LIKELY(max_ins_size > (ulint) zip_max_ins)) {
+	} else if (IB_LIKELY(max_ins_size > (ulint) zip_max_ins)) {
 		max_ins_size = (ulint) zip_max_ins;
 	}
 
@@ -309,12 +309,12 @@ ibuf_update_free_bits_if_full(
 	before = ibuf_index_page_calc_free_bits(0, max_ins_size);
 
 	if (max_ins_size >= increase) {
-#if ULINT32_UNDEFINED <= UNIV_PAGE_SIZE
-# error "ULINT32_UNDEFINED <= UNIV_PAGE_SIZE"
+#if ULINT32_UNDEFINED <= IB_PAGE_SIZE
+# error "ULINT32_UNDEFINED <= IB_PAGE_SIZE"
 #endif
 		after = ibuf_index_page_calc_free_bits(0, max_ins_size
 						       - increase);
-#ifdef UNIV_IBUF_DEBUG
+#ifdef IB_IBUF_DEBUG
 		ut_a(after <= ibuf_index_page_calc_free(0, block));
 #endif
 	} else {
@@ -334,4 +334,4 @@ ibuf_update_free_bits_if_full(
 		ibuf_set_free_bits(block, after, before);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

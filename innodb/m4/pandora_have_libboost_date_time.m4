@@ -12,13 +12,13 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_DATE_TIME],[
   dnl --------------------------------------------------------------------
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_date_time-mt,,[
+  AC_LIB_IB_HAVE_LINKFLAGS(boost_date_time-mt,,[
     #include <boost/date_time.hpp>
   ],[
     boost::gregorian::date weekstart(2002,2,1);
   ])
   AS_IF([test "x${ac_cv_libboost_date_time_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_date_time,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(boost_date_time,,[
       #include <boost/date_time.hpp>
     ],[
       boost::gregorian::date weekstart(2002,2,1);
@@ -26,14 +26,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_DATE_TIME],[
   ])
   AC_LANG_POP()
   
-  AM_CONDITIONAL(HAVE_BOOST_DATE_TIME,
+  AM_CONDITIONAL(IB_HAVE_BOOST_DATE_TIME,
     [test "x${ac_cv_libboost_date_time}" = "xyes" -o "x${ac_cv_libboost_date_time_mt}" = "xyes"])
   BOOST_LIBS="${BOOST_LIBS} ${LTLIBBOOST_DATE_TIME_MT} ${LTLIBBOOST_DATE_TIME}"
   AC_SUBST(BOOST_LIBS) 
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST_DATE_TIME],[
-  PANDORA_HAVE_BOOST($1)
+AC_DEFUN([PANDORA_IB_HAVE_BOOST_DATE_TIME],[
+  PANDORA_IB_HAVE_BOOST($1)
   _PANDORA_SEARCH_BOOST_DATE_TIME($1)
 ])
 

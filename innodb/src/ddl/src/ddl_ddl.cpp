@@ -317,9 +317,9 @@ ddl_drop_table(
 	}
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&dict_operation_lock, RW_LOCK_EX));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	table = dict_table_get_low(name);
 
@@ -350,7 +350,7 @@ check_next_foreign:
 	}
 
 	if (foreign && trx->check_foreigns
-	    && !(drop_db && dict_tables_have_same_db(
+	    && !(drop_db && dict_tables_IB_HAVE_same_db(
 			 name, foreign->foreign_table_name))) {
 		/* We only allow dropping a referenced table if
 		FOREIGN_KEY_CHECKS is set to 0 */
@@ -618,9 +618,9 @@ func_exit:
 
 	trx->op_info = "";
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	srv_wake_master_thread();
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	return((int) err);
 }
@@ -649,14 +649,14 @@ ddl_create_table(
 	mem_heap_t*	heap;
 	que_thr_t*	thr;
 	const char*	table_name;
-	ulint		table_name_len;
+	ulint		table_IB_NAME_LEN;
 	ulint		err;
 	ulint		i;
 
 	ut_ad(trx->client_thread_id == os_thread_get_curr_id());
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&dict_operation_lock, RW_LOCK_EX));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 	ut_ad(trx->dict_operation_lock_mode == RW_X_LATCH);
 
@@ -697,9 +697,9 @@ err_exit:
 
 	table_name = strchr(table->name, '/');
 	table_name++;
-	table_name_len = strlen(table_name) + 1;
+	table_IB_NAME_LEN = strlen(table_name) + 1;
 
-	if (STR_EQ(table_name, table_name_len, S_innodb_monitor)) {
+	if (STR_EQ(table_name, table_IB_NAME_LEN, S_innodb_monitor)) {
 
 		/* Table equals "innodb_monitor":
 		start monitor prints */
@@ -710,23 +710,23 @@ err_exit:
 		of InnoDB monitor prints */
 
 		os_event_set(srv_lock_timeout_thread_event);
-	} else if (STR_EQ(table_name, table_name_len,
+	} else if (STR_EQ(table_name, table_IB_NAME_LEN,
 			  S_innodb_lock_monitor)) {
 
 		srv_print_innodb_monitor = TRUE;
 		srv_print_innodb_lock_monitor = TRUE;
 		os_event_set(srv_lock_timeout_thread_event);
-	} else if (STR_EQ(table_name, table_name_len,
+	} else if (STR_EQ(table_name, table_IB_NAME_LEN,
 			  S_innodb_tablespace_monitor)) {
 
 		srv_print_innodb_tablespace_monitor = TRUE;
 		os_event_set(srv_lock_timeout_thread_event);
-	} else if (STR_EQ(table_name, table_name_len,
+	} else if (STR_EQ(table_name, table_IB_NAME_LEN,
 			  S_innodb_table_monitor)) {
 
 		srv_print_innodb_table_monitor = TRUE;
 		os_event_set(srv_lock_timeout_thread_event);
-	} else if (STR_EQ(table_name, table_name_len,
+	} else if (STR_EQ(table_name, table_IB_NAME_LEN,
 			  S_innodb_mem_validate)) {
 		/* We define here a debugging feature intended for
 		developers */
@@ -734,19 +734,19 @@ err_exit:
 		ib_logger(ib_stream,
 		      "Validating InnoDB memory:\n"
 		      "to use this feature you must compile InnoDB with\n"
-		      "UNIV_MEM_DEBUG defined in univ.i and"
+		      "IB_MEM_DEBUG defined in univ.i and"
 		      " the server must be\n"
 		      "quiet because allocation from a mem heap"
 		      " is not protected\n"
 		      "by any semaphore.\n");
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 		ut_a(mem_validate());
 		ib_logger(ib_stream, "Memory validated\n");
-#else /* UNIV_MEM_DEBUG */
+#else /* IB_MEM_DEBUG */
 		ib_logger(ib_stream,
 			"Memory NOT validated (recompile with "
-			"UNIV_MEM_DEBUG)\n");
-#endif /* UNIV_MEM_DEBUG */
+			"IB_MEM_DEBUG)\n");
+#endif /* IB_MEM_DEBUG */
 	}
 
 	heap = mem_heap_create(512);
@@ -762,7 +762,7 @@ err_exit:
 
 	err = trx->error_state;
 
-	if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
+	if (IB_UNLIKELY(err != DB_SUCCESS)) {
 		trx->error_state = DB_SUCCESS;
 	}
 
@@ -817,9 +817,9 @@ ddl_create_index(
 	ind_node_t*	node;		/* Index creation node */
 	mem_heap_t*	heap;		/* Memory heap */
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&dict_operation_lock, RW_LOCK_EX));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
 	/* This heap is destroyed when the query graph is freed. */
@@ -921,9 +921,9 @@ ddl_truncate_table(
 	table */
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&dict_operation_lock, RW_LOCK_EX));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	/* Check if the table is referenced by foreign key constraints from
 	some other table (not the table itself) */
@@ -1336,18 +1336,18 @@ ddl_rename_table(
 			"new_db_name CHAR;\n"
 			"foreign_id CHAR;\n"
 			"new_foreign_id CHAR;\n"
-			"old_db_name_len INT;\n"
-			"old_t_name_len INT;\n"
-			"new_db_name_len INT;\n"
+			"old_db_IB_NAME_LEN INT;\n"
+			"old_t_IB_NAME_LEN INT;\n"
+			"new_db_IB_NAME_LEN INT;\n"
 			"id_len INT;\n"
 			"found INT;\n"
 			"BEGIN\n"
 			"found := 1;\n"
-			"old_db_name_len := INSTR(:old_table_name, '/')-1;\n"
-			"new_db_name_len := INSTR(:new_table_name, '/')-1;\n"
+			"old_db_IB_NAME_LEN := INSTR(:old_table_name, '/')-1;\n"
+			"new_db_IB_NAME_LEN := INSTR(:new_table_name, '/')-1;\n"
 			"new_db_name := SUBSTR(:new_table_name, 0,\n"
-			"                      new_db_name_len);\n"
-			"old_t_name_len := LENGTH(:old_table_name);\n"
+			"                      new_db_IB_NAME_LEN);\n"
+			"old_t_IB_NAME_LEN := LENGTH(:old_table_name);\n"
 			"gen_constr_prefix := CONCAT(:old_table_name,\n"
 			"                            '_ibfk_');\n"
 			"WHILE found = 1 LOOP\n"
@@ -1370,14 +1370,14 @@ ddl_rename_table(
 			"               THEN\n"
 			"                new_foreign_id :=\n"
 			"                CONCAT(:new_table_name,\n"
-			"                SUBSTR(foreign_id, old_t_name_len,\n"
-			"                       id_len - old_t_name_len));\n"
+			"                SUBSTR(foreign_id, old_t_IB_NAME_LEN,\n"
+			"                       id_len - old_t_IB_NAME_LEN));\n"
 			"               ELSE\n"
 			"                new_foreign_id :=\n"
 			"                CONCAT(new_db_name,\n"
 			"                SUBSTR(foreign_id,\n"
-			"                       old_db_name_len,\n"
-			"                       id_len - old_db_name_len));\n"
+			"                       old_db_IB_NAME_LEN,\n"
+			"                       id_len - old_db_IB_NAME_LEN));\n"
 			"               END IF;\n"
 			"               UPDATE SYS_FOREIGN\n"
 			"                SET ID = new_foreign_id\n"
@@ -1400,10 +1400,10 @@ ddl_rename_table(
 
 		ulint	i;
 		char*	db_name;
-		ulint	db_name_len;
+		ulint	db_IB_NAME_LEN;
 
-		db_name_len = dict_get_db_name_len(old_name) + 1;
-		db_name = mem_heap_strdupl(heap, old_name, db_name_len);
+		db_IB_NAME_LEN = dict_get_db_IB_NAME_LEN(old_name) + 1;
+		db_name = mem_heap_strdupl(heap, old_name, db_IB_NAME_LEN);
 
 		for (i = 0; i < n_constraints_to_drop; i++) {
 			err = ddl_delete_constraint(
@@ -1479,7 +1479,7 @@ ddl_rename_table(
 
 func_exit:
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -1782,7 +1782,7 @@ ddl_drop_all_temp_indexes(
 		rec = btr_pcur_get_rec(&pcur);
 		field = rec_get_nth_field_old(rec, DICT_SYS_INDEXES_NAME_FIELD,
 					      &len);
-		if (len == UNIV_SQL_NULL || len == 0
+		if (len == IB_SQL_NULL || len == 0
 		    || mach_read_from_1(field) != (ulint) TEMP_INDEX_PREFIX) {
 			continue;
 		}
@@ -1886,7 +1886,7 @@ ddl_drop_all_temp_tables(
 
 		/* This is a temporary table. */
 		field = rec_get_nth_field_old(rec, 0/*NAME*/, &len);
-		if (len == UNIV_SQL_NULL || len == 0) {
+		if (len == IB_SQL_NULL || len == 0) {
 			/* Corrupted SYS_TABLES.NAME */
 			continue;
 		}

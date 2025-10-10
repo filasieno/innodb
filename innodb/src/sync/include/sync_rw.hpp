@@ -34,11 +34,11 @@ Created 9/11/1995 Heikki Tuuri
 #define sync0rw_h
 
 #include "univ.i"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "ut_lst.hpp"
 #include "sync_sync.hpp"
 #include "os_sync.hpp"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /* Latch types; these are used also in btr0btr.h: keep the numerical values
 smaller than 30 and the order of the numerical values like below! */
@@ -46,7 +46,7 @@ smaller than 30 and the order of the numerical values like below! */
 #define	RW_X_LATCH	2
 #define	RW_NO_LATCH	3
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /* We decrement lock_word by this amount for each x_lock. It is also the
 start value for the lock_word, meaning that it limits the maximum number
 of concurrent read locks before the rw_lock breaks. The current value of
@@ -54,16 +54,16 @@ of concurrent read locks before the rw_lock breaks. The current value of
 #define X_LOCK_DECR		0x00100000
 
 typedef struct rw_lock_struct		rw_lock_t;
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 typedef struct rw_lock_debug_struct	rw_lock_debug_t;
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 typedef UT_LIST_BASE_NODE_T(rw_lock_t)	rw_lock_list_t;
 
 extern rw_lock_list_t	rw_lock_list;
 extern mutex_t		rw_lock_list_mutex;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /* The global mutex which protects debug info lists of all rw-locks.
 To modify the debug info list of an rw-lock, this mutex has to be
 
@@ -74,7 +74,7 @@ extern os_event_t	rw_lock_debug_event;	/*!< If deadlock detection does
 					may wait for this event */
 extern ibool		rw_lock_debug_waiters;	/*!< This is set to TRUE, if
 					there may be waiters for the event */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /** number of spin waits on rw-latches,
 resulted during exclusive (write) locks */
@@ -83,7 +83,7 @@ extern	ib_int64_t	rw_s_spin_wait_count;
 resulted during exclusive (write) locks */
 extern	ib_int64_t	rw_s_spin_round_count;
 /** number of unlocks (that unlock shared locks),
-set only when UNIV_SYNC_PERF_STAT is defined */
+set only when IB_SYNC_PERF_STAT is defined */
 extern	ib_int64_t	rw_s_exit_count;
 /** number of OS waits on rw-latches,
 resulted during shared (read) locks */
@@ -98,7 +98,7 @@ extern	ib_int64_t	rw_x_spin_round_count;
 resulted during exclusive (write) locks */
 extern	ib_int64_t	rw_x_os_wait_count;
 /** number of unlocks (that unlock exclusive locks),
-set only when UNIV_SYNC_PERF_STAT is defined */
+set only when IB_SYNC_PERF_STAT is defined */
 extern	ib_int64_t	rw_x_exit_count;
 
 /******************************************************************//**
@@ -106,18 +106,18 @@ Creates, or rather, initializes an rw-lock object in a specified memory
 location (which must be appropriately aligned). The rw-lock is initialized
 to the non-locked state. Explicit freeing of the rw-lock with rw_lock_free
 is necessary only if the memory block containing it is freed. */
-#ifdef UNIV_DEBUG
-# ifdef UNIV_SYNC_DEBUG
+#ifdef IB_DEBUG
+# ifdef IB_SYNC_DEBUG
 #  define rw_lock_create(L, level) 					\
 	rw_lock_create_func((L), (level), #L, __FILE__, __LINE__)
-# else /* UNIV_SYNC_DEBUG */
+# else /* IB_SYNC_DEBUG */
 #  define rw_lock_create(L, level) 					\
 	rw_lock_create_func((L), #L, __FILE__, __LINE__)
-# endif /* UNIV_SYNC_DEBUG */
-#else /* UNIV_DEBUG */
+# endif /* IB_SYNC_DEBUG */
+#else /* IB_DEBUG */
 # define rw_lock_create(L, level) 					\
 	rw_lock_create_func((L), __FILE__, __LINE__)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /******************************************************************//**
 Creates, or rather, initializes an rw-lock object in a specified memory
@@ -129,12 +129,12 @@ void
 rw_lock_create_func(
 /*================*/
 	rw_lock_t*	lock,		/*!< in: pointer to memory */
-#ifdef UNIV_DEBUG
-# ifdef UNIV_SYNC_DEBUG
+#ifdef IB_DEBUG
+# ifdef IB_SYNC_DEBUG
 	ulint		level,		/*!< in: level */
-# endif /* UNIV_SYNC_DEBUG */
+# endif /* IB_SYNC_DEBUG */
 	const char*	cmutex_name, 	/*!< in: mutex name */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	const char*	cfile_name,	/*!< in: file name where created */
 	ulint 		cline);		/*!< in: file line where created */
 /******************************************************************//**
@@ -146,7 +146,7 @@ void
 rw_lock_free(
 /*=========*/
 	rw_lock_t*	lock);	/*!< in: rw-lock */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /******************************************************************//**
 Checks that the rw-lock has been initialized and that there are no
 simultaneous shared and exclusive locks.
@@ -156,7 +156,7 @@ ibool
 rw_lock_validate(
 /*=============*/
 	rw_lock_t*	lock);	/*!< in: rw-lock */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /**************************************************************//**
 NOTE! The following macros should be used in rw s-locking, not the
 corresponding function. */
@@ -223,13 +223,13 @@ IB_INLINE
 void
 rw_lock_s_unlock_func(
 /*==================*/
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		pass,	/*!< in: pass value; != 0, if the lock may have
 				been passed to another thread to unlock */
 #endif
 	rw_lock_t*	lock);	/*!< in/out: rw-lock */
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 # define rw_lock_s_unlock_gen(L, P)	rw_lock_s_unlock_func(P, L)
 #else
 # define rw_lock_s_unlock_gen(L, P)	rw_lock_s_unlock_func(L)
@@ -280,13 +280,13 @@ IB_INLINE
 void
 rw_lock_x_unlock_func(
 /*==================*/
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint		pass,	/*!< in: pass value; != 0, if the lock may have
 				been passed to another thread to unlock */
 #endif
 	rw_lock_t*	lock);	/*!< in/out: rw-lock */
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 # define rw_lock_x_unlock_gen(L, P)	rw_lock_x_unlock_func(P, L)
 #else
 # define rw_lock_x_unlock_gen(L, P)	rw_lock_x_unlock_func(L)
@@ -416,7 +416,7 @@ rw_lock_set_writer_id_and_recursion_flag(
 	rw_lock_t*	lock,		/*!< in/out: lock to work on */
 	ibool		recursive);	/*!< in: TRUE if recursion
 					allowed */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Checks if the thread has locked the rw-lock in the specified mode, with
 the pass value == 0. */
@@ -428,7 +428,7 @@ rw_lock_own(
 	ulint		lock_type)	/*!< in: lock type: RW_LOCK_SHARED,
 					RW_LOCK_EX */
 	__attribute__((warn_unused_result));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 /******************************************************************//**
 Checks if somebody has locked the rw-lock in the specified mode. */
 IB_INTERN
@@ -438,7 +438,7 @@ rw_lock_is_locked(
 	rw_lock_t*	lock,		/*!< in: rw-lock */
 	ulint		lock_type);	/*!< in: lock type: RW_LOCK_SHARED,
 					RW_LOCK_EX */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /***************************************************************//**
 Prints debug info of an rw-lock. */
 IB_INTERN
@@ -487,7 +487,7 @@ void
 rw_lock_debug_print(
 /*================*/
 	rw_lock_debug_t*	info);	/*!< in: debug struct */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 /**********************************************************************
 Reset the variables. */
 IB_INTERN
@@ -536,12 +536,12 @@ struct rw_lock_struct {
 	UT_LIST_NODE_T(rw_lock_t) list;
 				/*!< All allocated rw locks are put into a
 				list */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	UT_LIST_BASE_NODE_T(rw_lock_debug_t) debug_list;
 				/*!< In the debug version: pointer to the debug
 				info list of the lock */
 	ulint	level;		/*!< Level in the global latching order. */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ulint count_os_wait;	/*!< Count of os_waits. May not be accurate */
 	const char*	cfile_name;/*!< File name where lock created */
         /* last s-lock file/line is not guaranteed to be correct */
@@ -563,7 +563,7 @@ struct rw_lock_struct {
 /** Value of rw_lock_struct::magic_n */
 #define	RW_LOCK_MAGIC_N	22643
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /** The structure for storing debug info of an rw-lock */
 struct	rw_lock_debug_struct {
 
@@ -578,11 +578,11 @@ struct	rw_lock_debug_struct {
 				/*!< Debug structs are linked in a two-way
 				list */
 };
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 #ifndef IB_DO_NOT_INLINE
 #include "sync0rw.inl"
 #endif
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #endif

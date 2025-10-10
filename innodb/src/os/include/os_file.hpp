@@ -44,9 +44,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** File node of a tablespace or the log data space */
 typedef struct fil_node_struct fil_node_t;
 
-#ifdef UNIV_DO_FLUSH
+#ifdef IB_DO_FLUSH
 extern ibool os_do_not_call_flush_at_each_write;
-#endif /* UNIV_DO_FLUSH */
+#endif /* IB_DO_FLUSH */
 extern ibool os_has_said_disk_full;
 /** Flag: enable debug printout for asynchronous i/o */
 extern ibool os_aio_print_debug;
@@ -68,7 +68,7 @@ extern ulint os_n_pending_writes;
 #define WIN_ASYNC_IO
 
 /** Use unbuffered I/O */
-#define UNIV_NON_BUFFERED_IO
+#define IB_NON_BUFFERED_IO
 
 #endif
 
@@ -224,7 +224,7 @@ typedef DIR *os_file_dir_t; /*!< directory stream */
 /// \return OS_WIN95, OS_WIN31, OS_WINNT, or OS_WIN2000.
 IB_INTERN
 ulint os_get_os_version(void);
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Creates the seek mutexes used in positioned reads and writes.
 IB_INTERN
 void os_io_init_simple(void);
@@ -234,7 +234,7 @@ void os_io_init_simple(void);
 IB_INTERN
 FILE *
 os_file_create_tmpfile(void);
-#endif																	  /* !UNIV_HOTBACKUP */
+#endif																	  /* !IB_HOTBACKUP */
 /***********************************************************************/ /**
 The os_file_opendir() function opens a directory stream corresponding to the
 directory named by the dirname argument. The directory stream is positioned
@@ -403,7 +403,7 @@ ibool os_file_close(
 	/*==========*/
 	os_file_t file
 ); /*!< in, own: handle to a file */
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /***********************************************************************/ /**
 Closes a file handle.
 @return	TRUE if success */
@@ -412,7 +412,7 @@ ibool os_file_close_no_error_handling(
 	/*============================*/
 	os_file_t file
 );																		  /*!< in, own: handle to a file */
-#endif																	  /* UNIV_HOTBACKUP */
+#endif																	  /* IB_HOTBACKUP */
 /***********************************************************************/ /**
 Gets a file size.
 @return	TRUE if success */
@@ -742,14 +742,14 @@ IB_INTERN
 void os_aio_refresh_stats(void);
 /*======================*/
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************************/ /**
 Checks that all slots in the system have been freed, that is, there are
 no pending io operations. */
 IB_INTERN
 ibool os_aio_all_slots_free(void);
 /*=======================*/
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*******************************************************************/ /**
 This function returns information about the specified file
@@ -773,7 +773,7 @@ Close/Shutdown the IO sub-system and free all the memory. */
 IB_INTERN
 void os_aio_close(void);
 /*===============*/
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************/ /**
 Sets the info describing an i/o thread current state. */
 IB_INTERN
@@ -785,6 +785,6 @@ void os_set_io_thread_op_info(
 				state */
 #else
 #define os_set_io_thread_op_info(t, info) ((void)0)
-#endif /* UNIV_HOTBACK */
+#endif /* IB_HOTBACK */
 
 #endif

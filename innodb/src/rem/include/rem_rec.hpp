@@ -66,13 +66,13 @@ The status is stored in the low-order bits. */
 /* Length of a B-tree node pointer, in bytes */
 #define REC_NODE_PTR_SIZE	4
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /* Length of the rec_get_offsets() header */
 # define REC_OFFS_HEADER_SIZE	4
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 /* Length of the rec_get_offsets() header */
 # define REC_OFFS_HEADER_SIZE	2
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /* Number of elements that should be initially allocated for the
 offsets[] array, first passed to rec_get_offsets() */
@@ -407,7 +407,7 @@ rec_offs_validate(
 	const dict_index_t*	index,	/*!< in: record descriptor or NULL */
 	const ulint*		offsets);/*!< in: array returned by
 					rec_get_offsets() */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /************************************************************//**
 Updates debug data in offsets, in order to avoid bogus
 rec_offs_validate() failures. */
@@ -421,7 +421,7 @@ rec_offs_make_valid(
 					rec_get_offsets() */
 #else
 # define rec_offs_make_valid(rec, index, offsets) ((void) 0)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /************************************************************//**
 The following function is used to get the offset to the nth
@@ -433,7 +433,7 @@ rec_get_nth_field_offs_old(
 /*=======================*/
 	const rec_t*	rec,	/*!< in: record */
 	ulint		n,	/*!< in: index of the field */
-	ulint*		len);	/*!< out: length of the field; UNIV_SQL_NULL
+	ulint*		len);	/*!< out: length of the field; IB_SQL_NULL
 				if SQL null */
 #define rec_get_nth_field_old(rec, n, len) \
 ((rec) + rec_get_nth_field_offs_old(rec, n, len))
@@ -458,7 +458,7 @@ rec_get_nth_field_offs(
 /*===================*/
 	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
 	ulint		n,	/*!< in: index of the field */
-	ulint*		len);	/*!< out: length of the field; UNIV_SQL_NULL
+	ulint*		len);	/*!< out: length of the field; IB_SQL_NULL
 				if SQL null */
 #define rec_get_nth_field(rec, offsets, n, len) \
 ((rec) + rec_get_nth_field_offs(offsets, n, len))
@@ -519,9 +519,9 @@ rec_offs_n_extern(
 /***********************************************************//**
 This is used to modify the value of an already existing field in a record.
 The previous value must have exactly the same size as the new value. If len
-is UNIV_SQL_NULL then the field is treated as an SQL null.
+is IB_SQL_NULL then the field is treated as an SQL null.
 For records in ROW_FORMAT=COMPACT (new-style records), len must not be
-UNIV_SQL_NULL unless the field already is SQL null. */
+IB_SQL_NULL unless the field already is SQL null. */
 IB_INLINE
 void
 rec_set_nth_field(
@@ -530,7 +530,7 @@ rec_set_nth_field(
 	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
 	ulint		n,	/*!< in: index number of the field */
 	const void*	data,	/*!< in: pointer to the data if not SQL null */
-	ulint		len);	/*!< in: length of the data or UNIV_SQL_NULL */
+	ulint		len);	/*!< in: length of the data or IB_SQL_NULL */
 /**********************************************************//**
 The following function returns the data size of an old-style physical
 record, that is the sum of field lengths. SQL null fields
@@ -628,7 +628,7 @@ rec_copy(
 	void*		buf,	/*!< in: buffer */
 	const rec_t*	rec,	/*!< in: physical record */
 	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**************************************************************//**
 Copies the first n fields of a physical record to a new physical record in
 a buffer.
@@ -661,7 +661,7 @@ rec_fold(
 					in an incomplete last field */
 	dulint		tree_id)	/*!< in: index tree id */
 	__attribute__((pure));
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*********************************************************//**
 Builds a ROW_FORMAT=COMPACT record out of a data tuple. */
 IB_INTERN
@@ -743,7 +743,7 @@ rec_get_converted_size(
 	dict_index_t*	index,	/*!< in: record descriptor */
 	const dtuple_t*	dtuple,	/*!< in: data tuple */
 	ulint		n_ext);	/*!< in: number of externally stored columns */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**************************************************************//**
 Copies the first n fields of a physical record to a data tuple.
 The fields are copied to the memory heap. */
@@ -757,7 +757,7 @@ rec_copy_prefix_to_dtuple(
 	ulint			n_fields,	/*!< in: number of fields
 						to copy */
 	mem_heap_t*		heap);		/*!< in: memory heap */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***************************************************************//**
 Validates the consistency of a physical record.
 @return	TRUE if ok */
@@ -775,7 +775,7 @@ rec_print_old(
 /*==========*/
 	ib_stream_t	ib_stream,	/*!< in: stream where to print */
 	const rec_t*	rec);		/*!< in: physical record */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***************************************************************//**
 Prints a physical record in ROW_FORMAT=COMPACT.  Ignores the
 record header. */
@@ -806,7 +806,7 @@ rec_print(
 	ib_stream_t	ib_stream,	/*!< in: stream where to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	dict_index_t*	index);		/*!< in: record descriptor */
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 #define REC_INFO_BITS		6	/* This is single byte bit-field */
 

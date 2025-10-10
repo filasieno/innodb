@@ -11,7 +11,7 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([_PANDORA_SEARCH_LIBPCRE],[
   AC_REQUIRE([AC_LIB_PREFIX])
 
-  AC_LIB_HAVE_LINKFLAGS(pcre,,
+  AC_LIB_IB_HAVE_LINKFLAGS(pcre,,
   [#include <pcre.h>],
   [
     pcre *re= NULL;
@@ -20,11 +20,11 @@ AC_DEFUN([_PANDORA_SEARCH_LIBPCRE],[
   AS_IF([test "x$ac_cv_libpcre" = "xno"],
   [
     unset ac_cv_libpcre
-    unset HAVE_LIBPCRE
+    unset IB_HAVE_LIBPCRE
     unset LIBPCRE
     unset LIBPCRE_PREFIX
     unset LTLIBPCRE
-    AC_LIB_HAVE_LINKFLAGS(pcre,,
+    AC_LIB_IB_HAVE_LINKFLAGS(pcre,,
     [#include <pcre/pcre.h>],
     [
       pcre *re= NULL;
@@ -37,10 +37,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBPCRE],[
     ac_cv_pcre_location="<pcre.h>"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBPCRE, [test "x${ac_cv_libpcre}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBPCRE, [test "x${ac_cv_libpcre}" = "xyes"])
 ])
 
-AC_DEFUN([_PANDORA_HAVE_LIBPCRE],[
+AC_DEFUN([_PANDORA_IB_HAVE_LIBPCRE],[
 
   AC_ARG_ENABLE([libpcre],
     [AS_HELP_STRING([--disable-libpcre],
@@ -52,8 +52,8 @@ AC_DEFUN([_PANDORA_HAVE_LIBPCRE],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_LIBPCRE],[
-  AC_REQUIRE([_PANDORA_HAVE_LIBPCRE])
+AC_DEFUN([PANDORA_IB_HAVE_LIBPCRE],[
+  AC_REQUIRE([_PANDORA_IB_HAVE_LIBPCRE])
 ])
 
 AC_DEFUN([_PANDORA_REQUIRE_LIBPCRE],[

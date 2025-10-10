@@ -218,11 +218,11 @@ eval_node_copy_and_alloc_val(
 /*=========================*/
 	que_node_t*	node,	/*!< in: query graph node */
 	const byte*	str,	/*!< in: binary string */
-	ulint		len)	/*!< in: string length or UNIV_SQL_NULL */
+	ulint		len)	/*!< in: string length or IB_SQL_NULL */
 {
 	byte*		data;
 
-	if (len == UNIV_SQL_NULL) {
+	if (len == IB_SQL_NULL) {
 		dfield_set_len(que_node_get_val(node), len);
 
 		return;

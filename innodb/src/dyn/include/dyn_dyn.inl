@@ -133,7 +133,7 @@ dyn_array_create(
 	arr->heap = NULL;
 	arr->used = 0;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	arr->buf_end = 0;
 	arr->magic_n = DYN_BLOCK_MAGIC_N;
 #endif
@@ -152,7 +152,7 @@ dyn_array_free(
 		mem_heap_free(arr->heap);
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	arr->magic_n = 0;
 #endif
 }
@@ -235,7 +235,7 @@ dyn_array_open(
 	}
 
 	ut_ad(block->used <= DYN_ARRAY_DATA_SIZE);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ut_ad(arr->buf_end == 0);
 
 	arr->buf_end = used + size;
@@ -265,7 +265,7 @@ dyn_array_close(
 
 	ut_ad(block->used <= DYN_ARRAY_DATA_SIZE);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	arr->buf_end = 0;
 #endif
 }

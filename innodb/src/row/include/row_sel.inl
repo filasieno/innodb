@@ -73,7 +73,7 @@ que_thr_t *open_step(que_thr_t *thr)
         }
     }
 
-    if (UNIV_EXPECT(err, DB_SUCCESS) != DB_SUCCESS) {
+    if (IB_EXPECT(err, DB_SUCCESS) != DB_SUCCESS) {
         // SQL error detected
         ib_logger(ib_stream, "SQL error %lu\n", (ulong)err);
 

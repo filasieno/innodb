@@ -244,19 +244,19 @@ struct btr_search_struct{
 				the same prefix should be indexed in the
 				hash index */
 	/*---------------------- @} */
-#ifdef UNIV_SEARCH_PERF_STAT
+#ifdef IB_SEARCH_PERF_STAT
 	ulint	n_hash_succ;	/*!< number of successful hash searches thus
 				far */
 	ulint	n_hash_fail;	/*!< number of failed hash searches */
 	ulint	n_patt_succ;	/*!< number of successful pattern searches thus
 				far */
 	ulint	n_searches;	/*!< number of searches */
-#endif /* UNIV_SEARCH_PERF_STAT */
-#ifdef UNIV_DEBUG
+#endif /* IB_SEARCH_PERF_STAT */
+#ifdef IB_DEBUG
 	ulint	magic_n;	/*!< magic number @see BTR_SEARCH_MAGIC_N */
 /** value of btr_search_struct::magic_n, used in assertions */
 # define BTR_SEARCH_MAGIC_N	1112765
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 };
 
 /** The hash index system */
@@ -290,12 +290,12 @@ extern rw_lock_t*	btr_search_latch_temp;
 /** The latch protecting the adaptive search system */
 #define btr_search_latch	(*btr_search_latch_temp)
 
-#ifdef UNIV_SEARCH_PERF_STAT
+#ifdef IB_SEARCH_PERF_STAT
 /** Number of successful adaptive hash index lookups */
 extern ulint	btr_search_n_succ;
 /** Number of failed adaptive hash index lookups */
 extern ulint	btr_search_n_hash_fail;
-#endif /* UNIV_SEARCH_PERF_STAT */
+#endif /* IB_SEARCH_PERF_STAT */
 
 /** After change in n_fields or n_bytes in info, this many rounds are waited
 before starting the hash analysis again: this is to save CPU time when there

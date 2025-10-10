@@ -45,7 +45,7 @@ row_ext_lookup_ith(
 
 	*len = ext->len[i];
 
-	if (UNIV_UNLIKELY(*len == 0)) {
+	if (IB_UNLIKELY(*len == 0)) {
 		/* The BLOB could not be fetched to the cache. */
 		return(field_ref_zero);
 	} else {

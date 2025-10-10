@@ -3,7 +3,7 @@ dnl This file is free software; Sun Microsystems, Inc.
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
-AC_DEFUN([PANDORA_HAVE_BETTER_MALLOC],[
+AC_DEFUN([PANDORA_IB_HAVE_BETTER_MALLOC],[
   AC_REQUIRE([AC_LIB_PREFIX])
 
   AC_ARG_ENABLE([umem],
@@ -60,7 +60,7 @@ AC_DEFUN([PANDORA_HAVE_BETTER_MALLOC],[
 ])
 
 AC_DEFUN([PANDORA_USE_BETTER_MALLOC],[
-  AC_REQUIRE([PANDORA_HAVE_BETTER_MALLOC])
+  AC_REQUIRE([PANDORA_IB_HAVE_BETTER_MALLOC])
   LIBS="${LIBS} ${BETTER_MALLOC_LIBS}"
 ])
 

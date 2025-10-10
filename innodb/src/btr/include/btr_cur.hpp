@@ -37,7 +37,7 @@ Created 10/16/1994 Heikki Tuuri
 #define BTR_KEEP_SYS_FLAG	4	/* sys fields will be found from the
 					update vector or inserted entry */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "que_types.hpp"
 #include "row_types.hpp"
 #include "ha_ha.hpp"
@@ -45,7 +45,7 @@ Created 10/16/1994 Heikki Tuuri
 #define BTR_CUR_ADAPT
 #define BTR_CUR_HASH_ADAPT
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************//**
 Returns the page cursor component of a tree cursor.
 @return	pointer to page cursor component */
@@ -54,9 +54,9 @@ page_cur_t*
 btr_cur_get_page_cur(
 /*=================*/
 	const btr_cur_t*	cursor);/*!< in: tree cursor */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define btr_cur_get_page_cur(cursor) (&(cursor)->page_cur)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************//**
 Returns the buffer block on which the tree cursor is positioned.
 @return	pointer to buffer block */
@@ -404,7 +404,7 @@ btr_cur_pessimistic_delete(
 				deleted record on function exit */
 	enum trx_rb_ctx	rb_ctx,	/*!< in: rollback context */
 	mtr_t*		mtr);	/*!< in: mtr */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***********************************************************//**
 Parses a redo log record of updating a record in-place.
 @return	end of log record or NULL */
@@ -442,7 +442,7 @@ btr_cur_parse_del_mark_set_sec_rec(
 	byte*		end_ptr,/*!< in: buffer end */
 	page_t*		page,	/*!< in/out: page or NULL */
 	page_zip_des_t*	page_zip);/*!< in/out: compressed page, or NULL */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Estimates the number of rows in a given index range.
 @return	estimated number of rows */
@@ -607,7 +607,7 @@ btr_cur_var_init(void);
 
 /** In the pessimistic delete, if the page data size drops below this
 limit, merging it to a neighbor is tried */
-#define BTR_CUR_PAGE_COMPRESS_LIMIT	(UNIV_PAGE_SIZE / 2)
+#define BTR_CUR_PAGE_COMPRESS_LIMIT	(IB_PAGE_SIZE / 2)
 
 /** A slot in the path array. We store here info on a search path down the
 tree. Each slot contains data on a single level of the tree. */
@@ -760,7 +760,7 @@ extern ulint	btr_cur_n_non_sea_old;
 srv_refresh_innodb_monitor_stats().  Referenced by
 srv_printf_innodb_monitor(). */
 extern ulint	btr_cur_n_sea_old;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifndef IB_DO_NOT_INLINE
 #include "btr0cur.inl"

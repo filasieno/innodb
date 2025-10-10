@@ -11,17 +11,17 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([_PANDORA_SEARCH_LIBZ],[
   AC_REQUIRE([AC_LIB_PREFIX])
 
-  AC_LIB_HAVE_LINKFLAGS(z,,
+  AC_LIB_IB_HAVE_LINKFLAGS(z,,
   [
     #include <zlib.h>
   ],[
     crc32(0, Z_NULL, 0);
   ])
 
-  AM_CONDITIONAL(HAVE_LIBZ, [test "x${ac_cv_libz}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBZ, [test "x${ac_cv_libz}" = "xyes"])
 ])
 
-AC_DEFUN([_PANDORA_HAVE_LIBZ],[
+AC_DEFUN([_PANDORA_IB_HAVE_LIBZ],[
 
   AC_ARG_ENABLE([libz],
     [AS_HELP_STRING([--disable-libz],
@@ -33,8 +33,8 @@ AC_DEFUN([_PANDORA_HAVE_LIBZ],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_LIBZ],[
-  AC_REQUIRE([_PANDORA_HAVE_LIBZ])
+AC_DEFUN([PANDORA_IB_HAVE_LIBZ],[
+  AC_REQUIRE([_PANDORA_IB_HAVE_LIBZ])
 ])
 
 AC_DEFUN([_PANDORA_REQUIRE_LIBZ],[

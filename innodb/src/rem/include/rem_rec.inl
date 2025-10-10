@@ -68,7 +68,7 @@ most significant bytes and bits are written below less significant.
 				  we can calculate the offset of the next
 				  record with the formula:
 				  relative_offset + offset_of_this_record
-				  mod UNIV_PAGE_SIZE
+				  mod IB_PAGE_SIZE
 			3	3 bits status:
 					000=conventional record
 					001=node pointer record (inside B-tree)
@@ -263,13 +263,13 @@ rec_get_next_ptr_const(
 
 	field_value = mach_read_from_2(rec - REC_NEXT);
 
-	if (UNIV_UNLIKELY(field_value == 0)) {
+	if (IB_UNLIKELY(field_value == 0)) {
 
 		return(NULL);
 	}
 
-	if (UNIV_EXPECT(comp, REC_OFFS_COMPACT)) {
-#if UNIV_PAGE_SIZE <= 32768
+	if (IB_EXPECT(comp, REC_OFFS_COMPACT)) {
+#if IB_PAGE_SIZE <= 32768
 		/* Note that for 64 KiB pages, field_value can 'wrap around'
 		and the debug assertion is not valid */
 
@@ -277,13 +277,13 @@ rec_get_next_ptr_const(
 		as signed 16-bit integer in 2's complement arithmetics.
 		If all platforms defined int16_t in the standard headers,
 		the expression could be written simpler as
-		(int16_t) field_value + ut_align_offset(...) < UNIV_PAGE_SIZE
+		(int16_t) field_value + ut_align_offset(...) < IB_PAGE_SIZE
 		*/
 		ut_ad((field_value >= 32768
 		       ? field_value - 65536
 		       : field_value)
-		      + ut_align_offset(rec, UNIV_PAGE_SIZE)
-		      < UNIV_PAGE_SIZE);
+		      + ut_align_offset(rec, IB_PAGE_SIZE)
+		      < IB_PAGE_SIZE);
 #endif
 		/* There must be at least REC_N_NEW_EXTRA_BYTES + 1
 		between each record. */
@@ -291,12 +291,12 @@ rec_get_next_ptr_const(
 		       && field_value < 32768)
 		      || field_value < (ib_uint16_t) -REC_N_NEW_EXTRA_BYTES);
 
-		return((byte*) ut_align_down(rec, UNIV_PAGE_SIZE)
-		       + ut_align_offset(rec + field_value, UNIV_PAGE_SIZE));
+		return((byte*) ut_align_down(rec, IB_PAGE_SIZE)
+		       + ut_align_offset(rec + field_value, IB_PAGE_SIZE));
 	} else {
-		ut_ad(field_value < UNIV_PAGE_SIZE);
+		ut_ad(field_value < IB_PAGE_SIZE);
 
-		return((byte*) ut_align_down(rec, UNIV_PAGE_SIZE)
+		return((byte*) ut_align_down(rec, IB_PAGE_SIZE)
 		       + field_value);
 	}
 }
@@ -336,8 +336,8 @@ rec_get_next_offs(
 
 	field_value = mach_read_from_2(rec - REC_NEXT);
 
-	if (UNIV_EXPECT(comp, REC_OFFS_COMPACT)) {
-#if UNIV_PAGE_SIZE <= 32768
+	if (IB_EXPECT(comp, REC_OFFS_COMPACT)) {
+#if IB_PAGE_SIZE <= 32768
 		/* Note that for 64 KiB pages, field_value can 'wrap around'
 		and the debug assertion is not valid */
 
@@ -345,15 +345,15 @@ rec_get_next_offs(
 		as signed 16-bit integer in 2's complement arithmetics.
 		If all platforms defined int16_t in the standard headers,
 		the expression could be written simpler as
-		(int16_t) field_value + ut_align_offset(...) < UNIV_PAGE_SIZE
+		(int16_t) field_value + ut_align_offset(...) < IB_PAGE_SIZE
 		*/
 		ut_ad((field_value >= 32768
 		       ? field_value - 65536
 		       : field_value)
-		      + ut_align_offset(rec, UNIV_PAGE_SIZE)
-		      < UNIV_PAGE_SIZE);
+		      + ut_align_offset(rec, IB_PAGE_SIZE)
+		      < IB_PAGE_SIZE);
 #endif
-		if (UNIV_UNLIKELY(field_value == 0)) {
+		if (IB_UNLIKELY(field_value == 0)) {
 
 			return(0);
 		}
@@ -364,9 +364,9 @@ rec_get_next_offs(
 		       && field_value < 32768)
 		      || field_value < (ib_uint16_t) -REC_N_NEW_EXTRA_BYTES);
 
-		return(ut_align_offset(rec + field_value, UNIV_PAGE_SIZE));
+		return(ut_align_offset(rec + field_value, IB_PAGE_SIZE));
 	} else {
-		ut_ad(field_value < UNIV_PAGE_SIZE);
+		ut_ad(field_value < IB_PAGE_SIZE);
 
 		return(field_value);
 	}
@@ -383,7 +383,7 @@ rec_set_next_offs_old(
 	ulint	next)	/*!< in: offset of the next record */
 {
 	ut_ad(rec);
-	ut_ad(UNIV_PAGE_SIZE > next);
+	ut_ad(IB_PAGE_SIZE > next);
 #if REC_NEXT_MASK != 0xFFFFUL
 # error "REC_NEXT_MASK != 0xFFFFUL"
 #endif
@@ -407,9 +407,9 @@ rec_set_next_offs_new(
 	ulint	field_value;
 
 	ut_ad(rec);
-	ut_ad(UNIV_PAGE_SIZE > next);
+	ut_ad(IB_PAGE_SIZE > next);
 
-	if (UNIV_UNLIKELY(!next)) {
+	if (IB_UNLIKELY(!next)) {
 		field_value = 0;
 	} else {
 		/* The following two statements calculate
@@ -418,7 +418,7 @@ rec_set_next_offs_new(
 
 		field_value = (ulint)
 			((lint) next 
-			 - (lint) ut_align_offset(rec, UNIV_PAGE_SIZE));
+			 - (lint) ut_align_offset(rec, IB_PAGE_SIZE));
 		field_value &= REC_NEXT_MASK;
 	}
 
@@ -572,8 +572,8 @@ rec_set_n_owned_new(
 	rec_set_bit_field_1(rec, n_owned, REC_NEW_N_OWNED,
 			    REC_N_OWNED_MASK, REC_N_OWNED_SHIFT);
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)
-	    && UNIV_LIKELY(rec_get_status(rec)
+	if (IB_LIKELY_NULL(page_zip)
+	    && IB_LIKELY(rec_get_status(rec)
 			   != REC_STATUS_SUPREMUM)) {
 		page_zip_rec_set_owned(page_zip, rec, n_owned);
 	}
@@ -649,7 +649,7 @@ rec_get_info_and_status_bits(
 & (REC_INFO_BITS_MASK >> REC_INFO_BITS_SHIFT)
 # error "REC_NEW_STATUS_MASK and REC_INFO_BITS_MASK overlap"
 #endif
-	if (UNIV_EXPECT(comp, REC_OFFS_COMPACT)) {
+	if (IB_EXPECT(comp, REC_OFFS_COMPACT)) {
 		bits = rec_get_info_bits(rec, TRUE) | rec_get_status(rec);
 	} else {
 		bits = rec_get_info_bits(rec, FALSE);
@@ -685,13 +685,13 @@ rec_get_deleted_flag(
 	const rec_t*	rec,	/*!< in: physical record */
 	ulint		comp)	/*!< in: nonzero=compact page format */
 {
-	if (UNIV_EXPECT(comp, REC_OFFS_COMPACT)) {
-		return(UNIV_UNLIKELY(
+	if (IB_EXPECT(comp, REC_OFFS_COMPACT)) {
+		return(IB_UNLIKELY(
 			       rec_get_bit_field_1(rec, REC_NEW_INFO_BITS,
 						   REC_INFO_DELETED_FLAG,
 						   REC_INFO_BITS_SHIFT)));
 	} else {
-		return(UNIV_UNLIKELY(
+		return(IB_UNLIKELY(
 			       rec_get_bit_field_1(rec, REC_OLD_INFO_BITS,
 						   REC_INFO_DELETED_FLAG,
 						   REC_INFO_BITS_SHIFT)));
@@ -743,7 +743,7 @@ rec_set_deleted_flag_new(
 	rec_set_info_bits_new(rec, val);
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		page_zip_rec_set_deleted(page_zip, rec, flag);
 	}
 #endif /* WITH_ZIP */
@@ -909,7 +909,7 @@ rec_offs_get_n_alloc(
 	ut_ad(offsets);
 	n_alloc = offsets[0];
 	ut_ad(n_alloc > REC_OFFS_HEADER_SIZE);
-	UNIV_MEM_ASSERT_W(offsets, n_alloc * sizeof *offsets);
+	IB_MEM_ASSERT_W(offsets, n_alloc * sizeof *offsets);
 	return(n_alloc);
 }
 
@@ -926,7 +926,7 @@ rec_offs_set_n_alloc(
 {
 	ut_ad(offsets);
 	ut_ad(n_alloc > REC_OFFS_HEADER_SIZE);
-	UNIV_MEM_ASSERT_AND_ALLOC(offsets, n_alloc * sizeof *offsets);
+	IB_MEM_ASSERT_AND_ALLOC(offsets, n_alloc * sizeof *offsets);
 	offsets[0] = n_alloc;
 }
 
@@ -1004,7 +1004,7 @@ rec_offs_validate(
 	}
 	return(TRUE);
 }
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /************************************************************//**
 Updates debug data in offsets, in order to avoid bogus
 rec_offs_validate() failures. */
@@ -1024,7 +1024,7 @@ rec_offs_make_valid(
 	offsets[2] = (ulint) rec;
 	offsets[3] = (ulint) index;
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /************************************************************//**
 The following function is used to get an offset to the nth
@@ -1036,7 +1036,7 @@ rec_get_nth_field_offs(
 /*===================*/
 	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
 	ulint		n,	/*!< in: index of the field */
-	ulint*		len)	/*!< out: length of the field; UNIV_SQL_NULL
+	ulint*		len)	/*!< out: length of the field; IB_SQL_NULL
 				if SQL null */
 {
 	ulint	offs;
@@ -1044,7 +1044,7 @@ rec_get_nth_field_offs(
 	ut_ad(n < rec_offs_n_fields(offsets));
 	ut_ad(len);
 
-	if (UNIV_UNLIKELY(n == 0)) {
+	if (IB_UNLIKELY(n == 0)) {
 		offs = 0;
 	} else {
 		offs = rec_offs_base(offsets)[n] & REC_OFFS_MASK;
@@ -1053,7 +1053,7 @@ rec_get_nth_field_offs(
 	length = rec_offs_base(offsets)[1 + n];
 
 	if (length & REC_OFFS_SQL_NULL) {
-		length = UNIV_SQL_NULL;
+		length = IB_SQL_NULL;
 	} else {
 		length &= REC_OFFS_MASK;
 		length -= offs;
@@ -1088,7 +1088,7 @@ rec_offs_any_extern(
 	const ulint*	offsets)/*!< in: array returned by rec_get_offsets() */
 {
 	ut_ad(rec_offs_validate(NULL, NULL, offsets));
-	return(UNIV_UNLIKELY(*rec_offs_base(offsets) & REC_OFFS_EXTERNAL));
+	return(IB_UNLIKELY(*rec_offs_base(offsets) & REC_OFFS_EXTERNAL));
 }
 
 /******************************************************//**
@@ -1103,7 +1103,7 @@ rec_offs_nth_extern(
 {
 	ut_ad(rec_offs_validate(NULL, NULL, offsets));
 	ut_ad(n < rec_offs_n_fields(offsets));
-	return(UNIV_UNLIKELY(rec_offs_base(offsets)[1 + n]
+	return(IB_UNLIKELY(rec_offs_base(offsets)[1 + n]
 			     & REC_OFFS_EXTERNAL));
 }
 
@@ -1119,7 +1119,7 @@ rec_offs_nth_sql_null(
 {
 	ut_ad(rec_offs_validate(NULL, NULL, offsets));
 	ut_ad(n < rec_offs_n_fields(offsets));
-	return(UNIV_UNLIKELY(rec_offs_base(offsets)[1 + n]
+	return(IB_UNLIKELY(rec_offs_base(offsets)[1 + n]
 			     & REC_OFFS_SQL_NULL));
 }
 
@@ -1331,7 +1331,7 @@ rec_get_nth_field_size(
 	os = rec_get_field_start_offs(rec, n);
 	next_os = rec_get_field_start_offs(rec, n + 1);
 
-	ut_ad(next_os - os < UNIV_PAGE_SIZE);
+	ut_ad(next_os - os < IB_PAGE_SIZE);
 
 	return(next_os - os);
 }
@@ -1339,9 +1339,9 @@ rec_get_nth_field_size(
 /***********************************************************//**
 This is used to modify the value of an already existing field in a record.
 The previous value must have exactly the same size as the new value. If len
-is UNIV_SQL_NULL then the field is treated as an SQL null.
+is IB_SQL_NULL then the field is treated as an SQL null.
 For records in ROW_FORMAT=COMPACT (new-style records), len must not be
-UNIV_SQL_NULL unless the field already is SQL null. */
+IB_SQL_NULL unless the field already is SQL null. */
 IB_INLINE
 void
 rec_set_nth_field(
@@ -1351,7 +1351,7 @@ rec_set_nth_field(
 	ulint		n,	/*!< in: index number of the field */
 	const void*	data,	/*!< in: pointer to the data
 				if not SQL null */
-	ulint		len)	/*!< in: length of the data or UNIV_SQL_NULL */
+	ulint		len)	/*!< in: length of the data or IB_SQL_NULL */
 {
 	byte*	data2;
 	ulint	len2;
@@ -1359,7 +1359,7 @@ rec_set_nth_field(
 	ut_ad(rec);
 	ut_ad(rec_offs_validate(rec, NULL, offsets));
 
-	if (UNIV_UNLIKELY(len == UNIV_SQL_NULL)) {
+	if (IB_UNLIKELY(len == IB_SQL_NULL)) {
 		if (!rec_offs_nth_sql_null(offsets, n)) {
 			ut_a(!rec_offs_comp(offsets));
 			rec_set_nth_field_sql_null(rec, n);
@@ -1369,7 +1369,7 @@ rec_set_nth_field(
 	}
 
 	data2 = rec_get_nth_field(rec, offsets, n, &len2);
-	if (len2 == UNIV_SQL_NULL) {
+	if (len2 == IB_SQL_NULL) {
 		ut_ad(!rec_offs_comp(offsets));
 		rec_set_nth_field_null_bit(rec, n, FALSE);
 		ut_ad(len == rec_get_nth_field_size(rec, n));
@@ -1432,7 +1432,7 @@ rec_offs_data_size(
 	ut_ad(rec_offs_validate(NULL, NULL, offsets));
 	size = rec_offs_base(offsets)[rec_offs_n_fields(offsets)]
 		& REC_OFFS_MASK;
-	ut_ad(size < UNIV_PAGE_SIZE);
+	ut_ad(size < IB_PAGE_SIZE);
 	return(size);
 }
 
@@ -1450,7 +1450,7 @@ rec_offs_extra_size(
 	ulint	size;
 	ut_ad(rec_offs_validate(NULL, NULL, offsets));
 	size = *rec_offs_base(offsets) & ~(REC_OFFS_COMPACT | REC_OFFS_EXTERNAL);
-	ut_ad(size < UNIV_PAGE_SIZE);
+	ut_ad(size < IB_PAGE_SIZE);
 	return(size);
 }
 
@@ -1582,7 +1582,7 @@ rec_get_converted_size(
 	return(data_size + extra_size);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /************************************************************//**
 Folds a prefix of a physical record to a ulint. Folds only existing fields,
 that is, checks that we do not run out of the record.
@@ -1627,7 +1627,7 @@ rec_fold(
 	for (i = 0; i < n_fields; i++) {
 		data = rec_get_nth_field(rec, offsets, i, &len);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			fold = ut_fold_ulint_pair(fold,
 						  ut_fold_binary(data, len));
 		}
@@ -1636,7 +1636,7 @@ rec_fold(
 	if (n_bytes > 0) {
 		data = rec_get_nth_field(rec, offsets, i, &len);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			if (len > n_bytes) {
 				len = n_bytes;
 			}
@@ -1648,4 +1648,4 @@ rec_fold(
 
 	return(fold);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

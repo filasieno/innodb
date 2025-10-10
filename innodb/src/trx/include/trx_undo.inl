@@ -26,7 +26,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "data_type.hpp"
 #include "page_page.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************************//**
 Builds a roll pointer.
 @return	roll pointer */
@@ -104,7 +104,7 @@ trx_undo_roll_ptr_is_insert(
 
 	return(high / (256 * 256 * 128));
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*****************************************************************//**
 Writes a roll ptr to an index page. In case that the size changes in
@@ -141,7 +141,7 @@ trx_read_roll_ptr(
 	return(mach_read_from_7(ptr));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /******************************************************************//**
 Gets an undo log page and x-latches it.
 @return	pointer to page x-latched */
@@ -255,7 +255,7 @@ trx_undo_page_get_prev_rec(
 	page_t*	undo_page;
 	ulint	start;
 
-	undo_page = (page_t*) ut_align_down(rec, UNIV_PAGE_SIZE);
+	undo_page = (page_t*) ut_align_down(rec, IB_PAGE_SIZE);
 
 	start = trx_undo_page_get_start(undo_page, page_no, offset);
 
@@ -283,7 +283,7 @@ trx_undo_page_get_next_rec(
 	ulint	end;
 	ulint	next;
 
-	undo_page = (page_t*) ut_align_down(rec, UNIV_PAGE_SIZE);
+	undo_page = (page_t*) ut_align_down(rec, IB_PAGE_SIZE);
 
 	end = trx_undo_page_get_end(undo_page, page_no, offset);
 
@@ -348,4 +348,4 @@ trx_undo_page_get_first_rec(
 
 	return(undo_page + start);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

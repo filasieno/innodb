@@ -35,9 +35,9 @@ Created 11/29/1995 Heikki Tuuri
 #include "ut_byte.hpp"
 #include "page_page.hpp"
 #include "page_zip.hpp"
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 # include "fut0lst.h"
-#else /* UNIV_HOTBACKUP */
+#else /* IB_HOTBACKUP */
 # include "sync0sync.h"
 # include "fut0fut.h"
 # include "srv0srv.h"
@@ -46,7 +46,7 @@ Created 11/29/1995 Heikki Tuuri
 # include "btr0sea.h"
 # include "dict0boot.h"
 # include "log0log.h"
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 #include "dict_mem.hpp"
 
 
@@ -158,7 +158,7 @@ typedef	byte	fseg_inode_t;
 	 + FSEG_FRAG_ARR_N_SLOTS * FSEG_FRAG_SLOT_SIZE)
 
 #define FSP_SEG_INODES_PER_PAGE(zip_size)		\
-	(((zip_size ? zip_size : UNIV_PAGE_SIZE)	\
+	(((zip_size ? zip_size : IB_PAGE_SIZE)	\
 	  - FSEG_ARR_OFFSET - 10) / FSEG_INODE_SIZE)
 				/* Number of segment inodes which fit on a
 				single page */
@@ -231,7 +231,7 @@ the extent are free and which contain old tuple version to clean. */
 /* Offset of the descriptor array on a descriptor page */
 #define	XDES_ARR_OFFSET		(FSP_HEADER_OFFSET + FSP_HEADER_SIZE)
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /* Flag to indicate if we have printed the tablespace full error. */
 static ibool fsp_tbs_full_error_printed = FALSE;
 
@@ -334,7 +334,7 @@ fseg_alloc_free_page_low(
 				direction they go alphabetically: FSP_DOWN,
 				FSP_UP, FSP_NO_DIR */
 	mtr_t*		mtr);	/*!< in: mtr handle */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Reads the file space size stored in the header page.
@@ -348,7 +348,7 @@ fsp_get_size_low(
 	return(mach_read_from_4(page + FSP_HEADER_OFFSET + FSP_SIZE));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Gets a pointer to the space header and x-locks its page.
 @return	pointer to the space header, page x-locked */
@@ -365,7 +365,7 @@ fsp_get_space_header(
 	fsp_header_t*	header;
 
 	ut_ad(ut_is_2pow(zip_size));
-	ut_ad(zip_size <= UNIV_PAGE_SIZE);
+	ut_ad(zip_size <= IB_PAGE_SIZE);
 	ut_ad(!zip_size || zip_size >= PAGE_ZIP_MIN_SIZE);
 	ut_ad(id || !zip_size);
 
@@ -652,8 +652,8 @@ xdes_calc_descriptor_page(
 	ulint	offset)		/*!< in: page offset */
 {
 #ifndef DOXYGEN /* Doxygen gets confused of these */
-# if UNIV_PAGE_SIZE <= XDES_ARR_OFFSET \
-		+ (UNIV_PAGE_SIZE / FSP_EXTENT_SIZE) * XDES_SIZE
+# if IB_PAGE_SIZE <= XDES_ARR_OFFSET \
+		+ (IB_PAGE_SIZE / FSP_EXTENT_SIZE) * XDES_SIZE
 #  error
 # endif
 # if PAGE_ZIP_MIN_SIZE <= XDES_ARR_OFFSET \
@@ -664,7 +664,7 @@ xdes_calc_descriptor_page(
 	ut_ad(ut_is_2pow(zip_size));
 
 	if (!zip_size) {
-		return(ut_2pow_round(offset, UNIV_PAGE_SIZE));
+		return(ut_2pow_round(offset, IB_PAGE_SIZE));
 	} else {
 		ut_ad(zip_size > XDES_ARR_OFFSET
 		      + (zip_size / FSP_EXTENT_SIZE) * XDES_SIZE);
@@ -686,7 +686,7 @@ xdes_calc_descriptor_index(
 	ut_ad(ut_is_2pow(zip_size));
 
 	if (!zip_size) {
-		return(ut_2pow_remainder(offset, UNIV_PAGE_SIZE)
+		return(ut_2pow_remainder(offset, IB_PAGE_SIZE)
 		       / FSP_EXTENT_SIZE);
 	} else {
 		return(ut_2pow_remainder(offset, zip_size) / FSP_EXTENT_SIZE);
@@ -837,7 +837,7 @@ xdes_get_offset(
 	       + ((page_offset(descr) - XDES_ARR_OFFSET) / XDES_SIZE)
 	       * FSP_EXTENT_SIZE);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Inits a file page whose prior contents should be ignored. */
@@ -850,12 +850,12 @@ fsp_init_file_page_low(
 	page_t*		page	= buf_block_get_frame(block);
 	page_zip_des_t*	page_zip= buf_block_get_page_zip(block);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	block->check_index_page_at_flush = FALSE;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-	if (UNIV_LIKELY_NULL(page_zip)) {
-		memset(page, 0, UNIV_PAGE_SIZE);
+	if (IB_LIKELY_NULL(page_zip)) {
+		memset(page, 0, IB_PAGE_SIZE);
 		memset(page_zip->data, 0, page_zip_get_size(page_zip));
 		mach_write_to_4(page + FIL_PAGE_OFFSET,
 				buf_block_get_page_no(block));
@@ -869,15 +869,15 @@ fsp_init_file_page_low(
 		return;
 	}
 
-	UNIV_MEM_INVALID(page, UNIV_PAGE_SIZE);
+	IB_MEM_INVALID(page, IB_PAGE_SIZE);
 	mach_write_to_4(page + FIL_PAGE_OFFSET, buf_block_get_page_no(block));
 	memset(page + FIL_PAGE_LSN, 0, 8);
 	mach_write_to_4(page + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID,
 			buf_block_get_space(block));
-	memset(page + UNIV_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM, 0, 8);
+	memset(page + IB_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM, 0, 8);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************//**
 Inits a file page whose prior contents should be ignored. */
 static
@@ -892,7 +892,7 @@ fsp_init_file_page(
 	mlog_write_initial_log_record(buf_block_get_frame(block),
 				      MLOG_INIT_FILE_PAGE, mtr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Parses a redo log record of a file page init.
@@ -949,7 +949,7 @@ fsp_header_init_fields(
 			flags);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Initializes the space header of a new created space and creates also the
 insert buffer tree root if space == 0. */
@@ -1011,7 +1011,7 @@ fsp_header_init(
 		fsp_fill_free_list(TRUE, space, header, mtr);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Reads the space id from the first page of a tablespace.
@@ -1069,7 +1069,7 @@ fsp_header_get_zip_size(
 	return(dict_table_flags_to_zip_size(flags));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Increases the space size field of a space. */
 IB_INTERN
@@ -1121,7 +1121,7 @@ fsp_header_get_free_limit(void)
 
 	limit = mtr_read_ulint(header + FSP_FREE_LIMIT, MLOG_4BYTES, &mtr);
 
-	limit /= ((1024 * 1024) / UNIV_PAGE_SIZE);
+	limit /= ((1024 * 1024) / IB_PAGE_SIZE);
 
 	log_fsp_current_free_limit_set_and_checkpoint(limit);
 
@@ -1273,7 +1273,7 @@ fsp_try_extend_data_file(
 			extent_size = FSP_EXTENT_SIZE;
 		} else {
 			extent_size = FSP_EXTENT_SIZE
-				* UNIV_PAGE_SIZE / zip_size;
+				* IB_PAGE_SIZE / zip_size;
 		}
 
 		if (size < extent_size) {
@@ -1314,7 +1314,7 @@ fsp_try_extend_data_file(
 
 	if (!zip_size) {
 		new_size = ut_calc_align_down(actual_size,
-					      (1024 * 1024) / UNIV_PAGE_SIZE);
+					      (1024 * 1024) / IB_PAGE_SIZE);
 	} else {
 		new_size = ut_calc_align_down(actual_size,
 					      (1024 * 1024) / zip_size);
@@ -1363,7 +1363,7 @@ fsp_fill_free_list(
 	zip_size = dict_table_flags_to_zip_size(
 		mach_read_from_4(FSP_SPACE_FLAGS + header));
 	ut_a(ut_is_2pow(zip_size));
-	ut_a(zip_size <= UNIV_PAGE_SIZE);
+	ut_a(zip_size <= IB_PAGE_SIZE);
 	ut_a(!zip_size || zip_size >= PAGE_ZIP_MIN_SIZE);
 
 	if (space == 0 && srv_auto_extend_last_data_file
@@ -1391,7 +1391,7 @@ fsp_fill_free_list(
 		if (zip_size) {
 			init_xdes = ut_2pow_remainder(i, zip_size) == 0;
 		} else {
-			init_xdes = ut_2pow_remainder(i, UNIV_PAGE_SIZE) == 0;
+			init_xdes = ut_2pow_remainder(i, IB_PAGE_SIZE) == 0;
 		}
 
 		mlog_write_ulint(header + FSP_FREE_LIMIT, i + FSP_EXTENT_SIZE,
@@ -1403,10 +1403,10 @@ fsp_fill_free_list(
 			ut_a(!zip_size);
 			log_fsp_current_free_limit_set_and_checkpoint(
 				(i + FSP_EXTENT_SIZE)
-				/ ((1024 * 1024) / UNIV_PAGE_SIZE));
+				/ ((1024 * 1024) / IB_PAGE_SIZE));
 		}
 
-		if (UNIV_UNLIKELY(init_xdes)) {
+		if (IB_UNLIKELY(init_xdes)) {
 
 			buf_block_t*	block;
 
@@ -1455,14 +1455,14 @@ fsp_fill_free_list(
 							   mtr);
 		xdes_init(descr, mtr);
 
-#if UNIV_PAGE_SIZE % FSP_EXTENT_SIZE
-# error "UNIV_PAGE_SIZE % FSP_EXTENT_SIZE != 0"
+#if IB_PAGE_SIZE % FSP_EXTENT_SIZE
+# error "IB_PAGE_SIZE % FSP_EXTENT_SIZE != 0"
 #endif
 #if PAGE_ZIP_MIN_SIZE % FSP_EXTENT_SIZE
 # error "PAGE_ZIP_MIN_SIZE % FSP_EXTENT_SIZE != 0"
 #endif
 
-		if (UNIV_UNLIKELY(init_xdes)) {
+		if (IB_UNLIKELY(init_xdes)) {
 
 			/* The first page in the extent is a descriptor page
 			and the second is an ibuf bitmap page: mark them
@@ -2076,7 +2076,7 @@ fseg_inode_try_get(
 
 	inode = fut_get_ptr(space, zip_size, inode_addr, RW_X_LATCH, mtr);
 
-	if (UNIV_UNLIKELY
+	if (IB_UNLIKELY
 	    (ut_dulint_is_zero(mach_read_from_8(inode + FSEG_ID)))) {
 
 		inode = NULL;
@@ -2262,7 +2262,7 @@ fseg_create_general(
 
 	ut_ad(mtr);
 	ut_ad(byte_offset + FSEG_HEADER_SIZE
-	      <= UNIV_PAGE_SIZE - FIL_PAGE_DATA_END);
+	      <= IB_PAGE_SIZE - FIL_PAGE_DATA_END);
 
 	latch = fil_space_get_latch(space, &flags);
 	zip_size = dict_table_flags_to_zip_size(flags);
@@ -2785,7 +2785,7 @@ fseg_alloc_free_page_low(
 		block = buf_page_create(space, ret_page, zip_size, mtr);
 		buf_block_dbg_add_level(block, SYNC_FSP_PAGE);
 
-		if (UNIV_UNLIKELY(block != buf_page_get(space, zip_size,
+		if (IB_UNLIKELY(block != buf_page_get(space, zip_size,
 							ret_page, RW_X_LATCH,
 							mtr))) {
 			ut_error;
@@ -3030,7 +3030,7 @@ try_again:
 		n_free_up--;
 		if (!zip_size) {
 			n_free_up -= n_free_up
-				/ (UNIV_PAGE_SIZE / FSP_EXTENT_SIZE);
+				/ (IB_PAGE_SIZE / FSP_EXTENT_SIZE);
 		} else {
 			n_free_up -= n_free_up
 				/ (zip_size / FSP_EXTENT_SIZE);
@@ -3140,7 +3140,7 @@ fsp_get_available_space_in_free_extents(
 		n_free_up--;
 		if (!zip_size) {
 			n_free_up -= n_free_up
-				/ (UNIV_PAGE_SIZE / FSP_EXTENT_SIZE);
+				/ (IB_PAGE_SIZE / FSP_EXTENT_SIZE);
 		} else {
 			n_free_up -= n_free_up
 				/ (zip_size / FSP_EXTENT_SIZE);
@@ -3162,7 +3162,7 @@ fsp_get_available_space_in_free_extents(
 	if (!zip_size) {
 		return((ib_uint64_t) (n_free - reserve)
 		       * FSP_EXTENT_SIZE
-		       * (UNIV_PAGE_SIZE / 1024));
+		       * (IB_PAGE_SIZE / 1024));
 	} else {
 		return((ib_uint64_t) (n_free - reserve)
 		       * FSP_EXTENT_SIZE
@@ -3397,7 +3397,7 @@ fseg_free_page(
 
 	fseg_free_page_low(seg_inode, space, zip_size, page, mtr);
 
-#ifdef UNIV_DEBUG_FILE_ACCESSES
+#ifdef IB_DEBUG_FILE_ACCESSES
 	buf_page_set_file_page_was_freed(space, page);
 #endif
 }
@@ -3466,7 +3466,7 @@ fseg_free_extent(
 
 	fsp_free_extent(space, zip_size, page, mtr);
 
-#ifdef UNIV_DEBUG_FILE_ACCESSES
+#ifdef IB_DEBUG_FILE_ACCESSES
 	for (i = 0; i < FSP_EXTENT_SIZE; i++) {
 
 		buf_page_set_file_page_was_freed(space,
@@ -3522,7 +3522,7 @@ fseg_free_step(
 			  header_page % FSP_EXTENT_SIZE, mtr) == FALSE);
 	inode = fseg_inode_try_get(header, space, zip_size, mtr);
 
-	if (UNIV_UNLIKELY(inode == NULL)) {
+	if (IB_UNLIKELY(inode == NULL)) {
 		ib_logger(ib_stream, "double free of inode from %u:%u\n",
 			(unsigned) space, (unsigned) header_page);
 		return(TRUE);
@@ -3785,7 +3785,7 @@ fseg_validate_low(
 	return(TRUE);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*******************************************************************//**
 Validates a segment.
 @return	TRUE if ok */
@@ -3813,7 +3813,7 @@ fseg_validate(
 
 	return(ret);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*******************************************************************//**
 Writes info of a segment. */
@@ -3868,7 +3868,7 @@ fseg_print_low(
 	ut_ad(mach_read_from_4(inode + FSEG_MAGIC_N) == FSEG_MAGIC_N_VALUE);
 }
 
-#ifdef UNIV_BTR_PRINT
+#ifdef IB_BTR_PRINT
 /*******************************************************************//**
 Writes info of a segment. */
 IB_INTERN
@@ -3892,7 +3892,7 @@ fseg_print(
 
 	fseg_print_low(inode, mtr);
 }
-#endif /* UNIV_BTR_PRINT */
+#endif /* IB_BTR_PRINT */
 
 /*******************************************************************//**
 Validates the file space system and its segments.
@@ -3928,7 +3928,7 @@ fsp_validate(
 	latch = fil_space_get_latch(space, &flags);
 	zip_size = dict_table_flags_to_zip_size(flags);
 	ut_a(ut_is_2pow(zip_size));
-	ut_a(zip_size <= UNIV_PAGE_SIZE);
+	ut_a(zip_size <= IB_PAGE_SIZE);
 	ut_a(!zip_size || zip_size >= PAGE_ZIP_MIN_SIZE);
 
 	/* Start first a mini-transaction mtr2 to lock out all other threads
@@ -3950,7 +3950,7 @@ fsp_validate(
 	n_full_frag_pages = FSP_EXTENT_SIZE
 		* flst_get_len(header + FSP_FULL_FRAG, &mtr);
 
-	if (UNIV_UNLIKELY(free_limit > size)) {
+	if (IB_UNLIKELY(free_limit > size)) {
 
 		ut_a(space != 0);
 		ut_a(size < FSP_EXTENT_SIZE);
@@ -4133,8 +4133,8 @@ fsp_validate(
 	ut_a(descr_count * FSP_EXTENT_SIZE == free_limit);
 	if (!zip_size) {
 		ut_a(n_used + n_full_frag_pages
-		     == n_used2 + 2 * ((free_limit + (UNIV_PAGE_SIZE - 1))
-				       / UNIV_PAGE_SIZE)
+		     == n_used2 + 2 * ((free_limit + (IB_PAGE_SIZE - 1))
+				       / IB_PAGE_SIZE)
 		     + seg_inode_len_full + seg_inode_len_free);
 	} else {
 		ut_a(n_used + n_full_frag_pages
@@ -4306,4 +4306,4 @@ fsp_print(
 
 	ib_logger(ib_stream, "NUMBER of file segments: %lu\n", (ulong) n_segs);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

@@ -215,7 +215,7 @@ IB_INTERN
 void
 buf_LRU_var_init(void);
 /*==================*/
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 /**********************************************************************//**
 Validates the LRU list.
 @return	TRUE */
@@ -223,15 +223,15 @@ IB_INTERN
 ibool
 buf_LRU_validate(void);
 /*==================*/
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
-#if defined UNIV_DEBUG_PRINT || defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
+#if defined IB_DEBUG_PRINT || defined IB_DEBUG || defined IB_BUF_DEBUG
 /**********************************************************************//**
 Prints the LRU list. */
 IB_INTERN
 void
 buf_LRU_print(void);
 /*===============*/
-#endif /* UNIV_DEBUG_PRINT || UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG_PRINT || IB_DEBUG || IB_BUF_DEBUG */
 
 /** @name Heuristics for detecting index scan @{ */
 /** Reserve this much/BUF_LRU_OLD_RATIO_DIV of the buffer pool for

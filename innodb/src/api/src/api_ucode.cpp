@@ -22,7 +22,7 @@
 #include "ut_mem.hpp"
 #include "api_ucode.hpp"
 #include <ctype.h>
-#ifdef HAVE_STRINGS_H
+#ifdef IB_HAVE_STRINGS_H
 #include <strings.h>
 #endif
 

@@ -19,7 +19,7 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST],[
   AS_IF([test "x$ac_enable_boost" = "xyes"],[
     dnl link against libc because we're just looking for headers here
     AC_LANG_PUSH(C++)
-    AC_LIB_HAVE_LINKFLAGS(c,,
+    AC_LIB_IB_HAVE_LINKFLAGS(c,,
       [#include <boost/pool/pool.hpp>],
       [boost::pool<> test_pool(1);],
       [system])
@@ -77,16 +77,16 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST],[
     ])
   ])
 
-  AM_CONDITIONAL(HAVE_BOOST, [test "x${ac_cv_boost}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_BOOST, [test "x${ac_cv_boost}" = "xyes"])
   
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST],[
+AC_DEFUN([PANDORA_IB_HAVE_BOOST],[
   _PANDORA_SEARCH_BOOST($1)
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_BOOST],[
-  PANDORA_HAVE_BOOST($1)
+  PANDORA_IB_HAVE_BOOST($1)
   AS_IF([test x$ac_cv_boost = xno],
       AC_MSG_ERROR([boost is required for ${PACKAGE}]))
 ])

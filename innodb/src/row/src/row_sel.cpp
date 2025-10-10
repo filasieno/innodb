@@ -110,7 +110,7 @@ row_sel_sec_rec_is_for_blob(
 						      zip_size,
 						      clust_field, clust_len);
 
-	if (UNIV_UNLIKELY(len == 0)) {
+	if (IB_UNLIKELY(len == 0)) {
 		/* The BLOB was being deleted as the server crashed.
 		There should not be any secondary index records
 		referring to this clustered index record, because
@@ -198,7 +198,7 @@ row_sel_sec_rec_is_for_clust_rec(
 
 		len = clust_len;
 
-		if (ifield->prefix_len > 0 && len != UNIV_SQL_NULL) {
+		if (ifield->prefix_len > 0 && len != IB_SQL_NULL) {
 
 			if (rec_offs_nth_extern(clust_offs, clust_pos)) {
 				len -= BTR_EXTERN_FIELD_REF_SIZE;
@@ -235,7 +235,7 @@ inequal:
 	}
 
 func_exit:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(is_equal);
@@ -416,7 +416,7 @@ row_sel_fetch_columns(
 
 		if (field_no != ULINT_UNDEFINED) {
 
-			if (UNIV_UNLIKELY(rec_offs_nth_extern(offsets,
+			if (IB_UNLIKELY(rec_offs_nth_extern(offsets,
 							      field_no))) {
 
 				/* Copy an externally stored field to the
@@ -429,7 +429,7 @@ row_sel_fetch_columns(
 					dict_table_zip_size(index->table),
 					field_no, &len, heap);
 
-				ut_a(len != UNIV_SQL_NULL);
+				ut_a(len != IB_SQL_NULL);
 
 				needs_copy = TRUE;
 			} else {
@@ -447,7 +447,7 @@ row_sel_fetch_columns(
 				dfield_set_data(val, data, len);
 			}
 
-			if (UNIV_LIKELY_NULL(heap)) {
+			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
 			}
 		}
@@ -893,7 +893,7 @@ row_sel_get_clust_rec(
 func_exit:
 	err = DB_SUCCESS;
 err_exit:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(err);
@@ -1148,9 +1148,9 @@ row_sel_try_search_shortcut(
 	ut_ad(node->read_view);
 	ut_ad(plan->unique_search);
 	ut_ad(!plan->must_get_clust);
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&btr_search_latch, RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	row_sel_open_pcur(plan, TRUE, mtr);
 
@@ -1218,7 +1218,7 @@ row_sel_try_search_shortcut(
 	plan->n_rows_fetched++;
 	ret = SEL_FOUND;
 func_exit:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(ret);
@@ -1869,9 +1869,9 @@ stop_for_a_while:
 
 	mtr_commit(&mtr);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(sync_thread_levels_empty_gen(TRUE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	err = DB_SUCCESS;
 	goto func_exit;
 
@@ -1889,9 +1889,9 @@ commit_mtr_for_a_while:
 
 	mtr_has_extra_clust_latch = FALSE;
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(sync_thread_levels_empty_gen(TRUE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	goto table_loop;
 
@@ -1906,15 +1906,15 @@ lock_wait_or_error:
 
 	mtr_commit(&mtr);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(sync_thread_levels_empty_gen(TRUE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 func_exit:
 	if (search_latch_locked) {
 		rw_lock_s_unlock(&btr_search_latch);
 	}
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(err);
@@ -2114,7 +2114,7 @@ row_fetch_print(
 		dtype_print(type);
 		ib_logger(ib_stream, "\n");
 
-		if (dfield_get_len(dfield) != UNIV_SQL_NULL) {
+		if (dfield_get_len(dfield) != IB_SQL_NULL) {
 			ut_print_buf(ib_stream, dfield_get_data(dfield),
 				     dfield_get_len(dfield));
 			ib_logger(ib_stream, "\n");
@@ -2408,7 +2408,7 @@ row_sel_get_clust_rec_with_prebuilt(
 		    && !row_sel_sec_rec_is_for_clust_rec(
 			    rec, sec_index, clust_rec, clust_index)) {
 			clust_rec = NULL;
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 		} else {
 			ut_a(clust_rec == NULL
 			     || row_sel_sec_rec_is_for_clust_rec(
@@ -2670,17 +2670,17 @@ row_sel_try_search_shortcut_for_prebuilt(
 
 	ut_ad(dict_index_is_clust(index));
 
-#ifndef UNIV_SEARCH_DEBUG
+#ifndef IB_SEARCH_DEBUG
 	btr_pcur_open_with_no_init(index, search_tuple, PAGE_CUR_GE,
 				   BTR_SEARCH_LEAF, pcur,
 				   RW_S_LATCH,
 				   mtr);
-#else /* UNIV_SEARCH_DEBUG */
+#else /* IB_SEARCH_DEBUG */
 	btr_pcur_open_with_no_init(index, search_tuple, PAGE_CUR_GE,
 				   BTR_SEARCH_LEAF, pcur,
 				   0,
 				   mtr);
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 	rec = btr_pcur_get_rec(pcur);
 
 	if (!page_rec_is_user_rec(rec)) {
@@ -2748,7 +2748,7 @@ row_unlock_for_client(
 	ut_ad(prebuilt && trx);
 	ut_ad(trx->client_thread_id == os_thread_get_curr_id());
 
-	if (UNIV_UNLIKELY(trx->isolation_level != TRX_ISO_READ_COMMITTED)) {
+	if (IB_UNLIKELY(trx->isolation_level != TRX_ISO_READ_COMMITTED)) {
 
 		ib_logger(ib_stream,
 			"InnoDB: Error: row_unlock_for_client called though\n"
@@ -2866,9 +2866,9 @@ row_search_for_client(
 	/* if the returned record was locked and we did a semi-consistent
 	read (fetch the newest committed version), then this is set to
 	TRUE */
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	ulint		cnt				= 0;
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 	ulint		next_offs;
 	ibool		same_user_rec;
 	mtr_t		mtr;
@@ -2884,7 +2884,7 @@ row_search_for_client(
 	ut_ad(index && pcur && search_tuple);
 	ut_ad(trx->client_thread_id == os_thread_get_curr_id());
 
-	if (UNIV_UNLIKELY(prebuilt->table->ibd_file_missing)) {
+	if (IB_UNLIKELY(prebuilt->table->ibd_file_missing)) {
 		ut_print_timestamp(ib_stream);
 		ib_logger(ib_stream, "  InnoDB: Error:\n"
 			"InnoDB: The client is trying to use a table handle"
@@ -2901,12 +2901,12 @@ row_search_for_client(
 		return(DB_ERROR);
 	}
 
-	if (UNIV_UNLIKELY(!prebuilt->index_usable)) {
+	if (IB_UNLIKELY(!prebuilt->index_usable)) {
 
 		return(DB_MISSING_HISTORY);
 	}
 
-	if (UNIV_UNLIKELY(prebuilt->magic_n != ROW_PREBUILT_ALLOCATED)) {
+	if (IB_UNLIKELY(prebuilt->magic_n != ROW_PREBUILT_ALLOCATED)) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: trying to free a corrupt\n"
 			"InnoDB: table handle. Magic n %lu, table name ",
@@ -2923,7 +2923,7 @@ row_search_for_client(
 	See bugs #12263 and #12456!*/
 
 	if (trx->n_tables_in_use == 0
-	    && UNIV_UNLIKELY(prebuilt->select_lock_type == LOCK_NONE)) {
+	    && IB_UNLIKELY(prebuilt->select_lock_type == LOCK_NONE)) {
 		/* Note that if the client uses an InnoDB temp table that it
 		created inside LOCK TABLES, then n_client_tables_in_use can
 		be zero; in that case select_lock_type is set to LOCK_X in
@@ -2971,7 +2971,7 @@ row_search_for_client(
 	/*-------------------------------------------------------------*/
 	/* PHASE 1: Try to pop the row from the prefetch cache */
 
-	if (UNIV_UNLIKELY(direction == ROW_SEL_MOVETO)) {
+	if (IB_UNLIKELY(direction == ROW_SEL_MOVETO)) {
 		trx->op_info = "starting index read";
 
 		row_sel_row_cache_reset(prebuilt);
@@ -2988,7 +2988,7 @@ row_search_for_client(
 			prebuilt->row_cache.direction = direction;
 		}
 
-		if (UNIV_UNLIKELY(direction != prebuilt->row_cache.direction)) {
+		if (IB_UNLIKELY(direction != prebuilt->row_cache.direction)) {
 
 			if (!row_sel_row_cache_is_empty(prebuilt)) {
 				ut_error;
@@ -3000,7 +3000,7 @@ row_search_for_client(
 
 			row_sel_row_cache_reset(prebuilt);
 
-		} else if (UNIV_LIKELY(!row_sel_row_cache_is_empty(prebuilt))) {
+		} else if (IB_LIKELY(!row_sel_row_cache_is_empty(prebuilt))) {
 			err = DB_SUCCESS;
 			srv_n_rows_read++;
 
@@ -3055,7 +3055,7 @@ row_search_for_client(
 	cannot use the adaptive hash index in a search in the case the row
 	may be long and there may be externally stored fields */
 
-	if (UNIV_UNLIKELY(direction == ROW_SEL_MOVETO)
+	if (IB_UNLIKELY(direction == ROW_SEL_MOVETO)
 	    && unique_search
 	    && dict_index_is_clust(index)) {
 
@@ -3080,7 +3080,7 @@ row_search_for_client(
 			and if we try that, we can deadlock on the adaptive
 			hash index semaphore! */
 
-#ifndef UNIV_SEARCH_DEBUG
+#ifndef IB_SEARCH_DEBUG
 			if (!trx->has_search_latch) {
 				rw_lock_s_lock(&btr_search_latch);
 				trx->has_search_latch = TRUE;
@@ -3090,7 +3090,7 @@ row_search_for_client(
 					&rec, prebuilt, &offsets, &heap,
 					&mtr)) {
 			case SEL_FOUND:
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 				ut_a(0 == cmp_dtuple_rec(
 					cmp_ctx, search_tuple, rec, offsets));
 #endif 
@@ -3177,7 +3177,7 @@ release_search_latch_if_needed:
 	naturally moves upward (in fetch next) in alphabetical order,
 	otherwise downward */
 
-	if (UNIV_UNLIKELY(direction == ROW_SEL_MOVETO)) {
+	if (IB_UNLIKELY(direction == ROW_SEL_MOVETO)) {
 		if (mode == IB_CUR_GE || mode == IB_CUR_G) {
 			moves_up = TRUE;
 		}
@@ -3191,7 +3191,7 @@ release_search_latch_if_needed:
 
 	clust_index = dict_table_get_first_index(index->table);
 
-	if (UNIV_LIKELY(direction != ROW_SEL_MOVETO)) {
+	if (IB_LIKELY(direction != ROW_SEL_MOVETO)) {
 
 		if (!row_sel_restore_position(
 			&same_user_rec, BTR_SEARCH_LEAF,
@@ -3282,7 +3282,7 @@ rec_loop:
 
 	rec = btr_pcur_get_rec(pcur);
 	ut_ad(!!page_rec_is_comp(rec) == comp);
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	/*
 	ib_logger(ib_stream, "Using ");
 	dict_index_name_print(ib_stream, index);
@@ -3290,7 +3290,7 @@ rec_loop:
 	page_get_page_no(page_align(rec)));
 	rec_print(rec);
 	*/
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 
 	if (page_rec_is_infimum(rec)) {
 
@@ -3337,19 +3337,19 @@ rec_loop:
 
 	if (comp) {
 		next_offs = rec_get_next_offs(rec, TRUE);
-		if (UNIV_UNLIKELY(next_offs < PAGE_NEW_SUPREMUM)) {
+		if (IB_UNLIKELY(next_offs < PAGE_NEW_SUPREMUM)) {
 
 			goto wrong_offs;
 		}
 	} else {
 		next_offs = rec_get_next_offs(rec, FALSE);
-		if (UNIV_UNLIKELY(next_offs < PAGE_OLD_SUPREMUM)) {
+		if (IB_UNLIKELY(next_offs < PAGE_OLD_SUPREMUM)) {
 
 			goto wrong_offs;
 		}
 	}
 
-	if (UNIV_UNLIKELY(next_offs >= UNIV_PAGE_SIZE - PAGE_DIR)) {
+	if (IB_UNLIKELY(next_offs >= IB_PAGE_SIZE - PAGE_DIR)) {
 
 wrong_offs:
 		if (recovery == IB_RECOVERY_DEFAULT || moves_up == FALSE) {
@@ -3404,7 +3404,7 @@ wrong_offs:
 
 	offsets = rec_get_offsets(rec, index, offsets, ULINT_UNDEFINED, &heap);
 
-	if (UNIV_UNLIKELY(recovery != IB_RECOVERY_DEFAULT)) {
+	if (IB_UNLIKELY(recovery != IB_RECOVERY_DEFAULT)) {
 		if (!rec_validate(rec, offsets)
 		    || !btr_index_rec_validate(rec, index, FALSE)) {
 			ib_logger(ib_stream,
@@ -3502,7 +3502,7 @@ not_found:
 		if (!set_also_gap_locks
 		    || trx->isolation_level == TRX_ISO_READ_COMMITTED
 		    || (unique_search
-			&& !UNIV_UNLIKELY(rec_get_deleted_flag(rec, comp)))) {
+			&& !IB_UNLIKELY(rec_get_deleted_flag(rec, comp)))) {
 
 			goto no_gap_lock;
 		} else {
@@ -3559,7 +3559,7 @@ no_gap_lock:
 			high force recovery level set, we try to avoid crashes
 			by skipping this lookup */
 
-			if (UNIV_LIKELY(recovery < IB_RECOVERY_NO_UNDO_LOG_SCAN)
+			if (IB_LIKELY(recovery < IB_RECOVERY_NO_UNDO_LOG_SCAN)
 			    && !lock_clust_rec_cons_read_sees(
 				    rec, index, offsets, trx->read_view)) {
 
@@ -3611,7 +3611,7 @@ no_gap_lock:
 	point that rec is on a buffer pool page. Functions like
 	page_rec_is_comp() cannot be used! */
 
-	if (UNIV_UNLIKELY(rec_get_deleted_flag(rec, comp))) {
+	if (IB_UNLIKELY(rec_get_deleted_flag(rec, comp))) {
 
 		/* The record is delete-marked: we can skip it */
 
@@ -3695,7 +3695,7 @@ requires_clust_rec:
 			prebuilt->new_rec_locks = 2;
 		}
 
-		if (UNIV_UNLIKELY(rec_get_deleted_flag(clust_rec, comp))) {
+		if (IB_UNLIKELY(rec_get_deleted_flag(clust_rec, comp))) {
 
 			/* The record is delete marked: we can skip it */
 
@@ -3805,7 +3805,7 @@ next_rec:
 	/*-------------------------------------------------------------*/
 	/* PHASE 5: Move the cursor to the next index record */
 
-	if (UNIV_UNLIKELY(mtr_has_extra_clust_latch)) {
+	if (IB_UNLIKELY(mtr_has_extra_clust_latch)) {
 		/* We must commit mtr if we are moving to the next
 		non-clustered index record, because we could break the
 		latching order if we would access a different clustered
@@ -3820,16 +3820,16 @@ next_rec:
 		if (row_sel_restore_position(
 				&same_user_rec, BTR_SEARCH_LEAF,
 				pcur, moves_up, &mtr)) {
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 			cnt++;
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 
 			goto rec_loop;
 		}
 	}
 
 	if (moves_up) {
-		if (UNIV_UNLIKELY(!btr_pcur_move_to_next(pcur, &mtr))) {
+		if (IB_UNLIKELY(!btr_pcur_move_to_next(pcur, &mtr))) {
 not_moved:
 			btr_pcur_store_position(pcur, &mtr);
 
@@ -3842,13 +3842,13 @@ not_moved:
 			prebuilt->result = -1;
 			goto normal_return;
 		}
-	} else if (UNIV_UNLIKELY(!btr_pcur_move_to_prev(pcur, &mtr))) {
+	} else if (IB_UNLIKELY(!btr_pcur_move_to_prev(pcur, &mtr))) {
 		goto not_moved;
 	}
 
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	cnt++;
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 
 	goto rec_loop;
 
@@ -3905,11 +3905,11 @@ lock_wait_or_error:
 
 	thr->lock_state = QUE_THR_LOCK_NOLOCK;
 
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	/*	ib_logger(ib_stream, "Using ");
 	dict_index_name_print(ib_stream, index);
 	ib_logger(ib_stream, " cnt %lu ret value %lu err\n", cnt, err); */
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 	goto func_exit;
 
 normal_return:
@@ -3921,11 +3921,11 @@ normal_return:
 		err = DB_SUCCESS;
 	}
 
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	/*	ib_logger(ib_strean, "Using ");
 	dict_index_name_print(ib_stream, index);
 	ib_logger(ib_stream, " cnt %lu ret value %lu err\n", cnt, err); */
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 	if (err == DB_SUCCESS) {
 		srv_n_rows_read++;
 	}
@@ -3933,7 +3933,7 @@ normal_return:
 func_exit:
 	trx->op_info = "";
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 

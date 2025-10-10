@@ -52,12 +52,12 @@ ha_search_and_update_if_found_func(
 	hash_table_t*	table,	/*!< in/out: hash table */
 	ulint		fold,	/*!< in: folded value of the searched data */
 	void*		data,	/*!< in: pointer to the data */
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	buf_block_t*	new_block,/*!< in: block containing new_data */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	void*		new_data);/*!< in: new pointer to the data */
 
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 /** Looks for an element when we know the pointer to the data and
 updates the pointer to data if found.
 @param table		in/out: hash table
@@ -67,7 +67,7 @@ updates the pointer to data if found.
 @param new_data		in: new pointer to the data */
 # define ha_search_and_update_if_found(table,fold,data,new_block,new_data) \
 	ha_search_and_update_if_found_func(table,fold,data,new_block,new_data)
-#else /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#else /* IB_AHI_DEBUG || IB_DEBUG */
 /** Looks for an element when we know the pointer to the data and
 updates the pointer to data if found.
 @param table		in/out: hash table
@@ -77,7 +77,7 @@ updates the pointer to data if found.
 @param new_data		in: new pointer to the data */
 # define ha_search_and_update_if_found(table,fold,data,new_block,new_data) \
 	ha_search_and_update_if_found_func(table,fold,data,new_data)
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 /*************************************************************//**
 Creates a hash table with at least n array cells.  The actual number
 of cells is chosen to be a prime number slightly bigger than n.
@@ -87,13 +87,13 @@ hash_table_t*
 ha_create_func(
 /*===========*/
 	ulint	n,		/*!< in: number of array cells */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint	mutex_level,	/*!< in: level of the mutexes in the latching
 				order: this is used in the debug version */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ulint	n_mutexes);	/*!< in: number of mutexes to protect the
 				hash table: must be a power of 2, or 0 */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /** Creates a hash table.
 @return		own: created table
 @param n_c	in: number of array cells.  The actual number of cells is
@@ -102,7 +102,7 @@ chosen to be a slightly bigger prime number.
 @param n_m	in: number of mutexes to protect the hash table;
 		must be a power of 2, or 0 */
 # define ha_create(n_c,n_m,level) ha_create_func(n_c,level,n_m)
-#else /* UNIV_SYNC_DEBUG */
+#else /* IB_SYNC_DEBUG */
 /** Creates a hash table.
 @return		own: created table
 @param n_c	in: number of array cells.  The actual number of cells is
@@ -111,7 +111,7 @@ chosen to be a slightly bigger prime number.
 @param n_m	in: number of mutexes to protect the hash table;
 		must be a power of 2, or 0 */
 # define ha_create(n_c,n_m,level) ha_create_func(n_c,n_m)
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /*************************************************************//**
 Empties a hash table and frees the memory heaps. */
@@ -135,12 +135,12 @@ ha_insert_for_fold_func(
 				the same fold value already exists, it is
 				updated to point to the same data, and no new
 				node is created! */
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	buf_block_t*	block,	/*!< in: buffer block containing the data */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	void*		data);	/*!< in: data, must not be NULL */
 
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 /**
 Inserts an entry into a hash table. If an entry with the same fold number
 is found, its node is updated to point to the new data, and no new node
@@ -151,7 +151,7 @@ is inserted.
 @param b	in: buffer block containing the data
 @param d	in: data, must not be NULL */
 # define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,b,d)
-#else /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#else /* IB_AHI_DEBUG || IB_DEBUG */
 /**
 Inserts an entry into a hash table. If an entry with the same fold number
 is found, its node is updated to point to the new data, and no new node
@@ -162,7 +162,7 @@ is inserted.
 @param b	ignored: buffer block containing the data
 @param d	in: data, must not be NULL */
 # define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,d)
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 
 /*********************************************************//**
 Looks for an element when we know the pointer to the data and deletes
@@ -175,7 +175,7 @@ ha_search_and_delete_if_found(
 	hash_table_t*	table,	/*!< in: hash table */
 	ulint		fold,	/*!< in: folded value of the searched data */
 	void*		data);	/*!< in: pointer to the data */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*****************************************************************//**
 Removes from the chain determined by fold all nodes whose data pointer
 points to the page given. */
@@ -204,7 +204,7 @@ ha_print_info(
 /*==========*/
 	ib_stream_t	ib_stream,	/*!< in: stream where to print */
 	hash_table_t*	table);		/*!< in: hash table */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** The hash table external chain node */
 typedef struct ha_node_struct ha_node_t;
@@ -212,27 +212,27 @@ typedef struct ha_node_struct ha_node_t;
 /** The hash table external chain node */
 struct ha_node_struct {
 	ha_node_t*	next;	/*!< next chain node or NULL if none */
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	buf_block_t*	block;	/*!< buffer block containing the data, or NULL */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	void*		data;	/*!< pointer to the data */
 	ulint		fold;	/*!< fold value for the data */
 };
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** Assert that the current thread is holding the mutex protecting a
 hash bucket corresponding to a fold value.
 @param table	in: hash table
 @param fold	in: fold value */
 # define ASSERT_HASH_MUTEX_OWN(table, fold)				\
 	ut_ad(!(table)->mutexes || mutex_own(hash_get_mutex(table, fold)))
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 /** Assert that the current thread is holding the mutex protecting a
 hash bucket corresponding to a fold value.
 @param table	in: hash table
 @param fold	in: fold value */
 # define ASSERT_HASH_MUTEX_OWN(table, fold) ((void) 0)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifndef IB_DO_NOT_INLINE
 #include "ha0ha.inl"

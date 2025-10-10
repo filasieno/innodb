@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_SASL],[
 
   AS_IF([test "x$ac_enable_sasl" = "xyes"],
     [
-      AC_LIB_HAVE_LINKFLAGS(sasl,,[
+      AC_LIB_IB_HAVE_LINKFLAGS(sasl,,[
         #include <stdlib.h>
         #include <sasl/sasl.h>
       ],[
@@ -26,13 +26,13 @@ AC_DEFUN([_PANDORA_SEARCH_SASL],[
 
       AS_IF([test "x${ac_cv_libsasl}" != "xyes" ],
             [
-              AC_LIB_HAVE_LINKFLAGS(sasl2,,[
+              AC_LIB_IB_HAVE_LINKFLAGS(sasl2,,[
                 #include <stdlib.h>
                 #include <sasl/sasl.h>
               ],[
                 sasl_server_init(NULL, NULL);
               ])
-              HAVE_LIBSASL="$HAVE_LIBSASL2"
+              IB_HAVE_LIBSASL="$IB_HAVE_LIBSASL2"
               LIBSASL="$LIBSASL2"
               LIBSASL_PREFIX="$LIBSASL2_PREFIX"
 	      LTLIBSASL="$LT_LIBSASL2"
@@ -43,12 +43,12 @@ AC_DEFUN([_PANDORA_SEARCH_SASL],[
         [ac_cv_sasl=yes],
         [ac_cv_sasl=no])
 
-  AM_CONDITIONAL(HAVE_LIBSASL, [test "x${ac_cv_libsasl}" = "xyes"])
-  AM_CONDITIONAL(HAVE_LIBSASL2, [test "x${ac_cv_libsasl2}" = "xyes"])
-  AM_CONDITIONAL(HAVE_SASL, [test "x${ac_cv_sasl}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBSASL, [test "x${ac_cv_libsasl}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBSASL2, [test "x${ac_cv_libsasl2}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_SASL, [test "x${ac_cv_sasl}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_SASL],[
+AC_DEFUN([PANDORA_IB_HAVE_SASL],[
   AC_REQUIRE([_PANDORA_SEARCH_SASL])
 ])
 
@@ -72,7 +72,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSASL],[
     [ac_enable_libsasl="yes"])
 
   AS_IF([test "x$ac_enable_libsasl" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(sasl,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(sasl,,[
       #include <stdlib.h>
       #include <sasl/sasl.h>
     ],[
@@ -82,10 +82,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSASL],[
     ac_cv_libsasl="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBSASL, [test "x${ac_cv_libsasl}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBSASL, [test "x${ac_cv_libsasl}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBSASL],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBSASL],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBSASL])
 ])
 
@@ -109,7 +109,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSASL2],[
     [ac_enable_libsasl2="yes"])
 
   AS_IF([test "x$ac_enable_libsasl2" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(sasl2,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(sasl2,,[
       #include <stdlib.h>
       #include <sasl2/sasl2.h>
     ],[
@@ -119,10 +119,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSASL2],[
     ac_cv_libsasl2="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBSASL2, [test "x${ac_cv_libsasl2}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBSASL2, [test "x${ac_cv_libsasl2}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBSASL2],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBSASL2],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBSASL2])
 ])
 

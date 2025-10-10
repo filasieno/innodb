@@ -14,7 +14,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBUUID],[
   dnl Do this by hand. Need to check for uuid/uuid.h, but uuid may or may
   dnl not be a lib is weird.
   AC_CHECK_HEADERS(uuid/uuid.h)
-  AC_LIB_HAVE_LINKFLAGS(uuid,,
+  AC_LIB_IB_HAVE_LINKFLAGS(uuid,,
   [
     #include <uuid/uuid.h>
   ],
@@ -23,10 +23,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBUUID],[
     uuid_generate(uout);
   ])
 
-  AM_CONDITIONAL(HAVE_LIBUUID, [test "x${ac_cv_libuuid}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBUUID, [test "x${ac_cv_libuuid}" = "xyes"])
 ])
 
-AC_DEFUN([_PANDORA_HAVE_LIBUUID],[
+AC_DEFUN([_PANDORA_IB_HAVE_LIBUUID],[
 
   AC_ARG_ENABLE([libuuid],
     [AS_HELP_STRING([--disable-libuuid],
@@ -38,8 +38,8 @@ AC_DEFUN([_PANDORA_HAVE_LIBUUID],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_LIBUUID],[
-  AC_REQUIRE([_PANDORA_HAVE_LIBUUID])
+AC_DEFUN([PANDORA_IB_HAVE_LIBUUID],[
+  AC_REQUIRE([_PANDORA_IB_HAVE_LIBUUID])
 ])
 
 AC_DEFUN([_PANDORA_REQUIRE_LIBUUID],[

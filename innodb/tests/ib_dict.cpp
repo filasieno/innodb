@@ -33,7 +33,7 @@ including the system tables.
 
 #include "test_aux.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -314,7 +314,7 @@ create_table(
 	ib_err_t	err = DB_SUCCESS;
 	ib_tbl_sch_t	ib_tbl_sch = NULL;
 	ib_idx_sch_t	ib_idx_sch = NULL;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s%d", dbname, name, n);
@@ -531,7 +531,7 @@ drop_table_n(
 {
 	ib_trx_t	ib_trx;
 	ib_err_t	err = DB_SUCCESS;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s%d", dbname, name, n);
@@ -592,7 +592,7 @@ main(int argc, char* argv[])
 	err = ib_shutdown(IB_SHUTDOWN_NORMAL);
 	assert(err == DB_SUCCESS);
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	VALGRIND_DO_LEAK_CHECK;
 #endif
 

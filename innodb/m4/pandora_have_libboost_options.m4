@@ -11,14 +11,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_PROGRAM_OPTIONS],[
   dnl --------------------------------------------------------------------
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_program_options-mt,,[
+  AC_LIB_IB_HAVE_LINKFLAGS(boost_program_options-mt,,[
     #include <boost/program_options.hpp>
   ],[
     boost::program_options::options_description d;
     d.add_options()("a","some option");
   ])
   AS_IF([test "x${ac_cv_libboost_program_options_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_program_options,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(boost_program_options,,[
       #include <boost/program_options.hpp>
     ],[
       boost::program_options::options_description d;
@@ -27,14 +27,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_PROGRAM_OPTIONS],[
   ])
   AC_LANG_POP()
   
-  AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS,
+  AM_CONDITIONAL(IB_HAVE_BOOST_PROGRAM_OPTIONS,
     [test "x${ac_cv_libboost_program_options}" = "xyes" -o "x${ac_cv_libboost_program_options_mt}" = "xyes"])
   BOOST_LIBS="${BOOST_LIBS} ${LTLIBBOOST_PROGRAM_OPTIONS} ${LTLIBBOOST_PROGRAM_OPTIONS_MT}"
   AC_SUBST(BOOST_LIBS) 
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST_PROGRAM_OPTIONS],[
-  PANDORA_HAVE_BOOST($1)
+AC_DEFUN([PANDORA_IB_HAVE_BOOST_PROGRAM_OPTIONS],[
+  PANDORA_IB_HAVE_BOOST($1)
   _PANDORA_SEARCH_BOOST_PROGRAM_OPTIONS($1)
 ])
 

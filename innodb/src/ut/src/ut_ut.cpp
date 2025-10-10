@@ -36,10 +36,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "api_ucode.hpp"
 #include "trx_trx.hpp"
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 static ibool ut_always_false = FALSE;
 
@@ -119,7 +119,7 @@ IB_INTERN ib_time_t ut_time(void)
 	return time(NULL);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************/ /**
 Returns system time.
 Upon successful completion, the value 0 is returned; otherwise the
@@ -201,7 +201,7 @@ ulint ut_time_ms(void)
 
 	return ((ulint)tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************/ /**
 Returns the difference of two times in seconds.
@@ -237,7 +237,7 @@ void ut_print_timestamp(
 
 	time(&tm);
 
-#ifdef HAVE_LOCALTIME_R
+#ifdef IB_HAVE_LOCALTIME_R
 	localtime_r(&tm, &cal_tm);
 	cal_tm_ptr = &cal_tm;
 #else
@@ -268,7 +268,7 @@ void ut_sprintf_timestamp(
 
 	time(&tm);
 
-#ifdef HAVE_LOCALTIME_R
+#ifdef IB_HAVE_LOCALTIME_R
 	localtime_r(&tm, &cal_tm);
 	cal_tm_ptr = &cal_tm;
 #else
@@ -278,7 +278,7 @@ void ut_sprintf_timestamp(
 #endif
 }
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /**********************************************************/ /**
 Sprintfs a timestamp to a buffer with no spaces and with ':' characters
 replaced by '_'. */
@@ -301,7 +301,7 @@ void ut_sprintf_timestamp_without_extra_chars(
 
 	time(&tm);
 
-#ifdef HAVE_LOCALTIME_R
+#ifdef IB_HAVE_LOCALTIME_R
 	localtime_r(&tm, &cal_tm);
 	cal_tm_ptr = &cal_tm;
 #else
@@ -336,7 +336,7 @@ void ut_get_year_month_day(
 
 	time(&tm);
 
-#ifdef HAVE_LOCALTIME_R
+#ifdef IB_HAVE_LOCALTIME_R
 	localtime_r(&tm, &cal_tm);
 	cal_tm_ptr = &cal_tm;
 #else
@@ -347,9 +347,9 @@ void ut_get_year_month_day(
 	*day = (ulint)cal_tm_ptr->tm_mday;
 #endif
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************/ /**
 Runs an idle loop on CPU. The argument gives the desired delay
 in microseconds on 100 MHz Pentium + Visual C++.
@@ -375,7 +375,7 @@ ulint ut_delay(
 
 	return (j);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*************************************************************/ /**
 Prints the contents of a memory buffer in hex and ascii. */
@@ -390,7 +390,7 @@ void ut_print_buf(
 	const byte *data;
 	ulint i;
 
-	UNIV_MEM_ASSERT_RW(buf, len);
+	IB_MEM_ASSERT_RW(buf, len);
 
 	ib_logger(ib_stream, " len %lu; hex ", len);
 
@@ -457,7 +457,7 @@ void ut_print_filename(
 done:
 	ib_logger(ib_stream, "'");
 }
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************/ /**
 Outputs a fixed-length string, quoted as an SQL identifier.
 If the string contains a slash '/', the string will be
@@ -490,16 +490,16 @@ void ut_print_namel(
 ) /*!< in: length of name */
 {
 	int len;
-	/* 2 * NAME_LEN for database and table name,
+	/* 2 * IB_NAME_LEN for database and table name,
 	and some slack for the extra prefix and quotes */
-	char buf[3 * NAME_LEN];
+	char buf[3 * IB_NAME_LEN];
 
 	len = ut_snprintf(buf, sizeof(buf), "%.*s", (int)namelen, name);
 	ut_a(len >= (int)namelen);
 
 	ib_logger(ib_stream, "%.*s", len, buf);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifdef __WIN__
 #include <stdarg.h>

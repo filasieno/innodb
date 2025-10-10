@@ -65,15 +65,15 @@ ndb_init();
   ])    
   LIBS="${save_LIBS}"
   
-  AM_CONDITIONAL(HAVE_LIBNDBCLIENT, [test "x${ac_cv_libndbclient}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBNDBCLIENT, [test "x${ac_cv_libndbclient}" = "xyes"])
 ])
   
-AC_DEFUN([PANDORA_HAVE_LIBNDBCLIENT],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBNDBCLIENT],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBNDBCLIENT])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBNDBCLIENT],[
-  AC_REQUIRE([PANDORA_HAVE_LIBNDBCLIENT])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBNDBCLIENT])
   AS_IF([test "x${ac_cv_libndbclient}" = "xno"],
       AC_MSG_ERROR([libndbclient is required for ${PACKAGE}]))
 ])

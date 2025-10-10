@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBAVAHI],[
     [ac_enable_libavahi="yes"])
 
   AS_IF([test "x$ac_enable_libavahi" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(avahi-client,avahi-common,[
+    AC_LIB_IB_HAVE_LINKFLAGS(avahi-client,avahi-common,[
       #include <avahi-client/client.h>
       #include <avahi-common/simple-watch.h>
     ],[
@@ -27,10 +27,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBAVAHI],[
     ac_cv_libavahi="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBAVAHI, [test "x${ac_cv_libavahi}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBAVAHI, [test "x${ac_cv_libavahi}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBAVAHI],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBAVAHI],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBAVAHI])
 ])
 

@@ -50,7 +50,7 @@ log_release(void)
 	mutex_exit(&log_sys->mutex);
 }
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 /******************************************************//**
 Checks by parsing that the catenated log segment for a single mtr is
 consistent. */
@@ -63,7 +63,7 @@ log_check_log_recs(
 					log_sys->buf log buffer */
 	ulint		len,		/*!< in: segment length in bytes */
 	ib_uint64_t	buf_start_lsn);	/*!< in: buffer start lsn */
-#endif /* UNIV_LOG_DEBUG */
+#endif /* IB_LOG_DEBUG */
 
 /************************************************************//**
 Gets a log block flush bit.
@@ -321,7 +321,7 @@ log_block_init_in_old_format(
 	log_block_set_first_rec_group(log_block, 0);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /************************************************************//**
 Writes to the log the string given. The log must be released with
 log_release().
@@ -335,21 +335,21 @@ log_reserve_and_write_fast(
 	ib_uint64_t*	start_lsn)/*!< out: start lsn of the log record */
 {
 	ulint		data_len;
-#ifdef UNIV_LOG_LSN_DEBUG
+#ifdef IB_LOG_LSN_DEBUG
 	/* length of the LSN pseudo-record */
 	ulint		lsn_len;
-#endif /* UNIV_LOG_LSN_DEBUG */
+#endif /* IB_LOG_LSN_DEBUG */
 
-#ifdef UNIV_LOG_LSN_DEBUG
+#ifdef IB_LOG_LSN_DEBUG
 	lsn_len = 1
 		+ mach_get_compressed_size(log_sys->lsn >> 32)
 		+ mach_get_compressed_size(log_sys->lsn & 0xFFFFFFFFUL);
-#endif /* UNIV_LOG_LSN_DEBUG */
+#endif /* IB_LOG_LSN_DEBUG */
 
 	data_len = len
-#ifdef UNIV_LOG_LSN_DEBUG
+#ifdef IB_LOG_LSN_DEBUG
 		+ lsn_len
-#endif /* UNIV_LOG_LSN_DEBUG */
+#endif /* IB_LOG_LSN_DEBUG */
 		+ log_sys->buf_free % OS_FILE_LOG_BLOCK_SIZE;
 
 	if (data_len >= OS_FILE_LOG_BLOCK_SIZE - LOG_BLOCK_TRL_SIZE) {
@@ -362,7 +362,7 @@ log_reserve_and_write_fast(
 
 	*start_lsn = log_sys->lsn;
 
-#ifdef UNIV_LOG_LSN_DEBUG
+#ifdef IB_LOG_LSN_DEBUG
 	{
 		/* Write the LSN pseudo-record. */
 		byte* b = &log_sys->buf[log_sys->buf_free];
@@ -376,15 +376,15 @@ log_reserve_and_write_fast(
 		memcpy(b, str, len);
 		len += lsn_len;
 	}
-#else /* UNIV_LOG_LSN_DEBUG */
+#else /* IB_LOG_LSN_DEBUG */
 	memcpy(log_sys->buf + log_sys->buf_free, str, len);
-#endif /* UNIV_LOG_LSN_DEBUG */
+#endif /* IB_LOG_LSN_DEBUG */
 
 	log_block_set_data_len((byte*) ut_align_down(log_sys->buf
 						     + log_sys->buf_free,
 						     OS_FILE_LOG_BLOCK_SIZE),
 			       data_len);
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	log_sys->old_buf_free = log_sys->buf_free;
 	log_sys->old_lsn = log_sys->lsn;
 #endif
@@ -394,7 +394,7 @@ log_reserve_and_write_fast(
 
 	log_sys->lsn += len;
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	log_check_log_recs(log_sys->buf + log_sys->old_buf_free,
 			   log_sys->buf_free - log_sys->old_buf_free,
 			   log_sys->old_lsn);
@@ -451,4 +451,4 @@ log_free_check(void)
 		log_check_margins();
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

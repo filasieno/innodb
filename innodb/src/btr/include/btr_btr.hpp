@@ -28,10 +28,10 @@
 #include "mtr_mtr.hpp"
 #include "btr_types.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** Maximum record size which can be stored on a page, without using the
 special big record storage structure */
-#define	BTR_PAGE_MAX_REC_SIZE	(UNIV_PAGE_SIZE / 2 - 200)
+#define	BTR_PAGE_MAX_REC_SIZE	(IB_PAGE_SIZE / 2 - 200)
 
 /** @brief Maximum depth of a B-tree in InnoDB.
 
@@ -108,7 +108,7 @@ btr_page_get(
 	ulint	page_no,	/*!< in: page number */
 	ulint	mode,		/*!< in: latch mode */
 	mtr_t*	mtr);		/*!< in: mtr */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /**************************************************************//**
 Gets the index id field of a page.
 @return	index id */
@@ -117,7 +117,7 @@ dulint
 btr_page_get_index_id(
 /*==================*/
 	const page_t*	page);	/*!< in: index page */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************//**
 Gets the node level field in an index page.
 @return	level, leaf level == 0 */
@@ -325,7 +325,7 @@ btr_insert_on_non_leaf_level_func(
 	mtr_t*		mtr);	/*!< in: mtr */
 # define btr_insert_on_non_leaf_level(i,l,t,m)				\
 	btr_insert_on_non_leaf_level_func(i,l,t,__FILE__,__LINE__,m)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /****************************************************************//**
 Sets a record as the predefined minimum record. */
 IB_INTERN
@@ -334,7 +334,7 @@ btr_set_min_rec_mark(
 /*=================*/
 	rec_t*	rec,	/*!< in/out: record */
 	mtr_t*	mtr);	/*!< in: mtr */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Deletes on the upper level the node pointer to a page. */
 IB_INTERN
@@ -344,7 +344,7 @@ btr_node_ptr_delete(
 	dict_index_t*	index,	/*!< in: index tree */
 	buf_block_t*	block,	/*!< in: page whose node pointer is deleted */
 	mtr_t*		mtr);	/*!< in: mtr */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /************************************************************//**
 Checks that the node pointer to a page is appropriate.
 @return	TRUE */
@@ -355,7 +355,7 @@ btr_check_node_ptr(
 	dict_index_t*	index,	/*!< in: index tree */
 	buf_block_t*	block,	/*!< in: index page */
 	mtr_t*		mtr);	/*!< in: mtr */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*************************************************************//**
 Tries to merge the page first to the left immediate brother if such a
 brother exists, and the node pointers to the current page and to the
@@ -386,7 +386,7 @@ btr_discard_page(
 	btr_cur_t*	cursor,	/*!< in: cursor on the page to discard: not on
 				the root page */
 	mtr_t*		mtr);	/*!< in: mtr */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /****************************************************************//**
 Parses the redo log record for setting an index record as the predefined
 minimum record.
@@ -412,7 +412,7 @@ btr_parse_page_reorganize(
 	dict_index_t*	index,	/*!< in: record descriptor */
 	buf_block_t*	block,	/*!< in: page to be reorganized, or NULL */
 	mtr_t*		mtr);	/*!< in: mtr or NULL */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**************************************************************//**
 Gets the number of pages in a B-tree.
 @return	number of pages */
@@ -459,7 +459,7 @@ btr_page_free_low(
 	buf_block_t*	block,	/*!< in: block to be freed, x-latched */
 	ulint		level,	/*!< in: page level */
 	mtr_t*		mtr);	/*!< in: mtr */
-#ifdef UNIV_BTR_PRINT
+#ifdef IB_BTR_PRINT
 /*************************************************************//**
 Prints size info of a B-tree. */
 IB_INTERN
@@ -476,7 +476,7 @@ btr_print_index(
 	dict_index_t*	index,	/*!< in: index */
 	ulint		width);	/*!< in: print this many entries from start
 				and end */
-#endif /* UNIV_BTR_PRINT */
+#endif /* IB_BTR_PRINT */
 /************************************************************//**
 Checks the size and number of fields in a record based on the definition of
 the index.
@@ -503,7 +503,7 @@ btr_validate_index(
 #define BTR_N_LEAF_PAGES	1
 #define BTR_TOTAL_SIZE		2
 
-#endif // !UNIV_HOTBACKUP
+#endif // !IB_HOTBACKUP
 
 #ifndef IB_DO_NOT_INLINE
 #include "btr_btr.inl"

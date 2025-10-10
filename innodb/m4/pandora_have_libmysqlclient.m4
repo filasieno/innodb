@@ -51,7 +51,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBMYSQLCLIENT],[
     [ac_enable_libmysqlclient="yes"])
 
   AS_IF([test "x$ac_enable_libmysqlclient" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(mysqlclient_r,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(mysqlclient_r,,[
 #include <mysql/mysql.h>
     ],[
 MYSQL mysql;
@@ -59,14 +59,14 @@ MYSQL mysql;
     ac_cv_libmysqlclient_r="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBMYSQLCLIENT, [test "x${ac_cv_libmysqlclient_r}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBMYSQLCLIENT, [test "x${ac_cv_libmysqlclient_r}" = "xyes"])
   
-AC_DEFUN([PANDORA_HAVE_LIBMYSQLCLIENT],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBMYSQLCLIENT],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBMYSQLCLIENT])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBMYSQLCLIENT],[
-  AC_REQUIRE([PANDORA_HAVE_LIBMYSQLCLIENT])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBMYSQLCLIENT])
   AS_IF([test "x${ac_cv_libmysqlclient_r}" = "xno"],
       AC_MSG_ERROR([libmysqlclient_r is required for ${PACKAGE}]))
 ])
@@ -117,11 +117,11 @@ AC_DEFUN([PANDORA_REQUIRE_LIBMYSQLCLIENT],[
        [AC_MSG_RESULT(found)],
        [AC_MSG_ERROR([Couldn't find NdbApi.hpp!])])
     AC_MSG_CHECKING(for NDB_LE_ThreadConfigLoop)
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mgmapi.h>]], [[int attr=NDB_LE_ThreadConfigLoop; ]])],[have_cge63="yes"],[])
-      AS_IF([test "$have_cge63" = "yes"],
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mgmapi.h>]], [[int attr=NDB_LE_ThreadConfigLoop; ]])],[IB_HAVE_cge63="yes"],[])
+      AS_IF([test "$IB_HAVE_cge63" = "yes"],
         [AC_MSG_RESULT(found)
-         HAVE_CGE63="-DCGE63"
-         AC_SUBST(HAVE_CGE63)],
+         IB_HAVE_CGE63="-DCGE63"
+         AC_SUBST(IB_HAVE_CGE63)],
         [AC_MSG_RESULT(missing)])
 
     LDFLAGS="$LDFLAGS $LIBS"

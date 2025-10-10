@@ -20,7 +20,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBGTEST],[
     AC_LANG_PUSH(C++)
     save_CXXFLAGS="${CXXFLAGS}"
     CXXFLAGS="${AM_CXXFLAGS} ${CXXFLAGS}"
-    AC_LIB_HAVE_LINKFLAGS(gtest,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(gtest,,[
       #include <gtest/gtest.h>
 TEST(pandora_test_libgtest, PandoraTest)
 {
@@ -33,10 +33,10 @@ TEST(pandora_test_libgtest, PandoraTest)
     ac_cv_libgtest="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBGTEST, [test "x${ac_cv_libgtest}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBGTEST, [test "x${ac_cv_libgtest}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBGTEST],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBGTEST],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBGTEST])
 ])
 

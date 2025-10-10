@@ -34,13 +34,13 @@ Created 10/4/1994 Heikki Tuuri
 #include "mtr_log.hpp"
 #include "log_recv.hpp"
 #include "ut_ut.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "rem_cmp.hpp"
 
 #ifdef PAGE_CUR_ADAPT
-# ifdef UNIV_SEARCH_PERF_STAT
+# ifdef IB_SEARCH_PERF_STAT
 static ulint	page_cur_short_succ	= 0;
-# endif /* UNIV_SEARCH_PERF_STAT */
+# endif /* IB_SEARCH_PERF_STAT */
 
 /*******************************************************************//**
 This is a linear congruential generator PRNG. Returns a pseudo random
@@ -108,7 +108,7 @@ page_cur_try_search_shortcut(
 	ulint		low_bytes;
 	ulint		up_match;
 	ulint		up_bytes;
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	page_cur_t	cursor2;
 #endif
 	ibool		success		= FALSE;
@@ -154,7 +154,7 @@ page_cur_try_search_shortcut(
 
 	page_cur_position(rec, block, cursor);
 
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	page_cur_search_with_match(block, index, tuple, PAGE_CUR_DBG,
 				   iup_matched_fields,
 				   iup_matched_bytes,
@@ -181,12 +181,12 @@ page_cur_try_search_shortcut(
 	*ilow_matched_fields = low_match;
 	*ilow_matched_bytes = low_bytes;
 
-#ifdef UNIV_SEARCH_PERF_STAT
+#ifdef IB_SEARCH_PERF_STAT
 	page_cur_short_succ++;
 #endif
 	success = TRUE;
 exit_func:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(success);
@@ -229,8 +229,8 @@ page_cur_rec_field_extends(
 	    || type->mtype == DATA_VARCLIENT
 	    || type->mtype == DATA_CLIENT) {
 
-		if (dfield_get_len(dfield) != UNIV_SQL_NULL
-		    && rec_f_len != UNIV_SQL_NULL
+		if (dfield_get_len(dfield) != IB_SQL_NULL
+		    && rec_f_len != IB_SQL_NULL
 		    && rec_f_len >= dfield_get_len(dfield)
 		    && !cmp_data_data_slow(type->mtype, type->prtype,
 					   dfield_get_data(dfield),
@@ -288,14 +288,14 @@ page_cur_search_with_match(
 	ulint		cur_matched_fields;
 	ulint		cur_matched_bytes;
 	int		cmp;
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 	int		dbg_cmp;
 	ulint		dbg_matched_fields;
 	ulint		dbg_matched_bytes;
 #endif
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	const page_zip_des_t*	page_zip = buf_block_get_page_zip(block);
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 	mem_heap_t*	heap		= NULL;
 	ulint		offsets_[REC_OFFS_NORMAL_SIZE];
 	ulint*		offsets		= offsets_;
@@ -304,7 +304,7 @@ page_cur_search_with_match(
 	ut_ad(block && tuple && iup_matched_fields && iup_matched_bytes
 	      && ilow_matched_fields && ilow_matched_bytes && cursor);
 	ut_ad(dtuple_validate(tuple));
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 # ifdef PAGE_CUR_DBG
 	if (mode != PAGE_CUR_DBG)
 # endif /* PAGE_CUR_DBG */
@@ -313,11 +313,11 @@ page_cur_search_with_match(
 # endif /* PAGE_CUR_LE_OR_EXTENDS */
 			ut_ad(mode == PAGE_CUR_L || mode == PAGE_CUR_LE
 			      || mode == PAGE_CUR_G || mode == PAGE_CUR_GE);
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	page = buf_block_get_frame(block);
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 	page_check_dir(page);
 
@@ -387,13 +387,13 @@ page_cur_search_with_match(
 			index->cmp_ctx, tuple, mid_rec, offsets,
 			&cur_matched_fields, &cur_matched_bytes);
 
-		if (UNIV_LIKELY(cmp > 0)) {
+		if (IB_LIKELY(cmp > 0)) {
 low_slot_match:
 			low = mid;
 			low_matched_fields = cur_matched_fields;
 			low_matched_bytes = cur_matched_bytes;
 
-		} else if (UNIV_EXPECT(cmp, -1)) {
+		} else if (IB_EXPECT(cmp, -1)) {
 #ifdef PAGE_CUR_LE_OR_EXTENDS
 			if (mode == PAGE_CUR_LE_OR_EXTENDS
 			    && page_cur_rec_field_extends(
@@ -445,13 +445,13 @@ up_slot_match:
 			index->cmp_ctx, tuple, mid_rec, offsets,
 			&cur_matched_fields, &cur_matched_bytes);
 
-		if (UNIV_LIKELY(cmp > 0)) {
+		if (IB_LIKELY(cmp > 0)) {
 low_rec_match:
 			low_rec = mid_rec;
 			low_matched_fields = cur_matched_fields;
 			low_matched_bytes = cur_matched_bytes;
 
-		} else if (UNIV_EXPECT(cmp, -1)) {
+		} else if (IB_EXPECT(cmp, -1)) {
 #ifdef PAGE_CUR_LE_OR_EXTENDS
 			if (mode == PAGE_CUR_LE_OR_EXTENDS
 			    && page_cur_rec_field_extends(
@@ -478,7 +478,7 @@ up_rec_match:
 		}
 	}
 
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 
 	/* Check that the lower and upper limit records have the
 	right alphabetical order compared to tuple. */
@@ -546,7 +546,7 @@ up_rec_match:
 	*iup_matched_bytes   = up_matched_bytes;
 	*ilow_matched_fields = low_matched_fields;
 	*ilow_matched_bytes  = low_matched_bytes;
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 }
@@ -566,7 +566,7 @@ page_cur_open_on_rnd_user_rec(
 
 	page_cur_set_before_first(block, cursor);
 
-	if (UNIV_UNLIKELY(n_recs == 0)) {
+	if (IB_UNLIKELY(n_recs == 0)) {
 
 		return;
 	}
@@ -599,7 +599,7 @@ page_cur_insert_rec_write_log(
 	const byte* log_end;
 	ulint	i;
 
-	ut_a(rec_size < UNIV_PAGE_SIZE);
+	ut_a(rec_size < IB_PAGE_SIZE);
 	ut_ad(page_align(insert_rec) == page_align(cursor_rec));
 	ut_ad(!page_rec_is_comp(insert_rec)
 	      == !dict_table_is_comp(index->table));
@@ -625,7 +625,7 @@ page_cur_insert_rec_write_log(
 		ut_ad(rec_size == rec_offs_size(ins_offs));
 		cur_rec_size = rec_offs_size(cur_offs);
 
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
@@ -666,7 +666,7 @@ page_cur_insert_rec_write_log(
 			log_ptr = mlog_open_and_write_index(
 				mtr, insert_rec, index, MLOG_COMP_REC_INSERT,
 				2 + 5 + 1 + 5 + 5 + MLOG_BUF_MARGIN);
-			if (UNIV_UNLIKELY(!log_ptr)) {
+			if (IB_UNLIKELY(!log_ptr)) {
 				/* Logging in mtr is switched off
 				during crash recovery: in that case
 				mlog_open returns NULL */
@@ -676,7 +676,7 @@ page_cur_insert_rec_write_log(
 			log_ptr = mlog_open(mtr, 11
 					    + 2 + 5 + 1 + 5 + 5
 					    + MLOG_BUF_MARGIN);
-			if (UNIV_UNLIKELY(!log_ptr)) {
+			if (IB_UNLIKELY(!log_ptr)) {
 				/* Logging in mtr is switched off
 				during crash recovery: in that case
 				mlog_open returns NULL */
@@ -702,14 +702,14 @@ page_cur_insert_rec_write_log(
 	}
 
 	if (page_rec_is_comp(insert_rec)) {
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (rec_get_info_and_status_bits(insert_rec, TRUE)
 		     != rec_get_info_and_status_bits(cursor_rec, TRUE))) {
 
 			goto need_extra_info;
 		}
 	} else {
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (rec_get_info_and_status_bits(insert_rec, FALSE)
 		     != rec_get_info_and_status_bits(cursor_rec, FALSE))) {
 
@@ -737,8 +737,8 @@ need_extra_info:
 		/* Write the mismatch index */
 		log_ptr += mach_write_compressed(log_ptr, i);
 
-		ut_a(i < UNIV_PAGE_SIZE);
-		ut_a(extra_size < UNIV_PAGE_SIZE);
+		ut_a(i < IB_PAGE_SIZE);
+		ut_a(extra_size < IB_PAGE_SIZE);
 	} else {
 		/* Write the record end segment length
 		and the extra info storage flag */
@@ -755,13 +755,13 @@ need_extra_info:
 		mlog_close(mtr, log_ptr + rec_size);
 	} else {
 		mlog_close(mtr, log_ptr);
-		ut_a(rec_size < UNIV_PAGE_SIZE);
+		ut_a(rec_size < IB_PAGE_SIZE);
 		mlog_catenate_string(mtr, ins_ptr, rec_size);
 	}
 }
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define page_cur_insert_rec_write_log(ins_rec,size,cur,index,mtr) ((void) 0)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Parses a log record of a record insert on a page.
@@ -801,7 +801,7 @@ page_cur_parse_insert_rec(
 
 		/* Read the cursor rec offset as a 2-byte ulint */
 
-		if (UNIV_UNLIKELY(end_ptr < ptr + 2)) {
+		if (IB_UNLIKELY(end_ptr < ptr + 2)) {
 
 			return(NULL);
 		}
@@ -811,7 +811,7 @@ page_cur_parse_insert_rec(
 
 		cursor_rec = page + offset;
 
-		if (UNIV_UNLIKELY(offset >= UNIV_PAGE_SIZE)) {
+		if (IB_UNLIKELY(offset >= IB_PAGE_SIZE)) {
 
 			recv_sys->found_corrupt_log = TRUE;
 
@@ -826,7 +826,7 @@ page_cur_parse_insert_rec(
 		return(NULL);
 	}
 
-	if (UNIV_UNLIKELY(end_seg_len >= UNIV_PAGE_SIZE << 1)) {
+	if (IB_UNLIKELY(end_seg_len >= IB_PAGE_SIZE << 1)) {
 		recv_sys->found_corrupt_log = TRUE;
 
 		return(NULL);
@@ -850,7 +850,7 @@ page_cur_parse_insert_rec(
 			return(NULL);
 		}
 
-		ut_a(origin_offset < UNIV_PAGE_SIZE);
+		ut_a(origin_offset < IB_PAGE_SIZE);
 
 		ptr = mach_parse_compressed(ptr, end_ptr, &mismatch_index);
 
@@ -859,10 +859,10 @@ page_cur_parse_insert_rec(
 			return(NULL);
 		}
 
-		ut_a(mismatch_index < UNIV_PAGE_SIZE);
+		ut_a(mismatch_index < IB_PAGE_SIZE);
 	}
 
-	if (UNIV_UNLIKELY(end_ptr < ptr + (end_seg_len >> 1))) {
+	if (IB_UNLIKELY(end_ptr < ptr + (end_seg_len >> 1))) {
 
 		return(NULL);
 	}
@@ -898,7 +898,7 @@ page_cur_parse_insert_rec(
 
 	/* Build the inserted record to buf */
 
-        if (UNIV_UNLIKELY(mismatch_index >= UNIV_PAGE_SIZE)) {
+        if (IB_UNLIKELY(mismatch_index >= IB_PAGE_SIZE)) {
 		ib_logger(ib_stream,
 			"Is short %lu, info_and_status_bits %lu, offset %lu, "
 			"o_offset %lu\n"
@@ -934,7 +934,7 @@ page_cur_parse_insert_rec(
 
 	offsets = rec_get_offsets(buf + origin_offset, index, offsets,
 				  ULINT_UNDEFINED, &heap);
-	if (UNIV_UNLIKELY(!page_cur_rec_insert(&cursor,
+	if (IB_UNLIKELY(!page_cur_rec_insert(&cursor,
 					       buf + origin_offset,
 					       index, offsets, mtr))) {
 		/* The redo log record should only have been written
@@ -947,7 +947,7 @@ page_cur_parse_insert_rec(
 		mem_free(buf);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -992,7 +992,7 @@ page_cur_insert_rec_low(
 	/* 1. Get the size of the physical record in the page */
 	rec_size = rec_offs_size(offsets);
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	{
 		const void*	rec_start
 			= rec - rec_offs_extra_size(offsets);
@@ -1003,16 +1003,16 @@ page_cur_insert_rec_low(
 			   : REC_N_OLD_EXTRA_BYTES);
 
 		/* All data bytes of the record must be valid. */
-		UNIV_MEM_ASSERT_RW(rec, rec_offs_data_size(offsets));
+		IB_MEM_ASSERT_RW(rec, rec_offs_data_size(offsets));
 		/* The variable-length header must be valid. */
-		UNIV_MEM_ASSERT_RW(rec_start, extra_size);
+		IB_MEM_ASSERT_RW(rec_start, extra_size);
 	}
-#endif /* UNIV_DEBUG_VALGRIND */
+#endif /* IB_DEBUG_VALGRIND */
 
 	/* 2. Try to find suitable space from page memory management */
 
 	free_rec = page_header_get_ptr(page, PAGE_FREE);
-	if (UNIV_LIKELY_NULL(free_rec)) {
+	if (IB_LIKELY_NULL(free_rec)) {
 		/* Try to allocate from the head of the free list. */
 		ulint		foffsets_[REC_OFFS_NORMAL_SIZE];
 		ulint*		foffsets	= foffsets_;
@@ -1023,7 +1023,7 @@ page_cur_insert_rec_low(
 		foffsets = rec_get_offsets(free_rec, index, foffsets,
 					ULINT_UNDEFINED, &heap);
 		if (rec_offs_size(foffsets) < rec_size) {
-			if (UNIV_LIKELY_NULL(heap)) {
+			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
 			}
 
@@ -1044,7 +1044,7 @@ page_cur_insert_rec_low(
 					rec_size);
 		}
 
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	} else {
@@ -1053,7 +1053,7 @@ use_heap:
 		insert_buf = page_mem_alloc_heap(page, NULL,
 						 rec_size, &heap_no);
 
-		if (UNIV_UNLIKELY(insert_buf == NULL)) {
+		if (IB_UNLIKELY(insert_buf == NULL)) {
 			return(NULL);
 		}
 	}
@@ -1068,7 +1068,7 @@ use_heap:
 	{
 		/* next record after current before the insertion */
 		rec_t*	next_rec = page_rec_get_next(current_rec);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (page_is_comp(page)) {
 			ut_ad(rec_get_status(current_rec)
 				<= REC_STATUS_INFIMUM);
@@ -1093,7 +1093,7 @@ use_heap:
 		rec_set_heap_no_old(insert_rec, heap_no);
 	}
 
-	UNIV_MEM_ASSERT_RW(rec_get_start(insert_rec, offsets),
+	IB_MEM_ASSERT_RW(rec_get_start(insert_rec, offsets),
 			   rec_offs_size(offsets));
 	/* 6. Update the last insertion info in page header */
 
@@ -1102,7 +1102,7 @@ use_heap:
 	      || rec_get_node_ptr_flag(last_insert)
 	      == rec_get_node_ptr_flag(insert_rec));
 
-	if (UNIV_UNLIKELY(last_insert == NULL)) {
+	if (IB_UNLIKELY(last_insert == NULL)) {
 		page_header_set_field(page, NULL, PAGE_DIRECTION,
 				      PAGE_NO_DIRECTION);
 		page_header_set_field(page, NULL, PAGE_N_DIRECTION, 0);
@@ -1150,7 +1150,7 @@ use_heap:
 		record. If the number exceeds PAGE_DIR_SLOT_MAX_N_OWNED,
 		we have to split the corresponding directory slot in two. */
 
-		if (UNIV_UNLIKELY(n_owned == PAGE_DIR_SLOT_MAX_N_OWNED)) {
+		if (IB_UNLIKELY(n_owned == PAGE_DIR_SLOT_MAX_N_OWNED)) {
 			page_dir_split_slot(
 				page, NULL,
 				page_dir_find_owner_slot(owner_rec));
@@ -1158,7 +1158,7 @@ use_heap:
 	}
 
 	/* 9. Write log record of the insert */
-	if (UNIV_LIKELY(mtr != NULL)) {
+	if (IB_LIKELY(mtr != NULL)) {
 		page_cur_insert_rec_write_log(insert_rec, rec_size,
 					      current_rec, index, mtr);
 	}
@@ -1185,7 +1185,7 @@ page_cur_insert_rec_zip_reorg(
 	ulint		pos;
 
 	/* Recompress or reorganize and recompress the page. */
-	if (UNIV_LIKELY(page_zip_compress(page_zip, page, index, mtr))) {
+	if (IB_LIKELY(page_zip_compress(page_zip, page, index, mtr))) {
 		return(rec);
 	}
 
@@ -1256,14 +1256,14 @@ page_cur_insert_rec_zip(
 	ut_ad(page_is_comp(page));
 
 	ut_ad(!page_rec_is_supremum(*current_rec));
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 	/* 1. Get the size of the physical record in the page */
 	rec_size = rec_offs_size(offsets);
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	{
 		const void*	rec_start
 			= rec - rec_offs_extra_size(offsets);
@@ -1274,11 +1274,11 @@ page_cur_insert_rec_zip(
 			   : REC_N_OLD_EXTRA_BYTES);
 
 		/* All data bytes of the record must be valid. */
-		UNIV_MEM_ASSERT_RW(rec, rec_offs_data_size(offsets));
+		IB_MEM_ASSERT_RW(rec, rec_offs_data_size(offsets));
 		/* The variable-length header must be valid. */
-		UNIV_MEM_ASSERT_RW(rec_start, extra_size);
+		IB_MEM_ASSERT_RW(rec_start, extra_size);
 	}
-#endif /* UNIV_DEBUG_VALGRIND */
+#endif /* IB_DEBUG_VALGRIND */
 
 	/* 2. Try to find suitable space from page memory management */
 	if (!page_zip_available(page_zip, dict_index_is_clust(index),
@@ -1289,7 +1289,7 @@ page_cur_insert_rec_zip(
 						     index, rec, offsets,
 						     NULL);
 
-		if (UNIV_LIKELY(insert_rec != NULL)) {
+		if (IB_LIKELY(insert_rec != NULL)) {
 			insert_rec = page_cur_insert_rec_zip_reorg(
 				current_rec, block, index, insert_rec,
 				page, page_zip, mtr);
@@ -1299,7 +1299,7 @@ page_cur_insert_rec_zip(
 	}
 
 	free_rec = page_header_get_ptr(page, PAGE_FREE);
-	if (UNIV_LIKELY_NULL(free_rec)) {
+	if (IB_LIKELY_NULL(free_rec)) {
 		/* Try to allocate from the head of the free list. */
 		lint	extra_size_diff;
 		ulint		foffsets_[REC_OFFS_NORMAL_SIZE];
@@ -1312,7 +1312,7 @@ page_cur_insert_rec_zip(
 					ULINT_UNDEFINED, &heap);
 		if (rec_offs_size(foffsets) < rec_size) {
 too_small:
-			if (UNIV_LIKELY_NULL(heap)) {
+			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
 			}
 
@@ -1327,7 +1327,7 @@ too_small:
 			= rec_offs_extra_size(offsets)
 			- rec_offs_extra_size(foffsets);
 
-		if (UNIV_UNLIKELY(extra_size_diff < 0)) {
+		if (IB_UNLIKELY(extra_size_diff < 0)) {
 			/* Add an offset to the extra_size. */
 			if (rec_offs_size(foffsets)
 			    < rec_size - extra_size_diff) {
@@ -1336,7 +1336,7 @@ too_small:
 			}
 
 			insert_buf -= extra_size_diff;
-		} else if (UNIV_UNLIKELY(extra_size_diff)) {
+		} else if (IB_UNLIKELY(extra_size_diff)) {
 			/* Do not allow extra_size to grow */
 
 			goto too_small;
@@ -1396,7 +1396,7 @@ too_small:
 			ut_ad(len == DATA_ROLL_PTR_LEN);
 		}
 
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	} else {
@@ -1405,7 +1405,7 @@ use_heap:
 		insert_buf = page_mem_alloc_heap(page, page_zip,
 						 rec_size, &heap_no);
 
-		if (UNIV_UNLIKELY(insert_buf == NULL)) {
+		if (IB_UNLIKELY(insert_buf == NULL)) {
 			return(NULL);
 		}
 
@@ -1439,7 +1439,7 @@ use_heap:
 	rec_set_n_owned_new(insert_rec, NULL, 0);
 	rec_set_heap_no_new(insert_rec, heap_no);
 
-	UNIV_MEM_ASSERT_RW(rec_get_start(insert_rec, offsets),
+	IB_MEM_ASSERT_RW(rec_get_start(insert_rec, offsets),
 			   rec_offs_size(offsets));
 
 	page_zip_dir_insert(page_zip, *current_rec, free_rec, insert_rec);
@@ -1451,7 +1451,7 @@ use_heap:
 	      || rec_get_node_ptr_flag(last_insert)
 	      == rec_get_node_ptr_flag(insert_rec));
 
-	if (UNIV_UNLIKELY(last_insert == NULL)) {
+	if (IB_UNLIKELY(last_insert == NULL)) {
 		page_header_set_field(page, page_zip, PAGE_DIRECTION,
 							PAGE_NO_DIRECTION);
 		page_header_set_field(page, page_zip, PAGE_N_DIRECTION, 0);
@@ -1495,7 +1495,7 @@ use_heap:
 		record. If the number exceeds PAGE_DIR_SLOT_MAX_N_OWNED,
 		we have to split the corresponding directory slot in two. */
 
-		if (UNIV_UNLIKELY(n_owned == PAGE_DIR_SLOT_MAX_N_OWNED)) {
+		if (IB_UNLIKELY(n_owned == PAGE_DIR_SLOT_MAX_N_OWNED)) {
 			page_dir_split_slot(
 				page, page_zip,
 				page_dir_find_owner_slot(owner_rec));
@@ -1505,7 +1505,7 @@ use_heap:
 	page_zip_write_rec(page_zip, insert_rec, index, offsets, 1);
 
 	/* 9. Write log record of the insert */
-	if (UNIV_LIKELY(mtr != NULL)) {
+	if (IB_LIKELY(mtr != NULL)) {
 		page_cur_insert_rec_write_log(insert_rec, rec_size,
 					      *current_rec, index, mtr);
 	}
@@ -1513,7 +1513,7 @@ use_heap:
 	return(insert_rec);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************//**
 Writes a log record of copying a record list end to a new created page.
 @return 4-byte field where to write the log data length, or NULL if
@@ -1534,13 +1534,13 @@ page_copy_rec_list_to_created_page_write_log(
 					    page_is_comp(page)
 					    ? MLOG_COMP_LIST_END_COPY_CREATED
 					    : MLOG_LIST_END_COPY_CREATED, 4);
-	if (UNIV_LIKELY(log_ptr != NULL)) {
+	if (IB_LIKELY(log_ptr != NULL)) {
 		mlog_close(mtr, log_ptr + 4);
 	}
 
 	return(log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************//**
 Parses a log record of copying a record list end to a new created page.
@@ -1598,7 +1598,7 @@ page_parse_copy_rec_list_to_created_page(
 	return(rec_end);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Copies records from page to a newly created page, from a given record onward,
 including that record. Infimum and supremum records are not copied. */
@@ -1641,12 +1641,12 @@ page_copy_rec_list_end_to_created_page(
 		return;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* To pass the debug tests we have to set these dummy values
 	in the debug version */
-	page_dir_set_n_slots(new_page, NULL, UNIV_PAGE_SIZE / 2);
+	page_dir_set_n_slots(new_page, NULL, IB_PAGE_SIZE / 2);
 	page_header_set_ptr(new_page, NULL, PAGE_HEAP_TOP,
-			    new_page + UNIV_PAGE_SIZE - 1);
+			    new_page + IB_PAGE_SIZE - 1);
 #endif
 
 	log_ptr = page_copy_rec_list_to_created_page_write_log(new_page,
@@ -1692,7 +1692,7 @@ page_copy_rec_list_end_to_created_page(
 		count++;
 		n_recs++;
 
-		if (UNIV_UNLIKELY
+		if (IB_UNLIKELY
 		    (count == (PAGE_DIR_SLOT_MAX_N_OWNED + 1) / 2)) {
 
 			slot_index++;
@@ -1707,7 +1707,7 @@ page_copy_rec_list_end_to_created_page(
 
 		rec_size = rec_offs_size(offsets);
 
-		ut_ad(heap_top < new_page + UNIV_PAGE_SIZE);
+		ut_ad(heap_top < new_page + IB_PAGE_SIZE);
 
 		heap_top += rec_size;
 
@@ -1734,15 +1734,15 @@ page_copy_rec_list_end_to_created_page(
 		slot_index--;
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
 	log_data_len = dyn_array_get_data_size(&(mtr->log)) - log_data_len;
 
-	ut_a(log_data_len < 100 * UNIV_PAGE_SIZE);
+	ut_a(log_data_len < 100 * IB_PAGE_SIZE);
 
-	if (UNIV_LIKELY(log_ptr != NULL)) {
+	if (IB_LIKELY(log_ptr != NULL)) {
 		mach_write_to_4(log_ptr, log_data_len);
 	}
 
@@ -1802,9 +1802,9 @@ page_cur_delete_rec_write_log(
 
 	mlog_close(mtr, log_ptr + 2);
 }
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define page_cur_delete_rec_write_log(rec,index,mtr) ((void) 0)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Parses log record of a record delete on a page.
@@ -1831,7 +1831,7 @@ page_cur_parse_delete_rec(
 	offset = mach_read_from_2(ptr);
 	ptr += 2;
 
-	ut_a(offset <= UNIV_PAGE_SIZE);
+	ut_a(offset <= IB_PAGE_SIZE);
 
 	if (block) {
 		page_t*		page		= buf_block_get_frame(block);
@@ -1847,7 +1847,7 @@ page_cur_parse_delete_rec(
 				    rec_get_offsets(rec, index, offsets_,
 						    ULINT_UNDEFINED, &heap),
 				    mtr);
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 	}
@@ -1964,16 +1964,16 @@ page_cur_delete_rec(
 	If the number drops below PAGE_DIR_SLOT_MIN_N_OWNED, we balance the
 	slots. */
 
-	if (UNIV_UNLIKELY(cur_n_owned <= PAGE_DIR_SLOT_MIN_N_OWNED)) {
+	if (IB_UNLIKELY(cur_n_owned <= PAGE_DIR_SLOT_MIN_N_OWNED)) {
 		page_dir_balance_slot(page, page_zip, cur_slot_no);
 	}
 
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 	ut_a(!page_zip || page_zip_validate(page_zip, page));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 }
 
-#ifdef UNIV_COMPILE_TEST_FUNCS
+#ifdef IB_COMPILE_TEST_FUNCS
 
 /*******************************************************************//**
 Print the first n numbers, generated by page_cur_lcg_prng() to make sure
@@ -1998,4 +1998,4 @@ test_page_cur_lcg_prng(
 	}
 }
 
-#endif /* UNIV_COMPILE_TEST_FUNCS */
+#endif /* IB_COMPILE_TEST_FUNCS */

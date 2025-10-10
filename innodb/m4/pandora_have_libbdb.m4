@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBBDB],[
     [ac_enable_libbdb="yes"])
 
   AS_IF([test "x$ac_enable_libbdb" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(db,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(db,,[
       #include <db.h>
     ],[
       const char *test= DB_VERSION_STRING;
@@ -26,10 +26,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBBDB],[
     ac_cv_libbdb="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBBDB, [test "x${ac_cv_libbdb}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBBDB, [test "x${ac_cv_libbdb}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBBDB],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBBDB],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBBDB])
 ])
 

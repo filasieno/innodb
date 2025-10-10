@@ -18,13 +18,13 @@ dnl dependent semantics.
 dnl Does *not* test for #pragma GCC visibility push(hidden) - which is
 dnl "really only recommended for legacy code".
 dnl Set the variable CFLAG_VISIBILITY.
-dnl Defines and sets the variable HAVE_VISIBILITY.
+dnl Defines and sets the variable IB_HAVE_VISIBILITY.
 
 AC_DEFUN([PANDORA_CHECK_VISIBILITY],
 [
   AC_REQUIRE([AC_PROG_CC])
   CFLAG_VISIBILITY=
-  HAVE_VISIBILITY=0
+  IB_HAVE_VISIBILITY=0
   AS_IF([test -n "$GCC"],[
     AC_MSG_CHECKING([for simple visibility declarations])
     AC_CACHE_VAL([gl_cv_cc_visibility], [
@@ -43,18 +43,18 @@ AC_DEFUN([PANDORA_CHECK_VISIBILITY],
     if test $gl_cv_cc_visibility = yes; then
       CFLAG_VISIBILITY="-fvisibility=hidden"
       NO_VISIBILITY="-fvisibility=default"
-      HAVE_VISIBILITY=1
+      IB_HAVE_VISIBILITY=1
     fi
   ])
   AS_IF([test "x$SUNCC" = "xyes"],[
     CFLAG_VISIBILITY="-xldscope=hidden"
     NO_VISIBILITY="-xldscope=global"
-    HAVE_VISIBILITY=1
+    IB_HAVE_VISIBILITY=1
   ])
   AC_SUBST([CFLAG_VISIBILITY])
   AC_SUBST([NO_VISIBILITY])
-  AC_SUBST([HAVE_VISIBILITY])
-  AC_DEFINE_UNQUOTED([HAVE_VISIBILITY], [$HAVE_VISIBILITY],
+  AC_SUBST([IB_HAVE_VISIBILITY])
+  AC_DEFINE_UNQUOTED([IB_HAVE_VISIBILITY], [$IB_HAVE_VISIBILITY],
     [Define to 1 or 0, depending whether the compiler supports simple visibility declarations.])
 ])
 

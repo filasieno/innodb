@@ -77,7 +77,7 @@ AC_DEFUN([PANDORA_PLATFORM],[
       AC_DEFINE([_WIN32_WINNT], [0x0501], [Magical number to make things work])
       AC_DEFINE([EAI_SYSTEM], [11], [Another magical number])
       AH_BOTTOM([
-#ifndef HAVE_SYS_SOCKET_H
+#ifndef IB_HAVE_SYS_SOCKET_H
 # define SHUT_RD SD_RECEIVE
 # define SHUT_WR SD_SEND
 # define SHUT_RDWR SD_BOTH

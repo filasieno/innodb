@@ -19,7 +19,7 @@
 #include "univ.inl"
 
 /* Required for HugeTLB support. */
-#ifdef UNIV_LINUX
+#ifdef IB_LINUX
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #endif

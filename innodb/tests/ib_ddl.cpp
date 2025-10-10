@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "test_aux.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -72,7 +72,7 @@ create_table(
 	ib_id_t		table_id = 0;
 	ib_err_t	err = DB_SUCCESS;
 	ib_tbl_sch_t	ib_tbl_sch = NULL;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -133,7 +133,7 @@ open_table(
 	ib_crsr_t*	crsr)		/*!< out: innodb cursor */
 {
 	ib_err_t	err = DB_SUCCESS;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -209,7 +209,7 @@ create_sec_index(
 	ib_trx_t	ib_trx;
 	ib_id_t		index_id = 0;
 	ib_idx_sch_t	ib_idx_sch = NULL;
-	char		index_name[IB_MAX_TABLE_NAME_LEN];
+	char		index_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 	ib_trx = ib_trx_begin(IB_TRX_REPEATABLE_READ);
 
@@ -256,7 +256,7 @@ create_sec_index_1(
 	const char*	name)			/*!< in: table to drop */
 {
 	ib_err_t	err;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -309,8 +309,8 @@ open_sec_index_1(
 	ib_crsr_t	crsr;
 	ib_trx_t	ib_trx;
 	ib_err_t	err = DB_SUCCESS;
-	char		index_name[IB_MAX_TABLE_NAME_LEN];
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		index_name[IB_MAX_TABLE_IB_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -373,8 +373,8 @@ test_create_temp_index(
 	ib_trx_t	ib_trx;
 	ib_id_t		index_id = 0;
 	ib_idx_sch_t	ib_idx_sch = NULL;
-	char		index_name[IB_MAX_TABLE_NAME_LEN];
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		index_name[IB_MAX_TABLE_IB_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -470,7 +470,7 @@ int main(int argc, char* argv[])
 	err = ib_shutdown(IB_SHUTDOWN_NORMAL);
 	assert(err == DB_SUCCESS);
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	VALGRIND_DO_LEAK_CHECK;
 #endif
 

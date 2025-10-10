@@ -37,9 +37,9 @@ fsp_descr_page(
 	ut_ad(ut_is_2pow(zip_size));
 
 	if (!zip_size) {
-		return(UNIV_UNLIKELY((page_no & (UNIV_PAGE_SIZE - 1))
+		return(IB_UNLIKELY((page_no & (IB_PAGE_SIZE - 1))
 				     == FSP_XDES_OFFSET));
 	}
 
-	return(UNIV_UNLIKELY((page_no & (zip_size - 1)) == FSP_XDES_OFFSET));
+	return(IB_UNLIKELY((page_no & (zip_size - 1)) == FSP_XDES_OFFSET));
 }

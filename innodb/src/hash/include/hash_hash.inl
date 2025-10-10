@@ -85,7 +85,7 @@ hash_calc_hash(
 	return(ut_hash_ulint(fold, table->n_cells));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /************************************************************//**
 Gets the mutex index for a fold value in a hash table.
 @return	mutex number */
@@ -180,4 +180,4 @@ hash_get_mutex(
 
 	return(hash_get_nth_mutex(table, i));
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

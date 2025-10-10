@@ -56,10 +56,10 @@ cmp_data_data(
 	ulint		prtype,	/*!< in: precise type */
 	const byte*	data1,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len1,	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len1,	/*!< in: data field length or IB_SQL_NULL */
 	const byte*	data2,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len2);	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len2);	/*!< in: data field length or IB_SQL_NULL */
 /*************************************************************//**
 This function is used to compare two data fields for which we know the
 data type.
@@ -73,10 +73,10 @@ cmp_data_data_slow(
 	ulint		prtype,	/*!< in: precise type */
 	const byte*	data1,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len1,	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len1,	/*!< in: data field length or IB_SQL_NULL */
 	const byte*	data2,	/*!< in: data field (== a pointer to a memory
 				buffer) */
-	ulint		len2);	/*!< in: data field length or UNIV_SQL_NULL */
+	ulint		len2);	/*!< in: data field length or IB_SQL_NULL */
 /*************************************************************//**
 This function is used to compare two dfields where at least the first
 has its data type field set.

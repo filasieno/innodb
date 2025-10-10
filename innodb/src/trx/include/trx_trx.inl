@@ -99,7 +99,7 @@ trx_get_dict_operation(
 {
 	enum trx_dict_op op = (enum trx_dict_op) trx->dict_operation;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	switch (op) {
 	case TRX_DICT_OP_NONE:
 	case TRX_DICT_OP_TABLE:
@@ -107,8 +107,8 @@ trx_get_dict_operation(
 		return(op);
 	}
 	ut_error;
-#endif /* UNIV_DEBUG */
-	return((enum trx_dict_op) UNIV_EXPECT(op, TRX_DICT_OP_NONE));
+#endif /* IB_DEBUG */
+	return((enum trx_dict_op) IB_EXPECT(op, TRX_DICT_OP_NONE));
 }
 /**********************************************************************//**
 Flag a transaction a dictionary operation. */
@@ -120,7 +120,7 @@ trx_set_dict_operation(
 	enum trx_dict_op	op)	/*!< in: operation, not
 					TRX_DICT_OP_NONE */
 {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	enum trx_dict_op	old_op = trx_get_dict_operation(trx);
 
 	switch (op) {
@@ -141,7 +141,7 @@ trx_set_dict_operation(
 		break;
 	}
 ok:
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	trx->dict_operation = op;
 }

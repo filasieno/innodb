@@ -872,7 +872,7 @@ drop_table(
 {
 	ib_err_t	err;
 	ib_trx_t	ib_trx;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);

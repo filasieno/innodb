@@ -381,7 +381,7 @@ btr_pcur_move_backward_from_page(
 	btr_pcur_t*	cursor,	/*!< in: persistent cursor, must be on the
 				first record of the current page */
 	mtr_t*		mtr);	/*!< in: mtr */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************//**
 Returns the btr cursor component of a persistent cursor.
 @return	pointer to btr cursor component */
@@ -398,10 +398,10 @@ page_cur_t*
 btr_pcur_get_page_cur(
 /*==================*/
 	const btr_pcur_t*	cursor);	/*!< in: persistent cursor */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define btr_pcur_get_btr_cur(cursor) (&(cursor)->btr_cur)
 # define btr_pcur_get_page_cur(cursor) (&(cursor)->btr_cur.page_cur)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************//**
 Returns the page of a persistent cursor.
 @return	pointer to the page */

@@ -28,7 +28,7 @@
 #include "log_recv.hpp"
 #include "page_page.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "dict0boot.h"
 
 /// @brief Catenates n bytes to the mtr log.
@@ -79,7 +79,7 @@ void mlog_write_initial_log_record(const byte *ptr, byte type, mtr_t *mtr)
 
 	mlog_close(mtr, log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 ///
 /// @brief Parses an initial log record written by mlog_write_initial_log_record.
@@ -147,7 +147,7 @@ byte *mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *
 	offset = mach_read_from_2(ptr);
 	ptr += 2;
 
-	if (offset >= UNIV_PAGE_SIZE) {
+	if (offset >= IB_PAGE_SIZE) {
 		recv_sys->found_corrupt_log = TRUE;
 
 		return (NULL);
@@ -162,7 +162,7 @@ byte *mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *
 		}
 
 		if (page) {
-			if (UNIV_LIKELY_NULL(page_zip)) {
+			if (IB_LIKELY_NULL(page_zip)) {
 				mach_write_to_8(((page_zip_des_t *)page_zip)->data + offset, dval);
 			}
 			mach_write_to_8(page + offset, dval);
@@ -180,22 +180,22 @@ byte *mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *
 
 	switch (type) {
 		case MLOG_1BYTE:
-			if (UNIV_UNLIKELY(val > 0xFFUL)) {
+			if (IB_UNLIKELY(val > 0xFFUL)) {
 				goto corrupt;
 			}
 			if (page) {
-				if (UNIV_LIKELY_NULL(page_zip)) {
+				if (IB_LIKELY_NULL(page_zip)) {
 					mach_write_to_1(((page_zip_des_t *)page_zip)->data + offset, val);
 				}
 				mach_write_to_1(page + offset, val);
 			}
 			break;
 		case MLOG_2BYTES:
-			if (UNIV_UNLIKELY(val > 0xFFFFUL)) {
+			if (IB_UNLIKELY(val > 0xFFFFUL)) {
 				goto corrupt;
 			}
 			if (page) {
-				if (UNIV_LIKELY_NULL(page_zip)) {
+				if (IB_LIKELY_NULL(page_zip)) {
 					mach_write_to_2(((page_zip_des_t *)page_zip)->data + offset, val);
 				}
 				mach_write_to_2(page + offset, val);
@@ -203,7 +203,7 @@ byte *mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *page, void *
 			break;
 		case MLOG_4BYTES:
 			if (page) {
-				if (UNIV_LIKELY_NULL(page_zip)) {
+				if (IB_LIKELY_NULL(page_zip)) {
 					mach_write_to_4(((page_zip_des_t *)page_zip)->data + offset, val);
 				}
 				mach_write_to_4(page + offset, val);
@@ -297,7 +297,7 @@ void mlog_write_dulint(byte *ptr, dulint val, mtr_t *mtr)
 	mlog_close(mtr, log_ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 ///
 /// @brief Writes a string to a file page buffered in the buffer pool. Writes the
 /// corresponding log record to the mini-transaction log.
@@ -310,7 +310,7 @@ IB_INTERN
 void mlog_write_string(byte *ptr, const byte *str, ulint len, mtr_t *mtr)
 {
 	ut_ad(ptr && mtr);
-	ut_a(len < UNIV_PAGE_SIZE);
+	ut_a(len < IB_PAGE_SIZE);
 
 	memcpy(ptr, str, len);
 
@@ -330,7 +330,7 @@ void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr)
 	byte *log_ptr;
 
 	ut_ad(ptr && mtr);
-	ut_ad(len <= UNIV_PAGE_SIZE);
+	ut_ad(len <= IB_PAGE_SIZE);
 
 	log_ptr = mlog_open(mtr, 30);
 
@@ -351,7 +351,7 @@ void mlog_log_string(byte *ptr, ulint len, mtr_t *mtr)
 
 	mlog_catenate_string(mtr, ptr, len);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 ///
 /// @brief Parses a log record written by mlog_write_string.
@@ -379,7 +379,7 @@ byte *mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip)
 	len = mach_read_from_2(ptr);
 	ptr += 2;
 
-	if (UNIV_UNLIKELY(offset >= UNIV_PAGE_SIZE) || UNIV_UNLIKELY(len + offset) > UNIV_PAGE_SIZE) {
+	if (IB_UNLIKELY(offset >= IB_PAGE_SIZE) || IB_UNLIKELY(len + offset) > IB_PAGE_SIZE) {
 		recv_sys->found_corrupt_log = TRUE;
 
 		return (NULL);
@@ -391,7 +391,7 @@ byte *mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip)
 	}
 
 	if (page) {
-		if (UNIV_LIKELY_NULL(page_zip)) {
+		if (IB_LIKELY_NULL(page_zip)) {
 			memcpy(((page_zip_des_t *)page_zip)->data + offset, ptr, len);
 		}
 		memcpy(page + offset, ptr, len);
@@ -400,7 +400,7 @@ byte *mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip)
 	return (ptr + len);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 ///
 /// @brief Opens a buffer for mlog, writes the initial log record and,
 /// if needed, the field lengths of an index.
@@ -494,7 +494,7 @@ byte *mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_index_t *index
 	}
 	return (log_ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 ///
 /// @brief Parses a log record written by mlog_open_and_write_index.

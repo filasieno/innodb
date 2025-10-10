@@ -48,11 +48,11 @@ Created 10/4/1994 Heikki Tuuri
 				 "column LIKE 'abc%' ORDER BY column DESC";
 				 we have to find strings which are <= 'abc' or
 				 which extend it */
-#ifdef UNIV_SEARCH_DEBUG
+#ifdef IB_SEARCH_DEBUG
 # define PAGE_CUR_DBG	6	/* As PAGE_CUR_LE, but skips search shortcut */
-#endif /* UNIV_SEARCH_DEBUG */
+#endif /* IB_SEARCH_DEBUG */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************//**
 Gets pointer to the page frame where the cursor is positioned.
 @return	page */
@@ -85,12 +85,12 @@ rec_t*
 page_cur_get_rec(
 /*=============*/
 	page_cur_t*	cur);	/*!< in: page cursor */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define page_cur_get_page(cur)		page_align((cur)->rec)
 # define page_cur_get_block(cur)	(cur)->block
 # define page_cur_get_page_zip(cur)	buf_block_get_page_zip((cur)->block)
 # define page_cur_get_rec(cur)		(cur)->rec
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************//**
 Sets the cursor object to point before the first user record
 on the page. */
@@ -156,7 +156,7 @@ void
 page_cur_move_to_prev(
 /*==================*/
 	page_cur_t*	cur);	/*!< in/out: cursor; not before first */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************//**
 Inserts a record next to page cursor. Returns pointer to inserted record if
 succeed, i.e., enough space available, NULL otherwise. The cursor stays at
@@ -172,7 +172,7 @@ page_cur_tuple_insert(
 	dict_index_t*	index,	/*!< in: record descriptor */
 	ulint		n_ext,	/*!< in: number of externally stored columns */
 	mtr_t*		mtr);	/*!< in: mini-transaction handle, or NULL */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***********************************************************//**
 Inserts a record next to page cursor. Returns pointer to inserted record if
 succeed, i.e., enough space available, NULL otherwise. The cursor stays at
@@ -242,7 +242,7 @@ page_cur_delete_rec(
 	dict_index_t*	index,	/*!< in: record descriptor */
 	const ulint*	offsets,/*!< in: rec_get_offsets(cursor->rec, index) */
 	mtr_t*		mtr);	/*!< in: mini-transaction handle */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Searches the right position for a page cursor.
 @return	number of matched fields on the left */
@@ -293,7 +293,7 @@ page_cur_open_on_rnd_user_rec(
 /*==========================*/
 	buf_block_t*	block,	/*!< in: page */
 	page_cur_t*	cursor);/*!< out: page cursor */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***********************************************************//**
 Parses a log record of a record insert on a page.
 @return	end of log record or NULL */

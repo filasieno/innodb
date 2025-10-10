@@ -27,9 +27,9 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ut_mem.hpp"
 #include "ut_byte.hpp"
 #include "ut_rnd.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "sync0sync.h"
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 #include "ut_lst.hpp"
 #include "mach_data.hpp"
 
@@ -66,10 +66,10 @@ buffer pool; the latter method is used for very big heaps */
 // allocations of small buffers. 
 
 #define MEM_BLOCK_START_SIZE		64
-#define MEM_BLOCK_STANDARD_SIZE		(UNIV_PAGE_SIZE >= 16384 ? 8000 : MEM_MAX_ALLOC_IN_BUF)
+#define MEM_BLOCK_STANDARD_SIZE		(IB_PAGE_SIZE >= 16384 ? 8000 : MEM_MAX_ALLOC_IN_BUF)
 
 // If a memory heap is allowed to grow into the buffer pool, the following is the maximum size for a single allocated buffer:
-#define MEM_MAX_ALLOC_IN_BUF		(UNIV_PAGE_SIZE - 200)
+#define MEM_MAX_ALLOC_IN_BUF		(IB_PAGE_SIZE - 200)
 
 /// \brief Initializes the memory system.
 /// \param [in] size common pool size in bytes
@@ -285,7 +285,7 @@ mem_heap_printf(
 	const char*	format,	/*!< in: format string */
 	...) __attribute__ ((format (printf, 2, 3)));
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /******************************************************************//**
 Goes through the list of all allocated mem blocks, checks their magic
 numbers, and reports possible corruption. */
@@ -321,7 +321,7 @@ struct mem_block_info_struct {
 			user data in the block */
 	ulint	start;	/*!< the value of the struct field 'free' at the
 			creation of the block */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	void*	free_block;
 			/* if the MEM_HEAP_BTR_SEARCH bit is set in type,
 			and this is the heap root, this can contain an
@@ -332,8 +332,8 @@ struct mem_block_info_struct {
 			/* if this block has been allocated from the buffer
 			pool, this contains the buf_block_t handle;
 			otherwise, this is NULL */
-#endif /* !UNIV_HOTBACKUP */
-#ifdef UNIV_DEBUG
+#endif /* !IB_HOTBACKUP */
+#ifdef IB_DEBUG
 	UT_LIST_NODE_T(mem_block_t) mem_block_list;
 			/* List of all mem blocks allocated; protected
 			by the mem_comm_pool mutex */
@@ -347,7 +347,7 @@ struct mem_block_info_struct {
 #define MEM_FREED_BLOCK_MAGIC_N	547711122
 
 /// \brief Header size for a memory heap block
-#define MEM_BLOCK_HEADER_SIZE	ut_calc_align(sizeof(mem_block_info_t), UNIV_MEM_ALIGNMENT)
+#define MEM_BLOCK_HEADER_SIZE	ut_calc_align(sizeof(mem_block_info_t), IB_MEM_ALIGNMENT)
 
 #include "mem_dbg.hpp"
 

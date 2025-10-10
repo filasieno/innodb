@@ -25,7 +25,7 @@
 #include "ut0mem.inl"
 #endif
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "os_thread.h"
 #include "srv_srv.h"
 #include "srv_start.h"
@@ -95,28 +95,28 @@ void ut_mem_init(void)
 		ut_mem_block_list_inited = TRUE;
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /// \brief Allocates memory.
-/// \details Sets it also to zero if UNIV_SET_MEM_TO_ZERO is defined and set_to_zero is TRUE.
+/// \details Sets it also to zero if IB_SET_MEM_TO_ZERO is defined and set_to_zero is TRUE.
 /// \param n Number of bytes to allocate.
-/// \param set_to_zero TRUE if allocated memory should be set to zero if UNIV_SET_MEM_TO_ZERO is defined.
+/// \param set_to_zero TRUE if allocated memory should be set to zero if IB_SET_MEM_TO_ZERO is defined.
 /// \param assert_on_error If TRUE, we crash the server if the memory cannot be allocated.
 /// \return Allocated memory.
 IB_INTERN
 void *ut_malloc_low(ulint n, ibool set_to_zero, ibool assert_on_error)
 {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint retry_count;
 	void *ret;
 
-	if (UNIV_LIKELY(srv_use_sys_malloc)) {
+	if (IB_LIKELY(srv_use_sys_malloc)) {
 		ret = malloc(n);
 		ut_a(ret || !assert_on_error);
-#ifdef UNIV_SET_MEM_TO_ZERO
+#ifdef IB_SET_MEM_TO_ZERO
 		if (set_to_zero) {
 			memset(ret, '\0', n);
-			UNIV_MEM_ALLOC(ret, n);
+			IB_MEM_ALLOC(ret, n);
 		}
 #endif
 		return (ret);
@@ -197,12 +197,12 @@ retry:
 	}
 
 	if (set_to_zero) {
-#ifdef UNIV_SET_MEM_TO_ZERO
+#ifdef IB_SET_MEM_TO_ZERO
 		memset(ret, '\0', n + sizeof(ut_mem_block_t));
 #endif
 	}
 
-	UNIV_MEM_ALLOC(ret, n + sizeof(ut_mem_block_t));
+	IB_MEM_ALLOC(ret, n + sizeof(ut_mem_block_t));
 	((ut_mem_block_t *)ret)->size = n + sizeof(ut_mem_block_t);
 	((ut_mem_block_t *)ret)->magic_n = UT_MEM_MAGIC_N;
 	ut_total_allocated_memory += n + sizeof(ut_mem_block_t);
@@ -211,33 +211,33 @@ retry:
 	os_fast_mutex_unlock(&ut_list_mutex);
 
 	return ((void *)((byte *)ret + sizeof(ut_mem_block_t)));
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 	void *ret = malloc(n);
 	ut_a(ret || !assert_on_error);
-#ifdef UNIV_SET_MEM_TO_ZERO
+#ifdef IB_SET_MEM_TO_ZERO
 	if (set_to_zero) {
 		memset(ret, '\0', n);
 	}
 #endif
 	return (ret);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 }
 
 /// \brief Allocates memory.
-/// \details Sets it also to zero if UNIV_SET_MEM_TO_ZERO is defined.
+/// \details Sets it also to zero if IB_SET_MEM_TO_ZERO is defined.
 /// \param n Number of bytes to allocate.
 /// \return Allocated memory.
 IB_INTERN
 void *ut_malloc(ulint n)
 {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	return (ut_malloc_low(n, TRUE, TRUE));
-#else  /* !UNIV_HOTBACKUP */
+#else  /* !IB_HOTBACKUP */
 	return (malloc(n));
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Tests if malloc of n bytes would succeed.
 /// \details ut_malloc() asserts if memory runs out. It cannot be used if we want to return an error message. Prints to ib_stream a message if fails.
 /// \param n Try to allocate this many bytes.
@@ -273,19 +273,19 @@ ibool ut_test_malloc(ulint n)
 	free(ret);
 	return (TRUE);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /// \brief Frees a memory block allocated with ut_malloc.
 /// \param ptr Memory block to free.
 IB_INTERN
 void ut_free(void *ptr)
 {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ut_mem_block_t *block;
 
 	if (!ptr) {
 		return;
-	} else if (UNIV_LIKELY(srv_use_sys_malloc)) {
+	} else if (IB_LIKELY(srv_use_sys_malloc)) {
 		free(ptr);
 		return;
 	}
@@ -300,12 +300,12 @@ void ut_free(void *ptr)
 	UT_LIST_REMOVE(mem_block_list, ut_mem_block_list, block);
 	free(block);
 	os_fast_mutex_unlock(&ut_list_mutex);
-#else  /* !UNIV_HOTBACKUP */
+#else  /* !IB_HOTBACKUP */
 	free(ptr);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Implements realloc.
 /// \details This is needed by /pars/lexyy.c. Otherwise, you should not use this function because the allocation functions in mem0mem.h are the recommended ones in InnoDB.
 /// \param ptr Pointer to old block or NULL.
@@ -319,7 +319,7 @@ void *ut_realloc(void *ptr, ulint size)
 	ulint min_size;
 	void *new_ptr;
 
-	if (UNIV_LIKELY(srv_use_sys_malloc)) {
+	if (IB_LIKELY(srv_use_sys_malloc)) {
 		return (realloc(ptr, size));
 	}
 
@@ -459,7 +459,7 @@ char *ut_memcpyq(char *dest, char q, const char *src, ulint len)
 	return (dest);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Return the number of times s2 occurs in s1.
 /// \details Overlapping instances of s2 are only counted once.
 /// \param s1 String to search in.
@@ -535,7 +535,7 @@ char *ut_strreplace(const char *str, const char *s1, const char *s2)
 	return (new_str);
 }
 
-#ifdef UNIV_COMPILE_TEST_FUNCS
+#ifdef IB_COMPILE_TEST_FUNCS
 
 void test_ut_str_sql_format()
 {
@@ -601,5 +601,5 @@ void test_ut_str_sql_format()
 	CALL_AND_TEST("a'b'c'", 6, buf, 32, 12, "'a''b''c'''");
 }
 
-#endif /* UNIV_COMPILE_TEST_FUNCS */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* IB_COMPILE_TEST_FUNCS */
+#endif /* !IB_HOTBACKUP */

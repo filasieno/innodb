@@ -40,7 +40,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #define srv0srv_h
 
 #include "univ.i"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "sync_sync.hpp"
 #include "os_sync.hpp"
 #include "que_types.hpp"
@@ -56,7 +56,7 @@ extern os_event_t	srv_lock_timeout_thread_event;
 /* If the last data file is auto-extended, we add this many pages to it
 at a time */
 #define SRV_AUTO_EXTEND_INCREMENT	\
-	(srv_auto_extend_increment * ((1024 * 1024) / UNIV_PAGE_SIZE))
+	(srv_auto_extend_increment * ((1024 * 1024) / IB_PAGE_SIZE))
 
 /* FIXME: This is set to TRUE if the user has requested it. */
 extern ibool	srv_lower_case_table_names;
@@ -71,9 +71,9 @@ extern ibool	ses_rollback_on_timeout;
 extern char*	srv_data_home;
 extern char*	srv_log_group_home_dir;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 extern char*	srv_arch_dir;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 /** store to its own file each table created by an user; data
 dictionary tables are in the system tablespace 0 */
@@ -84,7 +84,7 @@ extern ulint	srv_file_format;
 DICT_TF_FORMAT_MAX + 1 means no checking ie. FALSE.  The default is to
 set it to the highest format we support. */
 extern ulint	srv_check_file_format_at_startup;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 extern ulint	srv_n_data_files;
 extern ulint*	srv_data_file_sizes;
@@ -92,7 +92,7 @@ extern ulint*	srv_data_file_is_raw_partition;
 
 extern ibool	srv_auto_extend_last_data_file;
 extern ulint	srv_last_file_size_max;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 extern ulong	srv_auto_extend_increment;
 
 extern ibool	srv_created_new_raw;
@@ -125,11 +125,11 @@ capacity. PCT_IO(5) -> returns the number of IO operations that
 is 5% of the max where max is srv_io_capacity.  */
 #define PCT_IO(p) ((ulong) (srv_io_capacity * ((double) p / 100.0)))
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 extern ibool	srv_log_archive_on;
 extern ibool	srv_archive_recovery;
 extern ib_uint64_t	srv_archive_recovery_limit_lsn;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 extern ulint	srv_unix_file_flush_method;
 extern ulint	srv_win_file_flush_method;
@@ -180,19 +180,19 @@ extern ibool	srv_error_monitor_active;
 extern ulong	srv_n_spin_wait_rounds;
 extern ulong	srv_spin_wait_delay;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 extern	ibool	srv_print_thread_releases;
 extern	ibool	srv_print_lock_waits;
 extern	ibool	srv_print_buf_io;
 extern	ibool	srv_print_log_io;
 extern	ibool	srv_print_latch_waits;
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define srv_print_thread_releases	FALSE
 # define srv_print_lock_waits		FALSE
 # define srv_print_buf_io		FALSE
 # define srv_print_log_io		FALSE
 # define srv_print_latch_waits		FALSE
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 extern ulint	srv_activity_count;
 extern ulint	srv_fatal_semaphore_wait_threshold;
@@ -258,7 +258,7 @@ typedef struct export_var_struct export_struc;
 /** Status variables to be passed to MySQL */
 extern export_struc export_vars;
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** Types of raw partitions in innodb_data_file_path */
 enum {
@@ -322,7 +322,7 @@ typedef enum ib_recovery_enum {
 					in connection with recovery */
 } ib_recovery_t;
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** Types of threads existing in the system. */
 enum srv_thread_type {
 	SRV_COM = 1,	/**< threads serving communication and queries */
@@ -528,9 +528,9 @@ struct export_var_struct{
 	ulint innodb_buffer_pool_pages_dirty;	/*!< Dirty data pages */
 	ulint innodb_buffer_pool_pages_misc;	/*!< Miscellanous pages */
 	ulint innodb_buffer_pool_pages_free;	/*!< Free pages */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint innodb_buffer_pool_pages_latched;	/*!< Latched pages */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	ulint innodb_buffer_pool_read_requests;	/*!< buf_pool->stat.n_page_gets */
 	ulint innodb_buffer_pool_reads;		/*!< srv_buf_pool_reads */
 	ulint innodb_buffer_pool_wait_free;	/*!< srv_buf_pool_wait_free */
@@ -540,7 +540,7 @@ struct export_var_struct{
 	ulint innodb_buffer_pool_read_ahead_evicted;/*!< srv_read_ahead evicted*/
 	ulint innodb_dblwr_pages_written;	/*!< srv_dblwr_pages_written */
 	ulint innodb_dblwr_writes;		/*!< srv_dblwr_writes */
-	ibool innodb_have_atomic_builtins;	/*!< HAVE_ATOMIC_BUILTINS */
+	ibool innodb_IB_HAVE_atomic_builtins;	/*!< IB_HAVE_ATOMIC_BUILTINS */
 	ulint innodb_log_waits;			/*!< srv_log_waits */
 	ulint innodb_log_write_requests;	/*!< srv_log_write_requests */
 	ulint innodb_log_writes;		/*!< srv_log_writes */
@@ -548,7 +548,7 @@ struct export_var_struct{
 	ulint innodb_os_log_fsyncs;		/*!< fil_n_log_flushes */
 	ulint innodb_os_log_pending_writes;	/*!< srv_os_log_pending_writes */
 	ulint innodb_os_log_pending_fsyncs;	/*!< fil_n_pending_log_flushes */
-	ulint innodb_page_size;			/*!< UNIV_PAGE_SIZE */
+	ulint innodb_page_size;			/*!< IB_PAGE_SIZE */
 	ulint innodb_pages_created;		/*!< buf_pool->stat.n_pages_created */
 	ulint innodb_pages_read;		/*!< buf_pool->stat.n_pages_read */
 	ulint innodb_pages_written;		/*!< buf_pool->stat.n_pages_written */
@@ -568,7 +568,7 @@ struct export_var_struct{
 };
 
 extern ulint	srv_n_threads_active[];
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define srv_use_checksums			TRUE
 # define srv_use_adaptive_hash_indexes		FALSE
 # define srv_force_recovery			0UL
@@ -577,7 +577,7 @@ extern ulint	srv_n_threads_active[];
 # define srv_unix_file_flush_method		SRV_UNIX_O_DSYNC
 # define srv_start_raw_disk_in_use		0
 # define srv_file_per_table			1
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 extern void* ib_panic_data;
 typedef void (*ib_panic_function_t)(void*, int, char*, ...);

@@ -266,7 +266,7 @@ set(CMAKE_EXTRA_INCLUDE_FILES)
 # Header File Detection
 # --------------------
 # Check for availability of standard and system headers
-check_include_files("stdint.h"            HAVE_STDINT_H)
+check_include_files("stdint.h"            IB_HAVE_STDINT_H)
 
 # System Capability Validation
 # ---------------------------

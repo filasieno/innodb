@@ -33,7 +33,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "page_types.hpp"
 #include "trx_xa.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************************//**
 Builds a roll pointer.
 @return	roll pointer */
@@ -65,7 +65,7 @@ ibool
 trx_undo_roll_ptr_is_insert(
 /*========================*/
 	roll_ptr_t	roll_ptr);	/*!< in: roll pointer */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*****************************************************************//**
 Writes a roll ptr to an index page. In case that the size changes in
 some future version, this function should be used instead of
@@ -87,7 +87,7 @@ roll_ptr_t
 trx_read_roll_ptr(
 /*==============*/
 	const byte*	ptr);	/*!< in: pointer to memory from where to read */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /******************************************************************//**
 Gets an undo log page and x-latches it.
 @return	pointer to page x-latched */
@@ -299,7 +299,7 @@ void
 trx_undo_insert_cleanup(
 /*====================*/
 	trx_t*	trx);	/*!< in: transaction handle */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***********************************************************//**
 Parses the redo log entry of an undo log page initialization.
 @return	end of log record or NULL */
@@ -359,7 +359,7 @@ trx_undo_mem_free(
 #define	TRX_UNDO_PREPARED	5	/* contains an undo log of an
 					prepared transaction */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** Transaction undo log memory object; this is protected by the undo_mutex
 in the corresponding transaction object */
 
@@ -420,7 +420,7 @@ struct trx_undo_struct{
 					/*!< undo log objects in the rollback
 					segment are chained into lists */
 };
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** The offset of the undo log page header on pages of the undo log */
 #define	TRX_UNDO_PAGE_HDR	FSEG_PAGE_DATA
@@ -449,7 +449,7 @@ struct trx_undo_struct{
 at most this many bytes used; we must leave space at least for one new undo
 log header on the page */
 
-#define TRX_UNDO_PAGE_REUSE_LIMIT	(3 * UNIV_PAGE_SIZE / 4)
+#define TRX_UNDO_PAGE_REUSE_LIMIT	(3 * IB_PAGE_SIZE / 4)
 
 /* An update undo log segment may contain several undo logs on its first page
 if the undo logs took so little space that the segment could be cached and

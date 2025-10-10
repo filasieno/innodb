@@ -31,7 +31,7 @@ Created 11/5/1995 Heikki Tuuri
 *******************************************************/
 
 #include "mtr_mtr.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "buf_flu.hpp"
 #include "buf_lru.hpp"
 #include "buf_rea.hpp"
@@ -72,7 +72,7 @@ buf_page_peek_if_too_old(
 /*=====================*/
 	const buf_page_t*	bpage)	/*!< in: block to make younger */
 {
-	if (UNIV_UNLIKELY(buf_pool->freed_page_clock == 0)) {
+	if (IB_UNLIKELY(buf_pool->freed_page_clock == 0)) {
 		/* If eviction has not started yet, do not update the
 		statistics or move blocks in the LRU list.  This is
 		either the warm-up phase or an in-memory workload. */
@@ -106,7 +106,7 @@ ulint
 buf_pool_get_curr_size(void)
 /*========================*/
 {
-	return(buf_pool->curr_size * UNIV_PAGE_SIZE);
+	return(buf_pool->curr_size * IB_PAGE_SIZE);
 }
 
 /********************************************************************//**
@@ -139,7 +139,7 @@ buf_pool_get_oldest_modification(void)
 
 	return(lsn);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Gets the state of a block.
@@ -152,7 +152,7 @@ buf_page_get_state(
 {
 	enum buf_page_state	state = (enum buf_page_state) bpage->state;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	switch (state) {
 #ifdef WITH_ZIP
 	case BUF_BLOCK_ZIP_FREE:
@@ -168,7 +168,7 @@ buf_page_get_state(
 	default:
 		ut_error;
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	return(state);
 }
@@ -192,7 +192,7 @@ buf_page_set_state(
 	buf_page_t*		bpage,	/*!< in/out: pointer to control block */
 	enum buf_page_state	state)	/*!< in: state */
 {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	enum buf_page_state	old_state	= buf_page_get_state(bpage);
 
 	switch (old_state) {
@@ -226,7 +226,7 @@ buf_page_set_state(
 		ut_a(state == BUF_BLOCK_MEMORY);
 		break;
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	bpage->state = state;
 	ut_ad(buf_page_get_state(bpage) == state);
 }
@@ -274,7 +274,7 @@ buf_page_in_file(
 	return(FALSE);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #ifdef WITH_ZIP
 /*********************************************************************//**
 Determines if a block should be on unzip_LRU list.
@@ -328,7 +328,7 @@ buf_page_get_flush_type(
 {
 	enum buf_flush	flush_type = (enum buf_flush) bpage->flush_type;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	switch (flush_type) {
 	case BUF_FLUSH_LRU:
 	case BUF_FLUSH_SINGLE_PAGE:
@@ -338,7 +338,7 @@ buf_page_get_flush_type(
 		break;
 	}
 	ut_error;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	return(flush_type);
 }
 /*********************************************************************//**
@@ -379,7 +379,7 @@ buf_page_get_io_fix(
 	const buf_page_t*	bpage)	/*!< in: pointer to the control block */
 {
 	enum buf_io_fix	io_fix = (enum buf_io_fix) bpage->io_fix;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	switch (io_fix) {
 	case BUF_IO_NONE:
 	case BUF_IO_READ:
@@ -387,7 +387,7 @@ buf_page_get_io_fix(
 		return(io_fix);
 	}
 	ut_error;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	return(io_fix);
 }
 
@@ -477,7 +477,7 @@ buf_page_set_old(
 	ut_ad(buf_pool_mutex_own());
 	ut_ad(bpage->in_LRU_list);
 
-#ifdef UNIV_LRU_DEBUG
+#ifdef IB_LRU_DEBUG
 	ut_a((buf_pool->LRU_old_len == 0) == (buf_pool->LRU_old == NULL));
 	/* If a block is flagged "old", the LRU_old list must exist. */
 	ut_a(!old || buf_pool->LRU_old);
@@ -492,7 +492,7 @@ buf_page_set_old(
 			ut_a(buf_pool->LRU_old == (old ? bpage : next));
 		}
 	}
-#endif /* UNIV_LRU_DEBUG */
+#endif /* IB_LRU_DEBUG */
 
 	bpage->old = old;
 }
@@ -539,7 +539,7 @@ buf_page_get_block(
 /*===============*/
 	buf_page_t*	bpage)	/*!< in: control block, or NULL */
 {
-	if (UNIV_LIKELY(bpage != NULL)) {
+	if (IB_LIKELY(bpage != NULL)) {
 		ut_ad(buf_page_in_file(bpage));
 
 		if (buf_page_get_state(bpage) == BUF_BLOCK_FILE_PAGE) {
@@ -549,9 +549,9 @@ buf_page_get_block(
 
 	return(NULL);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Gets a pointer to the memory frame of a block.
 @return	pointer to the frame */
@@ -573,9 +573,9 @@ buf_block_get_frame(
 		ut_error;
 		break;
 	case BUF_BLOCK_FILE_PAGE:
-# ifndef UNIV_HOTBACKUP
+# ifndef IB_HOTBACKUP
 		ut_a(block->page.buf_fix_count > 0);
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 		/* fall through */
 	case BUF_BLOCK_READY_FOR_USE:
 	case BUF_BLOCK_MEMORY:
@@ -586,7 +586,7 @@ buf_block_get_frame(
 ok:
 	return((buf_frame_t*) block->frame);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*********************************************************************//**
 Gets the space id of a block.
@@ -680,9 +680,9 @@ buf_block_get_zip_size(
 #endif /* WITH_ZIP */
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #ifdef WITH_ZIP
-#if defined UNIV_DEBUG || defined UNIV_ZIP_DEBUG
+#if defined IB_DEBUG || defined IB_ZIP_DEBUG
 /*********************************************************************//**
 Gets the compressed page descriptor corresponding to an uncompressed page
 if applicable.
@@ -695,9 +695,9 @@ buf_frame_get_page_zip(
 {
 	return(buf_block_get_page_zip(buf_block_align(ptr)));
 }
-#endif /* UNIV_DEBUG || UNIV_ZIP_DEBUG */
+#endif /* IB_DEBUG || IB_ZIP_DEBUG */
 #endif /* WITH_ZIP */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Gets the space id, page offset, and byte offset within page of a
@@ -711,14 +711,14 @@ buf_ptr_get_fsp_addr(
 	fil_addr_t*	addr)	/*!< out: page offset and byte offset */
 {
 	const page_t*	page = (const page_t*) ut_align_down(ptr,
-							     UNIV_PAGE_SIZE);
+							     IB_PAGE_SIZE);
 
 	*space = mach_read_from_4(page + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID);
 	addr->page = mach_read_from_4(page + FIL_PAGE_OFFSET);
-	addr->boffset = ut_align_offset(ptr, UNIV_PAGE_SIZE);
+	addr->boffset = ut_align_offset(ptr, IB_PAGE_SIZE);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Gets the hash value of the page the pointer is pointing to. This can be used
 in searches in the lock hash table.
@@ -731,10 +731,10 @@ buf_block_get_lock_hash_val(
 {
 	ut_ad(block);
 	ut_ad(buf_page_in_file(&block->page));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(((buf_block_t*) block)->lock), RW_LOCK_EXCLUSIVE)
 	      || rw_lock_own(&(((buf_block_t*) block)->lock), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	return(block->lock_hash_val);
 }
 
@@ -777,7 +777,7 @@ buf_block_free(
 
 	buf_pool_mutex_exit();
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************//**
 Copies contents of a buffer frame to a given buffer.
@@ -791,12 +791,12 @@ buf_frame_copy(
 {
 	ut_ad(buf && frame);
 
-	ut_memcpy(buf, frame, UNIV_PAGE_SIZE);
+	ut_memcpy(buf, frame, IB_PAGE_SIZE);
 
 	return(buf);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Calculates a folded value of a file page address to use in the page hash
 table.
@@ -848,11 +848,11 @@ buf_block_modify_clock_inc(
 /*=======================*/
 	buf_block_t*	block)	/*!< in: block */
 {
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad((buf_pool_mutex_own()
 	       && (block->page.buf_fix_count == 0))
 	      || rw_lock_own(&(block->lock), RW_LOCK_EXCLUSIVE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	block->modify_clock++;
 }
@@ -867,10 +867,10 @@ buf_block_get_modify_clock(
 /*=======================*/
 	buf_block_t*	block)	/*!< in: block */
 {
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(block->lock), RW_LOCK_SHARED)
 	      || rw_lock_own(&(block->lock), RW_LOCK_EXCLUSIVE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	return(block->modify_clock);
 }
@@ -881,35 +881,35 @@ IB_INLINE
 void
 buf_block_buf_fix_inc_func(
 /*=======================*/
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	buf_block_t*	block)	/*!< in/out: block to bufferfix */
 {
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ibool	ret;
 
 	ret = rw_lock_s_lock_nowait(&(block->debug_latch), file, line);
 	ut_a(ret);
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ut_ad(mutex_own(&block->mutex));
 
 	block->page.buf_fix_count++;
 }
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /** Increments the bufferfix count.
 @param b	in/out: block to bufferfix
 @param f	in: file name where requested
 @param l	in: line number where requested */
 # define buf_block_buf_fix_inc(b,f,l) buf_block_buf_fix_inc_func(f,l,b)
-#else /* UNIV_SYNC_DEBUG */
+#else /* IB_SYNC_DEBUG */
 /** Increments the bufferfix count.
 @param b	in/out: block to bufferfix
 @param f	in: file name where requested
 @param l	in: line number where requested */
 # define buf_block_buf_fix_inc(b,f,l) buf_block_buf_fix_inc_func(b)
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 /*******************************************************************//**
 Decrements the bufferfix count. */
@@ -922,7 +922,7 @@ buf_block_buf_fix_dec(
 	ut_ad(mutex_own(&block->mutex));
 
 	block->page.buf_fix_count--;
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_s_unlock(&block->debug_latch);
 #endif
 }
@@ -963,7 +963,7 @@ buf_page_hash_get(
 #ifdef WITH_ZIP
 		ut_ad(!bpage->in_zip_hash);
 #endif /* WITH_ZIP */
-		UNIV_MEM_ASSERT_RW(bpage, sizeof *bpage);
+		IB_MEM_ASSERT_RW(bpage, sizeof *bpage);
 	}
 
 	return(bpage);
@@ -1034,7 +1034,7 @@ buf_page_release_zip(
 	case BUF_BLOCK_FILE_PAGE:
 		block = (buf_block_t*) bpage;
 		mutex_enter(&block->mutex);
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 		rw_lock_s_unlock(&block->debug_latch);
 #endif
 		bpage->buf_fix_count--;
@@ -1079,7 +1079,7 @@ buf_page_release(
 
 	mutex_enter(&block->mutex);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	rw_lock_s_unlock(&(block->debug_latch));
 #endif
 	block->page.buf_fix_count--;
@@ -1093,7 +1093,7 @@ buf_page_release(
 	}
 }
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /*********************************************************************//**
 Adds latch level info for the rw-lock protecting the buffer frame. This
 should be called in the debug version after a successful latching of a
@@ -1108,5 +1108,5 @@ buf_block_dbg_add_level(
 {
 	sync_thread_add_level(&block->lock, level);
 }
-#endif /* UNIV_SYNC_DEBUG */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* IB_SYNC_DEBUG */
+#endif /* !IB_HOTBACKUP */

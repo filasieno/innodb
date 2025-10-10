@@ -24,12 +24,12 @@ Created 12/27/1996 Heikki Tuuri
 *******************************************************/
 
 #include "mtr_log.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "trx0trx.h"
 # include "trx0undo.h"
 # include "row0row.h"
 # include "btr0sea.h"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 #ifdef WITH_ZIP
 #include "page_zip.hpp"
 #endif /* WITH_ZIP */
@@ -71,7 +71,7 @@ upd_get_n_fields(
 	return(update->n_fields);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Returns the nth field of an update vector.
 @return	update vector field */
@@ -87,9 +87,9 @@ upd_get_nth_field(
 
 	return((upd_field_t*) update->fields + n);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Sets an index field number to be updated by an update vector field. */
 IB_INLINE
@@ -105,7 +105,7 @@ upd_field_set_field_no(
 	upd_field->field_no = field_no;
 	upd_field->orig_len = 0;
 
-	if (UNIV_UNLIKELY(field_no >= dict_index_get_n_fields(dict_index))) {
+	if (IB_UNLIKELY(field_no >= dict_index_get_n_fields(dict_index))) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: trying to access field %lu in ",
 			(ulong) field_no);
@@ -161,14 +161,14 @@ row_upd_rec_sys_fields(
 	ut_ad(dict_index_is_clust(dict_index));
 	ut_ad(rec_offs_validate(rec, dict_index, offsets));
 #endif /* WITH_ZIP */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	if (!rw_lock_own(&btr_search_latch, RW_LOCK_EX)) {
 		ut_ad(!buf_block_align(rec)->is_hashed);
 	}
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		ulint	pos = dict_index_get_sys_col_pos(dict_index, DATA_TRX_ID);
 		page_zip_write_trx_id_and_roll_ptr(page_zip, rec, offsets,
 						   pos, trx->id, roll_ptr);
@@ -189,4 +189,4 @@ row_upd_rec_sys_fields(
 	}
 #endif /* WITH_ZIP */
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

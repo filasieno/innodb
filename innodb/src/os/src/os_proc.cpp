@@ -26,7 +26,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef __WIN__
 #include <errno.h>
 #include <sys/types.h>
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #endif
@@ -80,7 +80,7 @@ void* os_mem_alloc_large(ulint* n)
 {
 	void*	ptr;
 	ulint	size;
-#if defined HAVE_LARGE_PAGES && defined UNIV_LINUX
+#if defined IB_HAVE_LARGE_PAGES && defined IB_LINUX
 	int shmid;
 	struct shmid_ds buf;
 
@@ -120,17 +120,17 @@ void* os_mem_alloc_large(ulint* n)
 		os_fast_mutex_lock(&ut_list_mutex);
 		ut_total_allocated_memory += size;
 		os_fast_mutex_unlock(&ut_list_mutex);
-# ifdef UNIV_SET_MEM_TO_ZERO
+# ifdef IB_SET_MEM_TO_ZERO
 		memset(ptr, '\0', size);
 # endif
-		UNIV_MEM_ALLOC(ptr, size);
+		IB_MEM_ALLOC(ptr, size);
 		return(ptr);
 	}
 
 	ib_logger(ib_stream, "InnoDB HugeTLB: Warning: Using conventional"
 		" memory pool\n");
 skip:
-#endif /* HAVE_LARGE_PAGES && UNIV_LINUX */
+#endif /* IB_HAVE_LARGE_PAGES && IB_LINUX */
 
 #ifdef __WIN__
 	SYSTEM_INFO	system_info;
@@ -152,23 +152,23 @@ skip:
 		os_fast_mutex_lock(&ut_list_mutex);
 		ut_total_allocated_memory += size;
 		os_fast_mutex_unlock(&ut_list_mutex);
-		UNIV_MEM_ALLOC(ptr, size);
+		IB_MEM_ALLOC(ptr, size);
 	}
 #elif defined __NETWARE__ || !defined OS_MAP_ANON
 	size = *n;
 	ptr = ut_malloc_low(size, TRUE, FALSE);
 #else
-# ifdef HAVE_GETPAGESIZE
+# ifdef IB_HAVE_GETPAGESIZE
 	size = getpagesize();
 # else
-	size = UNIV_PAGE_SIZE;
+	size = IB_PAGE_SIZE;
 # endif
 	/* Align block size to system page size */
 	ut_ad(ut_is_2pow(size));
 	size = *n = ut_2pow_round(*n + (size - 1), size);
 	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE,
 		   MAP_PRIVATE | OS_MAP_ANON, -1, 0);
-	if (UNIV_UNLIKELY(ptr == (void*) -1)) {
+	if (IB_UNLIKELY(ptr == (void*) -1)) {
 		ib_logger(ib_stream, "InnoDB: mmap(%lu bytes) failed;"
 			" errno %lu\n",
 			(ulong) size, (ulong) errno);
@@ -177,7 +177,7 @@ skip:
 		os_fast_mutex_lock(&ut_list_mutex);
 		ut_total_allocated_memory += size;
 		os_fast_mutex_unlock(&ut_list_mutex);
-		UNIV_MEM_ALLOC(ptr, size);
+		IB_MEM_ALLOC(ptr, size);
 	}
 #endif
 	return(ptr);
@@ -193,16 +193,16 @@ void os_mem_free_large(void *ptr, ulint size)
 	ut_a(ut_total_allocated_memory >= size);
 	os_fast_mutex_unlock(&ut_list_mutex);
 
-#if defined HAVE_LARGE_PAGES && defined UNIV_LINUX
+#if defined IB_HAVE_LARGE_PAGES && defined IB_LINUX
 	if (os_use_large_pages && os_large_page_size && !shmdt(ptr)) {
 		os_fast_mutex_lock(&ut_list_mutex);
 		ut_a(ut_total_allocated_memory >= size);
 		ut_total_allocated_memory -= size;
 		os_fast_mutex_unlock(&ut_list_mutex);
-		UNIV_MEM_FREE(ptr, size);
+		IB_MEM_FREE(ptr, size);
 		return;
 	}
-#endif /* HAVE_LARGE_PAGES && UNIV_LINUX */
+#endif /* IB_HAVE_LARGE_PAGES && IB_LINUX */
 #ifdef __WIN__
 	/* When RELEASE memory, the size parameter must be 0.
 	Do not use MEM_RELEASE with MEM_DECOMMIT. */
@@ -215,7 +215,7 @@ void os_mem_free_large(void *ptr, ulint size)
 		ut_a(ut_total_allocated_memory >= size);
 		ut_total_allocated_memory -= size;
 		os_fast_mutex_unlock(&ut_list_mutex);
-		UNIV_MEM_FREE(ptr, size);
+		IB_MEM_FREE(ptr, size);
 	}
 #elif defined __NETWARE__ || !defined OS_MAP_ANON
 	ut_free(ptr);
@@ -229,7 +229,7 @@ void os_mem_free_large(void *ptr, ulint size)
 		ut_a(ut_total_allocated_memory >= size);
 		ut_total_allocated_memory -= size;
 		os_fast_mutex_unlock(&ut_list_mutex);
-		UNIV_MEM_FREE(ptr, size);
+		IB_MEM_FREE(ptr, size);
 	}
 #endif
 }

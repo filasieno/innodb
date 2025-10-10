@@ -76,9 +76,9 @@ row_vers_impl_x_locked_off_kernel(
 	ulint		comp;
 
 	ut_ad(mutex_own(&kernel_mutex));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(!rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	mutex_exit(&kernel_mutex);
 
@@ -312,9 +312,9 @@ row_vers_must_preserve_del_marked(
 				clustered index record; it will also
 				hold the latch on purge_view */
 {
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(!rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	mtr_s_lock(&(purge_sys->latch), mtr);
 
@@ -363,9 +363,9 @@ row_vers_old_has_index_entry(
 
 	ut_ad(mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_X_FIX)
 	      || mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_S_FIX));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(!rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	mtr_s_lock(&(purge_sys->latch), mtr);
 
 	clust_index = dict_table_get_first_index(index->table);
@@ -512,9 +512,9 @@ row_vers_build_for_consistent_read(
 	ut_ad(dict_index_is_clust(index));
 	ut_ad(mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_X_FIX)
 	      || mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_S_FIX));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(!rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	ut_ad(rec_offs_validate(rec, index, *offsets));
 
@@ -642,9 +642,9 @@ row_vers_build_for_semi_consistent_read(
 	ut_ad(dict_index_is_clust(index));
 	ut_ad(mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_X_FIX)
 	      || mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_S_FIX));
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(!rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	ut_ad(rec_offs_validate(rec, index, *offsets));
 
@@ -720,7 +720,7 @@ row_vers_build_for_semi_consistent_read(
 			mem_heap_free(heap2); /* free version */
 		}
 
-		if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
+		if (IB_UNLIKELY(err != DB_SUCCESS)) {
 			break;
 		}
 

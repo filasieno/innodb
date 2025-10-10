@@ -67,7 +67,7 @@ create_table(
 	ib_err_t	err = DB_SUCCESS;
 	ib_tbl_sch_t	ib_tbl_sch = NULL;
 	ib_idx_sch_t	ib_idx_sch = NULL;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -146,7 +146,7 @@ open_table(
 	ib_crsr_t*	crsr)		/*!< out: innodb cursor */
 {
 	ib_err_t	err = DB_SUCCESS;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);

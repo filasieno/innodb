@@ -1161,7 +1161,7 @@ opt_search_plan(
 
 	opt_check_order_by(sel_node);
 
-#ifdef UNIV_SQL_DEBUG
+#ifdef IB_SQL_DEBUG
 	opt_print_query_plan(sel_node);
 #endif
 }

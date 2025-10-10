@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBHASHKIT],[
     [ac_enable_libhashkit="yes"])
 
   AS_IF([test "x$ac_enable_libhashkit" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(hashkit,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(hashkit,,[
       #include <libhashkit/hashkit.h>
     ],[
       hashkit_st foo;
@@ -28,15 +28,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBHASHKIT],[
     ac_cv_libhashkit="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBHASHKIT, [test "x${ac_cv_libhashkit}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBHASHKIT, [test "x${ac_cv_libhashkit}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBHASHKIT],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBHASHKIT],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBHASHKIT])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBHASHKIT],[
-  AC_REQUIRE([PANDORA_HAVE_LIBHASHKIT])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBHASHKIT])
   AS_IF([test x$ac_cv_libhashkit = xno],
       AC_MSG_ERROR([libhashkit is required for ${PACKAGE}]))
 ])

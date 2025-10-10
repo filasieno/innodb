@@ -124,7 +124,7 @@ buf_read_page_low(
 		return(0);
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (buf_debug_prints) {
 		ib_logger(ib_stream,
 			"Posting read request for page %lu, sync %lu\n",
@@ -144,7 +144,7 @@ buf_read_page_low(
 		ut_a(buf_page_get_state(bpage) == BUF_BLOCK_FILE_PAGE);
 
 		*err = fil_io(OS_FILE_READ | wake_later,
-			      sync, space, 0, offset, 0, UNIV_PAGE_SIZE,
+			      sync, space, 0, offset, 0, IB_PAGE_SIZE,
 			      ((buf_block_t*) bpage)->frame, bpage);
 	}
 	ut_a(*err == DB_SUCCESS);
@@ -255,7 +255,7 @@ buf_read_ahead_linear(
 		= BUF_READ_AHEAD_LINEAR_AREA;
 	ulint		threshold;
 
-	if (UNIV_UNLIKELY(srv_startup_is_before_trx_rollback_phase)) {
+	if (IB_UNLIKELY(srv_startup_is_before_trx_rollback_phase)) {
 		/* No read-ahead to avoid thread deadlocks */
 		return(0);
 	}
@@ -469,13 +469,13 @@ buf_read_ahead_linear(
 	/* Flush pages from the end of the LRU list if necessary */
 	buf_flush_free_margin();
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (buf_debug_prints && (count > 0)) {
 		ib_logger(ib_stream,
 			"LINEAR read-ahead space %lu offset %lu pages %lu\n",
 			(ulong) space, (ulong) offset, (ulong) count);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 	/* Read ahead is considered one I/O operation for the purpose of
 	LRU policy decision. */
@@ -516,8 +516,8 @@ buf_read_ibuf_merge_pages(
 	ulint	i;
 
 	ut_ad(!ibuf_inside());
-#ifdef UNIV_IBUF_DEBUG
-	ut_a(n_stored < UNIV_PAGE_SIZE);
+#ifdef IB_IBUF_DEBUG
+	ut_a(n_stored < IB_PAGE_SIZE);
 #endif
 	while (buf_pool->n_pend_reads
 	       > buf_pool->curr_size / BUF_READ_AHEAD_PEND_LIMIT) {
@@ -528,7 +528,7 @@ buf_read_ibuf_merge_pages(
 		ulint	zip_size = fil_space_get_zip_size(space_ids[i]);
 		ulint	err;
 
-		if (UNIV_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
+		if (IB_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
 
 			goto tablespace_deleted;
 		}
@@ -538,7 +538,7 @@ buf_read_ibuf_merge_pages(
 				  zip_size, TRUE, space_versions[i],
 				  page_nos[i]);
 
-		if (UNIV_UNLIKELY(err == DB_TABLESPACE_DELETED)) {
+		if (IB_UNLIKELY(err == DB_TABLESPACE_DELETED)) {
 tablespace_deleted:
 			/* We have deleted or are deleting the single-table
 			tablespace: remove the entries for that page */
@@ -554,13 +554,13 @@ tablespace_deleted:
 	/* Flush pages from the end of the LRU list if necessary */
 	buf_flush_free_margin();
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (buf_debug_prints) {
 		ib_logger(ib_stream,
 			"Ibuf merge read-ahead space %lu pages %lu\n",
 			(ulong) space_ids[0], (ulong) n_stored);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 }
 
 /********************************************************************//**
@@ -591,7 +591,7 @@ buf_read_recv_pages(
 
 	zip_size = fil_space_get_zip_size(space);
 
-	if (UNIV_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
+	if (IB_UNLIKELY(zip_size == ULINT_UNDEFINED)) {
 		/* It is a single table tablespace and the .ibd file is
 		missing: do nothing */
 
@@ -647,11 +647,11 @@ buf_read_recv_pages(
 	/* Flush pages from the end of the LRU list if necessary */
 	buf_flush_free_margin();
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (buf_debug_prints) {
 		ib_logger(ib_stream,
 			"Recovery applies read-ahead pages %lu\n",
 			(ulong) n_stored);
 	}
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 }

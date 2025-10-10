@@ -1664,7 +1664,7 @@ trx_print(
 		ib_logger(ib_stream, " state %lu", (ulong) trx->conc_state);
 	}
 
-#ifdef UNIV_LINUX
+#ifdef IB_LINUX
 	ib_logger(ib_stream, ", process no %lu", trx->client_process_no);
 #endif
 	ib_logger(ib_stream, ", OS thread id %lu",

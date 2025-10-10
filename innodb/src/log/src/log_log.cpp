@@ -28,7 +28,7 @@
 #include "log_log.inl"
 #endif
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "buf_buf.hpp"
 #include "buf_flu.hpp"
 #include "dict_boot.hpp"
@@ -69,30 +69,30 @@ IB_INTERN ulint log_fsp_current_free_limit = 0;
 // Global log system variable
 IB_INTERN log_t *log_sys = NULL;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 IB_INTERN ibool log_do_write = TRUE;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 // These control how often we print warnings if the last checkpoint is too old
 IB_INTERN ibool log_has_printed_chkp_warning = FALSE;
 IB_INTERN time_t log_last_warning_time;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 // Pointer to this variable is used as the i/o-message when we do i/o to an archive
 IB_INTERN byte log_archive_io;
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 // A margin for free space in the log buffer before a log entry is catenated
 #define LOG_BUF_WRITE_MARGIN (4 * OS_FILE_LOG_BLOCK_SIZE)
 
 // Margins for free space in the log buffer after a log entry is catenated
 #define LOG_BUF_FLUSH_RATIO 2
-#define LOG_BUF_FLUSH_MARGIN (LOG_BUF_WRITE_MARGIN + 4 * UNIV_PAGE_SIZE)
+#define LOG_BUF_FLUSH_MARGIN (LOG_BUF_WRITE_MARGIN + 4 * IB_PAGE_SIZE)
 
 // Margin for the free space in the smallest log group, before a new query
 // step which modifies the database, is started
-#define LOG_CHECKPOINT_FREE_PER_THREAD (4 * UNIV_PAGE_SIZE)
-#define LOG_CHECKPOINT_EXTRA_FREE (8 * UNIV_PAGE_SIZE)
+#define LOG_CHECKPOINT_FREE_PER_THREAD (4 * IB_PAGE_SIZE)
+#define LOG_CHECKPOINT_EXTRA_FREE (8 * IB_PAGE_SIZE)
 
 // This parameter controls asynchronous making of a new checkpoint; the value
 // should be bigger than LOG_POOL_PREFLUSH_RATIO_SYNC
@@ -105,7 +105,7 @@ IB_INTERN byte log_archive_io;
 #define LOG_POOL_PREFLUSH_RATIO_ASYNC 8
 
 // Extra margin, in addition to one log file, used in archiving
-#define LOG_ARCHIVE_EXTRA_MARGIN (4 * UNIV_PAGE_SIZE)
+#define LOG_ARCHIVE_EXTRA_MARGIN (4 * IB_PAGE_SIZE)
 
 // This parameter controls asynchronous writing to the archive
 #define LOG_ARCHIVE_RATIO_ASYNC 16
@@ -122,12 +122,12 @@ IB_INTERN byte log_archive_io;
  * @brief Completes a checkpoint write i/o to a log file.
  */
 static void log_io_complete_checkpoint(void);
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /**
  * @brief Completes an archiving i/o.
  */
 static void log_io_complete_archive(void);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 /**
  * @brief Reset the variables.
@@ -137,17 +137,17 @@ IB_INTERN void log_var_init(void)
 	log_fsp_current_free_limit = 0;
 	log_sys = NULL;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	log_do_write = TRUE;
 	log_debug_writes = FALSE;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	log_has_printed_chkp_warning = FALSE;
 	log_last_warning_time = 0;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	log_archive_io = 0;
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 }
 
 /**
@@ -202,13 +202,13 @@ ib_uint64_t log_reserve_and_open(ulint len) /**< in: length of data to be catena
 {
 	log_t *log = log_sys;
 	ulint len_upper_limit;
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint archived_lsn_age;
 	ulint dummy;
-#endif	  // UNIV_LOG_ARCHIVE
-#ifdef UNIV_DEBUG
+#endif	  // IB_LOG_ARCHIVE
+#ifdef IB_DEBUG
 	ulint count = 0;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	ut_a(len < log->buf_size / 2);
 loop:
@@ -236,7 +236,7 @@ loop:
 		goto loop;
 	}
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if (log->archiving_state != LOG_ARCH_OFF) {
 
 		archived_lsn_age = log->lsn - log->archived_lsn;
@@ -255,9 +255,9 @@ loop:
 			goto loop;
 		}
 	}
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	log->old_buf_free = log->buf_free;
 	log->old_lsn = log->lsn;
 #endif
@@ -409,14 +409,14 @@ ib_uint64_t log_close(
 	}
 function_exit:
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	log_check_log_recs(recovery, log->buf + log->old_buf_free, log->buf_free - log->old_buf_free, log->old_lsn);
 #endif
 
 	return (lsn);
 }
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /******************************************************/ /**
 Pads the current log block full with dummy log records. Used in producing
 consistent archived log files. */
@@ -446,7 +446,7 @@ static void log_pad_current_log_block(
 
 	ut_a(lsn % OS_FILE_LOG_BLOCK_SIZE == LOG_BLOCK_HDR_SIZE);
 }
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 /******************************************************/ /**
 Calculates the data capacity of a log group, when the log file headers are not
@@ -546,11 +546,11 @@ static ulint log_group_calc_lsn_offset(
 
 	return (log_group_calc_real_offset((ulint)offset, group));
 }
-#endif	  // !UNIV_HOTBACKUP
+#endif	  // !IB_HOTBACKUP
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 IB_INTERN ibool log_debug_writes = FALSE;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 /*******************************************************************/ /**
 Calculates where in log files we find a specified lsn.
@@ -589,7 +589,7 @@ ulint log_calc_where_lsn_is(
 	return (file_no);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************/ /**
 Sets the field values in group to correspond to a given lsn. For this function
 to work, the values must already be correctly initialized to correspond to
@@ -676,11 +676,11 @@ static ibool log_calc_max_ages(void)
 	log_sys->max_checkpoint_age_async = margin - margin / LOG_POOL_CHECKPOINT_RATIO_ASYNC;
 	log_sys->max_checkpoint_age = margin;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	log_sys->max_archived_lsn_age = smallest_archive_margin;
 
 	log_sys->max_archived_lsn_age_async = smallest_archive_margin - smallest_archive_margin / LOG_ARCHIVE_RATIO_ASYNC;
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 failure:
 	log_release();
 
@@ -725,7 +725,7 @@ void innobase_log_init(void)
 	log_sys->lsn = LOG_START_LSN;
 
 	ut_a(LOG_BUFFER_SIZE >= 16 * OS_FILE_LOG_BLOCK_SIZE);
-	ut_a(LOG_BUFFER_SIZE >= 4 * UNIV_PAGE_SIZE);
+	ut_a(LOG_BUFFER_SIZE >= 4 * IB_PAGE_SIZE);
 
 	log_sys->buf_ptr = mem_alloc(LOG_BUFFER_SIZE + OS_FILE_LOG_BLOCK_SIZE);
 	log_sys->buf = ut_align(log_sys->buf_ptr, OS_FILE_LOG_BLOCK_SIZE);
@@ -779,7 +779,7 @@ void innobase_log_init(void)
 	memset(log_sys->checkpoint_buf, '\0', OS_FILE_LOG_BLOCK_SIZE);
 	// ----------------------------
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	// By default log archiving is always off
 	log_sys->archiving_state = LOG_ARCH_OFF;
 	log_sys->archived_lsn = log_sys->lsn;
@@ -800,7 +800,7 @@ void innobase_log_init(void)
 	// memset(log_sys->archive_buf, '\0', LOG_ARCHIVE_BUF_SIZE);
 
 	log_sys->archiving_on = os_event_create(NULL);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	// ----------------------------
 
@@ -812,7 +812,7 @@ void innobase_log_init(void)
 
 	log_release();
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	recv_sys_create();
 	recv_sys_init(buf_pool_get_curr_size());
 
@@ -860,11 +860,11 @@ void log_group_init(
 
 	group->file_header_bufs_ptr = mem_alloc(sizeof(byte *) * n_files);
 	group->file_header_bufs = mem_alloc(sizeof(byte *) * n_files);
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	group->archive_file_header_bufs_ptr = mem_alloc(sizeof(byte *) * n_files);
 
 	group->archive_file_header_bufs = mem_alloc(sizeof(byte *) * n_files);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	for (i = 0; i < n_files; i++) {
 		group->file_header_bufs_ptr[i] = mem_alloc(LOG_FILE_HDR_SIZE + OS_FILE_LOG_BLOCK_SIZE);
@@ -873,21 +873,21 @@ void log_group_init(
 
 		memset(*(group->file_header_bufs + i), '\0', LOG_FILE_HDR_SIZE);
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		group->archive_file_header_bufs_ptr[i] = mem_alloc(LOG_FILE_HDR_SIZE + OS_FILE_LOG_BLOCK_SIZE);
 
 		group->archive_file_header_bufs[i] = ut_align(group->archive_file_header_bufs_ptr[i], OS_FILE_LOG_BLOCK_SIZE);
 
 		memset(*(group->archive_file_header_bufs + i), '\0', LOG_FILE_HDR_SIZE);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 	}
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	group->archive_space_id = archive_space_id;
 
 	group->archived_file_no = 0;
 	group->archived_offset = 0;
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	group->checkpoint_buf_ptr = mem_alloc(2 * OS_FILE_LOG_BLOCK_SIZE);
 
@@ -944,23 +944,23 @@ ulint log_group_check_flush_completion(
 	ut_ad(mutex_own(&(log_sys->mutex)));
 
 	if (!log_sys->one_flushed && group->n_pending_writes == 0) {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (log_debug_writes) {
 			ib_logger(ib_stream, "Log flushed first to group %lu\n", (ulong)group->id);
 		}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 		log_sys->written_to_some_lsn = log_sys->write_lsn;
 		log_sys->one_flushed = TRUE;
 
 		return (LOG_UNLOCK_NONE_FLUSHED_LOCK);
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes && (group->n_pending_writes == 0)) {
 
 		ib_logger(ib_stream, "Log flushed to group %lu\n", (ulong)group->id);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	return (0);
 }
 
@@ -1009,7 +1009,7 @@ void log_io_complete(
 {
 	ulint unlock;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if ((byte *)group == &log_archive_io) {
 		// It was an archive write
 
@@ -1017,7 +1017,7 @@ void log_io_complete(
 
 		return;
 	}
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	if ((ulint)group & 0x1UL) {
 		// It was a checkpoint write
@@ -1028,11 +1028,11 @@ void log_io_complete(
 			fil_flush(group->space_id);
 		}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (log_debug_writes) {
 			ib_logger(ib_stream, "Checkpoint info written to group %lu\n", group->id);
 		}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 		log_io_complete_checkpoint();
 
 		return;
@@ -1091,11 +1091,11 @@ static void log_group_file_header_flush(
 
 	dest_offset = nth_file * group->file_size;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 		ib_logger(ib_stream, "Writing log file header to group %lu file %lu\n", (ulong)group->id, (ulong)nth_file);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	if (log_do_write) {
 		log_sys->n_log_ios++;
 
@@ -1106,8 +1106,8 @@ static void log_group_file_header_flush(
 			TRUE,
 			group->space_id,
 			0,	  // FIXME: ARCHIVE: Zip size ?
-			dest_offset / UNIV_PAGE_SIZE,
-			dest_offset % UNIV_PAGE_SIZE,
+			dest_offset / IB_PAGE_SIZE,
+			dest_offset % IB_PAGE_SIZE,
 			OS_FILE_LOG_BLOCK_SIZE,
 			buf,
 			group
@@ -1185,7 +1185,7 @@ loop:
 		write_len = len;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 
 		ib_logger(
@@ -1208,7 +1208,7 @@ loop:
 			ut_a(log_block_get_hdr_no(buf) + i == log_block_get_hdr_no(buf + i * OS_FILE_LOG_BLOCK_SIZE));
 		}
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	/* Calculate the checksums for each log block and write them to
 	the trailer fields of the log blocks */
 
@@ -1221,7 +1221,7 @@ loop:
 
 		srv_os_log_pending_writes++;
 
-		fil_io(OS_FILE_WRITE | OS_FILE_LOG, TRUE, group->space_id, 0, next_offset / UNIV_PAGE_SIZE, next_offset % UNIV_PAGE_SIZE, write_len, buf, group);
+		fil_io(OS_FILE_WRITE | OS_FILE_LOG, TRUE, group->space_id, 0, next_offset / IB_PAGE_SIZE, next_offset % IB_PAGE_SIZE, write_len, buf, group);
 
 		srv_os_log_pending_writes--;
 
@@ -1263,9 +1263,9 @@ void log_write_up_to(
 	ulint end_offset;
 	ulint area_start;
 	ulint area_end;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint loop_count = 0;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	ulint unlock;
 
 	if (recv_no_ibuf_operations) {
@@ -1276,7 +1276,7 @@ void log_write_up_to(
 	}
 
 loop:
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	loop_count++;
 
 	ut_ad(loop_count < 5);
@@ -1340,11 +1340,11 @@ loop:
 		return;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 		ib_logger(ib_stream, "Writing log from %llu up to lsn %llu\n", log_sys->written_to_all_lsn, log_sys->lsn);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	log_sys->n_pending_writes++;
 
 	group = UT_LIST_GET_FIRST(log_sys->log_groups);
@@ -1439,12 +1439,12 @@ do_waits:
 		case LOG_WAIT_ALL_GROUPS:
 			os_event_wait(log_sys->no_flush_event);
 			break;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		case LOG_NO_WAIT:
 			break;
 		default:
 			ut_error;
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	}
 }
 
@@ -1635,10 +1635,10 @@ static void log_group_checkpoint(
 )	 // !< in: log group
 {
 	log_group_t *group2;
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ib_uint64_t archived_lsn;
 	ib_uint64_t next_archived_lsn;
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 	ulint write_offset;
 	ulint fold;
 	byte *buf;
@@ -1658,7 +1658,7 @@ static void log_group_checkpoint(
 
 	mach_write_to_4(buf + LOG_CHECKPOINT_LOG_BUF_SIZE, log_sys->buf_size);
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if (log_sys->archiving_state == LOG_ARCH_OFF) {
 		archived_lsn = IB_UINT64_T_MAX;
 	} else {
@@ -1671,9 +1671,9 @@ static void log_group_checkpoint(
 	}
 
 	mach_write_ull(buf + LOG_CHECKPOINT_ARCHIVED_LSN, archived_lsn);
-#else	  // UNIV_LOG_ARCHIVE
+#else	  // IB_LOG_ARCHIVE
 	mach_write_ull(buf + LOG_CHECKPOINT_ARCHIVED_LSN, IB_UINT64_T_MAX);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	for (i = 0; i < LOG_MAX_N_GROUPS; i++) {
 		log_checkpoint_set_nth_group_info(buf, i, 0, 0);
@@ -1685,13 +1685,13 @@ static void log_group_checkpoint(
 		log_checkpoint_set_nth_group_info(
 			buf,
 			group2->id,
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 			group2->archived_file_no,
 			group2->archived_offset
-#else	  // UNIV_LOG_ARCHIVE
+#else	  // IB_LOG_ARCHIVE
 			0,
 			0
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 		);
 
 		group2 = UT_LIST_GET_NEXT(log_groups, group2);
@@ -1733,14 +1733,14 @@ static void log_group_checkpoint(
 		added with 1, as we want to distinguish between a normal log
 		file write and a checkpoint field write */
 
-		fil_io(OS_FILE_WRITE | OS_FILE_LOG, FALSE, group->space_id, 0, write_offset / UNIV_PAGE_SIZE, write_offset % UNIV_PAGE_SIZE, OS_FILE_LOG_BLOCK_SIZE, buf, ((byte *)group + 1));
+		fil_io(OS_FILE_WRITE | OS_FILE_LOG, FALSE, group->space_id, 0, write_offset / IB_PAGE_SIZE, write_offset % IB_PAGE_SIZE, OS_FILE_LOG_BLOCK_SIZE, buf, ((byte *)group + 1));
 
 		ut_ad(((ulint)group & 0x1UL) == 0);
 	}
 }
-#endif	  // !UNIV_HOTBACKUP
+#endif	  // !IB_HOTBACKUP
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /******************************************************/ /**
 Writes info to a buffer of a log group when log files are created in
 backup restoration. */
@@ -1787,9 +1787,9 @@ void log_reset_first_header_and_checkpoint(
 	allocated size in the tablespace, but unfortunately we do not
 	know it here */
 }
-#endif	  // UNIV_HOTBACKUP
+#endif	  // IB_HOTBACKUP
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /******************************************************/ /**
 Reads a checkpoint info from a log group header to log_sys->checkpoint_buf. */
 IB_INTERN
@@ -1803,7 +1803,7 @@ void log_group_read_checkpoint_info(
 
 	log_sys->n_log_ios++;
 
-	fil_io(OS_FILE_READ | OS_FILE_LOG, TRUE, group->space_id, 0, field / UNIV_PAGE_SIZE, field % UNIV_PAGE_SIZE, OS_FILE_LOG_BLOCK_SIZE, log_sys->checkpoint_buf, NULL);
+	fil_io(OS_FILE_READ | OS_FILE_LOG, TRUE, group->space_id, 0, field / IB_PAGE_SIZE, field % IB_PAGE_SIZE, OS_FILE_LOG_BLOCK_SIZE, log_sys->checkpoint_buf, NULL);
 }
 
 /******************************************************/ /**
@@ -1898,11 +1898,11 @@ ibool log_checkpoint(
 
 	log_sys->next_checkpoint_lsn = oldest_lsn;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 		ib_logger(ib_stream, "Making checkpoint no %lu at lsn %llu\n", (ulong)log_sys->next_checkpoint_no, oldest_lsn);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	log_groups_write_checkpoint_info();
 
@@ -2076,16 +2076,16 @@ loop:
 		len = group->file_size - (source_offset % group->file_size);
 	}
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	if (type == LOG_ARCHIVE) {
 
 		log_sys->n_pending_archive_ios++;
 	}
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	log_sys->n_log_ios++;
 
-	fil_io(OS_FILE_READ | OS_FILE_LOG, sync, group->space_id, 0, source_offset / UNIV_PAGE_SIZE, source_offset % UNIV_PAGE_SIZE, len, buf, NULL);
+	fil_io(OS_FILE_READ | OS_FILE_LOG, sync, group->space_id, 0, source_offset / IB_PAGE_SIZE, source_offset % IB_PAGE_SIZE, len, buf, NULL);
 
 	start_lsn += len;
 	buf += len;
@@ -2096,7 +2096,7 @@ loop:
 	}
 }
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /******************************************************/ /**
 Generates an archived log file name. */
 IB_INTERN
@@ -2148,8 +2148,8 @@ static void log_group_archive_file_header_write(
 		TRUE,
 		group->archive_space_id,
 		0,	  // FIXME: ARCHIVE Zip size
-		dest_offset / UNIV_PAGE_SIZE,
-		dest_offset % UNIV_PAGE_SIZE,
+		dest_offset / IB_PAGE_SIZE,
+		dest_offset % IB_PAGE_SIZE,
 		2 * OS_FILE_LOG_BLOCK_SIZE,
 		buf,
 		&log_archive_io
@@ -2186,8 +2186,8 @@ static void log_group_archive_completed_header_write(
 		TRUE,
 		group->archive_space_id,
 		0,	  // FIXME: ARCHIVE Zip size
-		dest_offset / UNIV_PAGE_SIZE,
-		dest_offset % UNIV_PAGE_SIZE,
+		dest_offset / IB_PAGE_SIZE,
+		dest_offset % IB_PAGE_SIZE,
 		OS_FILE_LOG_BLOCK_SIZE,
 		buf + LOG_FILE_ARCH_COMPLETED,
 		&log_archive_io
@@ -2261,11 +2261,11 @@ loop:
 			);
 		}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (log_debug_writes) {
 			ib_logger(ib_stream, "Created archive file %s\n", name);
 		}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 		ret = os_file_close(file_handle);
 
@@ -2273,7 +2273,7 @@ loop:
 
 		// Add the archive file as a node to the space
 
-		fil_node_create(name, group->file_size / UNIV_PAGE_SIZE, group->archive_space_id, FALSE);
+		fil_node_create(name, group->file_size / IB_PAGE_SIZE, group->archive_space_id, FALSE);
 
 		if (next_offset % group->file_size == 0) {
 			log_group_archive_file_header_write(group, n_files, group->archived_file_no + n_files, start_lsn);
@@ -2289,7 +2289,7 @@ loop:
 		len = group->file_size - (next_offset % group->file_size);
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 		ib_logger(
 			ib_stream,
@@ -2300,7 +2300,7 @@ loop:
 			(ulong)group->id
 		);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	log_sys->n_pending_archive_ios++;
 
@@ -2311,8 +2311,8 @@ loop:
 		FALSE,
 		group->archive_space_id,
 		0,	  // FIXME: ARCHIVE: Zip size
-		next_offset / UNIV_PAGE_SIZE,
-		next_offset % UNIV_PAGE_SIZE,
+		next_offset / IB_PAGE_SIZE,
+		next_offset % IB_PAGE_SIZE,
 		ut_calc_align(len, OS_FILE_LOG_BLOCK_SIZE),
 		buf,
 		&log_archive_io
@@ -2376,7 +2376,7 @@ static void log_archive_write_complete_groups(void)
 	/* Truncate from the archive file space all but the last
 	file, or if it has been written full, all files */
 
-	n_files = (UNIV_PAGE_SIZE * fil_space_get_size(group->archive_space_id)) / group->file_size;
+	n_files = (IB_PAGE_SIZE * fil_space_get_size(group->archive_space_id)) / group->file_size;
 	ut_ad(n_files > 0);
 
 	end_offset = group->archived_offset;
@@ -2388,11 +2388,11 @@ static void log_archive_write_complete_groups(void)
 		trunc_files = n_files - 1;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes && trunc_files) {
 		ib_logger(ib_stream, "Complete file(s) archived to group %lu\n", (ulong)group->id);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	// Calculate the archive file space start lsn
 	start_lsn = log_sys->next_archived_lsn - (end_offset - LOG_FILE_HDR_SIZE + trunc_files * (group->file_size - LOG_FILE_HDR_SIZE));
@@ -2410,11 +2410,11 @@ static void log_archive_write_complete_groups(void)
 
 	fil_space_truncate_start(group->archive_space_id, trunc_files * group->file_size);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 		ib_logger("Archiving writes completed\n", ib_stream);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 }
 
 /******************************************************/ /**
@@ -2426,11 +2426,11 @@ static void log_archive_check_completion_low(void)
 
 	if (log_sys->n_pending_archive_ios == 0 && log_sys->archiving_phase == LOG_ARCHIVE_READ) {
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (log_debug_writes) {
 			ib_logger("Archiving read completed\n", ib_stream);
 		}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 		// Archive buffer has now been read in: start archive writes
 
@@ -2562,11 +2562,11 @@ loop:
 
 	log_sys->next_archived_lsn = limit_lsn;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	if (log_debug_writes) {
 		ib_logger(ib_stream, "Archiving from lsn %llu to lsn %llu\n", log_sys->archived_lsn, limit_lsn);
 	}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 
 	// Read the log segment to the archive buffer
 
@@ -2647,7 +2647,7 @@ static void log_archive_close_groups(
 
 	group = UT_LIST_GET_FIRST(log_sys->log_groups);
 
-	trunc_len = UNIV_PAGE_SIZE * fil_space_get_size(group->archive_space_id);
+	trunc_len = IB_PAGE_SIZE * fil_space_get_size(group->archive_space_id);
 	if (trunc_len > 0) {
 		ut_a(trunc_len == group->file_size);
 
@@ -2662,7 +2662,7 @@ static void log_archive_close_groups(
 			group->archived_file_no += 2;
 		}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		if (log_debug_writes) {
 			ib_logger(
 				ib_stream,
@@ -2672,7 +2672,7 @@ static void log_archive_close_groups(
 				(ulong)group->id
 			);
 		}
-#endif	  // UNIV_DEBUG
+#endif	  // IB_DEBUG
 	}
 }
 
@@ -2872,7 +2872,7 @@ loop:
 		goto loop;
 	}
 }
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 /********************************************************************/ /**
 Checks that there is enough free space in the log to start a new query step.
@@ -2888,9 +2888,9 @@ loop:
 
 	log_checkpoint_margin();
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	log_archive_margin();
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	log_acquire();
 	ut_ad(!recv_no_log_write);
@@ -2995,9 +2995,9 @@ loop:
 	log_acquire();
 
 	if (log_sys->n_pending_checkpoint_writes
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		|| log_sys->n_pending_archive_ios
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 		|| log_sys->n_pending_writes) {
 
 		log_release();
@@ -3012,9 +3012,9 @@ loop:
 		goto loop;
 	}
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	log_archive_all(recovery);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	log_make_checkpoint_at(IB_UINT64_T_MAX, TRUE);
 
@@ -3023,9 +3023,9 @@ loop:
 	lsn = log_sys->lsn;
 
 	if (lsn != log_sys->last_checkpoint_lsn
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		|| (srv_log_archive_on && lsn != log_sys->archived_lsn + LOG_BLOCK_HDR_SIZE)
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 	) {
 
 		log_release();
@@ -3035,7 +3035,7 @@ loop:
 
 	arch_log_no = 0;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	// FIXME: ARCHIVE: Statement has no effect
 	//UT_LIST_GET_FIRST(log_sys->log_groups)->archived_file_no;
 
@@ -3045,7 +3045,7 @@ loop:
 	}
 
 	log_archive_close_groups(TRUE);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	log_release();
 
@@ -3109,7 +3109,7 @@ loop:
 	ut_a(lsn == log_sys->lsn);
 }
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 /******************************************************/ /**
 Checks by parsing that the catenated log segment for a single mtr is
 consistent. */
@@ -3145,7 +3145,7 @@ ibool log_check_log_recs(
 
 	ut_memcpy(scan_buf, start, end - start);
 
-	recv_scan_log_recs(recovery, (buf_pool->curr_size - recv_n_pool_free_frames) * UNIV_PAGE_SIZE, FALSE, scan_buf, end - start, ut_uint64_align_down(buf_start_lsn, OS_FILE_LOG_BLOCK_SIZE), &contiguous_lsn, &scanned_lsn);
+	recv_scan_log_recs(recovery, (buf_pool->curr_size - recv_n_pool_free_frames) * IB_PAGE_SIZE, FALSE, scan_buf, end - start, ut_uint64_align_down(buf_start_lsn, OS_FILE_LOG_BLOCK_SIZE), &contiguous_lsn, &scanned_lsn);
 
 	ut_a(scanned_lsn == buf_start_lsn + len);
 	ut_a(recv_sys->recovered_lsn == scanned_lsn);
@@ -3154,7 +3154,7 @@ ibool log_check_log_recs(
 
 	return (TRUE);
 }
-#endif	  // UNIV_LOG_DEBUG
+#endif	  // IB_LOG_DEBUG
 
 /******************************************************/ /**
 Peeks the current lsn.
@@ -3239,7 +3239,7 @@ static void log_group_close(
 
 	for (i = 0; i < group->n_files; ++i) {
 		mem_free(group->file_header_bufs_ptr[i]);
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 		mem_free(group->archive_file_header_bufs_ptr[i]);
 #endif
 	}
@@ -3247,10 +3247,10 @@ static void log_group_close(
 	mem_free(group->file_header_bufs);
 	mem_free(group->file_header_bufs_ptr);
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	mem_free(group->archive_file_header_bufs);
 	mem_free(group->archive_file_header_bufs_ptr);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
 	mem_free(group->checkpoint_buf_ptr);
 
@@ -3291,13 +3291,13 @@ void log_shutdown(void)
 
 	rw_lock_free(&log_sys->checkpoint_lock);
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	rw_lock_free(&log_sys->archive_lock);
 	// FIXME: ARCHIVE, changed to NULL
 	os_event_create(NULL);
-#endif	  // UNIV_LOG_ARCHIVE
+#endif	  // IB_LOG_ARCHIVE
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	recv_sys_debug_free();
 #endif
 
@@ -3317,4 +3317,4 @@ void log_mem_free(void)
 		log_sys = NULL;
 	}
 }
-#endif	  // !UNIV_HOTBACKUP
+#endif	  // !IB_HOTBACKUP

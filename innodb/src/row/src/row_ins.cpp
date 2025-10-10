@@ -524,7 +524,7 @@ row_ins_cascade_calc_update_vec(
 
 				min_size = dict_col_get_min_size(col);
 
-				/* Because UNIV_SQL_NULL (the marker
+				/* Because IB_SQL_NULL (the marker
 				of SQL NULL values) exceeds all possible
 				values of min_size, the test below will
 				not hold for SQL NULL columns. */
@@ -545,12 +545,12 @@ row_ins_cascade_calc_update_vec(
 					       dfield_get_len(&ufield
 							      ->new_val));
 
-					switch (UNIV_EXPECT(col->mbminlen,1)) {
+					switch (IB_EXPECT(col->mbminlen,1)) {
 					default:
 						ut_error;
 						return(ULINT_UNDEFINED);
 					case 1:
-						if (UNIV_UNLIKELY
+						if (IB_UNLIKELY
 						    (dtype_get_charset_coll(
 							    col->prtype)
 						     == DATA_CLIENT_BINARY_CHARSET_COLL)) {
@@ -1237,9 +1237,9 @@ row_ins_check_foreign_constraint(
 	rec_offs_init(offsets_);
 
 run_again:
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&dict_operation_lock, RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	err = DB_SUCCESS;
 
@@ -1254,7 +1254,7 @@ run_again:
 	for example */
 
 	for (i = 0; i < foreign->n_fields; i++) {
-		if (UNIV_SQL_NULL == dfield_get_len(
+		if (IB_SQL_NULL == dfield_get_len(
 			    dtuple_get_nth_field(entry, i))) {
 
 			goto exit_func;
@@ -1514,7 +1514,7 @@ do_possible_lock_wait:
 	}
 
 exit_func:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(err);
@@ -1644,7 +1644,7 @@ row_ins_dupl_error_with_rec(
 	if (!dict_index_is_clust(index)) {
 
 		for (i = 0; i < n_unique; i++) {
-			if (UNIV_SQL_NULL == dfield_get_len(
+			if (IB_SQL_NULL == dfield_get_len(
 				    dtuple_get_nth_field(entry, i))) {
 
 				return(FALSE);
@@ -1688,7 +1688,7 @@ row_ins_scan_sec_index_for_duplicate(
 	since we define NULL != NULL in this case */
 
 	for (i = 0; i < n_unique; i++) {
-		if (UNIV_SQL_NULL == dfield_get_len(
+		if (IB_SQL_NULL == dfield_get_len(
 			    dtuple_get_nth_field(entry, i))) {
 
 			return(DB_SUCCESS);
@@ -1768,7 +1768,7 @@ row_ins_scan_sec_index_for_duplicate(
 		ut_a(cmp == 0);
 	} while (btr_pcur_move_to_next(&pcur, &mtr));
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	mtr_commit(&mtr);
@@ -1914,7 +1914,7 @@ row_ins_duplicate_error_in_clust(
 
 	err = DB_SUCCESS;
 func_exit:
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(err);
@@ -2021,7 +2021,7 @@ row_ins_index_entry_low(
 		goto function_exit;
 	}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	{
 		page_t*	page = btr_cur_get_page(&cursor);
 		rec_t*	first_rec = page_rec_get_next(
@@ -2118,7 +2118,7 @@ row_ins_index_entry_low(
 function_exit:
 	mtr_commit(&mtr);
 
-	if (UNIV_LIKELY_NULL(big_rec)) {
+	if (IB_LIKELY_NULL(big_rec)) {
 		rec_t*	rec;
 		ulint*	offsets;
 		mtr_start(&mtr);
@@ -2143,7 +2143,7 @@ function_exit:
 		mtr_commit(&mtr);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 	return(err);
@@ -2227,7 +2227,7 @@ row_ins_index_entry_set_vals(
 
 		/* Check column prefix indexes */
 		if (ind_field->prefix_len > 0
-		    && dfield_get_len(row_field) != UNIV_SQL_NULL) {
+		    && dfield_get_len(row_field) != IB_SQL_NULL) {
 
 			const	dict_col_t*	col;
 

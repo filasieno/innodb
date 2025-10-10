@@ -50,7 +50,7 @@ mutex_spin_wait(
 	const char*	file_name,	/*!< in: file name where mutex
 					requested */
 	ulint		line);		/*!< in: line where requested */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 /******************************************************************//**
 Sets the debug information for a reserved mutex. */
 IB_INTERN
@@ -60,7 +60,7 @@ mutex_set_debug_info(
 	mutex_t*	mutex,		/*!< in: mutex */
 	const char*	file_name,	/*!< in: file where requested */
 	ulint		line);		/*!< in: line where requested */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 /******************************************************************//**
 Releases the threads waiting in the primary wait array for this mutex. */
 IB_INTERN
@@ -79,7 +79,7 @@ mutex_test_and_set(
 /*===============*/
 	mutex_t*	mutex)	/*!< in: mutex */
 {
-#if defined(HAVE_ATOMIC_BUILTINS)
+#if defined(IB_HAVE_ATOMIC_BUILTINS)
 	return(os_atomic_test_and_set_byte(&mutex->lock_word, 1));
 #else
 	ibool	ret;
@@ -107,7 +107,7 @@ mutex_reset_lock_word(
 /*==================*/
 	mutex_t*	mutex)	/*!< in: mutex */
 {
-#if defined(HAVE_ATOMIC_BUILTINS)
+#if defined(IB_HAVE_ATOMIC_BUILTINS)
 	/* In theory __sync_lock_release should be used to release the lock.
 	Unfortunately, it does not work properly alone. The workaround is
 	that more conservative __sync_lock_test_and_set is used instead. */
@@ -163,7 +163,7 @@ mutex_exit(
 
 	ut_d(mutex->thread_id = (os_thread_id_t) ULINT_UNDEFINED);
 
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	sync_thread_reset_level(mutex);
 #endif
 	mutex_reset_lock_word(mutex);
@@ -185,7 +185,7 @@ mutex_exit(
 		mutex_signal_object(mutex);
 	}
 
-#ifdef UNIV_SYNC_PERF_STAT
+#ifdef IB_SYNC_PERF_STAT
 	mutex_exit_count++;
 #endif
 }
@@ -212,7 +212,7 @@ mutex_enter_func(
 
 	if (!mutex_test_and_set(mutex)) {
 		ut_d(mutex->thread_id = os_thread_get_curr_id());
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 		mutex_set_debug_info(mutex, file_name, line);
 #endif
 		return;	/* Succeeded! */

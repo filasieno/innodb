@@ -32,7 +32,7 @@ IB_INTERN dict_index_t*	dict_ind_redundant;
 /** dummy index for ROW_FORMAT=COMPACT supremum and infimum records */
 IB_INTERN dict_index_t*	dict_ind_compact;
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "buf_buf.hpp"
 #include "data_type.hpp"
 #include "mach_data.hpp"
@@ -183,7 +183,7 @@ Checks if the database name in two table names is the same.
 @return	TRUE if same db name */
 IB_INTERN
 ibool
-dict_tables_have_same_db(
+dict_tables_IB_HAVE_same_db(
 /*=====================*/
 	const char*	name1,	/*!< in: table name in the form
 				dbname '/' tablename */
@@ -220,7 +220,7 @@ Get the database name length in a table name.
 @return	database name length */
 IB_INTERN
 ulint
-dict_get_db_name_len(
+dict_get_db_IB_NAME_LEN(
 /*=================*/
 	const char*	name)	/*!< in: table name in the form
 				dbname '/' tablename */
@@ -334,7 +334,7 @@ dict_table_increment_handle_count(
 		mutex_exit(&dict_sys->mutex);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Returns a column's name.
@@ -364,7 +364,7 @@ dict_table_get_col_name(
 	return(s);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**************************************************************************
 Returns a column's ordinal value.
 @return	column pos. -1 if not found. NOTE: not guaranteed to stay valid
@@ -421,7 +421,7 @@ dict_index_get_on_id_low(
 
 	return(NULL);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /********************************************************************//**
 Looks for column n in an index.
@@ -463,7 +463,7 @@ dict_index_get_nth_col_pos(
 	return(ULINT_UNDEFINED);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Returns TRUE if the index contains a column or a prefix of that column.
 @return	TRUE if contains the column or its prefix */
@@ -646,10 +646,10 @@ dict_init(void)
 
 	dict_sys->table_hash = hash_create(buf_pool_get_curr_size()
 					   / (DICT_POOL_PER_TABLE_HASH
-					      * UNIV_WORD_SIZE));
+					      * IB_WORD_SIZE));
 	dict_sys->table_id_hash = hash_create(buf_pool_get_curr_size()
 					      / (DICT_POOL_PER_TABLE_HASH
-						 * UNIV_WORD_SIZE));
+						 * IB_WORD_SIZE));
 	dict_sys->size = 0;
 
 	UT_LIST_INIT(dict_sys->table_LRU);
@@ -698,7 +698,7 @@ dict_table_get(
 
 	return(table);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Returns a table instance based on table id.
@@ -771,7 +771,7 @@ dict_table_add_system_columns(
 #endif
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Adds a table object to the dictionary cache. */
 IB_INTERN
@@ -824,13 +824,13 @@ dict_table_add_to_cache(
 			    ut_strcmp(table2->name, table->name) == 0);
 		ut_a(table2 == NULL);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		/* Look for the same table pointer with a different name */
 		HASH_SEARCH_ALL(name_hash, dict_sys->table_hash,
 				dict_table_t*, table2, ut_ad(table2->cached),
 				table2 == table);
 		ut_ad(table2 == NULL);
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	}
 
 	/* Look for a table with the same id: error if such exists */
@@ -841,13 +841,13 @@ dict_table_add_to_cache(
 			    ut_dulint_cmp(table2->id, table->id) == 0);
 		ut_a(table2 == NULL);
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		/* Look for the same table pointer with a different id */
 		HASH_SEARCH_ALL(id_hash, dict_sys->table_id_hash,
 				dict_table_t*, table2, ut_ad(table2->cached),
 				table2 == table);
 		ut_ad(table2 == NULL);
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	}
 
 	/* Add table to hash table of tables */
@@ -931,7 +931,7 @@ dict_table_rename_in_cache(
 		HASH_SEARCH(name_hash, dict_sys->table_hash, fold,
 			    dict_table_t*, table2, ut_ad(table2->cached),
 			    (ut_strcmp(table2->name, new_name) == 0));
-		if (UNIV_LIKELY_NULL(table2)) {
+		if (IB_LIKELY_NULL(table2)) {
 			ut_print_timestamp(ib_stream);
 			ib_logger(ib_stream,
 			      "  InnoDB: Error: dictionary cache"
@@ -1071,10 +1071,10 @@ dict_table_rename_in_cache(
 			} else {
 				/* This is a >= 4.0.18 format id where the user
 				gave the id name */
-				db_len = dict_get_db_name_len(table->name) + 1;
+				db_len = dict_get_db_IB_NAME_LEN(table->name) + 1;
 
-				if (dict_get_db_name_len(table->name)
-				    > dict_get_db_name_len(foreign->id)) {
+				if (dict_get_db_IB_NAME_LEN(table->name)
+				    > dict_get_db_IB_NAME_LEN(foreign->id)) {
 
 					foreign->id = mem_heap_alloc(
 						foreign->heap,
@@ -1269,7 +1269,7 @@ dict_index_too_big_for_undo(
 		+ 10 + FIL_PAGE_DATA_END /* trx_undo_left() */
 		+ 2/* pointer to previous undo log record */;
 
-	if (UNIV_UNLIKELY(!clust_index)) {
+	if (IB_UNLIKELY(!clust_index)) {
 		ut_a(dict_index_is_clust(new_index));
 		clust_index = new_index;
 	}
@@ -1340,7 +1340,7 @@ is_ord_part:
 		undo_page_len += 5 + max_size;
 	}
 
-	return(undo_page_len >= UNIV_PAGE_SIZE);
+	return(undo_page_len >= IB_PAGE_SIZE);
 }
 
 /****************************************************************//**
@@ -1367,10 +1367,10 @@ dict_index_too_big_for_tree(
 	comp = dict_table_is_comp(table);
 	zip_size = dict_table_zip_size(table);
 
-	if (zip_size && zip_size < UNIV_PAGE_SIZE) {
+	if (zip_size && zip_size < IB_PAGE_SIZE) {
 		/* On a compressed page, two records must fit in the
 		uncompressed page modification log.  On compressed
-		pages with zip_size == UNIV_PAGE_SIZE, this limit will
+		pages with zip_size == IB_PAGE_SIZE, this limit will
 		never be reached. */
 		ut_ad(comp);
 		/* The maximum allowed record size is the size of
@@ -1471,7 +1471,7 @@ add_field_size:
 		rec_max_size += field_max_size;
 
 		/* Check the size limit on leaf pages. */
-		if (UNIV_UNLIKELY(rec_max_size >= page_rec_max)) {
+		if (IB_UNLIKELY(rec_max_size >= page_rec_max)) {
 
 			return(TRUE);
 		}
@@ -1547,7 +1547,7 @@ too_big:
 		return(DB_TOO_BIG_RECORD);
 	}
 
-	if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+	if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 		n_ord = new_index->n_fields;
 	} else {
 		n_ord = new_index->n_uniq;
@@ -1631,7 +1631,7 @@ undo_size_ok:
 	new_index->page = page_no;
 	rw_lock_create(&new_index->lock, SYNC_INDEX_TREE);
 
-	if (!UNIV_UNLIKELY(new_index->type & DICT_UNIVERSAL)) {
+	if (!IB_UNLIKELY(new_index->type & DICT_UNIVERSAL)) {
 
 		new_index->stat_n_diff_key_vals = mem_heap_alloc(
 			new_index->heap,
@@ -1761,14 +1761,14 @@ dict_index_find_cols(
 			}
 		}
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 		/* It is an error not to find a matching column. */
 		ib_logger(ib_stream, "InnoDB: Error: no matching column for ");
 		ut_print_name(ib_stream, NULL, FALSE, field->name);
 		ib_logger(ib_stream, " in ");
 		dict_index_name_print(ib_stream, NULL, index);
 		ib_logger(ib_stream, "!\n");
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 		return(FALSE);
 
 found:
@@ -1777,7 +1777,7 @@ found:
 
 	return(TRUE);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*******************************************************************//**
 Adds a column to index. */
@@ -1826,7 +1826,7 @@ dict_index_add_col(
 	}
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Copies fields contained in index2 to index1. */
 static
@@ -1865,7 +1865,7 @@ dict_index_copy_types(
 {
 	ulint		i;
 
-	if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+	if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 		dtuple_set_types_binary(tuple, n_fields);
 
 		return;
@@ -1944,7 +1944,7 @@ dict_index_build_internal_clust(
 	/* Copy the fields of index */
 	dict_index_copy(new_index, index, table, 0, index->n_fields);
 
-	if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+	if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 		/* No fixed number of fields determines an entry uniquely */
 
 		new_index->n_uniq = REC_MAX_N_FIELDS;
@@ -2788,7 +2788,7 @@ dict_scan_id(
 		len = ptr - s;
 	}
 
-	if (UNIV_UNLIKELY(!heap)) {
+	if (IB_UNLIKELY(!heap)) {
 		/* no heap given: id will point to source string */
 		*id = s;
 		return(ptr);
@@ -2896,9 +2896,9 @@ dict_scan_table_name(
 				NULL if no name was scannable */
 {
 	const char*	database_name	= NULL;
-	ulint		database_name_len = 0;
+	ulint		database_IB_NAME_LEN = 0;
 	const char*	table_name	= NULL;
-	ulint		table_name_len;
+	ulint		table_IB_NAME_LEN;
 	const char*	scan_name;
 	char*		ref;
 
@@ -2918,7 +2918,7 @@ dict_scan_table_name(
 		ptr++;
 
 		database_name = scan_name;
-		database_name_len = strlen(database_name);
+		database_IB_NAME_LEN = strlen(database_name);
 
 		ptr = dict_scan_id(cs, ptr, heap, &table_name, TRUE, FALSE);
 
@@ -2939,7 +2939,7 @@ dict_scan_table_name(
 		for (s = scan_name; *s; s++) {
 			if (*s == '.') {
 				database_name = scan_name;
-				database_name_len = s - scan_name;
+				database_IB_NAME_LEN = s - scan_name;
 				scan_name = ++s;
 				break;/* to do: multiple dots? */
 			}
@@ -2952,16 +2952,16 @@ dict_scan_table_name(
 		/* Use the database name of the foreign key table */
 
 		database_name = name;
-		database_name_len = dict_get_db_name_len(name);
+		database_IB_NAME_LEN = dict_get_db_IB_NAME_LEN(name);
 	}
 
-	table_name_len = strlen(table_name);
+	table_IB_NAME_LEN = strlen(table_name);
 
 	/* Copy database_name, '/', table_name, '\0' */
-	ref = mem_heap_alloc(heap, database_name_len + table_name_len + 2);
-	memcpy(ref, database_name, database_name_len);
-	ref[database_name_len] = '/';
-	memcpy(ref + database_name_len + 1, table_name, table_name_len + 1);
+	ref = mem_heap_alloc(heap, database_IB_NAME_LEN + table_IB_NAME_LEN + 2);
+	memcpy(ref, database_name, database_IB_NAME_LEN);
+	ref[database_IB_NAME_LEN] = '/';
+	memcpy(ref + database_IB_NAME_LEN + 1, table_name, table_IB_NAME_LEN + 1);
 #ifndef __WIN__
 	if (srv_lower_case_table_names) {
 #endif /* !__WIN__ */
@@ -3444,7 +3444,7 @@ col_loop1:
 		same client 'database' as the table itself. We store the name
 		to foreign->id. */
 
-		db_len = dict_get_db_name_len(table->name);
+		db_len = dict_get_db_IB_NAME_LEN(table->name);
 
 		foreign->id = mem_heap_alloc(
 			foreign->heap, db_len + strlen(constraint_name) + 2);
@@ -3931,7 +3931,7 @@ dict_index_get_if_in_cache_low(
 	return(dict_index_find_on_id_low(index_id));
 }
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 /**********************************************************************//**
 Returns an index object if it is found in the dictionary cache.
 @return	index, NULL if not found */
@@ -3955,9 +3955,9 @@ dict_index_get_if_in_cache(
 
 	return(index);
 }
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************************//**
 Checks that a tuple has n_fields_cmp value in a sensible range, so that
 no comparison can occur with the page number field in a node pointer.
@@ -3974,7 +3974,7 @@ dict_index_check_search_tuple(
 	     <= dict_index_get_n_unique_in_tree(index));
 	return(TRUE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /**********************************************************************//**
 Builds a node pointer out of a physical record and a page number.
@@ -3998,7 +3998,7 @@ dict_index_build_node_ptr(
 	byte*		buf;
 	ulint		n_unique;
 
-	if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+	if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 		/* In a universal index tree, we take the whole record as
 		the node pointer if the record is on the leaf level,
 		on non-leaf levels we remove the last field, which
@@ -4063,9 +4063,9 @@ dict_index_copy_rec_order_prefix(
 {
 	ulint		n;
 
-	UNIV_PREFETCH_R(rec);
+	IB_PREFETCH_R(rec);
 
-	if (UNIV_UNLIKELY(index->type & DICT_UNIVERSAL)) {
+	if (IB_UNLIKELY(index->type & DICT_UNIVERSAL)) {
 		ut_a(!dict_table_is_comp(index->table));
 		n = rec_get_n_fields_old(rec);
 	} else {
@@ -4453,11 +4453,11 @@ dict_index_print_low(
 
 	ib_logger(ib_stream, "\n");
 
-#ifdef UNIV_BTR_PRINT
+#ifdef IB_BTR_PRINT
 	btr_print_size(index);
 
 	btr_print_index(index, 7);
-#endif /* UNIV_BTR_PRINT */
+#endif /* IB_BTR_PRINT */
 }
 
 /**********************************************************************//**
@@ -4495,7 +4495,7 @@ dict_print_info_on_foreign_key_in_create_format(
 	if (strchr(foreign->id, '/')) {
 		/* Strip the preceding database name from the constraint id */
 		stripped_id = foreign->id + 1
-			+ dict_get_db_name_len(foreign->id);
+			+ dict_get_db_IB_NAME_LEN(foreign->id);
 	} else {
 		stripped_id = foreign->id;
 	}
@@ -4525,7 +4525,7 @@ dict_print_info_on_foreign_key_in_create_format(
 
 	ib_logger(ib_stream, ") REFERENCES ");
 
-	if (dict_tables_have_same_db(foreign->foreign_table_name,
+	if (dict_tables_IB_HAVE_same_db(foreign->foreign_table_name,
 				     foreign->referenced_table_name)) {
 		/* Do not print the database name of the referenced table */
 		ut_print_name(ib_stream, trx, TRUE,
@@ -4680,7 +4680,7 @@ dict_index_name_print(
 	ib_logger(ib_stream, " of table ");
 	ut_print_name(ib_stream, trx, TRUE, index->table_name);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Inits dict_ind_redundant and dict_ind_compact. */
@@ -4736,7 +4736,7 @@ dict_ind_free(void)
 	dict_mem_table_free(table);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Get index by name
 @return	index, NULL if does not exist */
@@ -4913,7 +4913,7 @@ dict_close(void)
 			dict_table_t*	prev_table = table;
 
 			table = HASH_GET_NEXT(name_hash, prev_table);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 			ut_a(prev_table->magic_n == DICT_TABLE_MAGIC_N);
 #endif
 			/* Acquire only because it's a pre-condition. */
@@ -4952,4 +4952,4 @@ dict_close(void)
 		mutex_free(&dict_index_stat_mutex[i]);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

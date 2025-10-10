@@ -482,7 +482,7 @@ os_mutex_create(
 	mutex_str->count = 0;
 	mutex_str->event = os_event_create(NULL);
 
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		/* When creating os_sync_mutex itself we cannot reserve it */
 		os_mutex_enter(os_sync_mutex);
 	}
@@ -491,7 +491,7 @@ os_mutex_create(
 
 	os_mutex_count++;
 
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
 	}
 
@@ -557,11 +557,11 @@ os_mutex_free(
 {
 	ut_a(mutex);
 
-	if (UNIV_LIKELY(!os_sync_free_called)) {
+	if (IB_LIKELY(!os_sync_free_called)) {
 		os_event_free_internal(mutex->event);
 	}
 
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_enter(os_sync_mutex);
 	}
 
@@ -569,7 +569,7 @@ os_mutex_free(
 
 	os_mutex_count--;
 
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
 	}
 
@@ -599,7 +599,7 @@ os_fast_mutex_init(
 #else
 	ut_a(0 == pthread_mutex_init(fast_mutex, NULL));
 #endif
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		/* When creating os_sync_mutex itself (in Unix) we cannot
 		reserve it */
 
@@ -608,7 +608,7 @@ os_fast_mutex_init(
 
 	os_fast_mutex_count++;
 
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
 	}
 }
@@ -660,7 +660,7 @@ os_fast_mutex_free(
 
 	ret = pthread_mutex_destroy(fast_mutex);
 
-	if (UNIV_UNLIKELY(ret != 0)) {
+	if (IB_UNLIKELY(ret != 0)) {
 		ut_print_timestamp(ib_stream);
 		ib_logger(ib_stream,
 			"  InnoDB: error: return value %lu when calling\n"
@@ -672,7 +672,7 @@ os_fast_mutex_free(
 		ib_logger(ib_stream, "\n");
 	}
 #endif
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		/* When freeing the last mutexes, we have
 		already freed os_sync_mutex */
 
@@ -682,7 +682,7 @@ os_fast_mutex_free(
 	ut_ad(os_fast_mutex_count > 0);
 	os_fast_mutex_count--;
 
-	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
 	}
 }

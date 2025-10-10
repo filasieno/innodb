@@ -31,9 +31,9 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "data_type.hpp"
 #include "mach_data.hpp"
 #include "dict_dict.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "lock0lock.h"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #define	DICT_HEAP_SIZE		100	/*!< initial memory heap size when
 					creating a table or index object */
@@ -154,10 +154,10 @@ dict_mem_table_add_col(
 	ulint		len)	/*!< in: precision */
 {
 	dict_col_t*	col;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint		mbminlen;
 	ulint		mbmaxlen;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	ulint		i;
 
 	ut_ad(table);
@@ -167,10 +167,10 @@ dict_mem_table_add_col(
 	i = table->n_def++;
 
 	if (name) {
-		if (UNIV_UNLIKELY(table->n_def == table->n_cols)) {
+		if (IB_UNLIKELY(table->n_def == table->n_cols)) {
 			heap = table->heap;
 		}
-		if (UNIV_LIKELY(i) && UNIV_UNLIKELY(!table->col_names)) {
+		if (IB_LIKELY(i) && IB_UNLIKELY(!table->col_names)) {
 			/* All preceding column names are empty. */
 			char* s = mem_heap_zalloc(heap, table->n_def);
 			table->col_names = s;
@@ -189,12 +189,12 @@ dict_mem_table_add_col(
 	col->prtype = (unsigned int) prtype;
 	col->len = (unsigned int) len;
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	dtype_get_mblen(mtype, prtype, &mbminlen, &mbmaxlen);
 
 	col->mbminlen = (unsigned int) mbminlen;
 	col->mbmaxlen = (unsigned int) mbmaxlen;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 }
 
 /**********************************************************************//**
@@ -224,9 +224,9 @@ dict_mem_index_create(
 	index->heap = heap;
 
 	index->type = type;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	index->space = (unsigned int) space;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	index->name = mem_heap_strdup(heap, index_name);
 	index->table_name = table_name;
 	index->n_fields = (unsigned int) n_fields;
@@ -234,9 +234,9 @@ dict_mem_index_create(
 				       * sizeof(dict_field_t));
 	/* The '1 +' above prevents allocation
 	of an empty mem block */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	index->magic_n = DICT_INDEX_MAGIC_N;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	return(index);
 }
 

@@ -262,10 +262,10 @@ struct trx_named_savept_struct{
 					arbitrary set of characters. Note:
 					When allocating memory for trx_named
 					structure allocate an additional
-					name_len bytes and set the value of
+					IB_NAME_LEN bytes and set the value of
 					name to point to the first byte past
 					an instance of this structure */
-	ulint		name_len;	/*!< length of name in bytes */
+	ulint		IB_NAME_LEN;	/*!< length of name in bytes */
 	trx_savept_t	savept;		/*!< the undo number corresponding to
 					the savepoint */
 	UT_LIST_NODE_T(trx_named_savept_t)

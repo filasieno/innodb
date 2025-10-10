@@ -24,7 +24,7 @@ Created 1/8/1996 Heikki Tuuri
 ***********************************************************************/
 
 #include "data_type.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "dict_load.hpp"
 #include "rem_types.hpp"
 
@@ -45,9 +45,9 @@ dict_col_copy_type(
 	type->mbminlen = col->mbminlen;
 	type->mbmaxlen = col->mbmaxlen;
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Assert that a column and a data type match.
 @return	TRUE */
@@ -64,16 +64,16 @@ dict_col_type_assert_equal(
 	ut_ad(col->mtype == type->mtype);
 	ut_ad(col->prtype == type->prtype);
 	ut_ad(col->len == type->len);
-# ifndef UNIV_HOTBACKUP
+# ifndef IB_HOTBACKUP
 	ut_ad(col->mbminlen == type->mbminlen);
 	ut_ad(col->mbmaxlen == type->mbmaxlen);
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 
 	return(TRUE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************************//**
 Returns the minimum size of the column.
 @return	minimum size */
@@ -97,7 +97,7 @@ dict_col_get_max_size(
 {
 	return(dtype_get_max_size_low(col->mtype, col->len));
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***********************************************************************//**
 Returns the size of a fixed size column, 0 if not a fixed size column.
 @return	fixed size, or 0 */
@@ -165,8 +165,8 @@ dict_col_get_clust_pos(
 	return(ULINT_UNDEFINED);
 }
 
-#ifndef UNIV_HOTBACKUP
-#ifdef UNIV_DEBUG
+#ifndef IB_HOTBACKUP
+#ifdef IB_DEBUG
 /********************************************************************//**
 Gets the first index on the table (the clustered index).
 @return	index, NULL if none exists */
@@ -196,8 +196,8 @@ dict_table_get_next_index(
 
 	return(UT_LIST_GET_NEXT(indexes, (dict_index_t*) index));
 }
-#endif /* UNIV_DEBUG */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* IB_DEBUG */
+#endif /* !IB_HOTBACKUP */
 
 /********************************************************************//**
 Check whether the index is the clustered index.
@@ -211,7 +211,7 @@ dict_index_is_clust(
 	ut_ad(dict_index);
 	ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
 
-	return(UNIV_UNLIKELY(dict_index->type & DICT_CLUSTERED));
+	return(IB_UNLIKELY(dict_index->type & DICT_CLUSTERED));
 }
 /********************************************************************//**
 Check whether the index is unique.
@@ -225,7 +225,7 @@ dict_index_is_unique(
 	ut_ad(dict_index);
 	ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
 
-	return(UNIV_UNLIKELY(dict_index->type & DICT_UNIQUE));
+	return(IB_UNLIKELY(dict_index->type & DICT_UNIQUE));
 }
 
 /********************************************************************//**
@@ -240,7 +240,7 @@ dict_index_is_ibuf(
 	ut_ad(dict_index);
 	ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
 
-	return(UNIV_UNLIKELY(dict_index->type & DICT_IBUF));
+	return(IB_UNLIKELY(dict_index->type & DICT_IBUF));
 }
 
 /********************************************************************//**
@@ -259,7 +259,7 @@ dict_index_is_sec_or_ibuf(
 
 	type = dict_index->type;
 
-	return(UNIV_LIKELY(!(type & DICT_CLUSTERED) || (type & DICT_IBUF)));
+	return(IB_LIKELY(!(type & DICT_CLUSTERED) || (type & DICT_IBUF)));
 }
 
 /********************************************************************//**
@@ -310,7 +310,7 @@ dict_table_get_n_cols(
 	return(table->n_cols);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /********************************************************************//**
 Gets the nth column of a table.
 @return	pointer to column object */
@@ -351,7 +351,7 @@ dict_table_get_sys_col(
 
 	return(col);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /********************************************************************//**
 Gets the given system column number of a table.
@@ -385,7 +385,7 @@ dict_table_is_comp(
 #error
 #endif
 
-	return(UNIV_LIKELY(table->flags & DICT_TF_COMPACT));
+	return(IB_LIKELY(table->flags & DICT_TF_COMPACT));
 }
 
 /********************************************************************//**
@@ -428,11 +428,11 @@ dict_table_flags_to_zip_size(
 {
 	ulint	zip_size = flags & DICT_TF_ZSSIZE_MASK;
 
-	if (UNIV_UNLIKELY(zip_size)) {
+	if (IB_UNLIKELY(zip_size)) {
 		zip_size = ((PAGE_ZIP_MIN_SIZE >> 1)
 			 << (zip_size >> DICT_TF_ZSSIZE_SHIFT));
 
-		ut_ad(zip_size <= UNIV_PAGE_SIZE);
+		ut_ad(zip_size <= IB_PAGE_SIZE);
 	}
 
 	return(zip_size);
@@ -535,7 +535,7 @@ dict_index_get_n_ordering_defined_by_user(
 	return(dict_index->n_user_defined_cols);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /********************************************************************//**
 Gets the nth field of an index.
 @return	pointer to field object */
@@ -552,7 +552,7 @@ dict_index_get_nth_field(
 
 	return((dict_field_t*) (index->fields) + pos);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /********************************************************************//**
 Returns the position of a system column in an index.
@@ -620,7 +620,7 @@ dict_index_get_nth_col_no(
 	return(dict_col_get_no(dict_index_get_nth_col(dict_index, pos)));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Returns the minimum data size of an index record.
 @return	minimum data size in bytes */
@@ -726,7 +726,7 @@ ulint
 dict_index_get_space_reserve(void)
 /*==============================*/
 {
-	return(UNIV_PAGE_SIZE / 16);
+	return(IB_PAGE_SIZE / 16);
 }
 
 /**********************************************************************//**
@@ -809,4 +809,4 @@ dict_table_get_on_id_low(
 
 	return(table);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

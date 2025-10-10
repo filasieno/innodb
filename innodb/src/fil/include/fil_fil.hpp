@@ -27,9 +27,9 @@ Created 10/25/1995 Heikki Tuuri
 #define fil0fil_h
 
 #include "univ.i"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "sync_rw.hpp"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 #include "dict_types.hpp"
 #include "ut_byte.hpp"
 #include "os_file.hpp"
@@ -158,7 +158,7 @@ extern ulint	fil_n_pending_log_flushes;
 extern ulint	fil_n_pending_tablespace_flushes;
 
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Returns the version number of a tablespace, -1 if not found.
 @return version number, -1 if the tablespace does not exist in the
@@ -186,7 +186,7 @@ ulint
 fil_space_get_type(
 /*===============*/
 	ulint	id);	/*!< in: space id */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*******************************************************************//**
 Appends a new file to the chain of files of a space. File must be closed. */
 IB_INTERN
@@ -199,7 +199,7 @@ fil_node_create(
 	ulint		id,	/*!< in: space id where to append */
 	ibool		is_raw);/*!< in: TRUE if a raw device or
 				a raw disk partition */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /****************************************************************//**
 Drops files from the start of a file space, so that its size is cut by
 the amount given. */
@@ -211,7 +211,7 @@ fil_space_truncate_start(
 	ulint	trunc_len);	/*!< in: truncate by this much; it is an error
 				if this does not equal to the combined size of
 				some initial files in the space */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 /*******************************************************************//**
 Creates a space memory object and puts it to the 'fil system' hash table. If
 there is an error, prints an error message to the .err log.
@@ -301,7 +301,7 @@ void
 fil_set_max_space_id_if_bigger(
 /*===========================*/
 	ulint	max_id);/*!< in: maximum known id */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Writes the flushed lsn and the latest archived log number to the page
 header of the first page of each data file in the system tablespace.
@@ -324,10 +324,10 @@ fil_read_flushed_lsn_and_arch_log_no(
 	ibool		one_read_already,	/*!< in: TRUE if min and max
 						parameters below already
 						contain sensible data */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	ulint*		min_arch_log_no,	/*!< in/out: */
 	ulint*		max_arch_log_no,	/*!< in/out: */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	ib_uint64_t*	min_flushed_lsn,	/*!< in/out: */
 	ib_uint64_t*	max_flushed_lsn);	/*!< in/out: */
 /*******************************************************************//**
@@ -346,7 +346,7 @@ void
 fil_decr_pending_ibuf_merges(
 /*=========================*/
 	ulint	id);	/*!< in: space id */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*******************************************************************//**
 Parses the body of a log record written about an .ibd file operation. That is,
 the log record part after the standard (type, space id, page no) header of the
@@ -384,7 +384,7 @@ ibool
 fil_delete_tablespace(
 /*==================*/
 	ulint	id);	/*!< in: space id */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Discards a single-table tablespace. The tablespace must be cached in the
 memory cache. Discarding is like deleting a tablespace, but
@@ -399,7 +399,7 @@ ibool
 fil_discard_tablespace(
 /*===================*/
 	ulint	id);	/*!< in: space id */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*******************************************************************//**
 Renames a single-table tablespace. The tablespace must be cached in the
 tablespace memory cache.
@@ -441,7 +441,7 @@ fil_create_new_single_table_tablespace(
 	ulint		size);		/*!< in: the initial size of the
 					tablespace file in pages,
 					must be >= FIL_IBD_FILE_INITIAL_SIZE */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Tries to open a single-table tablespace and optionally checks the space id is
 right in it. If does not succeed, prints an error message to the .err log. This
@@ -486,7 +486,7 @@ fil_reset_too_high_lsns(
 	ib_uint64_t	current_lsn);	/*!< in: reset lsn's if the lsn stamped
 					to FIL_PAGE_FILE_FLUSH_LSN in the
 					first page is too high */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /********************************************************************//**
 At the server startup, if we need crash recovery, scans the database
 directories under the current dir, looking for .ibd files. Those files are
@@ -530,7 +530,7 @@ ibool
 fil_tablespace_exists_in_mem(
 /*=========================*/
 	ulint	id);	/*!< in: space id */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 Returns TRUE if a matching tablespace exists in the InnoDB tablespace memory
 cache. Note that if we have not done a crash recovery at the database startup,
@@ -557,7 +557,7 @@ fil_space_for_table_exists_in_mem(
 					information to the .err log if a
 					matching tablespace is not found from
 					memory */
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 /********************************************************************//**
 Extends all tablespaces to the size stored in the space header. During the
 ibbackup --apply-log phase we extended the spaces on-demand so that log records
@@ -567,7 +567,7 @@ IB_INTERN
 void
 fil_extend_tablespaces_to_stored_len(void);
 /*======================================*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /**********************************************************************//**
 Tries to extend a data file so that it would accommodate the number of pages
 given. The tablespace must be cached in the memory cache. If the space is big

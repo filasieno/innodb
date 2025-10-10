@@ -11,13 +11,13 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_FILESYSTEM],[
   dnl --------------------------------------------------------------------
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_filesystem-mt,boost_system-mt,[
+  AC_LIB_IB_HAVE_LINKFLAGS(boost_filesystem-mt,boost_system-mt,[
     #include <boost/filesystem.hpp>
   ],[
     boost::filesystem::path my_path("some_dir/file.txt");
   ])
   AS_IF([test "x${ac_cv_libboost_filesystem_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_filesystem,boost_system,[
+    AC_LIB_IB_HAVE_LINKFLAGS(boost_filesystem,boost_system,[
       #include <boost/filesystem.hpp>
     ],[
       boost::filesystem::path my_path("some_dir/file.txt");
@@ -25,14 +25,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_FILESYSTEM],[
   ])
   AC_LANG_POP()
   
-  AM_CONDITIONAL(HAVE_BOOST_FILESYSTEM,
+  AM_CONDITIONAL(IB_HAVE_BOOST_FILESYSTEM,
     [test "x${ac_cv_libboost_filesystem}" = "xyes" -o "x${ac_cv_libboost_filesystem_mt}" = "xyes"])
   BOOST_LIBS="${BOOST_LIBS} ${LTLIBBOOST_FILESYSTEM_MT} ${LTLIBBOOST_FILESYSTEM}"
   AC_SUBST(BOOST_LIBS) 
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST_FILESYSTEM],[
-  PANDORA_HAVE_BOOST($1)
+AC_DEFUN([PANDORA_IB_HAVE_BOOST_FILESYSTEM],[
+  PANDORA_IB_HAVE_BOOST($1)
   _PANDORA_SEARCH_BOOST_FILESYSTEM($1)
 ])
 

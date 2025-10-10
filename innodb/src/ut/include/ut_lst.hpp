@@ -90,12 +90,12 @@ Adds the node as the first element in a two-way linked list.
 	((BASE).count)++;\
 	((N)->NAME).next = (BASE).start;\
 	((N)->NAME).prev = NULL;\
-	if (UNIV_LIKELY((BASE).start != NULL)) {\
+	if (IB_LIKELY((BASE).start != NULL)) {\
 		ut_ad((BASE).start != (N));\
 		(((BASE).start)->NAME).prev = (N);\
 	}\
 	(BASE).start = (N);\
-	if (UNIV_UNLIKELY((BASE).end == NULL)) {\
+	if (IB_UNLIKELY((BASE).end == NULL)) {\
 		(BASE).end = (N);\
 	}\
 }\
@@ -146,7 +146,7 @@ Inserts a NODE2 after NODE1 in a list.
 	}\
 }\
 
-#ifdef UNIV_LIST_DEBUG
+#ifdef IB_LIST_DEBUG
 /** Invalidate the pointers in a list node.
 @param NAME	list name
 @param N	pointer to the node that was removed */

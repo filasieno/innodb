@@ -34,7 +34,7 @@ Created 1/30/1994 Heikki Tuuri
 /** Test if an assertion fails.
 @param EXPR	assertion expression
 @return		nonzero if EXPR holds, zero if not */
-# define UT_DBG_FAIL(EXPR) UNIV_UNLIKELY(!((ulint)(EXPR)))
+# define UT_DBG_FAIL(EXPR) IB_UNLIKELY(!((ulint)(EXPR)))
 #else
 /** This is used to eliminate compiler warnings */
 extern ulint	ut_dbg_zero;
@@ -95,7 +95,7 @@ void ut_dbg_panic(void);
 extern ulint*	ut_dbg_null_ptr;
 # endif
 
-# if defined(UNIV_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
+# if defined(IB_SYNC_DEBUG) || !defined(UT_DBG_USE_ABORT)
 /** If this is set to TRUE by ut_dbg_assertion_failed(), all threads
 will stop at the next ut_a() or ut_ad(). */
 extern ibool	ut_dbg_stop_threads;
@@ -121,7 +121,7 @@ ut_dbg_stop_thread(
 	if (*(ut_dbg_null_ptr)) ut_dbg_null_ptr = NULL
 /** Stop threads in ut_a(). */
 #  define UT_DBG_STOP do						\
-	if (UNIV_UNLIKELY(ut_dbg_stop_threads)) {		\
+	if (IB_UNLIKELY(ut_dbg_stop_threads)) {		\
 		ut_dbg_stop_thread(__FILE__, (ulint) __LINE__);	\
 	} while (0)
 # endif /* UT_DBG_USE_ABORT */
@@ -144,15 +144,15 @@ ut_dbg_stop_thread(
 	UT_DBG_PANIC;						\
 } while (0)
 
-#ifdef UNIV_DEBUG
-/** Debug assertion. Does nothing unless UNIV_DEBUG is defined. */
+#ifdef IB_DEBUG
+/** Debug assertion. Does nothing unless IB_DEBUG is defined. */
 #define ut_ad(EXPR)	ut_a(EXPR)
-/** Debug statement. Does nothing unless UNIV_DEBUG is defined. */
+/** Debug statement. Does nothing unless IB_DEBUG is defined. */
 #define ut_d(EXPR)	do {EXPR;} while (0)
 #else
-/** Debug assertion. Does nothing unless UNIV_DEBUG is defined. */
+/** Debug assertion. Does nothing unless IB_DEBUG is defined. */
 #define ut_ad(EXPR)
-/** Debug statement. Does nothing unless UNIV_DEBUG is defined. */
+/** Debug statement. Does nothing unless IB_DEBUG is defined. */
 #define ut_d(EXPR)
 #endif
 
@@ -160,7 +160,7 @@ ut_dbg_stop_thread(
 @param A	the unused variable */
 #define UT_NOT_USED(A)	A = A
 
-#ifdef UNIV_COMPILE_TEST_FUNCS
+#ifdef IB_COMPILE_TEST_FUNCS
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -189,6 +189,6 @@ speedo_show(
 /*========*/
 	const speedo_t*	speedo);	/*!< in: speedo */
 
-#endif /* UNIV_COMPILE_TEST_FUNCS */
+#endif /* IB_COMPILE_TEST_FUNCS */
 
 #endif

@@ -26,9 +26,9 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "univ.i"
 
-#ifdef HAVE_PTHREAD_H
+#ifdef IB_HAVE_PTHREAD_H
 #include <pthread.h>
-#endif /* HAVE_PTHREAD_H */
+#endif /* IB_HAVE_PTHREAD_H */
 
 #ifdef __WIN__
 #include <windows.h>

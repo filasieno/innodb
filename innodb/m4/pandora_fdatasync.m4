@@ -21,5 +21,5 @@ fdatasync(4);
     AC_LANG_POP()
   ])
   AS_IF([test "x${ac_cv_func_fdatasync}" = "xyes"],
-    [AC_DEFINE([HAVE_FDATASYNC],[1],[If the system has a working fdatasync])])
+    [AC_DEFINE([IB_HAVE_FDATASYNC],[1],[If the system has a working fdatasync])])
 ])

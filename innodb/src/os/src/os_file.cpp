@@ -38,8 +38,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "buf_buf.hpp"
 #include "api_misc.hpp"
 
-#ifndef UNIV_HOTBACKUP
-# if !defined(__WIN__) && defined(HAVE_UNISTD_H)
+#ifndef IB_HOTBACKUP
+# if !defined(__WIN__) && defined(IB_HAVE_UNISTD_H)
 #  define __USE_UNIX98
 #  include <unistd.h>
 #  include <fcntl.h>
@@ -56,7 +56,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #  include <io.h>
 #  include <errno.h>
 # endif /* __WIN__ */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /* This specifies the file permissions InnoDB uses when it creates files in
 Unix; the value of os_innodb_umask is initialized in ha_innodb.cc to
@@ -71,17 +71,17 @@ IB_INTERN ulint	os_innodb_umask
 IB_INTERN ulint	os_innodb_umask		= 0;
 #endif
 
-#ifdef UNIV_DO_FLUSH
+#ifdef IB_DO_FLUSH
 /* If the following is set to TRUE, we do not call os_file_flush in every
 os_file_write. We can set this TRUE when the doublewrite buffer is used. */
 IB_INTERN ibool	os_do_not_call_flush_at_each_write	= FALSE;
 #else
 /* We do not call os_file_flush in every os_file_write. */
-#endif /* UNIV_DO_FLUSH */
+#endif /* IB_DO_FLUSH */
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 # define os_aio_use_native_aio	FALSE
-#else /* UNIV_HOTBACKUP */
+#else /* IB_HOTBACKUP */
 /* We use these mutexes to protect lseek + file i/o operation, if the
 OS does not provide an atomic pread or pwrite, or similar */
 #define OS_FILE_N_SEEK_MUTEXES	16
@@ -191,7 +191,7 @@ static ulint	os_aio_n_segments	= ULINT_UNDEFINED;
 /** If the following is TRUE, read i/o handler threads try to
 wait until a batch of new read requests have been posted */
 static ibool	os_aio_recommend_sleep_for_read_threads	= FALSE;
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 IB_INTERN ulint	os_n_file_reads		= 0;
 IB_INTERN ulint	os_bytes_read_since_printout = 0;
@@ -204,10 +204,10 @@ IB_INTERN time_t	os_last_printout;
 
 IB_INTERN ibool	os_has_said_disk_full	= FALSE;
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** The mutex protecting the following counts of pending I/O operations */
 static os_mutex_t	os_file_count_mutex;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /** Number of pending os_file_pread() operations */
 IB_INTERN ulint	os_file_n_pending_preads  = 0;
 /** Number of pending os_file_pwrite() operations */
@@ -250,14 +250,14 @@ void os_file_var_init(void)
 	os_n_pending_writes = 0;
 	os_n_pending_reads = 0;
 
-#ifdef UNIV_DO_FLUSH
+#ifdef IB_DO_FLUSH
 	os_do_not_call_flush_at_each_write = FALSE;
-#endif /* UNIV_DO_FLUSH */
+#endif /* IB_DO_FLUSH */
 
 	memset(os_file_seek_mutexes, 0x0, sizeof(os_file_seek_mutexes));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Returns a pointer to the nth slot in the aio array.
 /// \param array Aio array.
 /// \param index Index of the slot.
@@ -270,7 +270,7 @@ os_aio_array_get_nth_slot(os_aio_array_t* array, ulint index)
 
 	return((array->slots) + index);
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 /// \brief Frees an aio wait array.
 /// \param array Array to free.
@@ -627,7 +627,7 @@ os_file_handle_error_no_exit(
 
 #undef USE_FILE_LOCK
 #define USE_FILE_LOCK
-#if defined(UNIV_HOTBACKUP) || defined(__WIN__) || defined(__NETWARE__)
+#if defined(IB_HOTBACKUP) || defined(__WIN__) || defined(__NETWARE__)
 /* InnoDB Hot Backup does not lock the data files.
  * On Windows, mandatory locking is used.
  */
@@ -668,7 +668,7 @@ os_file_lock(
 }
 #endif /* USE_FILE_LOCK */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Creates the seek mutexes used in positioned reads and writes. */
 IB_INTERN
@@ -728,7 +728,7 @@ os_file_create_tmpfile(void)
 
 	return(file);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************************//**
 The os_file_opendir() function opens a directory stream corresponding to the
@@ -893,7 +893,7 @@ next_file:
 	char*		full_path;
 	int		ret;
 	struct stat	statinfo;
-#ifdef HAVE_READDIR_R
+#ifdef IB_HAVE_READDIR_R
 	char		dirent_buf[sizeof(struct dirent)
 				   + _POSIX_PATH_MAX + 100];
 	/* In /mysys/my_lib.c, _POSIX_PATH_MAX + 1 is used as
@@ -903,11 +903,11 @@ next_file:
 
 next_file:
 
-#ifdef HAVE_READDIR_R
+#ifdef IB_HAVE_READDIR_R
 	ret = readdir_r(dir, (struct dirent*)dirent_buf, &ent);
 
 	if (ret != 0
-#ifdef UNIV_AIX
+#ifdef IB_AIX
 	    /* On AIX, only if we got non-NULL 'ent' (result) value and
 	    a non-zero 'ret' (return) value, it indicates a failed
 	    readdir_r() call. An NULL 'ent' with an non-zero 'ret'
@@ -1308,7 +1308,7 @@ os_file_set_nocache(
 					diagnostic message */
 {
 	/* some versions of Solaris may not have DIRECTIO_ON */
-#if defined(UNIV_SOLARIS) && defined(DIRECTIO_ON)
+#if defined(IB_SOLARIS) && defined(DIRECTIO_ON)
 	if (directio(fd, DIRECTIO_ON) == -1) {
 		int	errno_save;
 		errno_save = (int)errno;
@@ -1398,8 +1398,8 @@ try_again:
 			attributes = attributes | FILE_FLAG_OVERLAPPED;
 		}
 #endif
-#ifdef UNIV_NON_BUFFERED_IO
-# ifndef UNIV_HOTBACKUP
+#ifdef IB_NON_BUFFERED_IO
+# ifndef IB_HOTBACKUP
 		if (type == OS_LOG_FILE && srv_flush_log_at_trx_commit == 2) {
 			/* Do not use unbuffered i/o to log files because
 			value 2 denotes that we do not flush the log at every
@@ -1408,14 +1408,14 @@ try_again:
 			   == SRV_WIN_IO_UNBUFFERED) {
 			attributes = attributes | FILE_FLAG_NO_BUFFERING;
 		}
-# else /* !UNIV_HOTBACKUP */
+# else /* !IB_HOTBACKUP */
 		attributes = attributes | FILE_FLAG_NO_BUFFERING;
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_NON_BUFFERED_IO */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_NON_BUFFERED_IO */
 	} else if (purpose == OS_FILE_NORMAL) {
 		attributes = 0;
-#ifdef UNIV_NON_BUFFERED_IO
-# ifndef UNIV_HOTBACKUP
+#ifdef IB_NON_BUFFERED_IO
+# ifndef IB_HOTBACKUP
 		if (type == OS_LOG_FILE && srv_flush_log_at_trx_commit == 2) {
 			/* Do not use unbuffered i/o to log files because
 			value 2 denotes that we do not flush the log at every
@@ -1424,10 +1424,10 @@ try_again:
 			   == SRV_WIN_IO_UNBUFFERED) {
 			attributes = attributes | FILE_FLAG_NO_BUFFERING;
 		}
-# else /* !UNIV_HOTBACKUP */
+# else /* !IB_HOTBACKUP */
 		attributes = attributes | FILE_FLAG_NO_BUFFERING;
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_NON_BUFFERED_IO */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_NON_BUFFERED_IO */
 	} else {
 		attributes = 0;
 		ut_error;
@@ -1806,7 +1806,7 @@ os_file_close(
 #endif
 }
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /***********************************************************************//**
 Closes a file handle.
 @return	TRUE if success */
@@ -1841,7 +1841,7 @@ os_file_close_no_error_handling(
 	return(TRUE);
 #endif
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 /***********************************************************************//**
 Gets a file size.
@@ -1941,12 +1941,12 @@ os_file_set_size(
 	desired_size = (ib_int64_t)size + (((ib_int64_t)size_high) << 32);
 
 	/* Write up to 1 megabyte at a time. */
-	buf_size = ut_min(64, (ulint) (desired_size / UNIV_PAGE_SIZE))
-		* UNIV_PAGE_SIZE;
-	buf2 = ut_malloc(buf_size + UNIV_PAGE_SIZE);
+	buf_size = ut_min(64, (ulint) (desired_size / IB_PAGE_SIZE))
+		* IB_PAGE_SIZE;
+	buf2 = ut_malloc(buf_size + IB_PAGE_SIZE);
 
 	/* Align the buffer for possible raw i/o */
-	buf = ut_align(buf2, UNIV_PAGE_SIZE);
+	buf = ut_align(buf2, IB_PAGE_SIZE);
 
 	/* Write buffer full of zeros */
 	memset(buf, 0, buf_size);
@@ -2003,7 +2003,7 @@ error_handling:
 	return(FALSE);
 }
 
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /***********************************************************************//**
 Truncates a file at its current position.
 @return	TRUE if success */
@@ -2112,7 +2112,7 @@ os_file_flush(
 #else
 	int	ret;
 
-#if defined(HAVE_DARWIN_THREADS)
+#if defined(IB_HAVE_DARWIN_THREADS)
 # ifndef F_FULLFSYNC
 	/* The following definition is from the Mac OS X 10.3 <sys/fcntl.h> */
 #  define F_FULLFSYNC 51 /* fsync + ask the drive to flush to the media */
@@ -2124,7 +2124,7 @@ os_file_flush(
 	OS X use a nonstandard flush method recommended by an Apple
 	engineer. */
 
-	if (!srv_have_fullfsync) {
+	if (!srv_IB_HAVE_fullfsync) {
 		/* If we are not on an operating system that supports this,
 		then fall back to a plain fsync. */
 
@@ -2186,9 +2186,9 @@ os_file_pread(
 				offset */
 {
 	off_t	offs;
-#if defined(HAVE_PREAD) && !defined(HAVE_BROKEN_PREAD)
+#if defined(IB_HAVE_PREAD) && !defined(IB_HAVE_BROKEN_PREAD)
 	ssize_t	n_bytes;
-#endif /* HAVE_PREAD && !HAVE_BROKEN_PREAD */
+#endif /* IB_HAVE_PREAD && !IB_HAVE_BROKEN_PREAD */
 
 	ut_a((offset & 0xFFFFFFFFUL) == offset);
 
@@ -2209,7 +2209,7 @@ os_file_pread(
 
 	os_n_file_reads++;
 
-#if defined(HAVE_PREAD) && !defined(HAVE_BROKEN_PREAD)
+#if defined(IB_HAVE_PREAD) && !defined(IB_HAVE_BROKEN_PREAD)
 	os_mutex_enter(os_file_count_mutex);
 	os_file_n_pending_preads++;
 	os_n_pending_reads++;
@@ -2227,20 +2227,20 @@ os_file_pread(
 	{
 		off_t	ret_offset;
 		ssize_t	ret;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		ulint	i;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_reads++;
 		os_mutex_exit(os_file_count_mutex);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		/* Protect the seek / read operation with a mutex */
 		i = ((ulint) file) % OS_FILE_N_SEEK_MUTEXES;
 
 		os_mutex_enter(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 		ret_offset = lseek(file, offs, SEEK_SET);
 
@@ -2250,9 +2250,9 @@ os_file_pread(
 			ret = read(file, buf, (ssize_t)n);
 		}
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_reads--;
@@ -2300,7 +2300,7 @@ os_file_pwrite(
 
 	os_n_file_writes++;
 
-#if defined(HAVE_PWRITE) && !defined(HAVE_BROKEN_PREAD)
+#if defined(IB_HAVE_PWRITE) && !defined(IB_HAVE_BROKEN_PREAD)
 	os_mutex_enter(os_file_count_mutex);
 	os_file_n_pending_pwrites++;
 	os_n_pending_writes++;
@@ -2313,7 +2313,7 @@ os_file_pwrite(
 	os_n_pending_writes--;
 	os_mutex_exit(os_file_count_mutex);
 
-# ifdef UNIV_DO_FLUSH
+# ifdef IB_DO_FLUSH
 	if (srv_unix_file_flush_method != SRV_UNIX_LITTLESYNC
 	    && srv_unix_file_flush_method != SRV_UNIX_NOSYNC
 	    && !os_do_not_call_flush_at_each_write) {
@@ -2324,26 +2324,26 @@ os_file_pwrite(
 
 		ut_a(TRUE == os_file_flush(file));
 	}
-# endif /* UNIV_DO_FLUSH */
+# endif /* IB_DO_FLUSH */
 
 	return(ret);
 #else
 	{
 		off_t	ret_offset;
-# ifndef UNIV_HOTBACKUP
+# ifndef IB_HOTBACKUP
 		ulint	i;
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_writes++;
 		os_mutex_exit(os_file_count_mutex);
 
-# ifndef UNIV_HOTBACKUP
+# ifndef IB_HOTBACKUP
 		/* Protect the seek / write operation with a mutex */
 		i = ((ulint) file) % OS_FILE_N_SEEK_MUTEXES;
 
 		os_mutex_enter(os_file_seek_mutexes[i]);
-# endif /* UNIV_HOTBACKUP */
+# endif /* IB_HOTBACKUP */
 
 		ret_offset = lseek(file, offs, SEEK_SET);
 
@@ -2355,7 +2355,7 @@ os_file_pwrite(
 
 		ret = write(file, buf, (ssize_t)n);
 
-# ifdef UNIV_DO_FLUSH
+# ifdef IB_DO_FLUSH
 		if (srv_unix_file_flush_method != SRV_UNIX_LITTLESYNC
 		    && srv_unix_file_flush_method != SRV_UNIX_NOSYNC
 		    && !os_do_not_call_flush_at_each_write) {
@@ -2366,12 +2366,12 @@ os_file_pwrite(
 
 			ut_a(TRUE == os_file_flush(file));
 		}
-# endif /* UNIV_DO_FLUSH */
+# endif /* IB_DO_FLUSH */
 
 func_exit:
-# ifndef UNIV_HOTBACKUP
+# ifndef IB_HOTBACKUP
 		os_mutex_exit(os_file_seek_mutexes[i]);
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_writes--;
@@ -2405,9 +2405,9 @@ os_file_read(
 	DWORD		low;
 	DWORD		high;
 	ibool		retry;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint		i;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_a((offset & 0xFFFFFFFFUL) == offset);
 
@@ -2426,20 +2426,20 @@ try_again:
 	os_n_pending_reads++;
 	os_mutex_exit(os_file_count_mutex);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/* Protect the seek / read operation with a mutex */
 	i = ((ulint) file) % OS_FILE_N_SEEK_MUTEXES;
 
 	os_mutex_enter(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ret2 = SetFilePointer(file, low, &high, FILE_BEGIN);
 
 	if (ret2 == 0xFFFFFFFF && GetLastError() != NO_ERROR) {
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_reads--;
@@ -2450,9 +2450,9 @@ try_again:
 
 	ret = ReadFile(file, buf, (DWORD) n, &len, NULL);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	os_mutex_enter(os_file_count_mutex);
 	os_n_pending_reads--;
@@ -2528,9 +2528,9 @@ os_file_read_no_error_handling(
 	DWORD		low;
 	DWORD		high;
 	ibool		retry;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint		i;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_a((offset & 0xFFFFFFFFUL) == offset);
 
@@ -2549,20 +2549,20 @@ try_again:
 	os_n_pending_reads++;
 	os_mutex_exit(os_file_count_mutex);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/* Protect the seek / read operation with a mutex */
 	i = ((ulint) file) % OS_FILE_N_SEEK_MUTEXES;
 
 	os_mutex_enter(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ret2 = SetFilePointer(file, low, &high, FILE_BEGIN);
 
 	if (ret2 == 0xFFFFFFFF && GetLastError() != NO_ERROR) {
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_reads--;
@@ -2573,9 +2573,9 @@ try_again:
 
 	ret = ReadFile(file, buf, (DWORD) n, &len, NULL);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	os_mutex_enter(os_file_count_mutex);
 	os_n_pending_reads--;
@@ -2658,9 +2658,9 @@ os_file_write(
 	DWORD		high;
 	ulint		n_retries	= 0;
 	ulint		err;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint		i;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_a((offset & 0xFFFFFFFF) == offset);
 
@@ -2677,20 +2677,20 @@ retry:
 	os_n_pending_writes++;
 	os_mutex_exit(os_file_count_mutex);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/* Protect the seek / write operation with a mutex */
 	i = ((ulint) file) % OS_FILE_N_SEEK_MUTEXES;
 
 	os_mutex_enter(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ret2 = SetFilePointer(file, low, &high, FILE_BEGIN);
 
 	if (ret2 == 0xFFFFFFFF && GetLastError() != NO_ERROR) {
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 		os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 		os_mutex_enter(os_file_count_mutex);
 		os_n_pending_writes--;
@@ -2716,15 +2716,15 @@ retry:
 	/* Always do fsync to reduce the probability that when the OS crashes,
 	a database page is only partially physically written to disk. */
 
-# ifdef UNIV_DO_FLUSH
+# ifdef IB_DO_FLUSH
 	if (!os_do_not_call_flush_at_each_write) {
 		ut_a(TRUE == os_file_flush(file));
 	}
-# endif /* UNIV_DO_FLUSH */
+# endif /* IB_DO_FLUSH */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	os_mutex_exit(os_file_seek_mutexes[i]);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	os_mutex_enter(os_file_count_mutex);
 	os_n_pending_writes--;
@@ -3069,7 +3069,7 @@ os_file_create_subdirs_if_needed(
 	return(success);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /************************************************************************//**
 Creates an aio wait array.
 @return	own: aio array */
@@ -3365,7 +3365,7 @@ os_aio_array_reserve_slot(
 	/* We attempt to keep adjacent blocks in the same local
 	segment. This can help in merging IO requests when we are
 	doing simulated AIO */
-	local_seg = (offset >> (UNIV_PAGE_SIZE_SHIFT + 6))
+	local_seg = (offset >> (IB_PAGE_SIZE_SHIFT + 6))
 		    % array->n_segments;
 
 loop:
@@ -3857,12 +3857,12 @@ os_aio_windows_handle(
 	if (ret && len == slot->len) {
 		ret_val = TRUE;
 
-#ifdef UNIV_DO_FLUSH
+#ifdef IB_DO_FLUSH
 		if (slot->type == OS_FILE_WRITE
 		    && !os_do_not_call_flush_at_each_write) {
 			ut_a(TRUE == os_file_flush(slot->file));
 		}
-#endif /* UNIV_DO_FLUSH */
+#endif /* IB_DO_FLUSH */
 	} else if (os_file_handle_error(slot->name, "Windows aio")) {
 
 		retry = TRUE;
@@ -4117,11 +4117,11 @@ consecutive_loop:
 		combined_buf = slot->buf;
 		combined_buf2 = NULL;
 	} else {
-		combined_buf2 = ut_malloc(total_len + UNIV_PAGE_SIZE);
+		combined_buf2 = ut_malloc(total_len + IB_PAGE_SIZE);
 
 		ut_a(combined_buf2);
 
-		combined_buf = ut_align(combined_buf2, UNIV_PAGE_SIZE);
+		combined_buf = ut_align(combined_buf2, IB_PAGE_SIZE);
 	}
 
 	/* We release the array mutex for the time of the i/o: NOTE that
@@ -4168,7 +4168,7 @@ consecutive_loop:
 #if 0
 	ib_logger(ib_stream,
 		"aio: %lu consecutive %lu:th segment, first offs %lu blocks\n",
-		n_consecutive, global_segment, slot->offset / UNIV_PAGE_SIZE);
+		n_consecutive, global_segment, slot->offset / IB_PAGE_SIZE);
 #endif
 
 	if (slot->type == OS_FILE_READ && n_consecutive > 1) {
@@ -4444,7 +4444,7 @@ os_aio_refresh_stats(void)
 	os_last_printout = time(NULL);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************************//**
 Checks that all slots in the system have been freed, that is, there are
 no pending io operations.
@@ -4504,7 +4504,7 @@ os_aio_all_slots_free(void)
 
 	return(FALSE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*************************************************************************
 Sets the info describing an i/o thread current state. */
@@ -4520,4 +4520,4 @@ os_set_io_thread_op_info(
 
 	srv_io_thread_op_info[i] = str;
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

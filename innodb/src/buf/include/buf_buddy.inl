@@ -23,7 +23,7 @@ Binary buddy allocator for compressed pages
 Created December 2006 by Marko Makela
 *******************************************************/
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE
 #endif
@@ -95,7 +95,7 @@ IB_INLINE
 void*
 buf_buddy_alloc(
 /*============*/
-	ulint	size,	/*!< in: block size, up to UNIV_PAGE_SIZE */
+	ulint	size,	/*!< in: block size, up to IB_PAGE_SIZE */
 	ibool*	lru)	/*!< in: pointer to a variable that will be assigned
 			TRUE if storage was allocated from the LRU list
 			and buf_pool_mutex was temporarily released,
@@ -114,14 +114,14 @@ buf_buddy_free(
 /*===========*/
 	void*	buf,	/*!< in: block to be freed, must not be
 			pointed to by the buffer pool */
-	ulint	size)	/*!< in: block size, up to UNIV_PAGE_SIZE */
+	ulint	size)	/*!< in: block size, up to IB_PAGE_SIZE */
 {
 	ut_ad(buf_pool_mutex_own());
 
 	buf_buddy_free_low(buf, buf_buddy_get_slot(size));
 }
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE	IB_INLINE_ORIGINAL
 #endif

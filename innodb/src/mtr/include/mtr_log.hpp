@@ -22,7 +22,7 @@
 #include "mtr_mtr.hpp"
 #include "univ.i"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 /// \brief Writes 1 - 4 bytes to a file page buffered in the buffer pool.
 /// \details Writes the corresponding log record to the mini-transaction log.
@@ -113,13 +113,13 @@ IB_INLINE void mlog_close(mtr_t *mtr, byte *ptr);
 /// \return New value of log_ptr.
 IB_INLINE byte* mlog_write_initial_log_record_fast(const byte *ptr, byte type, byte *log_ptr, mtr_t *mtr);
 
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 
 #define mlog_write_initial_log_record(ptr, type, mtr) ((void)0)
 
 #define mlog_write_initial_log_record_fast(ptr, type, log_ptr, mtr) ((byte *)0)
 
-#endif													   /* !UNIV_HOTBACKUP */
+#endif													   /* !IB_HOTBACKUP */
 /// \brief Parses an initial log record written by mlog_write_initial_log_record.
 /// \param ptr Buffer.
 /// \param end_ptr Buffer end.
@@ -146,7 +146,7 @@ IB_INTERN byte* mlog_parse_nbytes(ulint type, byte *ptr, byte *end_ptr, byte *pa
 /// \return Parsed record end, NULL if not a complete record.
 IB_INTERN byte* mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *page_zip);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 /// \brief Opens a buffer for mlog, writes the initial log record and,
 /// if needed, the field lengths of an index. Reserves space
@@ -159,7 +159,7 @@ IB_INTERN byte* mlog_parse_string(byte *ptr, byte *end_ptr, byte *page, void *pa
 /// \return Buffer, NULL if log mode MTR_LOG_NONE.
 IB_INTERN byte* mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_index_t *index, byte type, ulint size);
 
-#endif // !UNIV_HOTBACKUP
+#endif // !IB_HOTBACKUP
 
 /// \brief Parses a log record written by mlog_open_and_write_index.
 /// \param ptr Buffer.
@@ -169,11 +169,11 @@ IB_INTERN byte* mlog_open_and_write_index(mtr_t *mtr, const byte *rec, dict_inde
 /// \return Parsed record end, NULL if not a complete record.
 IB_INTERN byte* mlog_parse_index(byte *ptr, const byte *end_ptr, ibool comp, dict_index_t **index);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /* Insert, update, and maybe other functions may use this value to define an
 extra mlog buffer size for variable size data */
 #define MLOG_BUF_MARGIN 256
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifndef IB_DO_NOT_INLINE
 #include "mtr_log.inl"

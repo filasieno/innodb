@@ -36,10 +36,10 @@ Created 12/9/1995 Heikki Tuuri
 #include "univ.i"
 #include "ut_byte.hpp"
 #include "ut_lst.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "sync_sync.hpp"
 #include "sync_rw.hpp"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 #include "srv_srv.hpp"
 #include "api_api.hpp"
 
@@ -48,15 +48,15 @@ typedef struct log_struct	log_t;
 /** Redo log group */
 typedef struct log_group_struct	log_group_t;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /** Flag: write to log file? */
 extern	ibool	log_do_write;
 /** Flag: enable debug output when writing to the log? */
 extern	ibool	log_debug_writes;
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 /** Write to log */
 # define log_do_write TRUE
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /** Wait modes for log_write_up_to @{ */
 #define LOG_NO_WAIT		91
@@ -66,7 +66,7 @@ extern	ibool	log_debug_writes;
 /** Maximum number of log groups in log_group_struct::checkpoint_buf */
 #define LOG_MAX_N_GROUPS	32
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Sets the global variable log_fsp_current_free_limit. Also makes a checkpoint,
 so that we know that the limit has been written to a log checkpoint field
@@ -76,7 +76,7 @@ void
 log_fsp_current_free_limit_set_and_checkpoint(
 /*==========================================*/
 	ulint	limit);	/*!< in: limit to set */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /*******************************************************************//**
 Calculates where in log files we find a specified lsn.
 @return	log file number */
@@ -94,7 +94,7 @@ log_calc_where_lsn_is(
 						files */
 	ib_int64_t	log_file_size);		/*!< in: log file size
 						(including the header) */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************************//**
 Acquire the log mutex. */
 IB_INLINE
@@ -368,7 +368,7 @@ log_archived_file_name_gen(
 	char*	buf,	/*!< in: buffer where to write */
 	ulint	id,	/*!< in: group id */
 	ulint	file_no);/*!< in: file number */
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 /******************************************************//**
 Writes info to a buffer of a log group when log files are created in
 backup restoration. */
@@ -381,7 +381,7 @@ log_reset_first_header_and_checkpoint(
 	ib_uint64_t	start);	/*!< in: lsn of the start of the first log file;
 				we pretend that there is a checkpoint at
 				start + LOG_BLOCK_HDR_SIZE */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /********************************************************************//**
 Checks that there is enough free space in the log to start a new query step.
 Flushes the log buffer or makes a new checkpoint if necessary. NOTE: this
@@ -391,7 +391,7 @@ IB_INTERN
 void
 log_check_margins(void);
 /*===================*/
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /******************************************************//**
 Reads a specified log segment to a buffer. */
 IB_INTERN
@@ -440,7 +440,7 @@ ulint
 log_group_get_capacity(
 /*===================*/
 	const log_group_t*	group);	/*!< in: log group */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /************************************************************//**
 Gets a log block flush bit.
 @return	TRUE if this block was the first to be written in a log flush */
@@ -592,16 +592,16 @@ extern log_t*	log_sys;
 /* Values used as flags */
 #define LOG_FLUSH	7652559
 #define LOG_CHECKPOINT	78656949
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 # define LOG_ARCHIVE	11122331
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 #define LOG_RECOVER	98887331
 
 /* The counting of lsn's starts from this value: this must be non-zero */
 #define LOG_START_LSN		((ib_uint64_t) (16 * OS_FILE_LOG_BLOCK_SIZE))
 
-#define LOG_BUFFER_SIZE		(srv_log_buffer_size * UNIV_PAGE_SIZE)
-#define LOG_ARCHIVE_BUF_SIZE	(srv_log_buffer_size * UNIV_PAGE_SIZE / 4)
+#define LOG_BUFFER_SIZE		(srv_log_buffer_size * IB_PAGE_SIZE)
+#define LOG_ARCHIVE_BUF_SIZE	(srv_log_buffer_size * IB_PAGE_SIZE / 4)
 
 /* Offsets of a log block header */
 #define	LOG_BLOCK_HDR_NO	0	/* block number which must be > 0 and
@@ -739,9 +739,9 @@ struct log_group_struct{
 	byte**		file_header_bufs_ptr;/*!< unaligned buffers */
 	byte**		file_header_bufs;/*!< buffers for each file header
 					 in the group */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	/*-----------------------------*/
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	byte**		archive_file_header_bufs_ptr;/*!< unaligned buffers */
 	byte**		archive_file_header_bufs;/*!< buffers for each file
 					header in the group */
@@ -761,7 +761,7 @@ struct log_group_struct{
 					completion function then sets the new
 					value to ..._file_no */
 	ulint		next_archived_offset; /*!< like the preceding field */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 	/*-----------------------------*/
 	ib_uint64_t	scanned_lsn;	/*!< used only in recovery: recovery scan
 					succeeded up to this lsn in this log
@@ -781,16 +781,16 @@ struct log_struct{
 	ib_uint64_t	lsn;		/*!< log sequence number */
 	ulint		buf_free;	/*!< first free offset within the log
 					buffer */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	mutex_t		mutex;		/*!< mutex protecting the log */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	byte*		buf_ptr;	/* unaligned log buffer */
 	byte*		buf;		/*!< log buffer */
 	ulint		buf_size;	/*!< log buffer size in bytes */
 	ulint		max_buf_free;	/*!< recommended maximum value of
 					buf_free, after which the buffer is
 					flushed */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint		old_buf_free;	/*!< value of buf free when log was
 					last time opened; only in the debug
 					version */
@@ -810,7 +810,7 @@ struct log_struct{
 	UT_LIST_BASE_NODE_T(log_group_t)
 			log_groups;	/*!< log groups */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/** The fields involved in the log buffer flush @{ */
 
 	ulint		buf_next_to_write;/*!< first offset in the log buffer
@@ -932,12 +932,12 @@ struct log_struct{
 					checkpoint write is running; a thread
 					should wait for this without owning
 					the log mutex */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	byte*		checkpoint_buf_ptr;/* unaligned checkpoint header */
 	byte*		checkpoint_buf;	/*!< checkpoint header is read to this
 					buffer */
 	/* @} */
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	/** Fields involved in archiving @{ */
 	ulint		archiving_state;/*!< LOG_ARCH_ON, LOG_ARCH_STOPPING
 					LOG_ARCH_STOPPED, LOG_ARCH_OFF */
@@ -972,10 +972,10 @@ struct log_struct{
 					a thread can wait for this event to
 					become signaled */
 	/* @} */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 };
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /** Archiving state @{ */
 #define LOG_ARCH_ON		71
 #define LOG_ARCH_STOPPING	72
@@ -983,7 +983,7 @@ struct log_struct{
 #define LOG_ARCH_STOPPED	74
 #define LOG_ARCH_OFF		75
 /* @} */
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 #ifndef IB_DO_NOT_INLINE
 #include "log0log.inl"

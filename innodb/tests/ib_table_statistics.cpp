@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include <inttypes.h>
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -77,7 +77,7 @@ create_table_t2(
 	ib_idx_sch_t	ib_idx_sch_a = NULL;
 	ib_idx_sch_t	ib_idx_sch_b = NULL;
 	ib_tbl_fmt_t	tbl_fmt = IB_TBL_COMPACT;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -168,7 +168,7 @@ open_table(
 	ib_crsr_t*	crsr)		/*!< out: innodb cursor */
 {
 	ib_err_t	err = DB_SUCCESS;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 #ifdef __WIN__
 	sprintf(table_name, "%s/%s", dbname, name);
@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
 	err = ib_shutdown(IB_SHUTDOWN_NORMAL);
 	assert(err == DB_SUCCESS);
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	VALGRIND_DO_LEAK_CHECK;
 #endif
 

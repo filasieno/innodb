@@ -87,7 +87,7 @@ Created 10/8/1995 Heikki Tuuri
 #include "api_ucode.hpp"
 #include "buf_buddy.hpp"
 #include "page_zip.hpp"
-#include "os_sync.hpp" /* for HAVE_ATOMIC_BUILTINS */
+#include "os_sync.hpp" /* for IB_HAVE_ATOMIC_BUILTINS */
 
 /* FIXME: When we setup the session variables infrastructure. */
 #define sess_lock_wait_timeout(t)	(ses_lock_wait_timeout)
@@ -124,9 +124,9 @@ because srv_parse_log_group_home_dirs() parses it's input argument
 destructively. The copy is done using ut_malloc(). */
 IB_INTERN char*	srv_log_group_home_dir = NULL;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 IB_INTERN char*	srv_arch_dir	= NULL;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 /** store to its own file each table created by an user; data
 dictionary tables are in the system tablespace 0 */
@@ -207,11 +207,11 @@ in the buffer cache and accessed sequentially for InnoDB to trigger a
 readahead request. */
 IB_INTERN ulong	srv_read_ahead_threshold	= 56;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 IB_INTERN ibool	srv_log_archive_on	= FALSE;
 IB_INTERN ibool	srv_archive_recovery	= 0;
 IB_INTERN ib_uint64_t	srv_archive_recovery_limit_lsn;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 IB_INTERN ulint	srv_unix_file_flush_method = SRV_UNIX_FSYNC;
 IB_INTERN ulint	srv_win_file_flush_method = SRV_WIN_IO_UNBUFFERED;
@@ -335,13 +335,13 @@ IB_INTERN int		srv_query_thread_priority = 0;
 IB_INTERN ulong	srv_n_spin_wait_rounds	= 30;
 IB_INTERN ulong	srv_spin_wait_delay	= 6;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 IB_INTERN ibool	srv_print_thread_releases	= FALSE;
 IB_INTERN ibool	srv_print_lock_waits		= FALSE;
 IB_INTERN ibool	srv_print_buf_io		= FALSE;
 IB_INTERN ibool	srv_print_log_io		= FALSE;
 IB_INTERN ibool	srv_print_latch_waits		= FALSE;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 IB_INTERN ulint	srv_n_rows_inserted		= 0;
 IB_INTERN ulint	srv_n_rows_updated		= 0;
@@ -374,9 +374,9 @@ static	mutex_t		srv_innodb_monitor_mutex;
 /** Mutex for locking srv_monitor_file */
 IB_INTERN mutex_t	srv_monitor_file_mutex;
 
-#ifdef UNIV_LINUX
+#ifdef IB_LINUX
 static ulint		srv_main_thread_process_no	= 0;
-#endif /* UNIV_LINUX */
+#endif /* IB_LINUX */
 static ulint		srv_main_thread_id		= 0;
 
 /* The following count work done by srv_master_thread. */
@@ -676,9 +676,9 @@ srv_var_init(void)
 
 	srv_use_sys_malloc = FALSE;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	srv_arch_dir	= NULL;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 	srv_file_per_table = FALSE;
 	srv_file_format = 0;
@@ -707,11 +707,11 @@ srv_var_init(void)
 	srv_lock_table_size = ULINT_MAX;
 	srv_n_file_io_threads = ULINT_MAX;
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 	srv_log_archive_on = FALSE;
 	srv_archive_recovery = 0;
 	srv_archive_recovery_limit_lsn = 0;
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
 
 	srv_unix_file_flush_method = SRV_UNIX_FSYNC;
 	srv_win_file_flush_method = SRV_WIN_IO_UNBUFFERED;
@@ -752,9 +752,9 @@ srv_var_init(void)
 
 	srv_conc_slots = NULL;
 	srv_last_monitor_time = 0;
-#ifdef UNIV_LINUX
+#ifdef IB_LINUX
 	srv_main_thread_process_no = 0;
-#endif /* UNIV_LINUX */
+#endif /* IB_LINUX */
 
 	srv_conc_n_waiting_threads = 0;
 
@@ -1136,19 +1136,19 @@ srv_normalize_init_values(void)
 
 	for (i = 0; i < n; i++) {
 		srv_data_file_sizes[i] = srv_data_file_sizes[i]
-			* ((1024 * 1024) / UNIV_PAGE_SIZE);
+			* ((1024 * 1024) / IB_PAGE_SIZE);
 	}
 
 	srv_last_file_size_max = srv_last_file_size_max
-		* ((1024 * 1024) / UNIV_PAGE_SIZE);
+		* ((1024 * 1024) / IB_PAGE_SIZE);
 
-	srv_log_file_size = srv_log_file_curr_size / UNIV_PAGE_SIZE;
-	srv_log_file_curr_size = srv_log_file_size * UNIV_PAGE_SIZE;
+	srv_log_file_size = srv_log_file_curr_size / IB_PAGE_SIZE;
+	srv_log_file_curr_size = srv_log_file_size * IB_PAGE_SIZE;
 
-	srv_log_buffer_size = srv_log_buffer_curr_size / UNIV_PAGE_SIZE;
-	srv_log_buffer_curr_size = srv_log_buffer_size * UNIV_PAGE_SIZE;
+	srv_log_buffer_size = srv_log_buffer_curr_size / IB_PAGE_SIZE;
+	srv_log_buffer_curr_size = srv_log_buffer_size * IB_PAGE_SIZE;
 
-	srv_lock_table_size = 5 * (srv_buf_pool_size / UNIV_PAGE_SIZE);
+	srv_lock_table_size = 5 * (srv_buf_pool_size / IB_PAGE_SIZE);
 
 	return(DB_SUCCESS);
 }
@@ -1674,7 +1674,7 @@ srv_printf_innodb_monitor(
 			(ulong) n_reserved);
 	}
 
-#ifdef UNIV_LINUX
+#ifdef IB_LINUX
 	ib_logger(ib_stream, "Main thread process no. %lu, id %lu, state: %s\n",
 		(ulong) srv_main_thread_process_no,
 		(ulong) srv_main_thread_id,
@@ -1755,21 +1755,21 @@ srv_export_innodb_status(void)
 		= UT_LIST_GET_LEN(buf_pool->flush_list);
 	export_vars.innodb_buffer_pool_pages_free
 		= UT_LIST_GET_LEN(buf_pool->free);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	export_vars.innodb_buffer_pool_pages_latched
 		= buf_get_latched_pages_number();
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 	export_vars.innodb_buffer_pool_pages_total = buf_pool->curr_size;
 
 	export_vars.innodb_buffer_pool_pages_misc = buf_pool->curr_size
 		- UT_LIST_GET_LEN(buf_pool->LRU)
 		- UT_LIST_GET_LEN(buf_pool->free);
-#ifdef HAVE_ATOMIC_BUILTINS
-	export_vars.innodb_have_atomic_builtins = 1;
+#ifdef IB_HAVE_ATOMIC_BUILTINS
+	export_vars.innodb_IB_HAVE_atomic_builtins = 1;
 #else
-	export_vars.innodb_have_atomic_builtins = 0;
+	export_vars.innodb_IB_HAVE_atomic_builtins = 0;
 #endif
-	export_vars.innodb_page_size = UNIV_PAGE_SIZE;
+	export_vars.innodb_page_size = IB_PAGE_SIZE;
 	export_vars.innodb_log_waits = srv_log_waits;
 	export_vars.innodb_os_log_written = srv_os_log_written;
 	export_vars.innodb_os_log_fsyncs = fil_n_log_flushes;
@@ -1821,7 +1821,7 @@ srv_monitor_thread(
 	ulint		mutex_skipped;
 	ibool		last_srv_print_monitor;
 
-#ifdef UNIV_DEBUG_THREAD_CREATION
+#ifdef IB_DEBUG_THREAD_CREATION
 	ib_logger(ib_stream, "Lock timeout thread starts, id %lu\n",
 		os_thread_pf(os_thread_get_curr_id()));
 #endif
@@ -2077,7 +2077,7 @@ srv_error_monitor_thread(
 
 	old_lsn = srv_start_lsn;
 
-#ifdef UNIV_DEBUG_THREAD_CREATION
+#ifdef IB_DEBUG_THREAD_CREATION
 	ib_logger(ib_stream, "Error monitor thread starts, id %lu\n",
 		os_thread_pf(os_thread_get_curr_id()));
 #endif
@@ -2240,13 +2240,13 @@ srv_master_thread(
 	ibool		skip_sleep	= FALSE;
 	ulint		i;
 
-#ifdef UNIV_DEBUG_THREAD_CREATION
+#ifdef IB_DEBUG_THREAD_CREATION
 	ib_logger(ib_stream, "Master thread starts, id %lu\n",
 		os_thread_pf(os_thread_get_curr_id()));
 #endif
-#ifdef UNIV_LINUX
+#ifdef IB_LINUX
 	srv_main_thread_process_no = os_proc_get_number();
-#endif /* UNIV_LINUX */
+#endif /* IB_LINUX */
 	srv_main_thread_id = os_thread_pf(os_thread_get_curr_id());
 
 	srv_table_reserve_slot(SRV_MASTER);
@@ -2341,7 +2341,7 @@ loop:
 			srv_sync_log_buffer_in_background();
 		}
 
-		if (UNIV_UNLIKELY(buf_get_modified_ratio_pct()
+		if (IB_UNLIKELY(buf_get_modified_ratio_pct()
 				  > srv_max_buf_pool_modified_pct)) {
 
 			/* Try to keep the number of modified pages in the

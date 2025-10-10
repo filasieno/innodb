@@ -34,7 +34,7 @@ AC_DEFUN([PANDORA_PTHREAD_YIELD],[
       [pandora_cv_pthread_yield_zero_arg=yes],
       [pandora_cv_pthread_yield_zero_arg=no])])
   AS_IF([test "$pandora_cv_pthread_yield_zero_arg" = "yes"],[
-    AC_DEFINE([HAVE_PTHREAD_YIELD_ZERO_ARG], [1],
+    AC_DEFINE([IB_HAVE_PTHREAD_YIELD_ZERO_ARG], [1],
               [pthread_yield that doesn't take any arguments])
   ])
 
@@ -49,7 +49,7 @@ AC_DEFUN([PANDORA_PTHREAD_YIELD],[
       [pandora_cv_pthread_yield_one_arg=yes],
       [pandora_cv_pthread_yield_one_arg=no])])
   AS_IF([test "$pandora_cv_pthread_yield_one_arg" = "yes"],[
-    AC_DEFINE([HAVE_PTHREAD_YIELD_ONE_ARG], [1],
+    AC_DEFINE([IB_HAVE_PTHREAD_YIELD_ONE_ARG], [1],
               [pthread_yield function with one argument])
   ])
 
@@ -81,7 +81,7 @@ pthread_getspecific((pthread_key_t) NULL);
     [pandora_cv_getspecific_args=other])])
   if test "$pandora_cv_getspecific_args" = "other"
   then
-    AC_DEFINE([HAVE_NONPOSIX_PTHREAD_GETSPECIFIC], [1],
+    AC_DEFINE([IB_HAVE_NONPOSIX_PTHREAD_GETSPECIFIC], [1],
               [For some non posix threads])
   fi
 
@@ -102,7 +102,7 @@ pthread_getspecific((pthread_key_t) NULL);
       [pandora_cv_mutex_init_args=other])])
   if test "$pandora_cv_mutex_init_args" = "other"
   then
-    AC_DEFINE([HAVE_NONPOSIX_PTHREAD_MUTEX_INIT], [1],
+    AC_DEFINE([IB_HAVE_NONPOSIX_PTHREAD_MUTEX_INIT], [1],
               [For some non posix threads])
   fi
 #---END:
@@ -124,7 +124,7 @@ readdir_r((DIR *) NULL, (struct dirent *) NULL, (struct dirent **) NULL); ]])],
     [pandora_cv_readdir_r=other])])
 if test "$pandora_cv_readdir_r" = "POSIX"
 then
-  AC_DEFINE([HAVE_READDIR_R], [1], [POSIX readdir_r])
+  AC_DEFINE([IB_HAVE_READDIR_R], [1], [POSIX readdir_r])
 fi
 
 # Check definition of posix sigwait()
@@ -149,7 +149,7 @@ sigwait(&set,&sig);
     [pandora_cv_sigwait=other])])
 if test "$pandora_cv_sigwait" = "POSIX"
 then
-  AC_DEFINE([HAVE_SIGWAIT], [1], [POSIX sigwait])
+  AC_DEFINE([IB_HAVE_SIGWAIT], [1], [POSIX sigwait])
 fi
 
 if test "$pandora_cv_sigwait" != "POSIX"
@@ -175,7 +175,7 @@ sigwait(&set);
     [pandora_cv_sigwait=other])])
 if test "$pandora_cv_sigwait" = "NONPOSIX"
 then
-  AC_DEFINE([HAVE_NONPOSIX_SIGWAIT], [1], [sigwait with one argument])
+  AC_DEFINE([IB_HAVE_NONPOSIX_SIGWAIT], [1], [sigwait with one argument])
 fi
 fi
 #---END:
@@ -198,7 +198,7 @@ pthread_attr_setscope(&thr_attr,0);
     [pandora_cv_pthread_attr_setscope=no])])
 if test "$pandora_cv_pthread_attr_setscope" = "yes"
 then
-  AC_DEFINE([HAVE_PTHREAD_ATTR_SETSCOPE], [1], [pthread_attr_setscope])
+  AC_DEFINE([IB_HAVE_PTHREAD_ATTR_SETSCOPE], [1], [pthread_attr_setscope])
 fi
 
 
@@ -214,7 +214,7 @@ extern "C"
 ], ac_cv_pthread_yield_zero_arg=yes, ac_cv_pthread_yield_zero_arg=yeso)])
 if test "$ac_cv_pthread_yield_zero_arg" = "yes"
 then
-  AC_DEFINE([HAVE_PTHREAD_YIELD_ZERO_ARG], [1],
+  AC_DEFINE([IB_HAVE_PTHREAD_YIELD_ZERO_ARG], [1],
             [pthread_yield that doesn't take any arguments])
 fi
 AC_CACHE_CHECK([if pthread_yield takes 1 argument], ac_cv_pthread_yield_one_arg,
@@ -229,7 +229,7 @@ extern "C"
 ], ac_cv_pthread_yield_one_arg=yes, ac_cv_pthread_yield_one_arg=no)])
 if test "$ac_cv_pthread_yield_one_arg" = "yes"
 then
-  AC_DEFINE([HAVE_PTHREAD_YIELD_ONE_ARG], [1],
+  AC_DEFINE([IB_HAVE_PTHREAD_YIELD_ONE_ARG], [1],
             [pthread_yield function with one argument])
 fi
 
@@ -247,12 +247,12 @@ AC_DEFUN([_PANDORA_SEARCH_PTHREAD],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_PTHREAD],[
+AC_DEFUN([PANDORA_IB_HAVE_PTHREAD],[
   AC_REQUIRE([_PANDORA_SEARCH_PTHREAD])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_PTHREAD],[
-  AC_REQUIRE([PANDORA_HAVE_PTHREAD])
+  AC_REQUIRE([PANDORA_IB_HAVE_PTHREAD])
   AS_IF([test "x$acx_pthread_ok" != "xyes"],[
     AC_MSG_ERROR(could not find libpthread)])
 ])

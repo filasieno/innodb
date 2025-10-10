@@ -18,26 +18,26 @@ AC_DEFUN([_PANDORA_SEARCH_LIBHAILDB],[
 
 
   AS_IF([test "x$ac_enable_libhaildb" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(haildb,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(haildb,,[
       #include <haildb.h>
     ],[
       ib_set_panic_handler(NULL);
     ])
     AS_IF([test "x${ac_cv_libhaildb}" = "xyes"],[
-      AC_DEFINE([HAVE_HAILDB_H],[1],[Do we have haildb.h])
+      AC_DEFINE([IB_HAVE_HAILDB_H],[1],[Do we have haildb.h])
       ])
   ],[
     ac_cv_libhaildb="no"
   ])
-  AM_CONDITIONAL(HAVE_LIBHAILDB, [test "x${ac_cv_libhaildb}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBHAILDB, [test "x${ac_cv_libhaildb}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBHAILDB],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBHAILDB],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBHAILDB])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBHAILDB],[
-  AC_REQUIRE([PANDORA_HAVE_LIBHAILDB])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBHAILDB])
   AS_IF([test "x${ac_cv_libhaildb}" = "xno"],
       AC_MSG_ERROR([libhaildb 2.2.0 or later is required for ${PACKAGE}]))
 ])

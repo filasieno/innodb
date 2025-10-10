@@ -143,7 +143,7 @@ row_purge_remove_clust_if_poss_low(
 				       rec, index, rec_get_offsets(
 					       rec, index, offsets_,
 					       ULINT_UNDEFINED, &heap)))) {
-		if (UNIV_LIKELY_NULL(heap)) {
+		if (IB_LIKELY_NULL(heap)) {
 			mem_heap_free(heap);
 		}
 		/* Someone else has modified the record later: do not remove */
@@ -152,7 +152,7 @@ row_purge_remove_clust_if_poss_low(
 		return(TRUE);
 	}
 
-	if (UNIV_LIKELY_NULL(heap)) {
+	if (IB_LIKELY_NULL(heap)) {
 		mem_heap_free(heap);
 	}
 
@@ -439,7 +439,7 @@ skip_secondaries:
 				   dfield_get_data(&ufield->new_val))
 				- node->undo_rec;
 
-			ut_a(internal_offset < UNIV_PAGE_SIZE);
+			ut_a(internal_offset < IB_PAGE_SIZE);
 
 			trx_undo_decode_roll_ptr(node->roll_ptr,
 						 &is_insert, &rseg_id,

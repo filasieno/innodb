@@ -26,7 +26,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "univ.i"
 #include "ut_byte.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "mtr_types.hpp"
 #include "buf_types.hpp"
 
@@ -61,7 +61,7 @@ IB_INTERN
 void
 buf_flush_free_margin(void);
 /*=======================*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /********************************************************************//**
 Initializes a page for writing to the tablespace. */
 IB_INTERN
@@ -72,7 +72,7 @@ buf_flush_init_for_writing(
 	void*		page_zip_,	/*!< in/out: compressed page, or NULL */
 	ib_uint64_t	newest_lsn);	/*!< in: newest modification lsn
 					to the page */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*******************************************************************//**
 This utility flushes dirty blocks from the end of the LRU list or flush_list.
 NOTE 1: in the case of an LRU flush the calling thread may own latches to
@@ -173,7 +173,7 @@ ulint
 buf_flush_get_desired_flush_rate(void);
 /*==================================*/
 
-#if defined UNIV_DEBUG || defined UNIV_BUF_DEBUG
+#if defined IB_DEBUG || defined IB_BUF_DEBUG
 /******************************************************************//**
 Validates the flush list.
 @return	TRUE if ok */
@@ -181,7 +181,7 @@ IB_INTERN
 ibool
 buf_flush_validate(void);
 /*====================*/
-#endif /* UNIV_DEBUG || UNIV_BUF_DEBUG */
+#endif /* IB_DEBUG || IB_BUF_DEBUG */
 
 /******************************************************************//**
 Initialize the red-black tree to speed up insertions into the flush_list
@@ -206,7 +206,7 @@ sweep). */
 #define BUF_FLUSH_FREE_BLOCK_MARGIN	(5 + BUF_READ_AHEAD_AREA)
 /** Extra margin to apply above BUF_FLUSH_FREE_BLOCK_MARGIN */
 #define BUF_FLUSH_EXTRA_MARGIN		(BUF_FLUSH_FREE_BLOCK_MARGIN / 4 + 100)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifndef IB_DO_NOT_INLINE
 #include "buf0flu.inl"

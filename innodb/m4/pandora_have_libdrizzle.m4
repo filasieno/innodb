@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBDRIZZLE],[
     [ac_enable_libdrizzle="yes"])
 
   AS_IF([test "x$ac_enable_libdrizzle" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(drizzle,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(drizzle,,[
       #include <libdrizzle/drizzle_client.h>
     ],[
       drizzle_st drizzle;
@@ -27,15 +27,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBDRIZZLE],[
     ac_cv_libdrizzle="no"
   ])
   
-  AM_CONDITIONAL(HAVE_LIBDRIZZLE, [test "x${ac_cv_libdrizzle}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBDRIZZLE, [test "x${ac_cv_libdrizzle}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBDRIZZLE],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBDRIZZLE],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBDRIZZLE])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBDRIZZLE],[
-  AC_REQUIRE([PANDORA_HAVE_LIBDRIZZLE])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBDRIZZLE])
   AS_IF([test "x${ac_cv_libdrizzle}" = "xno"],[
     AC_MSG_ERROR([libdrizzle is required for ${PACKAGE}])
   ],[

@@ -35,9 +35,9 @@ Created 1/20/1994 Heikki Tuuri
 
 #include "univ.i"
 
-#ifndef UNIV_HOTBACKUP
-# include "os0sync.h" /* for HAVE_ATOMIC_BUILTINS */
-#endif /* UNIV_HOTBACKUP */
+#ifndef IB_HOTBACKUP
+# include "os0sync.h" /* for IB_HAVE_ATOMIC_BUILTINS */
+#endif /* IB_HOTBACKUP */
 
 #include <time.h>
 #include <ctype.h>
@@ -58,8 +58,8 @@ All log messages are written to this function. It should have the same
 behavior as fprintf(). */
 typedef int (*ib_logger_t)(ib_stream_t, const char*, ...);
 
-#ifndef UNIV_HOTBACKUP
-#if defined(HAVE_IB_PAUSE_INSTRUCTION)
+#ifndef IB_HOTBACKUP
+#if defined(IB_HAVE_IB_PAUSE_INSTRUCTION)
 #  ifdef WIN32
      /* In the Win32 API, the x86 PAUSE instruction is executed by calling
      the YieldProcessor macro defined in WinNT.h. It is a CPU architecture-
@@ -72,7 +72,7 @@ typedef int (*ib_logger_t)(ib_stream_t, const char*, ...);
      to memory). */
 #    define UT_RELAX_CPU() __asm__ __volatile__ ("pause")
 #  endif
-#elif defined(HAVE_SOLARIS_ATOMICS)
+#elif defined(IB_HAVE_SOLARIS_ATOMICS)
 #  define UT_RELAX_CPU() do { \
      volatile lint	volatile_var; \
      os_compare_and_swap_lint(&volatile_var, 0, 1); \
@@ -96,7 +96,7 @@ do {								\
 		os_thread_sleep(2000 /* 2 ms */);		\
 	}							\
 } while (0)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /********************************************************//**
 Gets the high 32 bits in a ulint. That is makes a shift >> 32,
@@ -162,7 +162,7 @@ ut_pair_cmp(
 Determines if a number is zero or a power of two.
 @param n	in: number
 @return		nonzero if n is zero or a power of two; zero otherwise */
-#define ut_is_2pow(n) UNIV_LIKELY(!((n) & ((n) - 1)))
+#define ut_is_2pow(n) IB_LIKELY(!((n) & ((n) - 1)))
 /*************************************************************//**
 Calculates fast the remainder of n/m when m is a power of two.
 @param n	in: numerator
@@ -229,7 +229,7 @@ IB_INTERN
 ib_time_t
 ut_time(void);
 /*=========*/
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************//**
 Returns system time.
 Upon successful completion, the value 0 is returned; otherwise the
@@ -262,7 +262,7 @@ IB_INTERN
 ulint
 ut_time_ms(void);
 /*============*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************//**
 Returns the difference of two times in seconds.
@@ -287,7 +287,7 @@ void
 ut_sprintf_timestamp(
 /*=================*/
 	char*	buf); /*!< in: buffer where to sprintf */
-#ifdef UNIV_HOTBACKUP
+#ifdef IB_HOTBACKUP
 /**********************************************************//**
 Sprintfs a timestamp to a buffer with no spaces and with ':' characters
 replaced by '_'. */
@@ -305,7 +305,7 @@ ut_get_year_month_day(
 	ulint*	year,	/*!< out: current year */
 	ulint*	month,	/*!< out: month */
 	ulint*	day);	/*!< out: day */
-#else /* UNIV_HOTBACKUP */
+#else /* IB_HOTBACKUP */
 /*************************************************************//**
 Runs an idle loop on CPU. The argument gives the desired delay
 in microseconds on 100 MHz Pentium + Visual C++.
@@ -315,7 +315,7 @@ ulint
 ut_delay(
 /*=====*/
 	ulint	delay);	/*!< in: delay in microseconds on 100 MHz Pentium */
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 /*************************************************************//**
 Prints the contents of a memory buffer in hex and ascii. */
 IB_INTERN
@@ -335,7 +335,7 @@ ut_print_filename(
 	ib_stream_t	ib_stream,	/*!< in: output stream */
 	const char*	name);		/*!< in: name to print */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /* Forward declaration of transaction handle */
 struct trx_struct;
 
@@ -367,7 +367,7 @@ ut_print_namel(
 	const char*	name,		/*!< in: name to print */
 	ulint		namelen);	/*!< in: length of name */
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #ifdef __WIN__
 /**********************************************************************//**

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include "univ.i"
@@ -375,7 +375,7 @@ IB_INLINE void ib_read_tuple(const rec_t* rec, ib_bool_t page_format, ib_tuple_t
 			data = btr_rec_copy_externally_stored_field(
 				copy, offsets, zip_size, i, &len,
 				tuple->heap);
-			ut_a(len != UNIV_SQL_NULL);
+			ut_a(len != IB_SQL_NULL);
 		}
 		dfield_set_data(dfield, data, len);
 	}
@@ -614,7 +614,7 @@ ib_err_t ib_trx_rollback(ib_trx_t ib_trx)
 IB_INLINE ibool ib_check_col_is_ok(const char* name, ib_col_type_t ib_col_type, ib_col_attr_t ib_col_attr, ib_ulint_t len)
 {
 	UT_DBG_ENTER_FUNC;
-	if (ut_strlen(name) > IB_MAX_COL_NAME_LEN) {
+	if (ut_strlen(name) > IB_MAX_COL_IB_NAME_LEN) {
 		return(FALSE);
 	} else if ((ib_col_type == IB_VARCHAR
 		    || ib_col_type == IB_CHAR
@@ -1205,22 +1205,22 @@ static const index_def_t* ib_copy_index_definition(ib_index_def_t* ib_index_def,
 {
 	ulint i;
 	ib_key_col_t* ib_col;
-	ulint name_len;
+	ulint IB_NAME_LEN;
 	index_def_t* index_def;
 	char* index_name;
 	UT_DBG_ENTER_FUNC;
 	index_def = (index_def_t*) mem_heap_zalloc(ib_index_def->heap, sizeof(*index_def));
-	name_len = ut_strlen(ib_index_def->name);
-	index_name = mem_heap_zalloc(ib_index_def->heap, name_len + 2);
+	IB_NAME_LEN = ut_strlen(ib_index_def->name);
+	index_name = mem_heap_zalloc(ib_index_def->heap, IB_NAME_LEN + 2);
 	// The TEMP_INDEX_PREFIX is only needed if we are rebuilding an
 	// index or creating a new index on a table that has records. If
 	// the definition is owned by a table schema then we can be sure that
 	// this index definition is part of a CREATE TABLE. 
 	if (ib_index_def->schema == NULL) {
 		*index_name = TEMP_INDEX_PREFIX;
-		memcpy(index_name + 1, ib_index_def->name, name_len + 1);
+		memcpy(index_name + 1, ib_index_def->name, IB_NAME_LEN + 1);
 	} else {
-		memcpy(index_name, ib_index_def->name, name_len);
+		memcpy(index_name, ib_index_def->name, IB_NAME_LEN);
 	}
 	index_def->name = index_name;
 	index_def->n_fields = ib_vector_size(ib_index_def->cols);
@@ -2199,8 +2199,8 @@ ib_err_t ib_cursor_insert_row(ib_crsr_t ib_crsr, const ib_tpl_t ib_tpl)
 			ut_ad(mtype == dtype_get_mtype(dfield_get_type(dst_field)));
 			// Do a shallow copy. 
 			dfield_set_data(dst_field, src_field->data, src_field->len);
-			UNIV_MEM_ASSERT_RW(src_field->data, src_field->len);
-			UNIV_MEM_ASSERT_RW(dst_field->data, dst_field->len);
+			IB_MEM_ASSERT_RW(src_field->data, src_field->len);
+			IB_MEM_ASSERT_RW(dst_field->data, dst_field->len);
 		}
 	}
 	if (err == DB_SUCCESS) {
@@ -2239,7 +2239,7 @@ static void ib_update_col(ib_cursor_t* cursor, upd_field_t* upd_field, ulint col
 	dict_table_t* table = cursor->prebuilt->table;
 	dict_index_t* dict_index = dict_table_get_first_index(table);
 	ulint data_len = dfield_get_len(dfield);
-	if (data_len == UNIV_SQL_NULL) {
+	if (data_len == IB_SQL_NULL) {
 		dfield_set_null(&upd_field->new_val);
 	} else {
 		dfield_copy_data(&upd_field->new_val, dfield);
@@ -2685,7 +2685,7 @@ ib_err_t ib_col_set_value(ib_tpl_t ib_tpl, ib_ulint_t col_no, const void* src, i
 	ib_tuple_t* tuple = (ib_tuple_t*) ib_tpl;
 	IB_CHECK_PANIC();
 	UT_DBG_ENTER_FUNC;
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	mem_heap_verify(tuple->heap);
 #endif
 	dfield = ib_col_get_dfield(tuple, col_no);
@@ -2771,7 +2771,7 @@ ib_err_t ib_col_set_value(ib_tpl_t ib_tpl, ib_ulint_t col_no, const void* src, i
 	} else {
 		dfield_set_len(dfield, len);
 	}
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	mem_heap_verify(tuple->heap);
 #endif
 	return(DB_SUCCESS);
@@ -2784,7 +2784,7 @@ ib_ulint_t ib_col_get_len(ib_ulint_t i)
 	ib_tuple_t* tuple = (ib_tuple_t*) ib_tpl;	
 	const dfield_t* dfield = ib_col_get_dfield(tuple, i);
 	ulint data_len = dfield_get_len(dfield);
-	return data_len == UNIV_SQL_NULL ? IB_SQL_NULL : data_len;
+	return data_len == IB_SQL_NULL ? IB_SQL_NULL : data_len;
 }
 
 IB_INLINE ib_ulint_t ib_col_copy_value_low(ib_ulint_t i, void* dst, ib_ulint_t len)
@@ -2797,7 +2797,7 @@ IB_INLINE ib_ulint_t ib_col_copy_value_low(ib_ulint_t i, void* dst, ib_ulint_t l
 	dfield = ib_col_get_dfield(tuple, i);
 	data = dfield_get_data(dfield);
 	data_len = dfield_get_len(dfield);
-	if (data_len != UNIV_SQL_NULL) {
+	if (data_len != IB_SQL_NULL) {
 		const dtype_t*  dtype = dfield_get_type(dfield);
 		switch (dtype_get_mtype(dfield_get_type(dfield))) {
 		case DATA_INT: {
@@ -2988,7 +2988,7 @@ const void* ib_col_get_value(ib_tpl_t ib_tpl, ib_ulint_t i)
 	dfield = ib_col_get_dfield(tuple, i);
 	data = dfield_get_data(dfield);
 	data_len = dfield_get_len(dfield);
-	return(data_len != UNIV_SQL_NULL ? data : NULL);
+	return(data_len != IB_SQL_NULL ? data : NULL);
 }
 
 ib_ulint_t ib_col_get_meta(ib_tpl_t ib_tpl, ib_ulint_t i, ib_col_meta_t* ib_col_meta) 
@@ -3053,7 +3053,7 @@ ib_err_t ib_tuple_get_cluster_key(ib_crsr_t ib_crsr, ib_tpl_t* ib_dst_tpl, const
 		src_field = dtuple_get_nth_field(src_tuple->ptr, pos);
 		dst_field = dtuple_get_nth_field(dst_tuple->ptr, i);
 		if (!dfield_is_null(src_field)) {
-			UNIV_MEM_ASSERT_RW(src_field->data, src_field->len);
+			IB_MEM_ASSERT_RW(src_field->data, src_field->len);
 			dst_field->data = mem_heap_dup(
 				dst_tuple->heap,
 				src_field->data,
@@ -3090,7 +3090,7 @@ ib_err_t ib_tuple_copy(ib_tpl_t ib_dst_tpl, const ib_tpl_t ib_src_tpl)
 		src_field = dtuple_get_nth_field(src_tuple->ptr, i);
 		dst_field = dtuple_get_nth_field(dst_tuple->ptr, i);
 		if (!dfield_is_null(src_field)) {
-			UNIV_MEM_ASSERT_RW(src_field->data, src_field->len);
+			IB_MEM_ASSERT_RW(src_field->data, src_field->len);
 			dst_field->data = mem_heap_dup(
 				dst_tuple->heap,
 				src_field->data,
@@ -3493,19 +3493,19 @@ void ib_cursor_set_simple_select(ib_crsr_t ib_crsr)
 	prebuilt->simple_select = TRUE;
 }
 
-void ib_savepoint_take(ib_trx_t ib_trx, const void* name, ib_ulint_t name_len)
+void ib_savepoint_take(ib_trx_t ib_trx, const void* name, ib_ulint_t IB_NAME_LEN)
 {
 	trx_named_savept_t* savep;
 	trx_t* trx = (trx_t*) ib_trx;
 	ut_a(trx);
 	ut_a(name != NULL);
-	ut_a(name_len > 0);
+	ut_a(IB_NAME_LEN > 0);
 	ut_a(trx->conc_state != TRX_NOT_STARTED);
 	savep = UT_LIST_GET_FIRST(trx->trx_savepoints);
 	// Check if there is a savepoint with the same name already.
 	while (savep != NULL) {
-		if (name_len == savep->name_len
-		    && 0 == ut_memcmp(savep->name, name, name_len)) {
+		if (IB_NAME_LEN == savep->IB_NAME_LEN
+		    && 0 == ut_memcmp(savep->name, name, IB_NAME_LEN)) {
 			break;
 		}
 		savep = UT_LIST_GET_NEXT(trx_savepoints, savep);
@@ -3516,15 +3516,15 @@ void ib_savepoint_take(ib_trx_t ib_trx, const void* name, ib_ulint_t name_len)
 		mem_free(savep);
 	}
 	// Create a new savepoint and add it as the last in the list
-	savep = mem_alloc(sizeof(trx_named_savept_t) + name_len);
+	savep = mem_alloc(sizeof(trx_named_savept_t) + IB_NAME_LEN);
 	savep->name = savep + 1;
 	savep->savept = trx_savept_take(trx);
-	savep->name_len = name_len;
-	ut_memcpy(savep->name, name, name_len);
+	savep->IB_NAME_LEN = IB_NAME_LEN;
+	ut_memcpy(savep->name, name, IB_NAME_LEN);
 	UT_LIST_ADD_LAST(trx_savepoints, trx->trx_savepoints, savep);
 }
 
-ib_err_t ib_savepoint_release(ib_trx_t ib_trx, const void* name, ib_ulint_t name_len) 
+ib_err_t ib_savepoint_release(ib_trx_t ib_trx, const void* name, ib_ulint_t IB_NAME_LEN) 
 {
 	trx_named_savept_t* savep;
 	trx_t* 		trx = (trx_t*) ib_trx;
@@ -3532,8 +3532,8 @@ ib_err_t ib_savepoint_release(ib_trx_t ib_trx, const void* name, ib_ulint_t name
 	savep = UT_LIST_GET_FIRST(trx->trx_savepoints);
 	// Search for the savepoint by name and free if found.
 	while (savep != NULL) {
-		if (name_len == savep->name_len
-		    && 0 == ut_memcmp(savep->name, name, name_len)) {
+		if (IB_NAME_LEN == savep->IB_NAME_LEN
+		    && 0 == ut_memcmp(savep->name, name, IB_NAME_LEN)) {
 			UT_LIST_REMOVE(trx_savepoints,
 					trx->trx_savepoints, savep);
 			mem_free(savep);
@@ -3544,7 +3544,7 @@ ib_err_t ib_savepoint_release(ib_trx_t ib_trx, const void* name, ib_ulint_t name
 	return(DB_NO_SAVEPOINT);
 }
 
-ib_err_t b_savepoint_rollback(ib_trx_t ib_trx, const void* name, ib_ulint_t name_len) 
+ib_err_t b_savepoint_rollback(ib_trx_t ib_trx, const void* name, ib_ulint_t IB_NAME_LEN) 
 {
 	ib_err_t 	err;
 	trx_named_savept_t* savep;
@@ -3562,8 +3562,8 @@ ib_err_t b_savepoint_rollback(ib_trx_t ib_trx, const void* name, ib_ulint_t name
 	savep = UT_LIST_GET_FIRST(trx->trx_savepoints);
 	if (name != NULL) {
 		while (savep != NULL) {
-			if (savep->name_len == name_len
-			    && 0 == ut_memcmp(savep->name, name, name_len)) {
+			if (savep->IB_NAME_LEN == IB_NAME_LEN
+			    && 0 == ut_memcmp(savep->name, name, IB_NAME_LEN)) {
 				// Found
 				break;
 			}
@@ -3787,7 +3787,7 @@ ib_err_t ib_schema_tables_iterate(ib_trx_t ib_trx, ib_schema_visitor_table_all_t
 			// Can't have NULL columns.
 			ut_a(ptr != NULL);
 			len = ib_col_get_meta_low(ib_tpl, 0, &ib_col_meta);
-			ut_a(len != UNIV_SQL_NULL);
+			ut_a(len != IB_SQL_NULL);
 			if (visitor(arg, (const char*) ptr, len)) {
 				break;
 			}
@@ -4017,9 +4017,9 @@ ib_err_t ib_get_table_statistics(ib_crsr_t ib_crsr, ib_table_stats_t *table_stat
 	}
 	table_stats->stat_n_rows= table->stat_n_rows;
 	table_stats->stat_clustered_index_size=
-		table->stat_clustered_index_size * UNIV_PAGE_SIZE;
+		table->stat_clustered_index_size * IB_PAGE_SIZE;
 	table_stats->stat_sum_of_other_index_sizes =
-		table->stat_sum_of_other_index_sizes * UNIV_PAGE_SIZE;
+		table->stat_sum_of_other_index_sizes * IB_PAGE_SIZE;
 	table_stats->stat_modified_counter = table->stat_modified_counter;
 	return DB_SUCCESS;
 }

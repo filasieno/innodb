@@ -50,7 +50,7 @@ row_ext_cache_fill(
 	ut_ad(dfield_is_ext(dfield));
 	ut_a(f_len >= BTR_EXTERN_FIELD_REF_SIZE);
 
-	if (UNIV_UNLIKELY(!memcmp(field_ref_zero,
+	if (IB_UNLIKELY(!memcmp(field_ref_zero,
 				  field + f_len - BTR_EXTERN_FIELD_REF_SIZE,
 				  BTR_EXTERN_FIELD_REF_SIZE))) {
 		/* The BLOB pointer is not set: we cannot fetch it */
@@ -93,14 +93,14 @@ row_ext_create(
 					     + (n_ext - 1) * sizeof ret->len);
 
 	ut_ad(ut_is_2pow(zip_size));
-	ut_ad(zip_size <= UNIV_PAGE_SIZE);
+	ut_ad(zip_size <= IB_PAGE_SIZE);
 
 	ret->n_ext = n_ext;
 	ret->ext = ext;
 	ret->buf = mem_heap_alloc(heap, n_ext * REC_MAX_INDEX_COL_LEN);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	memset(ret->buf, 0xaa, n_ext * REC_MAX_INDEX_COL_LEN);
-	UNIV_MEM_ALLOC(ret->buf, n_ext * REC_MAX_INDEX_COL_LEN);
+	IB_MEM_ALLOC(ret->buf, n_ext * REC_MAX_INDEX_COL_LEN);
 #endif
 
 	/* Fetch the BLOB prefixes */

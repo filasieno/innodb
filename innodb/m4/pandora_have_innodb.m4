@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBINNODB],[
     [ac_enable_libinnodb="yes"])
 
   AS_IF([test "x$ac_enable_libinnodb" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(innodb,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(innodb,,[
       #include <embedded_innodb-1.0/innodb.h>
     ],[
       ib_u64_t
@@ -27,15 +27,15 @@ AC_DEFUN([_PANDORA_SEARCH_LIBINNODB],[
     ac_cv_libinnodb="no"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBINNODB, [test "x${ac_cv_libinnodb}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBINNODB, [test "x${ac_cv_libinnodb}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBINNODB],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBINNODB],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBINNODB])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBINNODB],[
-  AC_REQUIRE([PANDORA_HAVE_LIBINNODB])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBINNODB])
   AS_IF([test "x${ac_cv_libinnodb}" = "xno"],
       AC_MSG_ERROR([libinnodb is required for ${PACKAGE}]))
 ])

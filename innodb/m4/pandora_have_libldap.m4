@@ -11,7 +11,7 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([_PANDORA_SEARCH_LIBLDAP],[
   AC_REQUIRE([AC_LIB_PREFIX])
 
-  AC_LIB_HAVE_LINKFLAGS(ldap,,
+  AC_LIB_IB_HAVE_LINKFLAGS(ldap,,
   [#include <ldap.h>],
   [
     LDAP *ldap;
@@ -20,11 +20,11 @@ AC_DEFUN([_PANDORA_SEARCH_LIBLDAP],[
   AS_IF([test "x$ac_cv_libldap" = "xno"],
   [
     unset ac_cv_libldap
-    unset HAVE_LIBLDAP
+    unset IB_HAVE_LIBLDAP
     unset LIBLDAP
     unset LIBLDAP_PREFIX
     unset LTLIBLDAP
-    AC_LIB_HAVE_LINKFLAGS(ldap,,
+    AC_LIB_IB_HAVE_LINKFLAGS(ldap,,
     [#include <ldap/ldap.h>],
     [
       LDAP *ldap;
@@ -37,10 +37,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBLDAP],[
     ac_cv_ldap_location="<ldap.h>"
   ])
 
-  AM_CONDITIONAL(HAVE_LIBLDAP, [test "x${ac_cv_libldap}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBLDAP, [test "x${ac_cv_libldap}" = "xyes"])
 ])
 
-AC_DEFUN([_PANDORA_HAVE_LIBLDAP],[
+AC_DEFUN([_PANDORA_IB_HAVE_LIBLDAP],[
 
   AC_ARG_ENABLE([libldap],
     [AS_HELP_STRING([--disable-libldap],
@@ -52,8 +52,8 @@ AC_DEFUN([_PANDORA_HAVE_LIBLDAP],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_LIBLDAP],[
-  AC_REQUIRE([_PANDORA_HAVE_LIBLDAP])
+AC_DEFUN([PANDORA_IB_HAVE_LIBLDAP],[
+  AC_REQUIRE([_PANDORA_IB_HAVE_LIBLDAP])
 ])
 
 AC_DEFUN([_PANDORA_REQUIRE_LIBLDAP],[

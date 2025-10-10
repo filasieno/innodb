@@ -17,7 +17,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBMEMCACHED],[
     [ac_enable_libmemcached="yes"])
 
   AS_IF([test "x$ac_enable_libmemcached" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(memcached,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(memcached,,[
       #include <libmemcached/memcached.h>
     ],[
       memcached_st memc;
@@ -29,7 +29,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBMEMCACHED],[
   ])
 
   AS_IF([test "x$ac_enable_libmemcached" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(memcachedprotocol,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(memcachedprotocol,,[
       #include <libmemcached/protocol_handler.h>
     ],[
       struct memcached_protocol_st *protocol_handle;
@@ -49,7 +49,7 @@ memcached_server_fn callbacks[1];
     [pandora_cv_libmemcached_server_fn=no])])
 
   AS_IF([test "x$pandora_cv_libmemcached_server_fn" = "xyes"],[
-    AC_DEFINE([HAVE_MEMCACHED_SERVER_FN],[1],[If we have the new memcached_server_fn typedef])
+    AC_DEFINE([IB_HAVE_MEMCACHED_SERVER_FN],[1],[If we have the new memcached_server_fn typedef])
   ])
 ])
 
@@ -84,23 +84,23 @@ AC_DEFUN([_PANDORA_RECENT_LIBMEMCACHED],[
     ])
   ])
 
-  AM_CONDITIONAL(HAVE_LIBMEMCACHED,[test "x${ac_cv_libmemcached}" = "xyes" -a "x${pandora_cv_recent_libmemcached}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBMEMCACHED,[test "x${ac_cv_libmemcached}" = "xyes" -a "x${pandora_cv_recent_libmemcached}" = "xyes"])
   
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBMEMCACHED],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBMEMCACHED],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBMEMCACHED])
   _PANDORA_RECENT_LIBMEMCACHED($1)
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBMEMCACHED],[
-  PANDORA_HAVE_LIBMEMCACHED($1)
+  PANDORA_IB_HAVE_LIBMEMCACHED($1)
   AS_IF([test "x{$pandora_cv_recent_libmemcached}" = "xno"],
       AC_MSG_ERROR([libmemcached is required for ${PACKAGE}]))
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBMEMCACHEDPROTOCOL],[
-  PANDORA_HAVE_LIBMEMCACHED($1)
+  PANDORA_IB_HAVE_LIBMEMCACHED($1)
   AS_IF([test x$ac_cv_libmemcachedprotocol = xno],
       AC_MSG_ERROR([libmemcachedprotocol is required for ${PACKAGE}]))
 ])

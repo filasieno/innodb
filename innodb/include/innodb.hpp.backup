@@ -26,7 +26,7 @@ extern "C" {
 #endif // __cplusplus
 
 #if defined(BUILDING_HAILDB)
-# if defined(HAVE_VISIBILITY)
+# if defined(IB_HAVE_VISIBILITY)
 #  define HAILDB_API __attribute__ ((visibility("default")))
 #  define HAILDB_LOCAL  __attribute__ ((visibility("hidden")))
 # elif defined (__SUNPRO_C) && (__SUNPRO_C >= 0x550)
@@ -35,7 +35,7 @@ extern "C" {
 # elif defined(_MSC_VER)
 #  define HAILDB_API extern __declspec(dllexport)
 #  define HAILDB_LOCAL
-# endif // defined(HAVE_VISIBILITY)
+# endif // defined(IB_HAVE_VISIBILITY)
 #else // defined(BUILDING_LIBDRIZZLE)
 # if defined(_MSC_VER)
 #  define HAILDB_API extern __declspec(dllimport)
@@ -220,13 +220,13 @@ enum db_err {
 #define strcasecmp		_stricmp
 #endif
 
-/// \def UNIV_NO_IGNORE
+/// \def IB_NO_IGNORE
 /// \brief Some HailDB methods will produce warnings if the result of them is not
 /// checked in client code. This uses a GCC compiler extension.
 #if defined(__GNUC__) && (__GNUC__ > 2) && ! defined(__INTEL_COMPILER)
-#define UNIV_NO_IGNORE		__attribute__ ((warn_unused_result))
+#define IB_NO_IGNORE		__attribute__ ((warn_unused_result))
 #else
-#define UNIV_NO_IGNORE
+#define IB_NO_IGNORE
 #endif // __GNUC__ && __GNUC__ > 2 && !__INTEL_COMPILER
 
 // See comment about ib_bool_t as to why the two macros are unsigned long.
@@ -635,7 +635,7 @@ typedef int (*ib_schema_visitor_table_all_t) (
 					on failure (abort traversal) */
 	void*		arg,		/*!< User callback arg */
 	const char*	name,		/*!< Table name */
-	int		name_len);	/*!< Length of name in bytes */
+	int		IB_NAME_LEN);	/*!< Length of name in bytes */
 
 /** Table visitor */
 typedef int (*ib_schema_visitor_table_t) (
@@ -714,10 +714,10 @@ typedef int (*ib_client_cmp_t)(
 
 /* MySQL uses 3 byte UTF-8 encoding. */
 /** The maximum length of a column name in a table schema. */
-#define IB_MAX_COL_NAME_LEN	(64 * 3)
+#define IB_MAX_COL_IB_NAME_LEN	(64 * 3)
 
 /** The maximum length of a table name (plus database name). */
-#define IB_MAX_TABLE_NAME_LEN	(64 * 3)
+#define IB_MAX_TABLE_IB_NAME_LEN	(64 * 3)
 
 /*! @def ib_tbl_sch_add_blob_col(s, n)
 Add a BLOB column to a table schema.
@@ -839,7 +839,7 @@ Return the API version number, the version number format is:
 
 HAILDB_API
 ib_u64_t
-ib_api_version(void) UNIV_NO_IGNORE;
+ib_api_version(void) IB_NO_IGNORE;
 /*=================*/
 
 /*****************************************************************//**
@@ -853,7 +853,7 @@ functions should be called.
 
 HAILDB_API
 ib_err_t
-ib_init(void) UNIV_NO_IGNORE;
+ib_init(void) IB_NO_IGNORE;
 /*=========*/
 
 /*****************************************************************//**
@@ -872,7 +872,7 @@ HAILDB_API
 ib_err_t
 ib_startup(
 /*=======*/
-	const char* format) UNIV_NO_IGNORE;
+	const char* format) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Shutdown the InnoDB engine. Call this function when they are no 
@@ -888,7 +888,7 @@ HAILDB_API
 ib_err_t
 ib_shutdown(
 /*========*/
-	ib_shutdown_t	flag) UNIV_NO_IGNORE;
+	ib_shutdown_t	flag) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Start a transaction that's been rolled back. This special function
@@ -908,7 +908,7 @@ ib_err_t
 ib_trx_start(
 /*=========*/
 	ib_trx_t	ib_trx,
-	ib_trx_level_t	ib_trx_level) UNIV_NO_IGNORE;
+	ib_trx_level_t	ib_trx_level) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Begin a transaction. This will allocate a new transaction handle and
@@ -922,7 +922,7 @@ HAILDB_API
 ib_trx_t
 ib_trx_begin(
 /*=========*/
-	ib_trx_level_t	ib_trx_level) UNIV_NO_IGNORE;
+	ib_trx_level_t	ib_trx_level) IB_NO_IGNORE;
 
 
 /*****************************************************************//**
@@ -957,7 +957,7 @@ HAILDB_API
 ib_trx_state_t
 ib_trx_state(
 /*=========*/
-	ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Release the resources of the transaction. If the transaction was
@@ -972,7 +972,7 @@ HAILDB_API
 ib_err_t
 ib_trx_release(
 /*===========*/
-	ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Commit a transaction. This function will release the schema latches too.
@@ -986,7 +986,7 @@ HAILDB_API
 ib_err_t
 ib_trx_commit(
 /*==========*/
-	ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Rollback a transaction. This function will release the schema latches too.
@@ -1000,7 +1000,7 @@ HAILDB_API
 ib_err_t
 ib_trx_rollback(
 /*============*/
-	ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Add columns to a table schema. Tables are created in InnoDB by first
@@ -1025,7 +1025,7 @@ ib_table_schema_add_col(
 	ib_col_type_t	ib_col_type,
 	ib_col_attr_t	ib_col_attr,
 	ib_u16_t	client_type,
-	ib_ulint_t	len) UNIV_NO_IGNORE;
+	ib_ulint_t	len) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create and add an index key definition to a table schema. The index
@@ -1044,7 +1044,7 @@ ib_table_schema_add_index(
 /*======================*/
 	ib_tbl_sch_t	ib_tbl_sch,
 	const char*	name,
-	ib_idx_sch_t*	ib_idx_sch) UNIV_NO_IGNORE;
+	ib_idx_sch_t*	ib_idx_sch) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Destroy a schema. The handle is freed by this function.
@@ -1076,7 +1076,7 @@ ib_table_schema_create(
 	const char*	name,
 	ib_tbl_sch_t*	ib_tbl_sch,
 	ib_tbl_fmt_t	ib_tbl_fmt,
-	ib_ulint_t	page_size) UNIV_NO_IGNORE;
+	ib_ulint_t	page_size) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Add columns to an index schema definition.
@@ -1093,7 +1093,7 @@ ib_index_schema_add_col(
 /*====================*/
 	ib_idx_sch_t	ib_idx_sch,
 	const char*	name,
-	ib_ulint_t	prefix_len) UNIV_NO_IGNORE;
+	ib_ulint_t	prefix_len) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create an index schema instance.
@@ -1112,7 +1112,7 @@ ib_index_schema_create(
 	ib_trx_t	ib_usr_trx,
 	const char*	name,
 	const char*	table_name,
-	ib_idx_sch_t*	ib_idx_sch) UNIV_NO_IGNORE;
+	ib_idx_sch_t*	ib_idx_sch) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Set index as clustered index. Implies UNIQUE.
@@ -1125,7 +1125,7 @@ HAILDB_API
 ib_err_t
 ib_index_schema_set_clustered(
 /*==========================*/
-	ib_idx_sch_t	ib_idx_sch) UNIV_NO_IGNORE;
+	ib_idx_sch_t	ib_idx_sch) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Set to true if it's a simple select.
@@ -1150,7 +1150,7 @@ HAILDB_API
 ib_err_t
 ib_index_schema_set_unique(
 /*=======================*/
-	ib_idx_sch_t	ib_idx_sch) UNIV_NO_IGNORE;
+	ib_idx_sch_t	ib_idx_sch) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Destroy an index schema.
@@ -1181,7 +1181,7 @@ ib_table_create(
 /*============*/
 	ib_trx_t		ib_trx,
 	const ib_tbl_sch_t	ib_tbl_sch,
-	ib_id_t*		id) UNIV_NO_IGNORE;
+	ib_id_t*		id) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Rename a table. Ensure that you have acquired the schema lock in
@@ -1199,7 +1199,7 @@ ib_table_rename(
 /*============*/
 	ib_trx_t	ib_trx,
 	const char*	old_name,
-	const char*	new_name) UNIV_NO_IGNORE;
+	const char*	new_name) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create a secondary index. The index id encodes the table id in the high
@@ -1215,7 +1215,7 @@ ib_err_t
 ib_index_create(
 /*============*/
 	ib_idx_sch_t	ib_idx_sch,
-	ib_id_t*	index_id) UNIV_NO_IGNORE;
+	ib_id_t*	index_id) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Drop a table. Ensure that you have acquired the schema lock in
@@ -1231,7 +1231,7 @@ ib_err_t
 ib_table_drop(
 /*==========*/
 	ib_trx_t	trx,
-	const char*	name) UNIV_NO_IGNORE;
+	const char*	name) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Drop a secondary index. Ensure that you have acquired the schema lock in
@@ -1247,7 +1247,7 @@ ib_err_t
 ib_index_drop(
 /*==========*/
 	ib_trx_t	trx,
-	ib_id_t		index_id) UNIV_NO_IGNORE;
+	ib_id_t		index_id) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Open an InnoDB table and return a cursor handle to it.
@@ -1264,7 +1264,7 @@ ib_cursor_open_table_using_id(
 /*==========================*/
 	ib_id_t		table_id,
 	ib_trx_t	ib_trx,
-	ib_crsr_t*	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t*	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Open an InnoDB index and return a cursor handle to it.
@@ -1281,7 +1281,7 @@ ib_cursor_open_index_using_id(
 /*==========================*/
 	ib_id_t		index_id,
 	ib_trx_t	ib_trx,
-	ib_crsr_t*	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t*	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Open an InnoDB secondary index cursor and return a cursor handle to it.
@@ -1298,7 +1298,7 @@ ib_cursor_open_index_using_name(
 /*============================*/
 	ib_crsr_t	ib_open_crsr,
 	const char*	index_name,
-	ib_crsr_t*	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t*	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Open an InnoDB table by name and return a cursor handle to it.
@@ -1315,7 +1315,7 @@ ib_cursor_open_table(
 /*=================*/
 	const char*	name,
 	ib_trx_t	ib_trx,
-	ib_crsr_t*	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t*	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Reset the cursor.
@@ -1328,7 +1328,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_reset(
 /*============*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Close an InnoDB table and free the cursor.
@@ -1341,7 +1341,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_close(
 /*============*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Insert a row to a table.
@@ -1356,7 +1356,7 @@ ib_err_t
 ib_cursor_insert_row(
 /*=================*/
 	ib_crsr_t	ib_crsr,
-	const ib_tpl_t	ib_tpl) UNIV_NO_IGNORE;
+	const ib_tpl_t	ib_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Update a row in a table.
@@ -1373,7 +1373,7 @@ ib_cursor_update_row(
 /*=================*/
 	ib_crsr_t	ib_crsr,
 	const ib_tpl_t	ib_old_tpl,
-	const ib_tpl_t	ib_new_tpl) UNIV_NO_IGNORE;
+	const ib_tpl_t	ib_new_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Delete a row in a table.
@@ -1386,7 +1386,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_delete_row(
 /*=================*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Read current row.
@@ -1401,7 +1401,7 @@ ib_err_t
 ib_cursor_read_row(
 /*===============*/
 	ib_crsr_t	ib_crsr,
-	ib_tpl_t	ib_tpl) UNIV_NO_IGNORE;
+	ib_tpl_t	ib_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Move cursor to the prev user record in the table.
@@ -1414,7 +1414,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_prev(
 /*===========*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Move cursor to the next user record in the table.
@@ -1427,7 +1427,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_next(
 /*===========*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Move cursor to the first record in the table.
@@ -1440,7 +1440,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_first(
 /*============*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Move cursor to the last record in the table.
@@ -1453,7 +1453,7 @@ HAILDB_API
 ib_err_t
 ib_cursor_last(
 /*===========*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Search for key.
@@ -1473,7 +1473,7 @@ ib_cursor_moveto(
 	ib_crsr_t	ib_crsr,
 	ib_tpl_t	ib_tpl,
 	ib_srch_mode_t	ib_srch_mode,
-	int*		result) UNIV_NO_IGNORE;
+	int*		result) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Attach the cursor to the transaction. The cursor must not already be
@@ -1533,7 +1533,7 @@ ib_col_set_value(
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	col_no,
 	const void*	src,
-	ib_ulint_t	len) UNIV_NO_IGNORE;
+	ib_ulint_t	len) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Get the size of the data available in the column the tuple.
@@ -1548,7 +1548,7 @@ ib_ulint_t
 ib_col_get_len(
 /*===========*/
 	ib_tpl_t	ib_tpl,
-	ib_ulint_t	i) UNIV_NO_IGNORE;
+	ib_ulint_t	i) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Copy a column value from the tuple.
@@ -1584,7 +1584,7 @@ ib_tuple_read_i8(
 /*=============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_i8_t*	ival) UNIV_NO_IGNORE;
+	ib_i8_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read an unsigned int 8 bit column from an InnoDB tuple.
@@ -1601,7 +1601,7 @@ ib_tuple_read_u8(
 /*=============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_u8_t*	ival) UNIV_NO_IGNORE;
+	ib_u8_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read a signed int 16 bit column from an InnoDB tuple.
@@ -1618,7 +1618,7 @@ ib_tuple_read_i16(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_i16_t*	ival) UNIV_NO_IGNORE;
+	ib_i16_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read an unsigned int 16 bit column from an InnoDB tuple.
@@ -1635,7 +1635,7 @@ ib_tuple_read_u16(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_u16_t*	ival) UNIV_NO_IGNORE;
+	ib_u16_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read a signed int 32 bit column from an InnoDB tuple.
@@ -1652,7 +1652,7 @@ ib_tuple_read_i32(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_i32_t*	ival) UNIV_NO_IGNORE;
+	ib_i32_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read an unsigned int 32 bit column from an InnoDB tuple.
@@ -1669,7 +1669,7 @@ ib_tuple_read_u32(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_u32_t*	ival) UNIV_NO_IGNORE;
+	ib_u32_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read a signed int 64 bit column from an InnoDB tuple.
@@ -1686,7 +1686,7 @@ ib_tuple_read_i64(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_i64_t*	ival) UNIV_NO_IGNORE;
+	ib_i64_t*	ival) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read an unsigned int 64 bit column from an InnoDB tuple.
@@ -1703,7 +1703,7 @@ ib_tuple_read_u64(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	i,
-	ib_u64_t*	ival) UNIV_NO_IGNORE;
+	ib_u64_t*	ival) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Get a column value pointer from the tuple.
@@ -1718,7 +1718,7 @@ const void*
 ib_col_get_value(
 /*=============*/
 	ib_tpl_t	ib_tpl,
-	ib_ulint_t	i) UNIV_NO_IGNORE;
+	ib_ulint_t	i) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Get a column type, length and attributes from the tuple.
@@ -1748,7 +1748,7 @@ HAILDB_API
 ib_tpl_t
 ib_tuple_clear(
 /*============*/
-	ib_tpl_t	ib_tpl) UNIV_NO_IGNORE;
+	ib_tpl_t	ib_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create a new cluster key search tuple and copy the contents of  the
@@ -1767,7 +1767,7 @@ ib_tuple_get_cluster_key(
 /*=====================*/
 	ib_crsr_t	ib_crsr,
 	ib_tpl_t*	ib_dst_tpl,
-	const ib_tpl_t	ib_src_tpl) UNIV_NO_IGNORE;
+	const ib_tpl_t	ib_src_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Copy the contents of  source tuple to destination tuple. The tuples
@@ -1783,7 +1783,7 @@ ib_err_t
 ib_tuple_copy(
 /*==========*/
 	ib_tpl_t	ib_dst_tpl,
-	const ib_tpl_t	ib_src_tpl) UNIV_NO_IGNORE;
+	const ib_tpl_t	ib_src_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create an InnoDB tuple used for index/table search.
@@ -1796,7 +1796,7 @@ HAILDB_API
 ib_tpl_t
 ib_sec_search_tuple_create(
 /*=======================*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create an InnoDB tuple used for index/table search.
@@ -1809,7 +1809,7 @@ HAILDB_API
 ib_tpl_t
 ib_sec_read_tuple_create(
 /*=====================*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create an InnoDB tuple used for table key operations.
@@ -1822,7 +1822,7 @@ HAILDB_API
 ib_tpl_t
 ib_clust_search_tuple_create(
 /*=========================*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Create an InnoDB tuple for table row operations.
@@ -1835,7 +1835,7 @@ HAILDB_API
 ib_tpl_t
 ib_clust_read_tuple_create(
 /*=======================*/
-	ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Return the number of user columns in the tuple definition.
@@ -1848,7 +1848,7 @@ HAILDB_API
 ib_ulint_t
 ib_tuple_get_n_user_cols(
 /*=====================*/
-	const ib_tpl_t	ib_tpl) UNIV_NO_IGNORE;
+	const ib_tpl_t	ib_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Return the number of columns in the tuple definition.
@@ -1861,7 +1861,7 @@ HAILDB_API
 ib_ulint_t
 ib_tuple_get_n_cols(
 /*================*/
-	const ib_tpl_t	ib_tpl) UNIV_NO_IGNORE;
+	const ib_tpl_t	ib_tpl) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Destroy an InnoDB tuple.
@@ -1889,7 +1889,7 @@ ib_err_t
 ib_cursor_truncate(
 /*===============*/
 	ib_crsr_t*	ib_crsr,
-	ib_id_t*	table_id) UNIV_NO_IGNORE;
+	ib_id_t*	table_id) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Truncate a table.
@@ -1904,7 +1904,7 @@ ib_err_t
 ib_table_truncate(
 /*==============*/
 	const char*	table_name,
-	ib_id_t*	table_id) UNIV_NO_IGNORE;
+	ib_id_t*	table_id) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Get a table id.
@@ -1919,7 +1919,7 @@ ib_err_t
 ib_table_get_id(
 /*============*/
 	const char*	table_name,
-	ib_id_t*	table_id) UNIV_NO_IGNORE;
+	ib_id_t*	table_id) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Get an index id.
@@ -1936,7 +1936,7 @@ ib_index_get_id(
 /*============*/
 	const char*	table_name,
 	const char*	index_name,
-	ib_id_t*	index_id) UNIV_NO_IGNORE;
+	ib_id_t*	index_id) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Create a database if it doesn't exist.
@@ -1949,7 +1949,7 @@ HAILDB_API
 ib_bool_t
 ib_database_create(
 /*===============*/
-	const char*	dbname) UNIV_NO_IGNORE;
+	const char*	dbname) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Drop a database if it exists. This function will also drop all tables
@@ -1963,7 +1963,7 @@ HAILDB_API
 ib_err_t
 ib_database_drop(
 /*=============*/
-	const char*	dbname) UNIV_NO_IGNORE;
+	const char*	dbname) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Check if cursor is positioned.
@@ -1976,7 +1976,7 @@ HAILDB_API
 ib_bool_t
 ib_cursor_is_positioned(
 /*====================*/
-	const ib_crsr_t	ib_crsr) UNIV_NO_IGNORE;
+	const ib_crsr_t	ib_crsr) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Latches the data dictionary in shared mode.
@@ -1989,7 +1989,7 @@ HAILDB_API
 ib_err_t
 ib_schema_lock_shared(
 /*==================*/
-	ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Latches the data dictionary in exclusive mode.
@@ -2002,7 +2002,7 @@ HAILDB_API
 ib_err_t
 ib_schema_lock_exclusive(
 /*======================*/
-	ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Checks if the data dictionary is latched in exclusive mode by a
@@ -2016,7 +2016,7 @@ HAILDB_API
 ib_bool_t
 ib_schema_lock_is_exclusive(
 /*========================*/
-	const ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	const ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Checks if the data dictionary is latched in shared mode.
@@ -2027,7 +2027,7 @@ HAILDB_API
 ib_bool_t
 ib_schema_lock_is_shared(
 /*=====================*/
-	const ib_trx_t	ib_trx) UNIV_NO_IGNORE;
+	const ib_trx_t	ib_trx) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Unlocks the data dictionary.
@@ -2055,7 +2055,7 @@ ib_err_t
 ib_cursor_lock(
 /*===========*/
 	ib_crsr_t	ib_crsr,
-	ib_lck_mode_t	ib_lck_mode) UNIV_NO_IGNORE;
+	ib_lck_mode_t	ib_lck_mode) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Set the Lock an InnoDB table using the table id.
@@ -2072,7 +2072,7 @@ ib_table_lock(
 /*===========*/
 	ib_trx_t	ib_trx,
 	ib_id_t		table_id,
-	ib_lck_mode_t	ib_lck_mode) UNIV_NO_IGNORE;
+	ib_lck_mode_t	ib_lck_mode) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Set the Lock mode of the cursor.
@@ -2087,7 +2087,7 @@ ib_err_t
 ib_cursor_set_lock_mode(
 /*====================*/
 	ib_crsr_t	ib_crsr,
-	ib_lck_mode_t	ib_lck_mode) UNIV_NO_IGNORE;
+	ib_lck_mode_t	ib_lck_mode) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Set need to access clustered index record flag.
@@ -2128,14 +2128,14 @@ ib_table_schema_visit(
 	const char*	name,
 	const ib_schema_visitor_t*
 			visitor,
-	void*		arg) UNIV_NO_IGNORE;
+	void*		arg) IB_NO_IGNORE;
 
 /*****************************************************************//**
 List all the tables in the InnoDB's data dictionary. It will abort
 if visitor returns a non-zero value.
 
 It will call the function:
-	visitor.tables(arg, const char* name, int name_len);
+	visitor.tables(arg, const char* name, int IB_NAME_LEN);
 
 The function will abort if visitor.tables() returns non-zero.
 
@@ -2152,7 +2152,7 @@ ib_schema_tables_iterate(
 	ib_trx_t	ib_trx,
 	ib_schema_visitor_table_all_t
 			visitor,
-	void*		arg) UNIV_NO_IGNORE;
+	void*		arg) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Get the type of a configuration variable. Returns DB_SUCCESS if the
@@ -2168,7 +2168,7 @@ ib_err_t
 ib_cfg_var_get_type(
 /*================*/
 	const char*	name,
-	ib_cfg_type_t*	type) UNIV_NO_IGNORE;
+	ib_cfg_type_t*	type) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Set a configuration variable. The second argument's type depends on the
@@ -2184,7 +2184,7 @@ ib_err_t
 ib_cfg_set(
 /*=======*/
 	const char*	name,
-	...) UNIV_NO_IGNORE;
+	...) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Get the value of a configuration variable. The type of the returned value
@@ -2201,7 +2201,7 @@ ib_err_t
 ib_cfg_get(
 /*=======*/
 	const char*	name,
-	void*		value) UNIV_NO_IGNORE;
+	void*		value) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Get a list of the names of all configuration variables.
@@ -2218,7 +2218,7 @@ ib_err_t
 ib_cfg_get_all(
 /*===========*/
 	const char***	names,
-	ib_u32_t*	names_num) UNIV_NO_IGNORE;
+	ib_u32_t*	names_num) IB_NO_IGNORE;
 
 /*******************************************************************//**
 Creates a named savepoint. The transaction must be started. If there is
@@ -2229,7 +2229,7 @@ commit or rollback.
 @ingroup trx
 @param ib_trx is the transaction instance
 @param name is the name of the savepoint
-@param name_len is the length of name in bytes */
+@param IB_NAME_LEN is the length of name in bytes */
 
 HAILDB_API
 void
@@ -2237,7 +2237,7 @@ ib_savepoint_take(
 /*==============*/
 	ib_trx_t	ib_trx,
 	const void*	name,
-	ib_ulint_t	name_len);
+	ib_ulint_t	IB_NAME_LEN);
 
 /*******************************************************************//**
 Releases only the named savepoint. Savepoints which were set after this
@@ -2246,7 +2246,7 @@ savepoint are left as is.
 @ingroup trx
 @param ib_trx is the active transaction
 @param name is the name of the savepoint
-@param name_len is the length of name in bytes
+@param IB_NAME_LEN is the length of name in bytes
 @return	if no savepoint of the name found then DB_NO_SAVEPOINT,
         otherwise DB_SUCCESS */
 
@@ -2256,7 +2256,7 @@ ib_savepoint_release(
 /*=================*/
 	ib_trx_t	ib_trx,
 	const void*	name,
-	ib_ulint_t	name_len) UNIV_NO_IGNORE;
+	ib_ulint_t	IB_NAME_LEN) IB_NO_IGNORE;
 
 /*******************************************************************//**
 Rolls back a transaction back to a named savepoint. Modifications after the
@@ -2270,7 +2270,7 @@ savepoints are rolled back.
 @ingroup trx
 @param ib_trx is the active transaction
 @param name is the savepoint name  can be NULL
-@param name_len is the length of name in bytes
+@param IB_NAME_LEN is the length of name in bytes
 @return	if no savepoint of the name found then DB_NO_SAVEPOINT,
         otherwise DB_SUCCESS */
 
@@ -2280,7 +2280,7 @@ ib_savepoint_rollback(
 /*==================*/
 	ib_trx_t	ib_trx,
 	const void*	name,
-	ib_ulint_t	name_len) UNIV_NO_IGNORE;
+	ib_ulint_t	IB_NAME_LEN) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2298,7 +2298,7 @@ ib_tuple_write_i8(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_i8_t		val) UNIV_NO_IGNORE;
+	ib_i8_t		val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2316,7 +2316,7 @@ ib_tuple_write_i16(
 /*=================*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_i16_t	val) UNIV_NO_IGNORE;
+	ib_i16_t	val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2334,7 +2334,7 @@ ib_tuple_write_i32(
 /*===============*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_i32_t	val) UNIV_NO_IGNORE;
+	ib_i32_t	val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2352,7 +2352,7 @@ ib_tuple_write_i64(
 /*===============*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_i64_t	val) UNIV_NO_IGNORE;
+	ib_i64_t	val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2370,7 +2370,7 @@ ib_tuple_write_u8(
 /*==============*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_u8_t		val) UNIV_NO_IGNORE;
+	ib_u8_t		val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2388,7 +2388,7 @@ ib_tuple_write_u16(
 /*===============*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_u16_t	val) UNIV_NO_IGNORE;
+	ib_u16_t	val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2406,7 +2406,7 @@ ib_tuple_write_u32(
 /*=================*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_u32_t	val) UNIV_NO_IGNORE;
+	ib_u32_t	val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write an integer value to a column. Integers are stored in big-endian
@@ -2424,7 +2424,7 @@ ib_tuple_write_u64(
 /*===============*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	ib_u64_t	val) UNIV_NO_IGNORE;
+	ib_u64_t	val) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Inform the cursor that it's the start of an SQL statement.
@@ -2453,7 +2453,7 @@ ib_tuple_write_double(
 /*==================*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	double		val) UNIV_NO_IGNORE;
+	double		val) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read a double column value from an InnoDB tuple.
@@ -2470,7 +2470,7 @@ ib_tuple_read_double(
 /*=================*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	col_no,
-	double*		dval) UNIV_NO_IGNORE;
+	double*		dval) IB_NO_IGNORE;
 
 /*****************************************************************//**
 Write a float value to a column.
@@ -2487,7 +2487,7 @@ ib_tuple_write_float(
 /*=================*/
 	ib_tpl_t	ib_tpl,
 	int		col_no,
-	float		val) UNIV_NO_IGNORE;
+	float		val) IB_NO_IGNORE;
 
 /*************************************************************//**
 Read a float value from an InnoDB tuple.
@@ -2504,7 +2504,7 @@ ib_tuple_read_float(
 /*================*/
 	ib_tpl_t	ib_tpl,
 	ib_ulint_t	col_no,
-	float*		fval) UNIV_NO_IGNORE;
+	float*		fval) IB_NO_IGNORE;
 
 /*************************************************************//**
 Set the message logging function.
@@ -2533,7 +2533,7 @@ HAILDB_API
 const char*
 ib_strerror(
 /*========*/
-	ib_err_t	db_errno) UNIV_NO_IGNORE;
+	ib_err_t	db_errno) IB_NO_IGNORE;
 
 /*******************************************************************//**
 Get the value of an INT status variable. 
@@ -2550,7 +2550,7 @@ ib_err_t
 ib_status_get_i64(
 /*==============*/
 	const char*	name,
-	ib_i64_t*	dst) UNIV_NO_IGNORE;
+	ib_i64_t*	dst) IB_NO_IGNORE;
 
 /*********************************************************************//**
 Get a list of the names of all status variables.
@@ -2567,7 +2567,7 @@ ib_err_t
 ib_status_get_all(
 /*===========*/
 	const char***	names,
-	ib_u32_t*	names_num) UNIV_NO_IGNORE;
+	ib_u32_t*	names_num) IB_NO_IGNORE;
 
 /**
    Type of callback in the event of HailDB panicing. Your callback should

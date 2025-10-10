@@ -16,7 +16,7 @@
 /// \brief The memory management: the debug code. This is not an independent compilation module but is included in mem0mem.*.
 /// \details Created 6/8/1994 Heikki Tuuri
 
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	extern ulint mem_current_allocated_memory;
 
 	/// \brief Initializes an allocated memory field in the debug version.
@@ -124,4 +124,4 @@ ulint mem_field_header_get_check(byte* field);
 void  mem_field_trailer_set_check(byte* field, ulint check);
 ulint mem_field_trailer_get_check(byte* field);
 
-#endif // UNIV_MEM_DEBUG
+#endif // IB_MEM_DEBUG

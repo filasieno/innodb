@@ -69,7 +69,7 @@ in: transaction id
 */
 IB_INTERN ibool trx_purge_update_undo_must_exist(trx_id_t trx_id)
 {
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
 #endif
 	if (!read_view_sees_trx_id(purge_sys->view, trx_id)) {

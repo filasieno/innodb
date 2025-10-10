@@ -245,14 +245,14 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
   # Test whether madvise() is declared in C++ code -- it is not on some
   # systems, such as Solaris
   AC_CHECK_DECLS([madvise], [], [], [AC_INCLUDES_DEFAULT[
-  #if HAVE_SYS_MMAN_H
+  #if IB_HAVE_SYS_MMAN_H
   #include <sys/types.h>
   #include <sys/mman.h>
   #endif
   ]])
   AC_LANG_POP()
 
-  PANDORA_HAVE_GCC_ATOMICS
+  PANDORA_IB_HAVE_GCC_ATOMICS
 
   m4_if(PCT_USE_VISIBILITY,[yes],[
     PANDORA_ENABLE_VISIBILITY
@@ -267,7 +267,7 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
   PANDORA_ENABLE_DTRACE
 
   AC_LIB_PREFIX
-  PANDORA_HAVE_BETTER_MALLOC
+  PANDORA_IB_HAVE_BETTER_MALLOC
 
   AC_CHECK_PROGS([DOXYGEN], [doxygen])
   AC_CHECK_PROGS([PERL], [perl])
@@ -286,9 +286,9 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
     ])
   ])
 
-  AM_CONDITIONAL(HAVE_DPKG_GENSYMBOLS,[test "x${DPKG_GENSYMBOLS}" != "x:"])
-  AM_CONDITIONAL(HAVE_SPHINX,[test "x${SPHINXBUILD}" != "x:"])
-  AM_CONDITIONAL(HAVE_RECENT_SPHINX,[test "x${ac_cv_recent_sphinx}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_DPKG_GENSYMBOLS,[test "x${DPKG_GENSYMBOLS}" != "x:"])
+  AM_CONDITIONAL(IB_HAVE_SPHINX,[test "x${SPHINXBUILD}" != "x:"])
+  AM_CONDITIONAL(IB_HAVE_RECENT_SPHINX,[test "x${ac_cv_recent_sphinx}" = "xyes"])
 
   m4_if(m4_substr(m4_esyscmd(test -d po && echo 0),0,1),0, [
     AM_PO_SUBDIRS
@@ -297,12 +297,12 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
     GETTEXT_PACKAGE=$PACKAGE
     AC_CHECK_LIB(intl, libintl_gettext)
     AC_SUBST([GETTEXT_PACKAGE])
-    AS_IF([test "x${USE_NLS}" = "xyes" -a "x${pandora_have_intltool}" = "xyes"],
+    AS_IF([test "x${USE_NLS}" = "xyes" -a "x${pandora_IB_HAVE_intltool}" = "xyes"],
           [AC_DEFINE([ENABLE_NLS],[1],[Turn on language support])
            AC_CONFIG_FILES([po/Makefile.in])
       ])
   ])
-  AM_CONDITIONAL(BUILD_PO,[test "x${USE_NLS}" = "xyes" -a "x${pandora_have_intltool}" = "xyes"])
+  AM_CONDITIONAL(BUILD_PO,[test "x${USE_NLS}" = "xyes" -a "x${pandora_IB_HAVE_intltool}" = "xyes"])
 
   AS_IF([test "x${gl_LIBOBJS}" != "x"],[
     AS_IF([test "$GCC" = "yes"],[
@@ -354,8 +354,8 @@ EOF_CONFIG_TOP
 # include <inttypes.h>
 #endif
 
-#if !defined(HAVE_ULONG) && !defined(__USE_MISC)
-# define HAVE_ULONG 1
+#if !defined(IB_HAVE_ULONG) && !defined(__USE_MISC)
+# define IB_HAVE_ULONG 1
 typedef unsigned long int ulong;
 #endif
 

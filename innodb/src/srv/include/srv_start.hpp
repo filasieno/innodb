@@ -50,7 +50,7 @@ srv_parse_log_group_home_dirs(const char* str);
 IB_INTERN
 void
 srv_free_paths_and_sizes(void);
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /****************************************************************//**
 Starts Innobase and creates a new database if database files
 are not found and the user wants.
@@ -77,9 +77,9 @@ extern	ib_uint64_t	srv_start_lsn;
 void set_panic_flag_for_netware(void);
 #endif
 
-#ifdef HAVE_DARWIN_THREADS
+#ifdef IB_HAVE_DARWIN_THREADS
 /** TRUE if the F_FULLFSYNC option is available */
-extern	ibool	srv_have_fullfsync;
+extern	ibool	srv_IB_HAVE_fullfsync;
 #endif
 
 /** TRUE if the server is being started */
@@ -114,7 +114,7 @@ enum srv_shutdown_state {
 /** At a shutdown this value climbs from SRV_SHUTDOWN_NONE to
 SRV_SHUTDOWN_CLEANUP and then to SRV_SHUTDOWN_LAST_PHASE, and so on */
 extern	enum srv_shutdown_state	srv_shutdown_state;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** Log 'spaces' have id's >= this */
 #define SRV_LOG_SPACE_FIRST_ID		0xFFFFFFF0UL

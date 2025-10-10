@@ -17,13 +17,13 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_REGEX],[
   CXXFLAGS="${PTHREAD_CFLAGS} ${CXXFLAGS}"
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_regex-mt,,[
+  AC_LIB_IB_HAVE_LINKFLAGS(boost_regex-mt,,[
     #include <boost/regex.hpp>
   ],[
     boost::regex test_regex("drizzle");
   ])
   AS_IF([test "x${ac_cv_libboost_regex_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_regex,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(boost_regex,,[
       #include <boost/regex.hpp>
     ],[
       boost::regex test_regex("drizzle");
@@ -34,14 +34,14 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_REGEX],[
   CXXFLAGS="${save_CXXFLAGS}"
 
   
-  AM_CONDITIONAL(HAVE_BOOST_REGEX,
+  AM_CONDITIONAL(IB_HAVE_BOOST_REGEX,
     [test "x${ac_cv_libboost_regex}" = "xyes" -o "x${ac_cv_libboost_regex_mt}" = "xyes"])
   BOOST_LIBS="${BOOST_LIBS} ${LTLIBBOOST_REGEX_MT} ${LTLIBBOOST_REGEX}"
   AC_SUBST(BOOST_LIBS) 
 ])
 
-AC_DEFUN([PANDORA_HAVE_BOOST_REGEX],[
-  PANDORA_HAVE_BOOST($1)
+AC_DEFUN([PANDORA_IB_HAVE_BOOST_REGEX],[
+  PANDORA_IB_HAVE_BOOST($1)
   _PANDORA_SEARCH_BOOST_REGEX($1)
 ])
 

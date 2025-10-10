@@ -23,9 +23,9 @@
 
 #include <errno.h>
 
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#endif /* IB_HAVE_UNISTD_H */
 
 #include "univ.i"
 #include "api_misc.hpp"
@@ -309,7 +309,7 @@ run_again:
 
 	trx->error_state = err;
 
-	if (UNIV_LIKELY(err == DB_SUCCESS)) {
+	if (IB_LIKELY(err == DB_SUCCESS)) {
 		que_thr_stop_for_client_no_error(thr, trx);
 	} else {
 		que_thr_stop_client(thr);

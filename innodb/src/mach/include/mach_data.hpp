@@ -209,7 +209,7 @@ IB_INTERN byte* mach_parse_compressed(byte* ptr, byte* end_ptr, ulint* val);
 /// \return pointer to end of the stored field, NULL if not complete
 IB_INTERN byte* mach_dulint_parse_compressed(byte* ptr, byte* end_ptr, dulint* val);
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 	/// \brief Reads a double value stored in little-endian format.
 	/// \param [in] b pointer to memory from where to read
@@ -282,7 +282,7 @@ IB_INTERN byte* mach_dulint_parse_compressed(byte* ptr, byte* end_ptr, dulint* v
 	/// \param [in] n where to read from
 	IB_INLINE void mach_write_uint64(byte* dest, ib_uint64_t n);
 
-#endif // ! UNIV_HOTBACKUP 
+#endif // ! IB_HOTBACKUP 
 
 #ifndef IB_DO_NOT_INLINE
   #include "mach_data.inl"

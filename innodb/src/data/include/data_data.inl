@@ -26,7 +26,7 @@ Created 5/30/1994 Heikki Tuuri
 #include "mem_mem.hpp"
 #include "ut_rnd.hpp"
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /** Dummy variable to catch access to uninitialized fields.  In the
 debug version, dtuple_create() will make all fields of dtuple_t point
 to data_error. */
@@ -45,7 +45,7 @@ dfield_get_type(
 
 	return((dtype_t*) &(field->type));
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*********************************************************************//**
 Sets the type struct of SQL data field. */
@@ -61,7 +61,7 @@ dfield_set_type(
 	field->type = *type;
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Gets pointer to the data in a field.
 @return	pointer to data */
@@ -72,16 +72,16 @@ dfield_get_data(
 	const dfield_t* field)	/*!< in: field */
 {
 	ut_ad(field);
-	ut_ad((field->len == UNIV_SQL_NULL)
+	ut_ad((field->len == IB_SQL_NULL)
 	      || (field->data != &data_error));
 
 	return((void*) field->data);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /*********************************************************************//**
 Gets length of field data.
-@return	length of data; UNIV_SQL_NULL if SQL null data */
+@return	length of data; IB_SQL_NULL if SQL null data */
 IB_INLINE
 ulint
 dfield_get_len(
@@ -89,7 +89,7 @@ dfield_get_len(
 	const dfield_t*	field)	/*!< in: field */
 {
 	ut_ad(field);
-	ut_ad((field->len == UNIV_SQL_NULL)
+	ut_ad((field->len == IB_SQL_NULL)
 	      || (field->data != &data_error));
 
 	return(field->len);
@@ -102,12 +102,12 @@ void
 dfield_set_len(
 /*===========*/
 	dfield_t*	field,	/*!< in: field */
-	ulint		len)	/*!< in: length or UNIV_SQL_NULL */
+	ulint		len)	/*!< in: length or IB_SQL_NULL */
 {
 	ut_ad(field);
-#ifdef UNIV_VALGRIND_DEBUG
-	if (len != UNIV_SQL_NULL) UNIV_MEM_ASSERT_RW(field->data, len);
-#endif /* UNIV_VALGRIND_DEBUG */
+#ifdef IB_VALGRIND_DEBUG
+	if (len != IB_SQL_NULL) IB_MEM_ASSERT_RW(field->data, len);
+#endif /* IB_VALGRIND_DEBUG */
 
 	field->ext = 0;
 	field->len = len;
@@ -124,7 +124,7 @@ dfield_is_null(
 {
 	ut_ad(field);
 
-	return(field->len == UNIV_SQL_NULL);
+	return(field->len == IB_SQL_NULL);
 }
 
 /*********************************************************************//**
@@ -138,7 +138,7 @@ dfield_is_ext(
 {
 	ut_ad(field);
 
-	return(UNIV_UNLIKELY(field->ext));
+	return(IB_UNLIKELY(field->ext));
 }
 
 /*********************************************************************//**
@@ -162,13 +162,13 @@ dfield_set_data(
 /*============*/
 	dfield_t*	field,	/*!< in: field */
 	const void*	data,	/*!< in: data */
-	ulint		len)	/*!< in: length or UNIV_SQL_NULL */
+	ulint		len)	/*!< in: length or IB_SQL_NULL */
 {
 	ut_ad(field);
 
-#ifdef UNIV_VALGRIND_DEBUG
-	if (len != UNIV_SQL_NULL) UNIV_MEM_ASSERT_RW(data, len);
-#endif /* UNIV_VALGRIND_DEBUG */
+#ifdef IB_VALGRIND_DEBUG
+	if (len != IB_SQL_NULL) IB_MEM_ASSERT_RW(data, len);
+#endif /* IB_VALGRIND_DEBUG */
 	field->data = (void*) data;
 	field->ext = 0;
 	field->len = len;
@@ -182,7 +182,7 @@ dfield_set_null(
 /*============*/
 	dfield_t*	field)	/*!< in/out: field */
 {
-	dfield_set_data(field, NULL, UNIV_SQL_NULL);
+	dfield_set_data(field, NULL, IB_SQL_NULL);
 }
 
 /*********************************************************************//**
@@ -223,7 +223,7 @@ dfield_dup(
 	mem_heap_t*	heap)	/*!< in: memory heap where allocated */
 {
 	if (!dfield_is_null(field)) {
-		UNIV_MEM_ASSERT_RW(field->data, field->len);
+		IB_MEM_ASSERT_RW(field->data, field->len);
 		field->data = mem_heap_dup(heap, field->data, field->len);
 	}
 }
@@ -243,7 +243,7 @@ dfield_datas_are_binary_equal(
 	len = field1->len;
 
 	return(len == field2->len
-	       && (len == UNIV_SQL_NULL
+	       && (len == IB_SQL_NULL
 		   || !memcmp(field1->data, field2->data, len)));
 }
 
@@ -319,7 +319,7 @@ dtuple_get_n_fields(
 	return(tuple->n_fields);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Gets nth field of a tuple.
 @return	nth field */
@@ -335,7 +335,7 @@ dtuple_get_nth_field(
 
 	return((dfield_t*) tuple->fields + n);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /**********************************************************//**
 Creates a data tuple to a memory heap. The default value for number
@@ -360,7 +360,7 @@ dtuple_create(
 	tuple->n_fields_cmp = n_fields;
 	tuple->fields = (dfield_t*) &tuple[1];
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	tuple->magic_n = DATA_TUPLE_MAGIC_N;
 
 	{	/* In the debug version, initialize fields to an error value */
@@ -371,13 +371,13 @@ dtuple_create(
 
 			field = dtuple_get_nth_field(tuple, i);
 
-			dfield_set_len(field, UNIV_SQL_NULL);
+			dfield_set_len(field, IB_SQL_NULL);
 			field->data = &data_error;
 			dfield_get_type(field)->mtype = DATA_ERROR;
 		}
 	}
 
-	UNIV_MEM_INVALID(tuple->fields, n_fields * sizeof *tuple->fields);
+	IB_MEM_INVALID(tuple->fields, n_fields * sizeof *tuple->fields);
 #endif
 	return(tuple);
 }
@@ -454,7 +454,7 @@ dtuple_get_data_size(
 		field = dtuple_get_nth_field(tuple,  i);
 		len = dfield_get_len(field);
 
-		if (len == UNIV_SQL_NULL) {
+		if (len == IB_SQL_NULL) {
 			len = dtype_get_sql_null_size(dfield_get_type(field),
 						      comp);
 		}
@@ -538,7 +538,7 @@ dtuple_fold(
 		data = (const byte*) dfield_get_data(field);
 		len = dfield_get_len(field);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			fold = ut_fold_ulint_pair(fold,
 						  ut_fold_binary(data, len));
 		}
@@ -550,7 +550,7 @@ dtuple_fold(
 		data = (const byte*) dfield_get_data(field);
 		len = dfield_get_len(field);
 
-		if (len != UNIV_SQL_NULL) {
+		if (len != IB_SQL_NULL) {
 			if (len > n_bytes) {
 				len = n_bytes;
 			}

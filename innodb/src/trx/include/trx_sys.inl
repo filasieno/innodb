@@ -25,7 +25,7 @@ Created 3/26/1996 Heikki Tuuri
 
 #include "trx_trx.hpp"
 #include "data_type.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "srv0srv.h"
 # include "mtr0log.h"
 
@@ -213,7 +213,7 @@ trx_sysf_rseg_set_page_no(
 			 page_no,
 			 MLOG_4BYTES, mtr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*****************************************************************//**
 Writes a trx id to an index page. In case that the id size changes in
@@ -232,7 +232,7 @@ trx_write_trx_id(
 	mach_write_to_6(ptr, id);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*****************************************************************//**
 Reads a trx id from an index page. In case that the id size changes in
 some future version, this function should be used instead of
@@ -384,4 +384,4 @@ trx_sys_get_new_trx_no(void)
 
 	return(trx_sys_get_new_trx_id());
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

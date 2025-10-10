@@ -24,7 +24,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef buf0buddy_h
 #define buf0buddy_h
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE
 #endif
@@ -46,7 +46,7 @@ IB_INLINE
 void*
 buf_buddy_alloc(
 /*============*/
-	ulint	size,	/*!< in: block size, up to UNIV_PAGE_SIZE */
+	ulint	size,	/*!< in: block size, up to IB_PAGE_SIZE */
 	ibool*	lru)	/*!< in: pointer to a variable that will be assigned
 			TRUE if storage was allocated from the LRU list
 			and buf_pool_mutex was temporarily released,
@@ -61,7 +61,7 @@ buf_buddy_free(
 /*===========*/
 	void*	buf,	/*!< in: block to be freed, must not be
 			pointed to by the buffer pool */
-	ulint	size)	/*!< in: block size, up to UNIV_PAGE_SIZE */
+	ulint	size)	/*!< in: block size, up to IB_PAGE_SIZE */
 	__attribute__((nonnull));
 
 /**************************************************************************

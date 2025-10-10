@@ -33,7 +33,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "mach_data.hpp"
 #include "trx_undo.hpp"
 #include "mtr_log.hpp"
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "dict_dict.hpp"
 #include "ut_mem.hpp"
 #include "row_ext.hpp"
@@ -84,7 +84,7 @@ trx_undof_page_add_undo_rec_log(
 		mlog_catenate_string(mtr, undo_page + old_free + 2, len);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************//**
 Parses a redo log record of adding an undo log record.
@@ -133,7 +133,7 @@ trx_undo_parse_add_undo_rec(
 	return(ptr + len);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Calculates the free space left for extending an undo log record.
 @return	bytes left */
@@ -147,7 +147,7 @@ trx_undo_left(
 	/* The '- 10' is a safety margin, in case we have some small
 	calculation error below */
 
-	return(UNIV_PAGE_SIZE - (ptr - page) - 10 - FIL_PAGE_DATA_END);
+	return(IB_PAGE_SIZE - (ptr - page) - 10 - FIL_PAGE_DATA_END);
 }
 
 /**********************************************************************//**
@@ -172,9 +172,9 @@ trx_undo_page_set_next_prev_and_add(
 					offset value within undo_page.*/
 
 	ut_ad(ptr > undo_page);
-	ut_ad(ptr < undo_page + UNIV_PAGE_SIZE);
+	ut_ad(ptr < undo_page + IB_PAGE_SIZE);
 
-	if (UNIV_UNLIKELY(trx_undo_left(undo_page, ptr) < 2)) {
+	if (IB_UNLIKELY(trx_undo_left(undo_page, ptr) < 2)) {
 
 		return(0);
 	}
@@ -228,7 +228,7 @@ trx_undo_page_report_insert(
 				      + TRX_UNDO_PAGE_FREE);
 	ptr = undo_page + first_free;
 
-	ut_ad(first_free <= UNIV_PAGE_SIZE);
+	ut_ad(first_free <= IB_PAGE_SIZE);
 
 	if (trx_undo_left(undo_page, ptr) < 2 + 1 + 11 + 11) {
 
@@ -260,7 +260,7 @@ trx_undo_page_report_insert(
 
 		ptr += mach_write_compressed(ptr, flen);
 
-		if (flen != UNIV_SQL_NULL) {
+		if (flen != IB_SQL_NULL) {
 			if (trx_undo_left(undo_page, ptr) < flen) {
 
 				return(0);
@@ -327,7 +327,7 @@ trx_undo_rec_get_col_val(
 /*=====================*/
 	byte*	ptr,	/*!< in: pointer to remaining part of undo log record */
 	byte**	field,	/*!< out: pointer to stored field */
-	ulint*	len,	/*!< out: length of the field, or UNIV_SQL_NULL */
+	ulint*	len,	/*!< out: length of the field, or IB_SQL_NULL */
 	ulint*	orig_len)/*!< out: original length of the locally
 			stored part of an externally stored column, or 0 */
 {
@@ -337,10 +337,10 @@ trx_undo_rec_get_col_val(
 	*orig_len = 0;
 
 	switch (*len) {
-	case UNIV_SQL_NULL:
+	case IB_SQL_NULL:
 		*field = NULL;
 		break;
-	case UNIV_EXTERN_STORAGE_FIELD:
+	case IB_EXTERN_STORAGE_FIELD:
 		*orig_len = mach_read_compressed(ptr);
 		ptr += mach_get_compressed_size(*orig_len);
 		*len = mach_read_compressed(ptr);
@@ -358,12 +358,12 @@ trx_undo_rec_get_col_val(
 		      + BTR_EXTERN_FIELD_REF_SIZE);
 		*/
 
-		*len += UNIV_EXTERN_STORAGE_FIELD;
+		*len += IB_EXTERN_STORAGE_FIELD;
 		break;
 	default:
 		*field = ptr;
-		if (*len >= UNIV_EXTERN_STORAGE_FIELD) {
-			ptr += *len - UNIV_EXTERN_STORAGE_FIELD;
+		if (*len >= IB_EXTERN_STORAGE_FIELD) {
+			ptr += *len - IB_EXTERN_STORAGE_FIELD;
 		} else {
 			ptr += *len;
 		}
@@ -503,7 +503,7 @@ trx_undo_page_report_modify_ext(
 		have to store a longer prefix of the field.  In this
 		case, write to the log a marker followed by the
 		original length and the real length of the field. */
-		ptr += mach_write_compressed(ptr, UNIV_EXTERN_STORAGE_FIELD);
+		ptr += mach_write_compressed(ptr, IB_EXTERN_STORAGE_FIELD);
 
 		ptr += mach_write_compressed(ptr, *len);
 
@@ -512,7 +512,7 @@ trx_undo_page_report_modify_ext(
 
 		ptr += mach_write_compressed(ptr, *len);
 	} else {
-		ptr += mach_write_compressed(ptr, UNIV_EXTERN_STORAGE_FIELD
+		ptr += mach_write_compressed(ptr, IB_EXTERN_STORAGE_FIELD
 					     + *len);
 	}
 
@@ -566,7 +566,7 @@ trx_undo_page_report_modify(
 				      + TRX_UNDO_PAGE_FREE);
 	ptr = undo_page + first_free;
 
-	ut_ad(first_free <= UNIV_PAGE_SIZE);
+	ut_ad(first_free <= IB_PAGE_SIZE);
 
 	if (trx_undo_left(undo_page, ptr) < 50) {
 
@@ -650,7 +650,7 @@ trx_undo_page_report_modify(
 
 		ptr += mach_write_compressed(ptr, flen);
 
-		if (flen != UNIV_SQL_NULL) {
+		if (flen != IB_SQL_NULL) {
 			if (trx_undo_left(undo_page, ptr) < flen) {
 
 				return(0);
@@ -713,7 +713,7 @@ trx_undo_page_report_modify(
 				ptr += mach_write_compressed(ptr, flen);
 			}
 
-			if (flen != UNIV_SQL_NULL) {
+			if (flen != IB_SQL_NULL) {
 				if (trx_undo_left(undo_page, ptr) < flen) {
 
 					return(0);
@@ -790,7 +790,7 @@ trx_undo_page_report_modify(
 						ptr, flen);
 				}
 
-				if (flen != UNIV_SQL_NULL) {
+				if (flen != IB_SQL_NULL) {
 					if (trx_undo_left(undo_page, ptr)
 					    < flen) {
 
@@ -993,12 +993,12 @@ trx_undo_update_rec_get_update(
 
 		upd_field->orig_len = orig_len;
 
-		if (len == UNIV_SQL_NULL) {
+		if (len == IB_SQL_NULL) {
 			dfield_set_null(&upd_field->new_val);
-		} else if (len < UNIV_EXTERN_STORAGE_FIELD) {
+		} else if (len < IB_EXTERN_STORAGE_FIELD) {
 			dfield_set_data(&upd_field->new_val, field, len);
 		} else {
-			len -= UNIV_EXTERN_STORAGE_FIELD;
+			len -= IB_EXTERN_STORAGE_FIELD;
 
 			dfield_set_data(&upd_field->new_val, field, len);
 			dfield_set_ext(&upd_field->new_val);
@@ -1071,10 +1071,10 @@ trx_undo_rec_get_partial_row(
 
 		dfield_set_data(dfield, field, len);
 
-		if (len != UNIV_SQL_NULL
-		    && len >= UNIV_EXTERN_STORAGE_FIELD) {
+		if (len != IB_SQL_NULL
+		    && len >= IB_EXTERN_STORAGE_FIELD) {
 			dfield_set_len(dfield,
-				       len - UNIV_EXTERN_STORAGE_FIELD);
+				       len - IB_EXTERN_STORAGE_FIELD);
 			dfield_set_ext(dfield);
 			/* If the prefix of this column is indexed,
 			ensure that enough prefix is stored in the
@@ -1093,7 +1093,7 @@ trx_undo_rec_get_partial_row(
 
 	return(ptr);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /***********************************************************************//**
 Erases the unused undo log page end. */
@@ -1109,7 +1109,7 @@ trx_undo_erase_page_end(
 	first_free = mach_read_from_2(undo_page + TRX_UNDO_PAGE_HDR
 				      + TRX_UNDO_PAGE_FREE);
 	memset(undo_page + first_free, 0xff,
-	       (UNIV_PAGE_SIZE - FIL_PAGE_DATA_END) - first_free);
+	       (IB_PAGE_SIZE - FIL_PAGE_DATA_END) - first_free);
 
 	mlog_write_initial_log_record(undo_page, MLOG_UNDO_ERASE_END, mtr);
 }
@@ -1138,7 +1138,7 @@ trx_undo_parse_erase_page_end(
 	return(ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************************//**
 Writes information to an undo log about an insert, update, or a delete marking
 of a clustered index record. This information is used in a rollback of the
@@ -1210,7 +1210,7 @@ trx_undo_report_row_operation(
 
 		undo = trx->insert_undo;
 
-		if (UNIV_UNLIKELY(!undo)) {
+		if (IB_UNLIKELY(!undo)) {
 			/* Did not succeed */
 			mutex_exit(&(trx->undo_mutex));
 
@@ -1227,7 +1227,7 @@ trx_undo_report_row_operation(
 
 		undo = trx->update_undo;
 
-		if (UNIV_UNLIKELY(!undo)) {
+		if (IB_UNLIKELY(!undo)) {
 			/* Did not succeed */
 			mutex_exit(&(trx->undo_mutex));
 			return(err);
@@ -1263,7 +1263,7 @@ trx_undo_report_row_operation(
 				cmpl_info, &mtr);
 		}
 
-		if (UNIV_UNLIKELY(offset == 0)) {
+		if (IB_UNLIKELY(offset == 0)) {
 			/* The record did not fit on the page. We erase the
 			end segment of the undo log page and write a log
 			record of it: this is to ensure that in the debug
@@ -1290,7 +1290,7 @@ trx_undo_report_row_operation(
 			*roll_ptr = trx_undo_build_roll_ptr(
 				op_type == TRX_UNDO_INSERT_OP,
 				rseg->id, page_no, offset);
-			if (UNIV_LIKELY_NULL(heap)) {
+			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
 			}
 			return(DB_SUCCESS);
@@ -1312,12 +1312,12 @@ trx_undo_report_row_operation(
 
 		mutex_exit(&(rseg->mutex));
 
-		if (UNIV_UNLIKELY(page_no == FIL_NULL)) {
+		if (IB_UNLIKELY(page_no == FIL_NULL)) {
 			/* Did not succeed: out of space */
 
 			mutex_exit(&(trx->undo_mutex));
 			mtr_commit(&mtr);
-			if (UNIV_LIKELY_NULL(heap)) {
+			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
 			}
 			return(DB_OUT_OF_FILE_SPACE);
@@ -1382,9 +1382,9 @@ trx_undo_get_undo_rec(
 	trx_undo_rec_t** undo_rec,	/*!< out, own: copy of the record */
 	mem_heap_t*	heap)		/*!< in: memory heap where copied */
 {
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	if (!trx_purge_update_undo_must_exist(trx_id)) {
 
@@ -1443,9 +1443,9 @@ trx_undo_prev_version_build(
 	ibool		dummy_extern;
 	byte*		buf;
 	ulint		err;
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(purge_sys->latch), RW_LOCK_SHARED));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ut_ad(mtr_memo_contains_page(index_mtr, index_rec, MTR_MEMO_PAGE_S_FIX)
 	      || mtr_memo_contains_page(index_mtr, index_rec,
 					MTR_MEMO_PAGE_X_FIX));
@@ -1480,7 +1480,7 @@ trx_undo_prev_version_build(
 
 	err = trx_undo_get_undo_rec(roll_ptr, rec_trx_id, &undo_rec, heap);
 
-	if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
+	if (IB_UNLIKELY(err != DB_SUCCESS)) {
 		/* The undo record may already have been purged.
 		This should never happen in InnoDB. */
 
@@ -1604,4 +1604,4 @@ trx_undo_prev_version_build(
 
 	return(DB_SUCCESS);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

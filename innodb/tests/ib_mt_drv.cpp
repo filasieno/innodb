@@ -78,7 +78,7 @@ This driver goes through following sequence:
 #include "test_aux.hpp"
 #include "ib_mt_drv.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -688,7 +688,7 @@ int main(int argc, char* argv[])
 
 	clean_up();
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 	VALGRIND_DO_LEAK_CHECK;
 #endif
 

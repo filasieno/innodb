@@ -142,7 +142,7 @@ ha_storage_put_memlim(
 	return(data_copy);
 }
 
-#ifdef UNIV_COMPILE_TEST_FUNCS
+#ifdef IB_COMPILE_TEST_FUNCS
 
 void
 test_ha_storage()
@@ -181,4 +181,4 @@ test_ha_storage()
 	ha_storage_free(storage);
 }
 
-#endif /* UNIV_COMPILE_TEST_FUNCS */
+#endif /* IB_COMPILE_TEST_FUNCS */

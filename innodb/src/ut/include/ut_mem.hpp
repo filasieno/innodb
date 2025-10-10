@@ -28,7 +28,7 @@ Created 5/30/1994 Heikki Tuuri
 
 #include "univ.i"
 #include <string.h>
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "os0sync.h"
 
 /** The total amount of memory currently allocated from the operating
@@ -38,7 +38,7 @@ extern ulint		ut_total_allocated_memory;
 
 /** Mutex protecting ut_total_allocated_memory and ut_mem_block_list */
 extern os_fast_mutex_t	ut_list_mutex;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** Wrapper for memcpy(3).  Copy memory area when the source and
 target are not overlapping.
@@ -78,7 +78,7 @@ ut_mem_init(void);
 /*=============*/
 
 /**********************************************************************//**
-Allocates memory. Sets it also to zero if UNIV_SET_MEM_TO_ZERO is
+Allocates memory. Sets it also to zero if IB_SET_MEM_TO_ZERO is
 defined and set_to_zero is TRUE.
 @return	own: allocated memory */
 IB_INTERN
@@ -88,12 +88,12 @@ ut_malloc_low(
 	ulint	n,			/*!< in: number of bytes to allocate */
 	ibool	set_to_zero,		/*!< in: TRUE if allocated memory
 					should be set to zero if
-					UNIV_SET_MEM_TO_ZERO is defined */
+					IB_SET_MEM_TO_ZERO is defined */
 	ibool	assert_on_error);	/*!< in: if TRUE, we crash the
 					engine if the memory cannot be
 					allocated */
 /**********************************************************************//**
-Allocates memory. Sets it also to zero if UNIV_SET_MEM_TO_ZERO is
+Allocates memory. Sets it also to zero if IB_SET_MEM_TO_ZERO is
 defined.
 @return	own: allocated memory */
 IB_INTERN
@@ -101,7 +101,7 @@ void*
 ut_malloc(
 /*======*/
 	ulint	n);	/*!< in: number of bytes to allocate */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Tests if malloc of n bytes would succeed. ut_malloc() asserts if memory runs
 out. It cannot be used if we want to return an error message. Prints to
@@ -112,7 +112,7 @@ ibool
 ut_test_malloc(
 /*===========*/
 	ulint	n);	/*!< in: try to allocate this many bytes */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /**********************************************************************//**
 Frees a memory block allocated with ut_malloc. */
 IB_INTERN
@@ -120,7 +120,7 @@ void
 ut_free(
 /*====*/
 	void* ptr);  /*!< in, own: memory block */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Implements realloc. This is needed by /pars/lexyy.c. Otherwise, you should not
 use this function because the allocation functions in mem0mem.h are the
@@ -158,7 +158,7 @@ IB_INTERN
 void
 ut_free_all_mem(void);
 /*=================*/
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /** Wrapper for strcpy(3).  Copy a NUL-terminated string.
 * @param dest	in: copy to

@@ -45,7 +45,7 @@ typedef	byte	flst_node_t;
 /* The physical size of a list node in bytes */
 #define	FLST_NODE_SIZE		(2 * FIL_ADDR_SIZE)
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /********************************************************************//**
 Initializes a list base node. */
 IB_INLINE
@@ -212,6 +212,6 @@ flst_print(
 #include "fut0lst.inl"
 #endif
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #endif

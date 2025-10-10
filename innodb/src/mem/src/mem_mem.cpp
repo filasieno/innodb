@@ -236,9 +236,9 @@ char *mem_heap_printf(mem_heap_t *heap, const char *format, ...)
 /// for MEM_HEAP_BTR_SEARCH type heaps)
 IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint type, const char *file_name, ulint line)
 {
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	buf_block_t *buf_block = NULL;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	mem_block_t *block;
 	ulint len;
 
@@ -252,15 +252,15 @@ IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint ty
 
 	len = MEM_BLOCK_HEADER_SIZE + MEM_SPACE_NEEDED(n);
 
-#ifndef UNIV_HOTBACKUP
-	if (type == MEM_HEAP_DYNAMIC || len < UNIV_PAGE_SIZE / 2) {
+#ifndef IB_HOTBACKUP
+	if (type == MEM_HEAP_DYNAMIC || len < IB_PAGE_SIZE / 2) {
 
 		ut_a(type == MEM_HEAP_DYNAMIC || n <= MEM_MAX_ALLOC_IN_BUF);
 
 		block = (mem_block_t *)malloc(len);
 	} else {
 
-		len = UNIV_PAGE_SIZE;
+		len = IB_PAGE_SIZE;
 
 		if ((type & MEM_HEAP_BTR_SEARCH) && heap) {
 			// We cannot allocate the block from the
@@ -270,7 +270,7 @@ IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint ty
 			buf_block = heap->free_block;
 			heap->free_block = NULL;
 
-			if (UNIV_UNLIKELY(buf_block == NULL)) {
+			if (IB_UNLIKELY(buf_block == NULL)) {
 
 				return (NULL);
 			}
@@ -284,11 +284,11 @@ IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint ty
 	ut_ad(block);
 	block->buf_block = buf_block;
 	block->free_block = NULL;
-#else  /* !UNIV_HOTBACKUP */
+#else  /* !IB_HOTBACKUP */
 	len = MEM_BLOCK_HEADER_SIZE + MEM_SPACE_NEEDED(n);
 	block = ut_malloc(len);
 	ut_ad(block);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	block->magic_n = MEM_BLOCK_MAGIC_N;
 	ut_strlcpy_rev(block->file_name, file_name, sizeof(block->file_name));
@@ -299,7 +299,7 @@ IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint ty
 	mem_block_set_free(block, MEM_BLOCK_HEADER_SIZE);
 	mem_block_set_start(block, MEM_BLOCK_HEADER_SIZE);
 
-	if (UNIV_UNLIKELY(heap == NULL)) {
+	if (IB_UNLIKELY(heap == NULL)) {
 		// This is the first block of the heap. The field
 		// total_size should be initialized here
 		block->total_size = len;
@@ -307,7 +307,7 @@ IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint ty
 		// Not the first allocation for the heap. This block's
 		// total_length field should be set to undefined.
 		ut_d(block->total_size = ULINT_UNDEFINED);
-		UNIV_MEM_INVALID(&block->total_size, sizeof block->total_size);
+		IB_MEM_INVALID(&block->total_size, sizeof block->total_size);
 
 		heap->total_size += len;
 	}
@@ -374,9 +374,9 @@ IB_INTERN void mem_heap_block_free(mem_heap_t *heap, mem_block_t *block)
 {
 	ulint type;
 	ulint len;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	buf_block_t *buf_block = block->buf_block;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	if (block->magic_n != MEM_BLOCK_MAGIC_N) {
 		ut_error;
@@ -391,52 +391,52 @@ IB_INTERN void mem_heap_block_free(mem_heap_t *heap, mem_block_t *block)
 	len = block->len;
 	block->magic_n = MEM_FREED_BLOCK_MAGIC_N;
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	if (!srv_use_sys_malloc) {
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 		// In the debug version we set the memory to a random
 		// combination of hex 0xDE and 0xAD.
 
 		mem_erase_buf((byte *)block, len);
-#else  /* UNIV_MEM_DEBUG */
-		UNIV_MEM_ASSERT_AND_FREE(block, len);
-#endif /* UNIV_MEM_DEBUG */
+#else  /* IB_MEM_DEBUG */
+		IB_MEM_ASSERT_AND_FREE(block, len);
+#endif /* IB_MEM_DEBUG */
 	}
-	if (type == MEM_HEAP_DYNAMIC || len < UNIV_PAGE_SIZE / 2) {
+	if (type == MEM_HEAP_DYNAMIC || len < IB_PAGE_SIZE / 2) {
 
 		free(block);
 	} else {
 		buf_block_free(buf_block);
 	}
-#else /* !UNIV_HOTBACKUP */
-#ifdef UNIV_MEM_DEBUG
+#else /* !IB_HOTBACKUP */
+#ifdef IB_MEM_DEBUG
 	// In the debug version we set the memory to a random
 	// combination of hex 0xDE and 0xAD.
 
 	mem_erase_buf((byte *)block, len);
-#else  /* UNIV_MEM_DEBUG */
-	UNIV_MEM_ASSERT_AND_FREE(block, len);
-#endif /* UNIV_MEM_DEBUG */
+#else  /* IB_MEM_DEBUG */
+	IB_MEM_ASSERT_AND_FREE(block, len);
+#endif /* IB_MEM_DEBUG */
 	ut_free(block);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Frees the free_block field from a memory heap.
 /// \param heap in: heap
 IB_INTERN
 void mem_heap_free_block_free(mem_heap_t *heap)
 {
-	if (UNIV_LIKELY_NULL(heap->free_block)) {
+	if (IB_LIKELY_NULL(heap->free_block)) {
 
 		buf_block_free(heap->free_block);
 
 		heap->free_block = NULL;
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /// \brief Goes through the list of all allocated mem blocks, checks their magic
 /// numbers, and reports possible corruption.
 /// \param heap in: memory heap
@@ -446,9 +446,9 @@ IB_INTERN ibool mem_heap_check(mem_heap_t *heap)
 
 	return (TRUE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
-#if defined UNIV_MEM_DEBUG || defined UNIV_DEBUG
+#if defined IB_MEM_DEBUG || defined IB_DEBUG
 /// \brief Checks a memory heap for consistency and prints the contents if requested.
 /// Outputs the sum of sizes of buffers given to the user (only in
 /// the debug version), the physical size of the heap and the number of
@@ -472,7 +472,7 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 	ulint total_len = 0;
 	ulint block_count = 0;
 	ulint phys_len = 0;
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 	ulint len;
 	byte *field;
 	byte *user_field;
@@ -504,12 +504,12 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 	while (block != NULL) {
 		phys_len += mem_block_get_len(block);
 
-		if ((block->type == MEM_HEAP_BUFFER) && (mem_block_get_len(block) > UNIV_PAGE_SIZE)) {
+		if ((block->type == MEM_HEAP_BUFFER) && (mem_block_get_len(block) > IB_PAGE_SIZE)) {
 
 			ib_logger(
 				ib_stream,
 				"InnoDB: Error: mem block %p"
-				" length %lu > UNIV_PAGE_SIZE\n",
+				" length %lu > IB_PAGE_SIZE\n",
 				(void *)block,
 				(ulong)mem_block_get_len(block)
 			);
@@ -518,7 +518,7 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 			return;
 		}
 
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 		// We can trace the fields of the block only in the debug
 		// version
 		if (print) {
@@ -600,7 +600,7 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 		block = UT_LIST_GET_NEXT(list, block);
 		block_count++;
 	}
-#ifdef UNIV_MEM_DEBUG
+#ifdef IB_MEM_DEBUG
 completed:
 #endif
 	if (us_size != NULL) {
@@ -660,9 +660,9 @@ ibool mem_heap_validate(mem_heap_t *heap)
 
 	return (TRUE);
 }
-#endif /* UNIV_MEM_DEBUG || UNIV_DEBUG */
+#endif /* IB_MEM_DEBUG || IB_DEBUG */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /// \brief Verify that the heap is not corrupt.
 /// \param heap in: heap to verify
 IB_INTERN void mem_heap_verify(const mem_heap_t *heap)

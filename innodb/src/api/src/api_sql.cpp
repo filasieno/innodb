@@ -30,7 +30,7 @@
 #include <stdarg.h>
 
 
-#ifdef HAVE_UNISTD_H
+#ifdef IB_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

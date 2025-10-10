@@ -26,7 +26,7 @@ Created June 2005 by Marko Makela
 #ifndef page0zip_h
 #define page0zip_h
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE
 #endif
@@ -56,7 +56,7 @@ page_zip_set_size(
 	page_zip_des_t*	page_zip,	/*!< in/out: compressed page */
 	ulint		size);		/*!< in: size in bytes */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Determine if a record is so big that it needs to be stored externally.
 @return	FALSE if the entire record can be stored locally on the page */
@@ -81,7 +81,7 @@ page_zip_empty_size(
 	ulint	n_fields,	/*!< in: number of columns in the index */
 	ulint	zip_size)	/*!< in: compressed page size in bytes */
 	__attribute__((const));
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Initialize a compressed page descriptor. */
@@ -134,7 +134,7 @@ page_zip_decompress(
 				after page creation */
 	__attribute__((nonnull(1,2)));
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************************//**
 Validate a compressed page descriptor.
 @return	TRUE if ok */
@@ -144,9 +144,9 @@ page_zip_simple_validate(
 /*=====================*/
 	const page_zip_des_t*	page_zip);	/*!< in: compressed page
 						descriptor */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
-#ifdef UNIV_ZIP_DEBUG
+#ifdef IB_ZIP_DEBUG
 /**********************************************************************//**
 Check that the compressed and decompressed pages match.
 @return	TRUE if valid, FALSE if not */
@@ -168,7 +168,7 @@ page_zip_validate(
 	const page_zip_des_t*	page_zip,/*!< in: compressed page */
 	const page_t*		page)	/*!< in: uncompressed page */
 	__attribute__((nonnull));
-#endif /* UNIV_ZIP_DEBUG */
+#endif /* IB_ZIP_DEBUG */
 
 /**********************************************************************//**
 Determine how big record can be inserted without recompressing the page.
@@ -402,7 +402,7 @@ page_zip_reorganize(
 	dict_index_t*	index,	/*!< in: index of the B-tree node */
 	mtr_t*		mtr)	/*!< in: mini-transaction */
 	__attribute__((nonnull));
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Copy the records of a page byte for byte.  Do not copy the page header
 or trailer, except those B-tree header fields that are directly
@@ -421,7 +421,7 @@ page_zip_copy_recs(
 	dict_index_t*		index,		/*!< in: index of the B-tree */
 	mtr_t*			mtr)		/*!< in: mini-transaction */
 	__attribute__((nonnull(1,2,3,4)));
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /**********************************************************************//**
 Parses a log record of compressing an index page.
@@ -453,23 +453,23 @@ void
 page_zip_var_init(void);
 /*===================*/
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /** Check if a pointer to an uncompressed page matches a compressed page.
 @param ptr	pointer to an uncompressed page frame
 @param page_zip	compressed page descriptor
 @return		TRUE if ptr and page_zip refer to the same block */
 # define PAGE_ZIP_MATCH(ptr, page_zip)			\
 	(buf_frame_get_page_zip(ptr) == (page_zip))
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 /** Check if a pointer to an uncompressed page matches a compressed page.
 @param ptr	pointer to an uncompressed page frame
 @param page_zip	compressed page descriptor
 @return		TRUE if ptr and page_zip refer to the same block */
 # define PAGE_ZIP_MATCH(ptr, page_zip)				\
-	(page_align(ptr) + UNIV_PAGE_SIZE == (page_zip)->data)
-#endif /* !UNIV_HOTBACKUP */
+	(page_align(ptr) + IB_PAGE_SIZE == (page_zip)->data)
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE	IB_INLINE_ORIGINAL
 #endif

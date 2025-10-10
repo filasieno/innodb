@@ -23,17 +23,17 @@ AC_DEFUN([PANDORA_WITH_LUA],[
       [LUAPC=$with_lua])
 
     PKG_CHECK_MODULES([LUA], $LUAPC >= 5.1, [
-      AC_DEFINE([HAVE_LUA], [1], [liblua])
-      AC_DEFINE([HAVE_LUA_H], [1], [lua.h])
+      AC_DEFINE([IB_HAVE_LUA], [1], [liblua])
+      AC_DEFINE([IB_HAVE_LUA_H], [1], [lua.h])
       with_lua=yes
     ],[
       LUAPC=lua5.1
       PKG_CHECK_MODULES([LUA], $LUAPC >= 5.1, [
-        AC_DEFINE([HAVE_LUA], [1], [liblua])
-        AC_DEFINE([HAVE_LUA_H], [1], [lua.h])
+        AC_DEFINE([IB_HAVE_LUA], [1], [liblua])
+        AC_DEFINE([IB_HAVE_LUA_H], [1], [lua.h])
         with_lua=yes
       ],[
-        AC_DEFINE([HAVE_LUA],["x"],["x"])
+        AC_DEFINE([IB_HAVE_LUA],["x"],["x"])
         with_lua=no
       ])
     ])

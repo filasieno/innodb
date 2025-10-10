@@ -11,7 +11,7 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([_PANDORA_SEARCH_LIBEVENT],[
   AC_REQUIRE([AC_LIB_PREFIX])
 
-  AC_LIB_HAVE_LINKFLAGS(event,,
+  AC_LIB_IB_HAVE_LINKFLAGS(event,,
   [
     #include <sys/types.h>
     #include <sys/time.h>
@@ -24,7 +24,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBEVENT],[
     event_loop(EVLOOP_ONCE);
   ]) 
 
-  AM_CONDITIONAL(HAVE_LIBEVENT, [test "x${ac_cv_libevent}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBEVENT, [test "x${ac_cv_libevent}" = "xyes"])
 
   AS_IF([test "x${ac_cv_libevent}" = "xyes"],[
     save_LIBS="${LIBS}"
@@ -36,7 +36,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBEVENT],[
   ])
 ])
 
-AC_DEFUN([_PANDORA_HAVE_LIBEVENT],[
+AC_DEFUN([_PANDORA_IB_HAVE_LIBEVENT],[
 
   AC_ARG_ENABLE([libevent],
     [AS_HELP_STRING([--disable-libevent],
@@ -48,8 +48,8 @@ AC_DEFUN([_PANDORA_HAVE_LIBEVENT],[
 ])
 
 
-AC_DEFUN([PANDORA_HAVE_LIBEVENT],[
-  AC_REQUIRE([_PANDORA_HAVE_LIBEVENT])
+AC_DEFUN([PANDORA_IB_HAVE_LIBEVENT],[
+  AC_REQUIRE([_PANDORA_IB_HAVE_LIBEVENT])
 ])
 
 AC_DEFUN([_PANDORA_REQUIRE_LIBEVENT],[

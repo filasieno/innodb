@@ -29,7 +29,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "trx0sys.inl"
 #endif
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "fsp_fsp.hpp"
 #include "log_log.hpp"
 #include "mtr_log.hpp"
@@ -133,9 +133,9 @@ static void trx_doublewrite_init(
 
 	/* Since we now start to use the doublewrite buffer, no need to call
   fsync() after every write to a data file */
-#ifdef UNIV_DO_FLUSH
+#ifdef IB_DO_FLUSH
 	os_do_not_call_flush_at_each_write = TRUE;
-#endif /* UNIV_DO_FLUSH */
+#endif /* IB_DO_FLUSH */
 
 	mutex_create(&trx_doublewrite->mutex, SYNC_DOUBLEWRITE);
 
@@ -146,10 +146,10 @@ static void trx_doublewrite_init(
 	trx_doublewrite->block2 =
 		mach_read_from_4(doublewrite + TRX_SYS_DOUBLEWRITE_BLOCK2);
 	trx_doublewrite->write_buf_unaligned =
-		ut_malloc((1 + 2 * TRX_SYS_DOUBLEWRITE_BLOCK_SIZE) * UNIV_PAGE_SIZE);
+		ut_malloc((1 + 2 * TRX_SYS_DOUBLEWRITE_BLOCK_SIZE) * IB_PAGE_SIZE);
 
 	trx_doublewrite->write_buf =
-		ut_align(trx_doublewrite->write_buf_unaligned, UNIV_PAGE_SIZE);
+		ut_align(trx_doublewrite->write_buf_unaligned, IB_PAGE_SIZE);
 	trx_doublewrite->buf_block_arr =
 		mem_alloc(2 * TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * sizeof(void *));
 }
@@ -212,7 +212,7 @@ start_again:
 
 		ulint required_size =
 			(2 * TRX_SYS_DOUBLEWRITE_BLOCK_SIZE + FSP_EXTENT_SIZE / 2 + 100) *
-			UNIV_PAGE_SIZE;
+			IB_PAGE_SIZE;
 		if (buf_pool_get_curr_size() < required_size) {
 			ib_logger(ib_stream, "InnoDB: Cannot create doublewrite buffer: you must\n");
 			ib_logger(ib_stream, "InnoDB: increase your buffer pool size.\n");
@@ -319,13 +319,13 @@ void trx_sys_doublewrite_init_or_restore_pages(
 
 	/* We do the file i/o past the buffer pool */
 
-	unaligned_read_buf = ut_malloc(2 * UNIV_PAGE_SIZE);
-	read_buf = ut_align(unaligned_read_buf, UNIV_PAGE_SIZE);
+	unaligned_read_buf = ut_malloc(2 * IB_PAGE_SIZE);
+	read_buf = ut_align(unaligned_read_buf, IB_PAGE_SIZE);
 
 	/* Read the trx sys header to check if we are using the doublewrite
   buffer */
 
-	fil_io(OS_FILE_READ, TRUE, TRX_SYS_SPACE, 0, TRX_SYS_PAGE_NO, 0, UNIV_PAGE_SIZE, read_buf, NULL);
+	fil_io(OS_FILE_READ, TRUE, TRX_SYS_SPACE, 0, TRX_SYS_PAGE_NO, 0, IB_PAGE_SIZE, read_buf, NULL);
 	doublewrite = read_buf + TRX_SYS_DOUBLEWRITE;
 
 	if (mach_read_from_4(doublewrite + TRX_SYS_DOUBLEWRITE_MAGIC) ==
@@ -362,8 +362,8 @@ void trx_sys_doublewrite_init_or_restore_pages(
 
 	/* Read the pages from the doublewrite buffer to memory */
 
-	fil_io(OS_FILE_READ, TRUE, TRX_SYS_SPACE, 0, block1, 0, TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * UNIV_PAGE_SIZE, buf, NULL);
-	fil_io(OS_FILE_READ, TRUE, TRX_SYS_SPACE, 0, block2, 0, TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * UNIV_PAGE_SIZE, buf + TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * UNIV_PAGE_SIZE, NULL);
+	fil_io(OS_FILE_READ, TRUE, TRX_SYS_SPACE, 0, block1, 0, TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * IB_PAGE_SIZE, buf, NULL);
+	fil_io(OS_FILE_READ, TRUE, TRX_SYS_SPACE, 0, block2, 0, TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * IB_PAGE_SIZE, buf + TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * IB_PAGE_SIZE, NULL);
 	/* Check if any of these pages is half-written in data files, in the
   intended position */
 
@@ -387,7 +387,7 @@ void trx_sys_doublewrite_init_or_restore_pages(
 				source_page_no = block2 + i - TRX_SYS_DOUBLEWRITE_BLOCK_SIZE;
 			}
 
-			fil_io(OS_FILE_WRITE, TRUE, 0, 0, source_page_no, 0, UNIV_PAGE_SIZE, page, NULL);
+			fil_io(OS_FILE_WRITE, TRUE, 0, 0, source_page_no, 0, IB_PAGE_SIZE, page, NULL);
 			/* printf("Resetting space id in page %lu\n",
       source_page_no); */
 		} else {
@@ -435,11 +435,11 @@ void trx_sys_doublewrite_init_or_restore_pages(
 			}
 #endif /* WITH_ZIP */
 			/* Read in the actual page from the file */
-			fil_io(OS_FILE_READ, TRUE, space_id, zip_size, page_no, 0, zip_size ? zip_size : UNIV_PAGE_SIZE, read_buf, NULL);
+			fil_io(OS_FILE_READ, TRUE, space_id, zip_size, page_no, 0, zip_size ? zip_size : IB_PAGE_SIZE, read_buf, NULL);
 
 			/* Check if the page is corrupt */
 
-			if (UNIV_UNLIKELY(buf_page_is_corrupted(read_buf, zip_size))) {
+			if (IB_UNLIKELY(buf_page_is_corrupted(read_buf, zip_size))) {
 
 				ib_logger(ib_stream,
 						  "InnoDB: Warning: database page"
@@ -478,14 +478,14 @@ void trx_sys_doublewrite_init_or_restore_pages(
         doublewrite buffer to the intended
         position */
 
-				fil_io(OS_FILE_WRITE, TRUE, space_id, zip_size, page_no, 0, zip_size ? zip_size : UNIV_PAGE_SIZE, page, NULL);
+				fil_io(OS_FILE_WRITE, TRUE, space_id, zip_size, page_no, 0, zip_size ? zip_size : IB_PAGE_SIZE, page, NULL);
 				ib_logger(ib_stream,
 						  "InnoDB: Recovered the page from"
 						  " the doublewrite buffer.\n");
 			}
 		}
 
-		page += UNIV_PAGE_SIZE;
+		page += IB_PAGE_SIZE;
 	}
 
 	fil_flush_file_spaces(FIL_TABLESPACE);
@@ -625,7 +625,7 @@ static void trx_sysf_create(
 
 	/* The remaining area (up to the page trailer) is uninitialized.
   Silence Valgrind warnings about it. */
-	UNIV_MEM_VALID(sys_header + (TRX_SYS_RSEGS + TRX_SYS_N_RSEGS * TRX_SYS_RSEG_SLOT_SIZE + TRX_SYS_RSEG_SPACE), (UNIV_PAGE_SIZE - FIL_PAGE_DATA_END - (TRX_SYS_RSEGS + TRX_SYS_N_RSEGS * TRX_SYS_RSEG_SLOT_SIZE + TRX_SYS_RSEG_SPACE)) + page - sys_header);
+	IB_MEM_VALID(sys_header + (TRX_SYS_RSEGS + TRX_SYS_N_RSEGS * TRX_SYS_RSEG_SLOT_SIZE + TRX_SYS_RSEG_SPACE), (IB_PAGE_SIZE - FIL_PAGE_DATA_END - (TRX_SYS_RSEGS + TRX_SYS_N_RSEGS * TRX_SYS_RSEG_SLOT_SIZE + TRX_SYS_RSEG_SPACE)) + page - sys_header);
 
 	/* Create the first rollback segment in the SYSTEM tablespace */
 	page_no = trx_rseg_header_create(TRX_SYS_SPACE, 0, ULINT_MAX, &slot_no, mtr);
@@ -1045,8 +1045,8 @@ ibool trx_sys_read_file_format_id(
 {
 	os_file_t file;
 	ibool success;
-	byte buf[UNIV_PAGE_SIZE * 2];
-	page_t *page = ut_align(buf, UNIV_PAGE_SIZE);
+	byte buf[IB_PAGE_SIZE * 2];
+	page_t *page = ut_align(buf, IB_PAGE_SIZE);
 	const byte *ptr;
 	dulint file_format_id;
 
@@ -1071,7 +1071,7 @@ ibool trx_sys_read_file_format_id(
 	/* Read the page on which file format is stored */
 
 	success = os_file_read_no_error_handling(
-		file, page, TRX_SYS_PAGE_NO * UNIV_PAGE_SIZE, 0, UNIV_PAGE_SIZE
+		file, page, TRX_SYS_PAGE_NO * IB_PAGE_SIZE, 0, IB_PAGE_SIZE
 	);
 	if (!success) {
 		/* The following call prints an error message */
@@ -1121,8 +1121,8 @@ ibool trx_sys_read_pertable_file_format_id(
 {
 	os_file_t file;
 	ibool success;
-	byte buf[UNIV_PAGE_SIZE * 2];
-	page_t *page = ut_align(buf, UNIV_PAGE_SIZE);
+	byte buf[IB_PAGE_SIZE * 2];
+	page_t *page = ut_align(buf, IB_PAGE_SIZE);
 	const byte *ptr;
 	ib_uint32_t flags;
 
@@ -1144,7 +1144,7 @@ ibool trx_sys_read_pertable_file_format_id(
 
 	/* Read the first page of the per-table datafile */
 
-	success = os_file_read_no_error_handling(file, page, 0, 0, UNIV_PAGE_SIZE);
+	success = os_file_read_no_error_handling(file, page, 0, 0, IB_PAGE_SIZE);
 	if (!success) {
 		/* The following call prints an error message */
 		os_file_get_last_error(TRUE);
@@ -1177,9 +1177,9 @@ ibool trx_sys_read_pertable_file_format_id(
 	}
 }
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************
 Shutdown/Close the transaction system. */
 IB_INTERN
@@ -1211,9 +1211,9 @@ void trx_sys_close(void)
   of the functions that we need to call. */
 	mutex_enter(&kernel_mutex);
 
-#ifdef UNIV_DO_FLUSH
+#ifdef IB_DO_FLUSH
 	os_do_not_call_flush_at_each_write = TRUE;
-#endif /* UNIV_DO_FLUSH */
+#endif /* IB_DO_FLUSH */
 
 	/* Free the double write data structures. */
 	ut_a(trx_doublewrite != NULL);
@@ -1224,7 +1224,7 @@ void trx_sys_close(void)
 	trx_doublewrite->buf_block_arr = NULL;
 
 	mutex_free(&trx_doublewrite->mutex);
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	memset(&trx_doublewrite->mutex, 0x0, sizeof(trx_doublewrite->mutex));
 #endif
 	mem_free(trx_doublewrite);
@@ -1265,4 +1265,4 @@ void trx_sys_close(void)
 	trx_sys = NULL;
 	mutex_exit(&kernel_mutex);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

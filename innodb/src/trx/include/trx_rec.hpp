@@ -34,7 +34,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "data_data.hpp"
 #include "rem_types.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "que0types.h"
 
 /***********************************************************************//**
@@ -281,7 +281,7 @@ trx_undo_prev_version_build(
 	rec_t**		old_vers);/*!< out, own: previous version, or NULL if
 				rec is the first inserted version, or if
 				history data has been deleted */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /***********************************************************//**
 Parses a redo log record of adding an undo log record.
 @return	end of log record or NULL */
@@ -304,7 +304,7 @@ trx_undo_parse_erase_page_end(
 	page_t*	page,	/*!< in: page or NULL */
 	mtr_t*	mtr);	/*!< in: mtr or NULL */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 /* Types of an undo log record: these have to be smaller than 16, as the
 compilation info multiplied by 16 is ORed to this value in an undo log
@@ -333,6 +333,6 @@ record */
 #include "trx0rec.inl"
 #endif
 
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 #endif /* trx0rec_h */

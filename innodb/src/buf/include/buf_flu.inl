@@ -23,7 +23,7 @@ The database buffer pool flush algorithm
 Created 11/5/1995 Heikki Tuuri
 *******************************************************/
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "buf_buf.hpp"
 #include "mtr_mtr.hpp"
 
@@ -58,9 +58,9 @@ buf_flush_note_modification(
 	ut_ad(block);
 	ut_ad(buf_block_get_state(block) == BUF_BLOCK_FILE_PAGE);
 	ut_ad(block->page.buf_fix_count > 0);
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(block->lock), RW_LOCK_EX));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ut_ad(buf_pool_mutex_own());
 
 	ut_ad(mtr->start_lsn != 0);
@@ -97,9 +97,9 @@ buf_flush_recv_note_modification(
 	ut_ad(block);
 	ut_ad(buf_block_get_state(block) == BUF_BLOCK_FILE_PAGE);
 	ut_ad(block->page.buf_fix_count > 0);
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&(block->lock), RW_LOCK_EX));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
 	buf_pool_mutex_enter();
 
@@ -120,4 +120,4 @@ buf_flush_recv_note_modification(
 
 	buf_pool_mutex_exit();
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

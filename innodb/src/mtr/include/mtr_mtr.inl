@@ -23,10 +23,10 @@ Mini-transaction buffer
 Created 11/26/1995 Heikki Tuuri
 *******************************************************/
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 # include "sync0sync.h"
 # include "sync0rw.h"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 #include "mach_data.hpp"
 
 /***************************************************************//**
@@ -100,7 +100,7 @@ mtr_set_savepoint(
 	return(dyn_array_get_data_size(memo));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************//**
 Releases the (index tree) s-latch stored in an mtr memo after a
 savepoint. */
@@ -133,7 +133,7 @@ mtr_release_s_latch_at_savepoint(
 	slot->object = NULL;
 }
 
-# ifdef UNIV_DEBUG
+# ifdef IB_DEBUG
 /**********************************************************//**
 Checks if memo contains the given item.
 @return	TRUE if contains */
@@ -170,8 +170,8 @@ mtr_memo_contains(
 
 	return(FALSE);
 }
-# endif /* UNIV_DEBUG */
-#endif /* !UNIV_HOTBACKUP */
+# endif /* IB_DEBUG */
+#endif /* !IB_HOTBACKUP */
 
 /***************************************************************//**
 Gets the logging mode of a mini-transaction.
@@ -219,7 +219,7 @@ mtr_set_log_mode(
 	return(old_mode);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Locks a lock in s-mode. */
 IB_INLINE
@@ -257,4 +257,4 @@ mtr_x_lock_func(
 
 	mtr_memo_push(mtr, lock, MTR_MEMO_X_LOCK);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

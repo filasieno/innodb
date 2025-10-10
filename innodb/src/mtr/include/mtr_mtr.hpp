@@ -104,7 +104,7 @@ For 1 - 8 bytes, the flag value must give the length also! @{ */
 #define MLOG_IBUF_BITMAP_INIT	((byte)27)	/*!< initialize an
 						ibuf bitmap page */
 /*#define	MLOG_FULL_PAGE	((byte)28)	full contents of a page */
-#ifdef UNIV_LOG_LSN_DEBUG
+#ifdef IB_LOG_LSN_DEBUG
 # define MLOG_LSN		((byte)28)	/* current LSN */
 #endif
 #define MLOG_INIT_FILE_PAGE	((byte)29)	/*!< this means that a
@@ -213,7 +213,7 @@ mtr_set_savepoint(mtr_t* mtr);
 IB_INTERN
 void
 mtr_rollback_to_savepoint(mtr_t* mtr, ulint savepoint);
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Releases the (index tree) s-latch stored in an mtr memo after a savepoint.
 /// \param mtr Mtr.
 /// \param savepoint Savepoint.
@@ -221,9 +221,9 @@ mtr_rollback_to_savepoint(mtr_t* mtr, ulint savepoint);
 IB_INLINE
 void
 mtr_release_s_latch_at_savepoint(mtr_t* mtr, ulint savepoint, rw_lock_t* lock);
-#else /* !UNIV_HOTBACKUP */
+#else /* !IB_HOTBACKUP */
 # define mtr_release_s_latch_at_savepoint(mtr,savepoint,lock) ((void) 0)
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /// \brief Gets the logging mode of a mini-transaction.
 /// \param mtr Mtr.
 /// \return Logging mode: MTR_LOG_NONE, ...
@@ -252,7 +252,7 @@ mtr_read_ulint(const byte* ptr, ulint type, mtr_t* mtr);
 IB_INTERN
 dulint
 mtr_read_dulint(const byte* ptr, mtr_t* mtr);
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**
 This macro locks an rw-lock in s-mode. */
 #define mtr_s_lock(B, MTR)	mtr_s_lock_func((B), __FILE__, __LINE__, (MTR))
@@ -276,15 +276,15 @@ IB_INLINE void mtr_x_lock_func(
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line number */
 	mtr_t*		mtr);	/*!< in: mtr */
-#endif // !UNIV_HOTBACKUP
+#endif // !IB_HOTBACKUP
 
 /** Releases an object in the memo stack. */
 IB_INTERN void mtr_memo_release(
 	mtr_t*	mtr,	/*!< in: mtr */
 	void*	object,	/*!< in: object */
 	ulint	type);	/*!< in: object type: MTR_MEMO_S_LOCK, ... */
-#ifdef UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#ifdef IB_DEBUG
+# ifndef IB_HOTBACKUP
 /** Checks if memo contains the given item.
 @return	TRUE if contains */
 IB_INLINE
@@ -308,11 +308,11 @@ mtr_memo_contains_page(mtr_t* mtr, const byte* ptr, ulint type);
 IB_INTERN
 void
 mtr_print(mtr_t* mtr);
-# else /* !UNIV_HOTBACKUP */
+# else /* !IB_HOTBACKUP */
 #  define mtr_memo_contains(mtr, object, type)		TRUE
 #  define mtr_memo_contains_page(mtr, ptr, type)	TRUE
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_DEBUG */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_DEBUG */
 /*######################################################################*/
 
 #define	MTR_BUF_MEMO_SIZE	200	/* number of slots in memo */
@@ -335,7 +335,7 @@ struct mtr_memo_slot_struct{
 
 /* Mini-transaction handle and buffer */
 struct mtr_struct{
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint		state;	/*!< MTR_ACTIVE, MTR_COMMITTING, MTR_COMMITTED */
 #endif
 	dyn_array_t	memo;	/*!< memo stack for locks etc. */
@@ -352,14 +352,14 @@ struct mtr_struct{
 				this mtr */
 	ib_uint64_t	end_lsn;/* end lsn of the possible log entry for
 				this mtr */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint		magic_n;
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 };
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 # define MTR_MAGIC_N		54551
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 #define MTR_ACTIVE		12231
 #define MTR_COMMITTING		56456

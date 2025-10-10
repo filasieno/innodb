@@ -28,12 +28,12 @@ Created 8/22/1994 Heikki Tuuri
 #include "ha0ha.inl"
 #endif
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 # include "buf0buf.h"
-#endif /* UNIV_DEBUG */
-#ifdef UNIV_SYNC_DEBUG
+#endif /* IB_DEBUG */
+#ifdef IB_SYNC_DEBUG
 # include "btr0sea.h"
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 #include "page_page.hpp"
 
 /*************************************************************//**
@@ -45,26 +45,26 @@ hash_table_t*
 ha_create_func(
 /*===========*/
 	ulint	n,		/*!< in: number of array cells */
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ulint	mutex_level,	/*!< in: level of the mutexes in the latching
 				order: this is used in the debug version */
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 	ulint	n_mutexes)	/*!< in: number of mutexes to protect the
 				hash table: must be a power of 2, or 0 */
 {
 	hash_table_t*	table;
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ulint		i;
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	ut_ad(ut_is_2pow(n_mutexes));
 	table = hash_create(n);
 
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
+# ifndef IB_HOTBACKUP
 	table->adaptive = TRUE;
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	/* Creating MEM_HEAP_BTR_SEARCH type heaps can potentially fail,
 	but in practise it never should in this case, hence the asserts. */
 
@@ -76,7 +76,7 @@ ha_create_func(
 		return(table);
 	}
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	hash_create_mutexes(table, n_mutexes, mutex_level);
 
 	table->heaps = mem_alloc(n_mutexes * sizeof(void*));
@@ -85,7 +85,7 @@ ha_create_func(
 		table->heaps[i] = mem_heap_create_in_btr_search(4096);
 		ut_a(table->heaps[i]);
 	}
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	return(table);
 }
@@ -103,18 +103,18 @@ ha_clear(
 
 	ut_ad(table);
 	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
-#ifdef UNIV_SYNC_DEBUG
+#ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&btr_search_latch, RW_LOCK_EXCLUSIVE));
-#endif /* UNIV_SYNC_DEBUG */
+#endif /* IB_SYNC_DEBUG */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	/* Free the memory heaps. */
 	n = table->n_mutexes;
 
 	for (i = 0; i < n; i++) {
 		mem_heap_free(table->heaps[i]);
 	}
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	/* Clear the hash table. */
 	n = hash_get_n_cells(table);
@@ -138,9 +138,9 @@ ha_insert_for_fold_func(
 				the same fold value already exists, it is
 				updated to point to the same data, and no new
 				node is created! */
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	buf_block_t*	block,	/*!< in: buffer block containing the data */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	void*		data)	/*!< in: data, must not be NULL */
 {
 	hash_cell_t*	cell;
@@ -151,9 +151,9 @@ ha_insert_for_fold_func(
 	ut_ad(data);
 	ut_ad(table);
 	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	ut_a(block->frame == page_align(data));
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	ASSERT_HASH_MUTEX_OWN(table, fold);
 
 	hash = hash_calc_hash(fold, table);
@@ -164,8 +164,8 @@ ha_insert_for_fold_func(
 
 	while (prev_node != NULL) {
 		if (prev_node->fold == fold) {
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
+# ifndef IB_HOTBACKUP
 			if (table->adaptive) {
 				buf_block_t* prev_block = prev_node->block;
 				ut_a(prev_block->frame
@@ -174,10 +174,10 @@ ha_insert_for_fold_func(
 				prev_block->n_pointers--;
 				block->n_pointers++;
 			}
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 
 			prev_node->block = block;
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 			prev_node->data = data;
 
 			return(TRUE);
@@ -201,13 +201,13 @@ ha_insert_for_fold_func(
 
 	ha_node_set_data(node, block, data);
 
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
+# ifndef IB_HOTBACKUP
 	if (table->adaptive) {
 		block->n_pointers++;
 	}
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 
 	node->fold = fold;
 
@@ -243,15 +243,15 @@ ha_delete_hash_node(
 {
 	ut_ad(table);
 	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
+# ifndef IB_HOTBACKUP
 	if (table->adaptive) {
 		ut_a(del_node->block->frame = page_align(del_node->data));
 		ut_a(del_node->block->n_pointers > 0);
 		del_node->block->n_pointers--;
 	}
-# endif /* !UNIV_HOTBACKUP */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+# endif /* !IB_HOTBACKUP */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 
 	HASH_DELETE_AND_COMPACT(ha_node_t, next, table, del_node);
 }
@@ -266,9 +266,9 @@ ha_search_and_update_if_found_func(
 	hash_table_t*	table,	/*!< in/out: hash table */
 	ulint		fold,	/*!< in: folded value of the searched data */
 	void*		data,	/*!< in: pointer to the data */
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	buf_block_t*	new_block,/*!< in: block containing new_data */
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 	void*		new_data)/*!< in: new pointer to the data */
 {
 	ha_node_t*	node;
@@ -276,29 +276,29 @@ ha_search_and_update_if_found_func(
 	ut_ad(table);
 	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
 	ASSERT_HASH_MUTEX_OWN(table, fold);
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
 	ut_a(new_block->frame == page_align(new_data));
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 
 	node = ha_search_with_data(table, fold, data);
 
 	if (node) {
-#if defined UNIV_AHI_DEBUG || defined UNIV_DEBUG
-# ifndef UNIV_HOTBACKUP
+#if defined IB_AHI_DEBUG || defined IB_DEBUG
+# ifndef IB_HOTBACKUP
 		if (table->adaptive) {
 			ut_a(node->block->n_pointers > 0);
 			node->block->n_pointers--;
 			new_block->n_pointers++;
 		}
-# endif /* !UNIV_HOTBACKUP */
+# endif /* !IB_HOTBACKUP */
 
 		node->block = new_block;
-#endif /* UNIV_AHI_DEBUG || UNIV_DEBUG */
+#endif /* IB_AHI_DEBUG || IB_DEBUG */
 		node->data = new_data;
 	}
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*****************************************************************//**
 Removes from the chain determined by fold all nodes whose data pointer
 points to the page given. */
@@ -334,7 +334,7 @@ ha_remove_all_nodes_to_page(
 			node = ha_chain_get_next(node);
 		}
 	}
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* Check that all nodes really got deleted */
 
 	node = ha_chain_get_first(table, fold);
@@ -447,4 +447,4 @@ ha_print_info(
 			(ulong) n_bufs);
 	}
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

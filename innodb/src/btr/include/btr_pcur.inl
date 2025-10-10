@@ -70,7 +70,7 @@ btr_pcur_get_mtr(
 	return(cursor->mtr);
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************//**
 Returns the btr cursor component of a persistent cursor.
 @return	pointer to btr cursor component */
@@ -95,7 +95,7 @@ btr_pcur_get_page_cur(
 {
 	return(btr_cur_get_page_cur(btr_pcur_get_btr_cur(cursor)));
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************//**
 Returns the page of a persistent cursor.
 @return	pointer to the page */

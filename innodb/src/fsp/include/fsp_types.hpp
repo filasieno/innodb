@@ -42,7 +42,7 @@ fseg_alloc_free_page) */
 /* @} */
 
 /** File space extent size (one megabyte) in pages */
-#define	FSP_EXTENT_SIZE		(1 << (20 - UNIV_PAGE_SIZE_SHIFT))
+#define	FSP_EXTENT_SIZE		(1 << (20 - IB_PAGE_SIZE_SHIFT))
 
 /** On a page of any file segment, data may be put starting from this
 offset */
@@ -71,8 +71,8 @@ typedef	byte	fseg_header_t;
 /* Number of pages described in a single descriptor page: currently each page
 description takes less than 1 byte; a descriptor page is repeated every
 this many file pages */
-/* #define XDES_DESCRIBED_PER_PAGE		UNIV_PAGE_SIZE */
-/* This has been replaced with either UNIV_PAGE_SIZE or page_zip->size. */
+/* #define XDES_DESCRIBED_PER_PAGE		IB_PAGE_SIZE */
+/* This has been replaced with either IB_PAGE_SIZE or page_zip->size. */
 
 /** @name The space low address page map
 The pages at FSP_XDES_OFFSET and FSP_IBUF_BITMAP_OFFSET are repeated

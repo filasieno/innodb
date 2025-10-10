@@ -27,15 +27,15 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "os0thread.inl"
 #endif
 
-#ifdef HAVE_PTHREAD_H
+#ifdef IB_HAVE_PTHREAD_H
 #include <pthread.h>
-#endif /* HAVE_PTHREAD_H */
+#endif /* IB_HAVE_PTHREAD_H */
 
-#ifdef HAVE_SYS_SELECT_H
+#ifdef IB_HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
+#endif /* IB_HAVE_SYS_SELECT_H */
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 #include "srv_srv.hpp"
 #include "os_sync.hpp"
@@ -69,7 +69,7 @@ ibool os_thread_eq(os_thread_id_t a, os_thread_id_t b)
 IB_INTERN
 ulint os_thread_pf(os_thread_id_t a)
 {
-#ifdef UNIV_HPUX10
+#ifdef IB_HPUX10
 	/* In HP-UX-10.20 a pthread_t is a struct of 3 fields: field1, field2,
 	field3. We do not know if field1 determines the thread uniquely. */
 
@@ -146,11 +146,11 @@ os_thread_create(
 	os_thread_t	pthread;
 	pthread_attr_t	attr;
 
-#ifndef UNIV_HPUX10
+#ifndef IB_HPUX10
 	pthread_attr_init(&attr);
 #endif
 
-#ifdef UNIV_AIX
+#ifdef IB_AIX
 	/* We must make sure a thread stack is at least 32 kB, otherwise
 	InnoDB might crash; we do not know if the default stack size on
 	AIX is always big enough. An empirical test on AIX-4.3 suggested
@@ -178,7 +178,7 @@ os_thread_create(
 	os_thread_count++;
 	os_mutex_exit(os_sync_mutex);
 
-#ifdef UNIV_HPUX10
+#ifdef IB_HPUX10
 	ret = pthread_create(&pthread, pthread_attr_default, start_f, arg);
 #else
 	ret = pthread_create(&pthread, &attr, start_f, arg);
@@ -188,12 +188,12 @@ os_thread_create(
 			"InnoDB: Error: pthread_create returned %d\n", ret);
 	}
 
-#ifndef UNIV_HPUX10
+#ifndef IB_HPUX10
 	pthread_attr_destroy(&attr);
 #endif
 	if (srv_set_thread_priorities) {
 
-#ifdef HAVE_PTHREAD_SETPRIO 
+#ifdef IB_HAVE_PTHREAD_SETPRIO 
 		pthread_setprio(pthread, srv_query_thread_priority);
 #endif
 	}
@@ -219,10 +219,10 @@ os_thread_exit(
 	int	ret;
 #endif /* __WIN__ */
 
-#ifdef UNIV_DEBUG_THREAD_CREATION
+#ifdef IB_DEBUG_THREAD_CREATION
 	ib_logger(ib_stream, "Thread exits, id %lu\n",
 		os_thread_pf(os_thread_get_curr_id()));
-#endif /* UNIV_DEBUG_THREAD_CREATION */
+#endif /* IB_DEBUG_THREAD_CREATION */
 
 	os_mutex_enter(os_sync_mutex);
 	os_thread_count--;
@@ -262,17 +262,17 @@ os_thread_yield(void)
 {
 #if defined(__WIN__)
 	Sleep(0);
-#elif (defined(HAVE_SCHED_YIELD) && defined(HAVE_SCHED_H))
+#elif (defined(IB_HAVE_SCHED_YIELD) && defined(IB_HAVE_SCHED_H))
 	sched_yield();
-#elif defined(HAVE_PTHREAD_YIELD_ZERO_ARG)
+#elif defined(IB_HAVE_PTHREAD_YIELD_ZERO_ARG)
 	pthread_yield();
-#elif defined(HAVE_PTHREAD_YIELD_ONE_ARG)
+#elif defined(IB_HAVE_PTHREAD_YIELD_ONE_ARG)
 	pthread_yield(0);
 #else
 	os_thread_sleep(0);
 #endif
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*****************************************************************//**
 The thread sleeps at least the time given in microseconds. */
@@ -296,7 +296,7 @@ os_thread_sleep(
 #endif
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /******************************************************************//**
 Sets a thread priority. */
 IB_INTERN
@@ -372,4 +372,4 @@ os_thread_get_last_error(void)
 	return(0);
 #endif
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

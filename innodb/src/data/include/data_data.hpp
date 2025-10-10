@@ -37,7 +37,7 @@ Created 5/30/1994 Heikki Tuuri
 index record which needs external storage of data fields */
 typedef struct big_rec_struct		big_rec_t;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Gets pointer to the type struct of SQL data field.
 @return	pointer to the type struct */
@@ -54,10 +54,10 @@ void*
 dfield_get_data(
 /*============*/
 	const dfield_t* field);	/*!< in: field */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define dfield_get_type(field) (&(field)->type)
 # define dfield_get_data(field) ((field)->data)
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************************//**
 Sets the type struct of SQL data field. */
 IB_INLINE
@@ -68,7 +68,7 @@ dfield_set_type(
 	dtype_t*	type);	/*!< in: pointer to data type struct */
 /*********************************************************************//**
 Gets length of field data.
-@return	length of data; UNIV_SQL_NULL if SQL null data */
+@return	length of data; IB_SQL_NULL if SQL null data */
 IB_INLINE
 ulint
 dfield_get_len(
@@ -81,7 +81,7 @@ void
 dfield_set_len(
 /*===========*/
 	dfield_t*	field,	/*!< in: field */
-	ulint		len);	/*!< in: length or UNIV_SQL_NULL */
+	ulint		len);	/*!< in: length or IB_SQL_NULL */
 /*********************************************************************//**
 Determines if a field is SQL NULL
 @return	nonzero if SQL null data */
@@ -113,7 +113,7 @@ dfield_set_data(
 /*============*/
 	dfield_t*	field,	/*!< in: field */
 	const void*	data,	/*!< in: data */
-	ulint		len);	/*!< in: length or UNIV_SQL_NULL */
+	ulint		len);	/*!< in: length or IB_SQL_NULL */
 /*********************************************************************//**
 Sets a data field to SQL NULL. */
 IB_INLINE
@@ -170,7 +170,7 @@ ibool
 dfield_data_is_binary_equal(
 /*========================*/
 	const dfield_t*	field,	/*!< in: field */
-	ulint		len,	/*!< in: data length or UNIV_SQL_NULL */
+	ulint		len,	/*!< in: data length or IB_SQL_NULL */
 	const byte*	data);	/*!< in: data */
 /*********************************************************************//**
 Gets number of fields in a data tuple.
@@ -180,7 +180,7 @@ ulint
 dtuple_get_n_fields(
 /*================*/
 	const dtuple_t*	tuple);	/*!< in: tuple */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*********************************************************************//**
 Gets nth field of a tuple.
 @return	nth field */
@@ -190,9 +190,9 @@ dtuple_get_nth_field(
 /*=================*/
 	const dtuple_t*	tuple,	/*!< in: tuple */
 	ulint		n);	/*!< in: index of field */
-#else /* UNIV_DEBUG */
+#else /* IB_DEBUG */
 # define dtuple_get_nth_field(tuple, n) ((tuple)->fields + (n))
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*********************************************************************//**
 Gets info bits in a data tuple.
 @return	info bits */
@@ -352,7 +352,7 @@ ibool
 dtuple_check_typed_no_assert(
 /*=========================*/
 	const dtuple_t*	tuple);	/*!< in: tuple */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************//**
 Validates the consistency of a tuple which must be complete, i.e,
 all fields must have been set.
@@ -362,7 +362,7 @@ ibool
 dtuple_validate(
 /*============*/
 	const dtuple_t*	tuple);	/*!< in: tuple */
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 /*************************************************************//**
 Pretty prints a dfield value according to its data type. */
 IB_INTERN
@@ -435,7 +435,7 @@ dfield_var_init(void);
 struct dfield_struct{
 	void*		data;	/*!< pointer to data */
 	unsigned	ext:1;	/*!< TRUE=externally stored, FALSE=local */
-	unsigned	len:32;	/*!< data length; UNIV_SQL_NULL if SQL null */
+	unsigned	len:32;	/*!< data length; IB_SQL_NULL if SQL null */
 	dtype_t		type;	/*!< type of data */
 };
 
@@ -457,12 +457,12 @@ struct dtuple_struct {
 	UT_LIST_NODE_T(dtuple_t) tuple_list;
 					/*!< data tuples can be linked into a
 					list using this field */
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	ulint		magic_n;	/*!< magic number, used in
 					debug assertions */
 /** Value of dtuple_struct::magic_n */
 # define		DATA_TUPLE_MAGIC_N	65478679
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 };
 
 /** A slot for a field in a big rec vector */

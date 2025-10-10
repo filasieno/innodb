@@ -17,7 +17,7 @@
 
 #include "mach_data.hpp"
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 #include "mtr_mtr.hpp"
 #include "mtr_log.hpp"
 
@@ -67,7 +67,7 @@ void
 btr_page_set_index_id(page_t* page, page_zip_des_t* page_zip, dulint id, mtr_t* mtr)
 {
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		mach_write_to_8(page + (PAGE_HEADER + PAGE_INDEX_ID), id);
 		page_zip_write_header(page_zip,
 				      page + (PAGE_HEADER + PAGE_INDEX_ID),
@@ -80,7 +80,7 @@ btr_page_set_index_id(page_t* page, page_zip_des_t* page_zip, dulint id, mtr_t* 
 	}
 #endif /* WITH_ZIP */
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /// \brief Gets the index id field of a page.
 /// \return index id
@@ -92,7 +92,7 @@ btr_page_get_index_id(const page_t* page)
 	return(mach_read_from_8(page + PAGE_HEADER + PAGE_INDEX_ID));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Gets the node level field in an index page.
 /// \return level, leaf level == 0
 /// \param page index page
@@ -137,7 +137,7 @@ btr_page_set_level(page_t* page, page_zip_des_t* page_zip, ulint level, mtr_t* m
 	ut_ad(level <= BTR_MAX_NODE_LEVEL);
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		mach_write_to_2(page + (PAGE_HEADER + PAGE_LEVEL), level);
 		page_zip_write_header(page_zip, page + (PAGE_HEADER + PAGE_LEVEL), 2, mtr);
 	} else {
@@ -174,7 +174,7 @@ btr_page_set_next(page_t* page, page_zip_des_t* page_zip, ulint next, mtr_t* mtr
 	ut_ad(page && mtr);
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		mach_write_to_4(page + FIL_PAGE_NEXT, next);
 		page_zip_write_header(page_zip, page + FIL_PAGE_NEXT, 4, mtr);
 	} else {
@@ -206,7 +206,7 @@ IB_INLINE void btr_page_set_prev(page_t* page, page_zip_des_t* page_zip, ulint p
 	ut_ad(page && mtr);
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		mach_write_to_4(page + FIL_PAGE_PREV, prev);
 		page_zip_write_header(page_zip, page + FIL_PAGE_PREV, 4, mtr);
 	} else {
@@ -236,7 +236,7 @@ IB_INLINE ulint btr_node_ptr_get_child_page_no(const rec_t* rec, const ulint* of
 	field = rec_get_nth_field(rec, offsets, rec_offs_n_fields(offsets) - 1, &len);
 	ut_ad(len == 4);
 	page_no = mach_read_from_4(field);
-	if (UNIV_UNLIKELY(page_no == 0)) {
+	if (IB_UNLIKELY(page_no == 0)) {
 		ib_logger(ib_stream, "InnoDB: a nonsensical page number 0 in a node ptr record at offset %lu\n", (ulong) page_offset(rec));
 		buf_page_print(page_align(rec), 0);
 	}
@@ -253,4 +253,4 @@ IB_INLINE void btr_leaf_page_release(buf_block_t* block, ulint latch_mode, mtr_t
 	ut_ad(!mtr_memo_contains(mtr, block, MTR_MEMO_MODIFY));
 	mtr_memo_release(mtr, block, latch_mode == BTR_SEARCH_LEAF ? MTR_MEMO_PAGE_S_FIX : MTR_MEMO_PAGE_X_FIX);
 }
-#endif // ! UNIV_HOTBACKUP
+#endif // ! IB_HOTBACKUP

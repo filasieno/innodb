@@ -46,7 +46,7 @@ register_test_table() in mt_drv.c
 #include "ib_mt_drv.hpp"
 #include "ib_mt_base.hpp"
 
-#ifdef UNIV_DEBUG_VALGRIND
+#ifdef IB_DEBUG_VALGRIND
 #include <valgrind/memcheck.h>
 #endif
 
@@ -62,7 +62,7 @@ open_table(
 	ib_crsr_t*	crsr)		/*!< out: innodb cursor */
 {
 	ib_err_t	err = DB_SUCCESS;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 
 	snprintf(table_name, sizeof(table_name), "%s/%s", dbname, name);
 	err = ib_cursor_open_table(table_name, ib_trx, crsr);
@@ -169,7 +169,7 @@ drop_base(
 {
 	ib_err_t	err;
 	ib_trx_t	ib_trx;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 	cb_args_t*	cb_arg = (cb_args_t *)arg;
 	tbl_class_t*	tbl = cb_arg->tbl;
 
@@ -207,7 +207,7 @@ truncate_base(
 {
 	ib_err_t	err;
 	ib_id_t		table_id;
-	char		table_name[IB_MAX_TABLE_NAME_LEN];
+	char		table_name[IB_MAX_TABLE_IB_NAME_LEN];
 	cb_args_t*	cb_arg = (cb_args_t *)arg;
 	tbl_class_t*	tbl = cb_arg->tbl;
 

@@ -18,7 +18,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBPQXX],[
 
   AS_IF([test "x$ac_enable_libpqxx" = "xyes"],[
     AC_LANG_PUSH([C++])
-    AC_LIB_HAVE_LINKFLAGS(pqxx,,[
+    AC_LIB_IB_HAVE_LINKFLAGS(pqxx,,[
       #include <pqxx/pqxx>
     ],[
        pqxx::connection conn("dbname=test");
@@ -28,16 +28,16 @@ AC_DEFUN([_PANDORA_SEARCH_LIBPQXX],[
     ac_cv_libpqxx="no"
   ])
   
-  AM_CONDITIONAL(HAVE_LIBPQXX, [test "x${ac_cv_libpqxx}" = "xyes"])
+  AM_CONDITIONAL(IB_HAVE_LIBPQXX, [test "x${ac_cv_libpqxx}" = "xyes"])
   
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBPQXX],[
+AC_DEFUN([PANDORA_IB_HAVE_LIBPQXX],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBPQXX])
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBPQXX],[
-  AC_REQUIRE([PANDORA_HAVE_LIBPQXX])
+  AC_REQUIRE([PANDORA_IB_HAVE_LIBPQXX])
   AS_IF([test "x$ac_cv_libpqxx" = "xno"],[
       AC_MSG_ERROR([libpqxx is required for ${PACKAGE}])
   ])

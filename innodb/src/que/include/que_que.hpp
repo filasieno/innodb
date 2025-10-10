@@ -38,7 +38,7 @@ Created 5/27/1996 Heikki Tuuri
 #include "pars_types.hpp"
 
 /* If the following flag is set TRUE, the module will print trace info
-of SQL execution in the UNIV_SQL_DEBUG version */
+of SQL execution in the IB_SQL_DEBUG version */
 extern ibool	que_trace_on;
 
 /***********************************************************************//**

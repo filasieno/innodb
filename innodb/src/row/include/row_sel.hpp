@@ -198,8 +198,8 @@ struct sel_buf_struct{
 	byte*		data;	/*!< data, or NULL; if not NULL, this field
 				has allocated memory which must be explicitly
 				freed; can be != NULL even when len is
-				UNIV_SQL_NULL */
-	ulint		len;	/*!< data length or UNIV_SQL_NULL */
+				IB_SQL_NULL */
+	ulint		len;	/*!< data length or IB_SQL_NULL */
 	ulint		val_buf_size;
 				/*!< size of memory buffer allocated for data:
 				this can be more than len; this is defined

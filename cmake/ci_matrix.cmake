@@ -60,14 +60,14 @@ endif()
 # ====================================================================================================================
 # Define platform-specific preprocessor macros
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    add_definitions(-DUNIV_LINUX)
+    add_definitions(-DIB_LINUX)
 endif()
 
 # ====================================================================================================================
 # 3. Debug Build Configuration
 # ====================================================================================================================
 # Enable debug-specific features and assertions in Debug builds
-add_compile_definitions($<$<CONFIG:Debug>:UNIV_DEBUG>)
+add_compile_definitions($<$<CONFIG:Debug>:IB_DEBUG>)
 
 # ====================================================================================================================
 # 4. Compiler-Specific Options

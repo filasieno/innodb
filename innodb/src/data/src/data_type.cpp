@@ -27,7 +27,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "data0type.inl"
 #endif
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 /* At the database startup we store the default-charset collation number of
 this installation to this global variable. If we have < 4.1.2 format
@@ -67,7 +67,7 @@ dtype_get_at_most_n_mbchars(
 	const char*	str)		/*!< in: the string whose prefix
 					length is being determined */
 {
-	ut_a(data_len != UNIV_SQL_NULL);
+	ut_a(data_len != IB_SQL_NULL);
 	ut_ad(!mbmaxlen || !(prefix_len % mbmaxlen));
 
 	if (mbminlen != mbmaxlen) {
@@ -89,7 +89,7 @@ dtype_get_at_most_n_mbchars(
 
 	return(data_len);
 }
-#endif /* UNIV_HOTBACKUP */
+#endif /* IB_HOTBACKUP */
 
 /*********************************************************************//**
 Checks if a data main type is a string type. Also a BLOB is considered a
@@ -190,14 +190,14 @@ dtype_validate(
 		ut_a((type->prtype & DATA_CLIENT_TYPE_MASK) < DATA_N_SYS_COLS);
 	}
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 	ut_a(type->mbminlen <= type->mbmaxlen);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 	return(TRUE);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************//**
 Prints a data type structure. */
 IB_INTERN
@@ -301,4 +301,4 @@ dtype_print(
 
 	ib_logger(ib_stream, " len %lu", (ulong) len);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */

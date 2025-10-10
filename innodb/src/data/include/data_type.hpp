@@ -148,7 +148,7 @@ SQL null*/
 store the charset-collation number; one byte is left unused, though */
 #define DATA_NEW_ORDER_NULL_TYPE_BUF_SIZE 6
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /// \brief Determine how many bytes the first n characters of the given string occupy.
 /// If the string is shorter than n characters, returns the number of bytes
 /// the characters in the string occupy.
@@ -161,7 +161,7 @@ store the charset-collation number; one byte is left unused, though */
 /// \param str the string whose prefix length is being determined
 IB_INTERN
 ulint dtype_get_at_most_n_mbchars(ulint prtype, ulint mbminlen, ulint mbmaxlen, ulint prefix_len, ulint data_len, const char *str);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 /// \brief Checks if a data main type is a string type. Also a BLOB is considered a string type.
 /// \return TRUE if string type
 /// \param mtype InnoDB main data type code: DATA_CHAR, ...
@@ -218,7 +218,7 @@ ulint dtype_get_prtype(
     /*=============*/
     const dtype_t *type
 ); /*!< in: data type */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************/ /**
 Compute the mbminlen and mbmaxlen members of a data type structure. */
 IB_INLINE
@@ -257,7 +257,7 @@ ulint dtype_get_len(
     /*==========*/
     const dtype_t *type
 ); /*!< in: data type */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*********************************************************************/ /**
 Gets the minimum length of a character, in bytes.
 @return minimum length of a char, in bytes, or 0 if this is not a
@@ -285,7 +285,7 @@ ulint dtype_get_pad_char(
     ulint mtype, /*!< in: main type */
     ulint prtype
 );                                                                        /*!< in: precise type */
-#endif                                                                    /* !UNIV_HOTBACKUP */
+#endif                                                                    /* !IB_HOTBACKUP */
 /***********************************************************************/ /**
 Returns the size of a fixed size data type, 0 if not a fixed size type.
 @return	fixed size, or 0 */
@@ -299,7 +299,7 @@ ulint dtype_get_fixed_size_low(
     ulint mbmaxlen, /*!< in: maximum length of a multibyte char */
     ulint comp
 ); /*!< in: nonzero=ROW_FORMAT=COMPACT  */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /***********************************************************************/ /**
 Returns the minimum size of a data type.
 @return	minimum size */
@@ -322,7 +322,7 @@ ulint dtype_get_max_size_low(
     ulint mtype, /*!< in: main type */
     ulint len
 );                                                                        /*!< in: length */
-#endif                                                                    /* !UNIV_HOTBACKUP */
+#endif                                                                    /* !IB_HOTBACKUP */
 /***********************************************************************/ /**
 Returns the ROW_FORMAT=REDUNDANT stored SQL NULL size of a type.
 For fixed length types it is the fixed length of the type, otherwise 0.
@@ -333,7 +333,7 @@ ulint dtype_get_sql_null_size(
     const dtype_t *type, /*!< in: type */
     ulint comp
 ); /*!< in: nonzero=ROW_FORMAT=COMPACT  */
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************/ /**
 Reads to a type the stored information which determines its alphabetical
 ordering and the storage size of an SQL NULL value. */
@@ -366,7 +366,7 @@ void dtype_new_read_for_order_and_null_size(
     dtype_t *type, /*!< in: type struct */
     const byte *buf
 );     /*!< in: buffer for stored type order info */
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*********************************************************************/ /**
 Validates a data type structure.
@@ -425,7 +425,7 @@ all bit-fields can be packed tightly in both structs. */
 struct dtype_struct
 {
     DTYPE_FIELDS
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 };
 
 #ifndef IB_DO_NOT_INLINE

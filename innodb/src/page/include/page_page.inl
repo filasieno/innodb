@@ -24,18 +24,18 @@ Created 2/2/1994 Heikki Tuuri
 *******************************************************/
 
 #include "mach_data.hpp"
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 # include "log0recv.h"
-#endif /* !UNIV_DEBUG */
-#ifndef UNIV_HOTBACKUP
+#endif /* !IB_DEBUG */
+#ifndef IB_HOTBACKUP
 # include "rem0cmp.h"
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 #include "mtr_log.hpp"
 #ifdef WITH_ZIP
 #include "page_zip.hpp"
 #endif /* WITH_ZIP */
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 #undef IB_INLINE
 #define IB_INLINE
 #endif
@@ -49,7 +49,7 @@ page_align(
 /*=======*/
 	const void*	ptr)	/*!< in: pointer to page frame */
 {
-	return((page_t*) ut_align_down(ptr, UNIV_PAGE_SIZE));
+	return((page_t*) ut_align_down(ptr, IB_PAGE_SIZE));
 }
 /************************************************************//**
 Gets the offset within a page.
@@ -60,7 +60,7 @@ page_offset(
 /*========*/
 	const void*	ptr)	/*!< in: pointer to page frame */
 {
-	return(ut_align_offset(ptr, UNIV_PAGE_SIZE));
+	return(ut_align_offset(ptr, IB_PAGE_SIZE));
 }
 /*************************************************************//**
 Returns the max trx id field value. */
@@ -135,12 +135,12 @@ page_header_set_field(
 {
 	ut_ad(page);
 	ut_ad(field <= PAGE_N_RECS);
-	ut_ad(field == PAGE_N_HEAP || val < UNIV_PAGE_SIZE);
-	ut_ad(field != PAGE_N_HEAP || (val & 0x7fff) < UNIV_PAGE_SIZE);
+	ut_ad(field == PAGE_N_HEAP || val < IB_PAGE_SIZE);
+	ut_ad(field != PAGE_N_HEAP || (val & 0x7fff) < IB_PAGE_SIZE);
 
 	mach_write_to_2(page + PAGE_HEADER + field, val);
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		page_zip_write_header(page_zip,
 				      page + PAGE_HEADER + field, 2, NULL);
 	}
@@ -201,7 +201,7 @@ page_header_set_ptr(
 	page_header_set_field(page, page_zip, field, offs);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Resets the last insert info field in the page header. Writes to mlog
 about this operation. */
@@ -217,7 +217,7 @@ page_header_reset_last_insert(
 	ut_ad(page && mtr);
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		mach_write_to_2(page + (PAGE_HEADER + PAGE_LAST_INSERT), 0);
 		page_zip_write_header(page_zip,
 				      page + (PAGE_HEADER + PAGE_LAST_INSERT),
@@ -230,7 +230,7 @@ page_header_reset_last_insert(
 	}
 #endif /* WITH_ZIP */
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /************************************************************//**
 Determine whether the page is in new-style compact format.
@@ -242,7 +242,7 @@ page_is_comp(
 /*=========*/
 	const page_t*	page)	/*!< in: index page */
 {
-	return(UNIV_EXPECT(page_header_get_field(page, PAGE_N_HEAP) & 0x8000,
+	return(IB_EXPECT(page_header_get_field(page, PAGE_N_HEAP) & 0x8000,
 			   0x8000));
 }
 
@@ -352,12 +352,12 @@ page_rec_is_user_rec_low(
 #if PAGE_OLD_SUPREMUM > PAGE_NEW_SUPREMUM_END
 # error "PAGE_OLD_SUPREMUM > PAGE_NEW_SUPREMUM_END"
 #endif
-	ut_ad(offset <= UNIV_PAGE_SIZE - PAGE_EMPTY_DIR_START);
+	ut_ad(offset <= IB_PAGE_SIZE - PAGE_EMPTY_DIR_START);
 
-	return(UNIV_LIKELY(offset != PAGE_NEW_SUPREMUM)
-	       && UNIV_LIKELY(offset != PAGE_NEW_INFIMUM)
-	       && UNIV_LIKELY(offset != PAGE_OLD_INFIMUM)
-	       && UNIV_LIKELY(offset != PAGE_OLD_SUPREMUM));
+	return(IB_LIKELY(offset != PAGE_NEW_SUPREMUM)
+	       && IB_LIKELY(offset != PAGE_NEW_INFIMUM)
+	       && IB_LIKELY(offset != PAGE_OLD_INFIMUM)
+	       && IB_LIKELY(offset != PAGE_OLD_SUPREMUM));
 }
 
 /************************************************************//**
@@ -370,10 +370,10 @@ page_rec_is_supremum_low(
 	ulint	offset)	/*!< in: record offset on page */
 {
 	ut_ad(offset >= PAGE_NEW_INFIMUM);
-	ut_ad(offset <= UNIV_PAGE_SIZE - PAGE_EMPTY_DIR_START);
+	ut_ad(offset <= IB_PAGE_SIZE - PAGE_EMPTY_DIR_START);
 
-	return(UNIV_UNLIKELY(offset == PAGE_NEW_SUPREMUM)
-	       || UNIV_UNLIKELY(offset == PAGE_OLD_SUPREMUM));
+	return(IB_UNLIKELY(offset == PAGE_NEW_SUPREMUM)
+	       || IB_UNLIKELY(offset == PAGE_OLD_SUPREMUM));
 }
 
 /************************************************************//**
@@ -386,10 +386,10 @@ page_rec_is_infimum_low(
 	ulint	offset)	/*!< in: record offset on page */
 {
 	ut_ad(offset >= PAGE_NEW_INFIMUM);
-	ut_ad(offset <= UNIV_PAGE_SIZE - PAGE_EMPTY_DIR_START);
+	ut_ad(offset <= IB_PAGE_SIZE - PAGE_EMPTY_DIR_START);
 
-	return(UNIV_UNLIKELY(offset == PAGE_NEW_INFIMUM)
-	       || UNIV_UNLIKELY(offset == PAGE_OLD_INFIMUM));
+	return(IB_UNLIKELY(offset == PAGE_NEW_INFIMUM)
+	       || IB_UNLIKELY(offset == PAGE_OLD_INFIMUM));
 }
 
 /************************************************************//**
@@ -428,7 +428,7 @@ page_rec_is_infimum(
 	return(page_rec_is_infimum_low(page_offset(rec)));
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /*************************************************************//**
 Compares a data tuple to a physical record. Differs from the function
 cmp_dtuple_rec_with_match in the way that the record must reside on an
@@ -464,12 +464,12 @@ page_cmp_dtuple_rec_with_match(
 
 	rec_offset = page_offset(rec);
 
-	if (UNIV_UNLIKELY(rec_offset == PAGE_NEW_INFIMUM)
-	    || UNIV_UNLIKELY(rec_offset == PAGE_OLD_INFIMUM)) {
+	if (IB_UNLIKELY(rec_offset == PAGE_NEW_INFIMUM)
+	    || IB_UNLIKELY(rec_offset == PAGE_OLD_INFIMUM)) {
 		return(1);
 	}
-	if (UNIV_UNLIKELY(rec_offset == PAGE_NEW_SUPREMUM)
-	    || UNIV_UNLIKELY(rec_offset == PAGE_OLD_SUPREMUM)) {
+	if (IB_UNLIKELY(rec_offset == PAGE_NEW_SUPREMUM)
+	    || IB_UNLIKELY(rec_offset == PAGE_OLD_SUPREMUM)) {
 		return(-1);
 	}
 
@@ -477,7 +477,7 @@ page_cmp_dtuple_rec_with_match(
 			cmp_ctx, dtuple, rec, offsets,
 			matched_fields, matched_bytes));
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
 /*************************************************************//**
 Gets the page number.
@@ -578,7 +578,7 @@ page_dir_set_n_heap(
 				 & page_header_get_field(page, PAGE_N_HEAP)));
 }
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /*************************************************************//**
 Gets pointer to nth directory slot.
 @return	pointer to dir slot */
@@ -592,10 +592,10 @@ page_dir_get_nth_slot(
 	ut_ad(page_dir_get_n_slots(page) > n);
 
 	return((page_dir_slot_t*)
-	       page + UNIV_PAGE_SIZE - PAGE_DIR
+	       page + IB_PAGE_SIZE - PAGE_DIR
 	       - (n + 1) * PAGE_DIR_SLOT_SIZE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /**************************************************************//**
 Used to check the consistency of a record on a page.
@@ -711,7 +711,7 @@ page_rec_get_next_low(
 
 	offs = rec_get_next_offs(rec, comp);
 
-	if (UNIV_UNLIKELY(offs >= UNIV_PAGE_SIZE)) {
+	if (IB_UNLIKELY(offs >= IB_PAGE_SIZE)) {
 		ib_logger(ib_stream,
 			"InnoDB: Next record offset is nonsensical %lu"
 			" in record at offset %lu\n"
@@ -725,7 +725,7 @@ page_rec_get_next_low(
 		ut_error;
 	}
 
-	if (UNIV_UNLIKELY(offs == 0)) {
+	if (IB_UNLIKELY(offs == 0)) {
 
 		return(NULL);
 	}
@@ -777,7 +777,7 @@ page_rec_set_next(
 	ut_ad(!next || !page_rec_is_infimum(next));
 	ut_ad(!next || page_align(rec) == page_align(next));
 
-	if (UNIV_LIKELY(next != NULL)) {
+	if (IB_LIKELY(next != NULL)) {
 		offs = page_offset(next);
 	} else {
 		offs = 0;
@@ -908,7 +908,7 @@ page_get_data_size(
 			 : PAGE_OLD_SUPREMUM_END)
 		      - page_header_get_field(page, PAGE_GARBAGE));
 
-	ut_ad(ret < UNIV_PAGE_SIZE);
+	ut_ad(ret < IB_PAGE_SIZE);
 
 	return(ret);
 }
@@ -930,7 +930,7 @@ page_mem_alloc_free(
 {
 	ulint		garbage;
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	const rec_t*	old_rec	= page_header_get_ptr(page, PAGE_FREE);
 	ulint		next_offs;
 
@@ -956,14 +956,14 @@ page_get_free_space_of_empty(
 /*=========================*/
 	ulint	comp)		/*!< in: nonzero=compact page layout */
 {
-	if (UNIV_LIKELY(comp)) {
-		return((ulint)(UNIV_PAGE_SIZE
+	if (IB_LIKELY(comp)) {
+		return((ulint)(IB_PAGE_SIZE
 			       - PAGE_NEW_SUPREMUM_END
 			       - PAGE_DIR
 			       - 2 * PAGE_DIR_SLOT_SIZE));
 	}
 
-	return((ulint)(UNIV_PAGE_SIZE
+	return((ulint)(IB_PAGE_SIZE
 		       - PAGE_OLD_SUPREMUM_END
 		       - PAGE_DIR
 		       - 2 * PAGE_DIR_SLOT_SIZE));
@@ -1069,7 +1069,7 @@ page_mem_free(
 			      garbage + rec_offs_size(offsets));
 
 #ifdef WITH_ZIP
-	if (UNIV_LIKELY_NULL(page_zip)) {
+	if (IB_LIKELY_NULL(page_zip)) {
 		page_zip_dir_delete(page_zip, rec, dict_index, offsets, free_rec);
 	} else
 #endif /* WITH_ZIP */
@@ -1096,14 +1096,14 @@ page_rec_needs_ext(
 	ut_ad(ut_is_2pow(zip_size));
 	ut_ad(comp || !zip_size);
 
-#if UNIV_PAGE_SIZE > REC_MAX_DATA_SIZE
-	if (UNIV_UNLIKELY(rec_size >= REC_MAX_DATA_SIZE)) {
+#if IB_PAGE_SIZE > REC_MAX_DATA_SIZE
+	if (IB_UNLIKELY(rec_size >= REC_MAX_DATA_SIZE)) {
 		return(TRUE);
 	}
 #endif
 
 #ifdef WITH_ZIP
-	if (UNIV_UNLIKELY(zip_size)) {
+	if (IB_UNLIKELY(zip_size)) {
 		return(page_zip_rec_needs_ext(
 			rec_size, comp, n_fields, zip_size));
 	}
@@ -1111,7 +1111,7 @@ page_rec_needs_ext(
 
 	return(rec_size >= page_get_free_space_of_empty(comp) / 2);
 }
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 #undef IB_INLINE
 #define IB_INLINE	IB_INLINE_ORIGINAL
 #endif

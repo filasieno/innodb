@@ -189,7 +189,7 @@ struct sym_node_struct{
 	enum sym_tab_entry		token_type;	/*!< type of the
 							parsed token */
 	const char*			name;		/*!< name of an id */
-	ulint				name_len;	/*!< id name length */
+	ulint				IB_NAME_LEN;	/*!< id name length */
 	dict_table_t*			table;		/*!< table definition
 							if a table id or a
 							column id */

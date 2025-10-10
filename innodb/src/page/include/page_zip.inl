@@ -23,7 +23,7 @@ Compressed page interface
 Created June 2005 by Marko Makela
 *******************************************************/
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE
 #endif
@@ -120,14 +120,14 @@ page_zip_get_size(
 {
 	ulint	size;
 
-	if (UNIV_UNLIKELY(!page_zip->ssize)) {
+	if (IB_UNLIKELY(!page_zip->ssize)) {
 		return(0);
 	}
 
 	size = (PAGE_ZIP_MIN_SIZE >> 1) << page_zip->ssize;
 
 	ut_ad(size >= PAGE_ZIP_MIN_SIZE);
-	ut_ad(size <= UNIV_PAGE_SIZE);
+	ut_ad(size <= IB_PAGE_SIZE);
 
 	return(size);
 }
@@ -156,7 +156,7 @@ page_zip_set_size(
 	ut_ad(page_zip_get_size(page_zip) == size);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 /**********************************************************************//**
 Determine if a record is so big that it needs to be stored externally.
 @return	FALSE if the entire record can be stored locally on the page */
@@ -175,13 +175,13 @@ page_zip_rec_needs_ext(
 	ut_ad(comp || !zip_size);
 
 #ifdef WITH_ZIP
-#if UNIV_PAGE_SIZE > REC_MAX_DATA_SIZE
-	if (UNIV_UNLIKELY(rec_size >= REC_MAX_DATA_SIZE)) {
+#if IB_PAGE_SIZE > REC_MAX_DATA_SIZE
+	if (IB_UNLIKELY(rec_size >= REC_MAX_DATA_SIZE)) {
 		return(TRUE);
 	}
 #endif
 
-	if (UNIV_UNLIKELY(zip_size)) {
+	if (IB_UNLIKELY(zip_size)) {
 		ut_ad(comp);
 		/* On a compressed page, there is a two-byte entry in
 		the dense page directory for every record.  But there
@@ -197,9 +197,9 @@ page_zip_rec_needs_ext(
 
 	return(rec_size >= page_get_free_space_of_empty(comp) / 2);
 }
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 /**********************************************************************//**
 Validate a compressed page descriptor.
 @return	TRUE if ok */
@@ -220,7 +220,7 @@ page_zip_simple_validate(
 	      < page_zip_get_size(page_zip) / BTR_EXTERN_FIELD_REF_SIZE);
 	return(TRUE);
 }
-#endif /* UNIV_DEBUG */
+#endif /* IB_DEBUG */
 
 /**********************************************************************//**
 Determine if the length of the page trailer.
@@ -238,13 +238,13 @@ page_zip_get_trailer_len(
 	ulint	uncompressed_size;
 
 	ut_ad(page_zip_simple_validate(page_zip));
-	UNIV_MEM_ASSERT_RW(page_zip->data, page_zip_get_size(page_zip));
+	IB_MEM_ASSERT_RW(page_zip->data, page_zip_get_size(page_zip));
 
-	if (UNIV_UNLIKELY(!page_is_leaf(page_zip->data))) {
+	if (IB_UNLIKELY(!page_is_leaf(page_zip->data))) {
 		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE
 			+ REC_NODE_PTR_SIZE;
 		ut_ad(!page_zip->n_blobs);
-	} else if (UNIV_UNLIKELY(is_clust)) {
+	} else if (IB_UNLIKELY(is_clust)) {
 		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE
 			+ DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN;
 	} else {
@@ -317,7 +317,7 @@ page_zip_available(
 	space needed for identifying the record (encoded heap_no). */
 	length -= REC_N_NEW_EXTRA_BYTES - 2;
 
-	if (UNIV_UNLIKELY(create)) {
+	if (IB_UNLIKELY(create)) {
 		/* When a record is created, a pointer may be added to
 		the dense directory.
 		Likewise, space for the columns that will not be
@@ -328,7 +328,7 @@ page_zip_available(
 		trailer_len += uncompressed_size;
 	}
 
-	return(UNIV_LIKELY(length
+	return(IB_LIKELY(length
 			   + trailer_len
 			   + page_zip->m_end
 			   < page_zip_get_size(page_zip)));
@@ -375,7 +375,7 @@ page_zip_write_header(
 
 	ut_ad(PAGE_ZIP_MATCH(str, page_zip));
 	ut_ad(page_zip_simple_validate(page_zip));
-	UNIV_MEM_ASSERT_RW(page_zip->data, page_zip_get_size(page_zip));
+	IB_MEM_ASSERT_RW(page_zip->data, page_zip_get_size(page_zip));
 
 	pos = page_offset(str);
 
@@ -386,14 +386,14 @@ page_zip_write_header(
 	/* The following would fail in page_cur_insert_rec_zip(). */
 	/* ut_ad(page_zip_validate(page_zip, str - pos)); */
 
-	if (UNIV_LIKELY_NULL(mtr)) {
-#ifndef UNIV_HOTBACKUP
+	if (IB_LIKELY_NULL(mtr)) {
+#ifndef IB_HOTBACKUP
 		page_zip_write_header_log(str, length, mtr);
-#endif /* !UNIV_HOTBACKUP */
+#endif /* !IB_HOTBACKUP */
 	}
 }
 
-#ifdef UNIV_MATERIALIZE
+#ifdef IB_MATERIALIZE
 # undef IB_INLINE
 # define IB_INLINE	IB_INLINE_ORIGINAL
 #endif

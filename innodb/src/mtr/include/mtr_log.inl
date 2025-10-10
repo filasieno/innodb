@@ -43,7 +43,7 @@ IB_INLINE void mlog_close(mtr_t* mtr, byte* ptr)
 	dyn_array_close(mlog, ptr);
 }
 
-#ifndef UNIV_HOTBACKUP
+#ifndef IB_HOTBACKUP
 
 IB_INLINE void mlog_catenate_ulint(mtr_t*	mtr, ulint val, ulint type)
 {
@@ -130,7 +130,7 @@ mlog_write_initial_log_record_fast(
 				been opened */
 	mtr_t*		mtr)	/*!< in: mtr */
 {
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	buf_block_t*	block;
 #endif
 	const byte*	page;
@@ -141,7 +141,7 @@ mlog_write_initial_log_record_fast(
 	ut_ad(type <= MLOG_BIGGEST_TYPE);
 	ut_ad(ptr && log_ptr);
 
-	page = (const byte*) ut_align_down(ptr, UNIV_PAGE_SIZE);
+	page = (const byte*) ut_align_down(ptr, IB_PAGE_SIZE);
 	space = mach_read_from_4(page + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID);
 	offset = mach_read_from_4(page + FIL_PAGE_OFFSET);
 
@@ -174,13 +174,13 @@ mlog_write_initial_log_record_fast(
 
 	mtr->n_log_recs++;
 
-#ifdef UNIV_LOG_DEBUG
+#ifdef IB_LOG_DEBUG
 	ib_logger(ib_stream,
 		"Adding to mtr log record type %lu space %lu page no %lu\n",
 		(ulong) type, space, offset);
 #endif
 
-#ifdef UNIV_DEBUG
+#ifdef IB_DEBUG
 	/* We now assume that all x-latched pages have been modified! */
 	block = (buf_block_t*) buf_block_align(ptr);
 
@@ -208,4 +208,4 @@ IB_INLINE byte* mlog_write_initial_log_record_for_file_op(
 	mtr->n_log_recs++;
 	return log_ptr;
 }
-#endif // ! UNIV_HOTBACKUP
+#endif // ! IB_HOTBACKUP

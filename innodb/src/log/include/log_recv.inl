@@ -33,10 +33,10 @@ ibool
 recv_recovery_is_on(void)
 /*=====================*/
 {
-	return(UNIV_UNLIKELY(recv_recovery_on));
+	return(IB_UNLIKELY(recv_recovery_on));
 }
 
-#ifdef UNIV_LOG_ARCHIVE
+#ifdef IB_LOG_ARCHIVE
 /** TRUE when applying redo log records from an archived log file */
 extern ibool	recv_recovery_from_backup_on;
 
@@ -50,4 +50,4 @@ recv_recovery_from_backup_is_on(void)
 {
 	return(recv_recovery_from_backup_on);
 }
-#endif /* UNIV_LOG_ARCHIVE */
+#endif /* IB_LOG_ARCHIVE */
