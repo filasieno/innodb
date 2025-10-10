@@ -12,99 +12,70 @@
 /// \file mach_data.cpp
 /// \brief Utilities for converting data from the database file to the machine
 /// format.
-/// \author Created 11/28/1995 Heikki Tuuri
+
+/// Updated 10/10/2025 Fabio N. Filasieno
+/// Created 11/28/1995 Heikki Tuuri
 
 #include "mach_data.hpp"
 
 #ifdef UNIV_NONINL
-#include "mach0data.inl"
+#include "mach_data.inl"
 #endif
 
-/// \brief Reads a ulint in a compressed form if the log record fully contains
-/// it.
-/// \param ptr Pointer to buffer from where to read
-/// \param end_ptr Pointer to end of the buffer
-/// \param val Read value (< 2^32)
-/// \return Pointer to end of the stored field, NULL if not complete
-UNIV_INTERN
-byte *mach_parse_compressed(byte *ptr, byte *end_ptr, ulint *val)
+UNIV_INTERN byte *mach_parse_compressed(byte *ptr, byte *end_ptr, ulint *val)
 {
-	ulint flag;
 	ut_ad(ptr && end_ptr && val);
-	if (ptr >= end_ptr) {
-		return (NULL);
-	}
 
-	flag = mach_read_from_1(ptr);
+	if (ptr >= end_ptr) {
+		return NULL;
+	}
+	ulint flag = mach_read_from_1(ptr);
 	if (flag < 0x80UL) {
 		*val = flag;
-		return (ptr + 1);
+		return ptr + 1;
 	} else if (flag < 0xC0UL) {
 		if (end_ptr < ptr + 2) {
-			return (NULL);
+			return NULL;
 		}
 		*val = mach_read_from_2(ptr) & 0x7FFFUL;
 		return (ptr + 2);
 	} else if (flag < 0xE0UL) {
 		if (end_ptr < ptr + 3) {
-			return (NULL);
+			return NULL;
 		}
 
 		*val = mach_read_from_3(ptr) & 0x3FFFFFUL;
-
-		return (ptr + 3);
+		return ptr + 3;
 	} else if (flag < 0xF0UL) {
 		if (end_ptr < ptr + 4) {
-			return (NULL);
+			return NULL;
 		}
 		*val = mach_read_from_4(ptr) & 0x1FFFFFFFUL;
-		return (ptr + 4);
+		return ptr + 4;
 	} else {
 		ut_ad(flag == 0xF0UL);
-
 		if (end_ptr < ptr + 5) {
-			return (NULL);
+			return NULL;
 		}
-
 		*val = mach_read_from_4(ptr + 1);
-		return (ptr + 5);
+		return ptr + 5;
 	}
 }
 
-/// \brief Reads a dulint in a compressed form if the log record fully contains
-/// it.
-/// \param ptr Pointer to buffer from where to read
-/// \param end_ptr Pointer to end of the buffer
-/// \param val Read value
-/// \return Pointer to end of the stored field, NULL if not complete
-UNIV_INTERN
-byte *mach_dulint_parse_compressed(byte *ptr, byte *end_ptr, dulint *val)
+UNIV_INTERN byte *mach_dulint_parse_compressed(byte *ptr, byte *end_ptr, dulint *val)
 {
-	ulint high;
-	ulint low;
-	ulint size;
-
 	ut_ad(ptr && end_ptr && val);
 
 	if (end_ptr < ptr + 5) {
-
-		return (NULL);
+		return NULL;
 	}
-
-	high = mach_read_compressed(ptr);
-
-	size = mach_get_compressed_size(high);
-
+	ulint high = mach_read_compressed(ptr);
+	ulint size = mach_get_compressed_size(high);
 	ptr += size;
-
 	if (end_ptr < ptr + 4) {
-
-		return (NULL);
+		return NULL;
 	}
-
-	low = mach_read_from_4(ptr);
-
+	ulint low = mach_read_from_4(ptr);
 	*val = ut_dulint_create(high, low);
-
-	return (ptr + 4);
+	return ptr + 4;
 }
