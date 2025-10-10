@@ -16,15 +16,12 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/**************************************************//**
-@file include/mem0mem.h
-The memory management
+///\file mem_mem.h
+/// The memory management
 
-Created 6/9/1994 Heikki Tuuri
-*******************************************************/
+// Created 6/9/1994 Heikki Tuuri
 
-#ifndef mem0mem_h
-#define mem0mem_h
+#pragma once
 
 #include "univ.i"
 #include "ut_mem.hpp"
@@ -36,7 +33,7 @@ Created 6/9/1994 Heikki Tuuri
 #include "ut_lst.hpp"
 #include "mach_data.hpp"
 
-/* -------------------- MEMORY HEAPS ----------------------------- */
+
 
 /* The info structure stored at the beginning of a heap block */
 typedef struct mem_block_info_struct mem_block_info_t;
@@ -55,118 +52,81 @@ buffer pool; the latter method is used for very big heaps */
 #define MEM_HEAP_DYNAMIC	0	/* the most common type */
 #define MEM_HEAP_BUFFER		1
 #define MEM_HEAP_BTR_SEARCH	2	/* this flag can optionally be
-					ORed to MEM_HEAP_BUFFER, in which
-					case heap->free_block is used in
-					some cases for memory allocations,
-					and if it's NULL, the memory
-					allocation functions can return
-					NULL. */
 
-/* The following start size is used for the first block in the memory heap if
-the size is not specified, i.e., 0 is given as the parameter in the call of
-create. The standard size is the maximum (payload) size of the blocks used for
-allocations of small buffers. */
+// ORed to MEM_HEAP_BUFFER, in which
+// case heap->free_block is used in
+// some cases for memory allocations,
+// and if it's NULL, the memory
+// allocation functions can return
+// NULL. 
+
+// The following start size is used for the first block in the memory heap if
+// the size is not specified, i.e., 0 is given as the parameter in the call of
+// create. The standard size is the maximum (payload) size of the blocks used for
+// allocations of small buffers. 
 
 #define MEM_BLOCK_START_SIZE		64
-#define MEM_BLOCK_STANDARD_SIZE		\
-	(UNIV_PAGE_SIZE >= 16384 ? 8000 : MEM_MAX_ALLOC_IN_BUF)
+#define MEM_BLOCK_STANDARD_SIZE		(UNIV_PAGE_SIZE >= 16384 ? 8000 : MEM_MAX_ALLOC_IN_BUF)
 
-/* If a memory heap is allowed to grow into the buffer pool, the following
-is the maximum size for a single allocated buffer: */
+// If a memory heap is allowed to grow into the buffer pool, the following is the maximum size for a single allocated buffer:
 #define MEM_MAX_ALLOC_IN_BUF		(UNIV_PAGE_SIZE - 200)
 
-/******************************************************************//**
-Initializes the memory system. */
-UNIV_INTERN
-void
-mem_init(
-/*=====*/
-	ulint	size);	/*!< in: common pool size in bytes */
-/******************************************************************//**
-Closes the memory system. */
-UNIV_INTERN
-void
-mem_close(void);
-/*===========*/
+/// \brief Initializes the memory system.
+/// \param [in] size common pool size in bytes
+UNIV_INTERN void mem_init(ulint	size);
 
-/**************************************************************//**
-Use this macro instead of the corresponding function! Macro for memory
-heap creation. */
+/// \brief Closes the memory system.
+UNIV_INTERN void mem_close(void);
 
-#define mem_heap_create(N)	mem_heap_create_func(\
-		(N), MEM_HEAP_DYNAMIC, __FILE__, __LINE__)
-/**************************************************************//**
-Use this macro instead of the corresponding function! Macro for memory
-heap creation. */
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation. */
+#define mem_heap_create(N) mem_heap_create_func((N), MEM_HEAP_DYNAMIC, __FILE__, __LINE__)
 
-#define mem_heap_create_in_buffer(N)	mem_heap_create_func(\
-		(N), MEM_HEAP_BUFFER, __FILE__, __LINE__)
-/**************************************************************//**
-Use this macro instead of the corresponding function! Macro for memory
-heap creation. */
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation.
+#define mem_heap_create_in_buffer(N) mem_heap_create_func((N), MEM_HEAP_BUFFER, __FILE__, __LINE__)
 
-#define mem_heap_create_in_btr_search(N)	mem_heap_create_func(\
-		(N), MEM_HEAP_BTR_SEARCH | MEM_HEAP_BUFFER,\
-		__FILE__, __LINE__)
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation.
+#define mem_heap_create_in_btr_search(N) mem_heap_create_func((N), MEM_HEAP_BTR_SEARCH | MEM_HEAP_BUFFER, __FILE__, __LINE__)
 
-/**************************************************************//**
-Use this macro instead of the corresponding function! Macro for memory
-heap freeing. */
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap freeing.
+#define mem_heap_free(heap) mem_heap_free_func((heap), __FILE__, __LINE__)
 
-#define mem_heap_free(heap) mem_heap_free_func(\
-					  (heap), __FILE__, __LINE__)
-/*****************************************************************//**
-NOTE: Use the corresponding macros instead of this function. Creates a
-memory heap. For debugging purposes, takes also the file name and line as
-arguments.
-@return own: memory heap, NULL if did not succeed (only possible for
-MEM_HEAP_BTR_SEARCH type heaps) */
-UNIV_INLINE
-mem_heap_t*
-mem_heap_create_func(
-/*=================*/
-	ulint		n,		/*!< in: desired start block size,
-					this means that a single user buffer
-					of size n will fit in the block,
-					0 creates a default size block */
-	ulint		type,		/*!< in: heap type */
-	const char*	file_name,	/*!< in: file name where created */
-	ulint		line);		/*!< in: line where created */
-/*****************************************************************//**
-NOTE: Use the corresponding macro instead of this function. Frees the space
-occupied by a memory heap. In the debug version erases the heap memory
-blocks. */
-UNIV_INLINE
-void
-mem_heap_free_func(
-/*===============*/
-	mem_heap_t*	heap,		/*!< in, own: heap to be freed */
-	const char*	file_name,	/*!< in: file name where freed */
-	ulint		line);		/*!< in: line where freed */
-/***************************************************************//**
-Allocates and zero-fills n bytes of memory from a memory heap.
-@return	allocated, zero-filled storage */
-UNIV_INLINE
-void*
-mem_heap_zalloc(
-/*============*/
-	mem_heap_t*	heap,	/*!< in: memory heap */
-	ulint		n);	/*!< in: number of bytes; if the heap is allowed
-				to grow into the buffer pool, this must be
-				<= MEM_MAX_ALLOC_IN_BUF */
-/***************************************************************//**
-Allocates n bytes of memory from a memory heap.
-@return allocated storage, NULL if did not succeed (only possible for
-MEM_HEAP_BTR_SEARCH type heaps) */
-UNIV_INLINE
-void*
-mem_heap_alloc(
-/*===========*/
-	mem_heap_t*	heap,	/*!< in: memory heap */
-	ulint		n);	/*!< in: number of bytes; if the heap is allowed
-				to grow into the buffer pool, this must be
-				<= MEM_MAX_ALLOC_IN_BUF */
-/*****************************************************************//**
+/// Use the corresponding macros instead of this function. Creates a
+/// memory heap. For debugging purposes, takes also the file name and line as
+/// arguments.
+/// \param [in] n desired start block size, this means that a single user buffer of size n will fit in the block, 0 creates a default size block
+/// \param [in] type heap type
+/// \param [in] file_name file name where created
+/// \param [in] line line where created
+/// \return own: memory heap, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
+UNIV_INLINE mem_heap_t* mem_heap_create_func(ulint n, ulint type, const char* file_name, ulint line);
+
+/// \brief Use the corresponding macros instead of this function. 
+/// Frees the space occupied by a memory heap. In the debug version erases the heap memory blocks.
+/// \param [in] heap in, own: heap to be freed
+/// \param [in] file_name file name where freed
+/// \param [in] line line where freed
+UNIV_INLINE void mem_heap_free_func(mem_heap_t*	heap, const char* file_name, ulint line);
+
+/// \brief Use the corresponding macros instead of this function. 
+/// \param [in] heap in, own: heap to be freed
+/// \param [in] file_name file name where freed
+/// \param [in] line line where freed
+UNIV_INLINE void mem_heap_free_func(mem_heap_t*	heap, const char* file_name, ulint line);		
+
+/// \brief Allocates and zero-fills n bytes of memory from a memory heap.
+/// \param [in] heap in: memory heap
+/// \param [in] n in: number of bytes; if the heap is allowed to grow into the buffer pool, this must be <= MEM_MAX_ALLOC_IN_BUF
+/// \return allocated, zero-filled storage
+UNIV_INLINE void* mem_heap_zalloc(mem_heap_t* heap, ulint n);	
+
+/// \brief Allocates n bytes of memory from a memory heap.
+/// \param [in] heap in: memory heap
+/// \param [in] n in: number of bytes; if the heap is allowed to grow into the buffer pool, this must be <= MEM_MAX_ALLOC_IN_BUF
+/// \return allocated storage, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
+UNIV_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
+
+
+/**
 Frees the space in a memory heap exceeding the pointer given. The
 pointer must have been acquired from mem_heap_get_heap_top. The first
 memory block of the heap is not freed. */
@@ -380,16 +340,18 @@ struct mem_block_info_struct {
 #endif
 };
 
-#define MEM_BLOCK_MAGIC_N	764741555
+/// \brief Magic number for a memory heap block
+#define MEM_BLOCK_MAGIC_N	    764741555
+
+/// \brief Magic number for a freed memory heap block
 #define MEM_FREED_BLOCK_MAGIC_N	547711122
 
-/* Header size for a memory heap block */
-#define MEM_BLOCK_HEADER_SIZE	ut_calc_align(sizeof(mem_block_info_t),\
-							UNIV_MEM_ALIGNMENT)
+/// \brief Header size for a memory heap block
+#define MEM_BLOCK_HEADER_SIZE	ut_calc_align(sizeof(mem_block_info_t), UNIV_MEM_ALIGNMENT)
+
 #include "mem_dbg.hpp"
 
 #ifndef UNIV_NONINL
-#include "mem0mem.inl"
+  #include "mem_mem.inl"
 #endif
 
-#endif
