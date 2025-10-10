@@ -31,7 +31,7 @@ Created 2/17/1996 Heikki Tuuri
 *************************************************************************/
 
 #include "btr_sea.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "btr0sea.inl"
 #endif
 

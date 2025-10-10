@@ -390,7 +390,7 @@ struct row_printf_node_struct{
 #define ROW_SEL_OPEN_CURSOR		0
 #define ROW_SEL_CLOSE_CURSOR		1
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0sel.inl"
 #endif
 

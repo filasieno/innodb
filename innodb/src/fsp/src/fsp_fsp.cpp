@@ -25,7 +25,7 @@ Created 11/29/1995 Heikki Tuuri
 
 #include "fsp_fsp.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "fsp0fsp.inl"
 #endif
 

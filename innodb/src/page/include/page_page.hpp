@@ -1021,7 +1021,7 @@ page_rec_needs_ext(
 #define IB_INLINE  IB_INLINE_ORIGINAL
 #endif
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "page0page.inl"
 #endif
 

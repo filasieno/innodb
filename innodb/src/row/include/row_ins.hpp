@@ -137,7 +137,7 @@ struct ins_node_struct{
 
 #define	INS_NODE_MAGIC_N	15849075
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0ins.inl"
 #endif
 

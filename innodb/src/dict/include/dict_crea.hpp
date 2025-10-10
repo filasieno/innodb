@@ -192,7 +192,7 @@ struct ind_node_struct{
 #define	INDEX_COMMIT_WORK	4
 #define	INDEX_ADD_TO_CACHE	5
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "dict0crea.inl"
 #endif
 

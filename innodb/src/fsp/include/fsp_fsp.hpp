@@ -352,7 +352,7 @@ fseg_print(
 	mtr_t*		mtr);	/*!< in: mtr */
 #endif /* UNIV_BTR_PRINT */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "fsp0fsp.inl"
 #endif
 

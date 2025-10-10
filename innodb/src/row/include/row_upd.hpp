@@ -486,7 +486,7 @@ struct upd_node_struct{
 
 #endif /* !UNIV_HOTBACKUP */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0upd.inl"
 #endif
 

@@ -26,7 +26,7 @@
 
 #include "ut_ut.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ut0ut.inl"
 #endif
 

@@ -18,7 +18,7 @@
 /// Created 6/9/1994 Heikki Tuuri
 
 #include "mem_mem.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "mem_mem.inl"
 #endif
 

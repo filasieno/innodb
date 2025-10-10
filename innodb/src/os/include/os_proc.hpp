@@ -50,7 +50,7 @@ IB_INTERN void os_mem_free_large(void* ptr, ulint size);
 /// \brief Reset the variables.
 IB_INTERN void os_proc_var_init(void);
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "os_proc.inl"
 #endif
 

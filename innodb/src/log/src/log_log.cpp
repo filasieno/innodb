@@ -24,7 +24,7 @@
 
 #include "log_log.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "log_log.inl"
 #endif
 

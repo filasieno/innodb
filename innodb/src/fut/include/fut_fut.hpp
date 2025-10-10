@@ -47,7 +47,7 @@ fut_get_ptr(
 	ulint		rw_latch, /*!< in: RW_S_LATCH, RW_X_LATCH */
 	mtr_t*		mtr);	/*!< in: mtr handle */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "fut0fut.inl"
 #endif
 

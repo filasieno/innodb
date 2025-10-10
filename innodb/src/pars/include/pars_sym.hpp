@@ -237,7 +237,7 @@ struct sym_tab_struct{
 					allocate space */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "pars0sym.inl"
 #endif
 

@@ -25,7 +25,7 @@ Created 1/20/1998 Heikki Tuuri
 
 #include "eval_proc.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "eval0proc.inl"
 #endif
 

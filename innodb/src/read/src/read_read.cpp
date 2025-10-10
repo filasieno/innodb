@@ -25,7 +25,7 @@ Created 2/16/1997 Heikki Tuuri
 
 #include "read_read.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "read0read.inl"
 #endif
 

@@ -25,7 +25,7 @@ Created 2/23/1996 Heikki Tuuri
 
 #include "btr_pcur.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "btr0pcur.inl"
 #endif
 

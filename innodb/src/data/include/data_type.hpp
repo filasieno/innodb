@@ -428,7 +428,7 @@ struct dtype_struct
 #endif /* !UNIV_HOTBACKUP */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "data0type.inl"
 #endif
 

@@ -778,7 +778,7 @@ struct commit_node_struct{
 
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "trx0trx.inl"
 #endif
 #endif /* !UNIV_HOTBACKUP */

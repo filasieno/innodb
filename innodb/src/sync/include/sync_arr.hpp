@@ -135,7 +135,7 @@ sync_array_print_info(
 	sync_array_t*	arr);		/*!< in: wait array */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "sync0arr.inl"
 #endif
 

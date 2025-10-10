@@ -536,7 +536,7 @@ struct que_fork_struct{
 #define	QUE_CUR_END		3
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "que0que.inl"
 #endif
 

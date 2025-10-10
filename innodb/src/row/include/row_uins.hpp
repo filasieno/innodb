@@ -47,7 +47,7 @@ row_undo_ins(
 /*=========*/
 	undo_node_t*	node);	/*!< in: row undo node */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0uins.inl"
 #endif
 

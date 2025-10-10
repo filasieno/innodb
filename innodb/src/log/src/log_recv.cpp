@@ -21,7 +21,7 @@
 
 #include "log_recv.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "log0recv.inl"
 #endif
 

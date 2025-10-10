@@ -68,7 +68,7 @@ opt_print_query_plan(
 /*=================*/
 	sel_node_t*	sel_node);	/*!< in: select node */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "pars0opt.inl"
 #endif
 

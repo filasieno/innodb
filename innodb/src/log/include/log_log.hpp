@@ -985,7 +985,7 @@ struct log_struct{
 /* @} */
 #endif /* UNIV_LOG_ARCHIVE */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "log0log.inl"
 #endif
 

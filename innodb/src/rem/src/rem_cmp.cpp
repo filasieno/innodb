@@ -25,7 +25,7 @@ Created 7/1/1994 Heikki Tuuri
 
 #include "rem_cmp.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "rem0cmp.inl"
 #endif
 

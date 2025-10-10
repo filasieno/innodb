@@ -24,7 +24,7 @@ Created 5/20/1997 Heikki Tuuri
 *******************************************************/
 
 #include "hash_hash.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "hash0hash.inl"
 #endif
 

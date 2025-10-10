@@ -449,7 +449,7 @@ struct hash_table_struct {
 #endif /* UNIV_DEBUG */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "hash0hash.inl"
 #endif
 

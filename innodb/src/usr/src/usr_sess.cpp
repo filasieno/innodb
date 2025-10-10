@@ -25,7 +25,7 @@ Created 6/25/1996 Heikki Tuuri
 
 #include "usr_sess.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "usr0sess.inl"
 #endif
 

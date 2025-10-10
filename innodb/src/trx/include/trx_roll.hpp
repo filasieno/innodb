@@ -273,7 +273,7 @@ struct trx_named_savept_struct{
 					transaction */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "trx0roll.inl"
 #endif
 

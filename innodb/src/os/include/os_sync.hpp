@@ -449,7 +449,7 @@ clobbered */
 	"Mutexes and rw_locks use InnoDB's own implementation"
 #endif
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "os0sync.inl"
 #endif
 

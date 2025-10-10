@@ -819,7 +819,7 @@ struct lock_sys_struct{
 extern lock_sys_t*	lock_sys;
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "lock0lock.inl"
 #endif
 

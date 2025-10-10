@@ -79,7 +79,6 @@ IB_INLINE int ut_dulint_cmp(dulint a, dulint b);
 /// \param a Dulint.
 /// \param b Ulint.
 /// \return Sum a + b.
-
 IB_INLINE dulint ut_dulint_add(dulint	a, ulint b);
 
 /// \brief Subtracts a ulint from a dulint.
@@ -199,7 +198,7 @@ IB_INLINE ibool ut_bit_get_nth(ulint a, ulint n);
 /// \return The ulint with the bit set as requested.
 IB_INLINE ulint ut_bit_set_nth(ulint a, ulint	n, ibool val);
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
   #include "ut_byte.inl"
 #endif
 

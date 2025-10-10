@@ -284,7 +284,7 @@ IB_INTERN byte* mach_dulint_parse_compressed(byte* ptr, byte* end_ptr, dulint* v
 
 #endif // ! UNIV_HOTBACKUP 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
   #include "mach_data.inl"
 #endif
 

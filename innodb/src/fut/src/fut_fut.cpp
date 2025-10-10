@@ -25,7 +25,7 @@ Created 12/13/1995 Heikki Tuuri
 
 #include "fut_fut.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "fut0fut.inl"
 #endif
 

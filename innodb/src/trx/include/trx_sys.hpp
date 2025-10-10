@@ -559,7 +559,7 @@ page is updated */
 #define TRX_SYS_TRX_ID_WRITE_MARGIN	256
 #endif /* !UNIV_HOTBACKUP */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "trx0sys.inl"
 #endif
 

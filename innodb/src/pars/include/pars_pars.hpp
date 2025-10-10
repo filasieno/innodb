@@ -779,7 +779,7 @@ struct col_assign_node_struct{
 					e.g., := */
 /* @} */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "pars0pars.inl"
 #endif
 

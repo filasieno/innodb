@@ -193,7 +193,7 @@ cmp_rec_rec(
 	dict_index_t*	index);	/*!< in: data dictionary index */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "rem0cmp.inl"
 #endif
 

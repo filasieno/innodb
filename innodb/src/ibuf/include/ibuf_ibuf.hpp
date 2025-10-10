@@ -382,7 +382,7 @@ for the file segment from which the pages for the ibuf tree are allocated */
 /* The insert buffer tree itself is always located in space 0. */
 #define IBUF_SPACE_ID		0
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ibuf0ibuf.inl"
 #endif
 

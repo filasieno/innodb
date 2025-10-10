@@ -483,7 +483,7 @@ struct big_rec_struct {
 	big_rec_field_t*fields;		/*!< stored fields */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "data0data.inl"
 #endif
 

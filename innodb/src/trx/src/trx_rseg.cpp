@@ -25,7 +25,7 @@ Created 3/26/1996 Heikki Tuuri
 
 #include "trx_rseg.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "trx0rseg.inl"
 #endif
 

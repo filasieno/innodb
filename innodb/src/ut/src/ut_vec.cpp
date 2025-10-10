@@ -18,7 +18,7 @@
 /// Created 4/6/2006 Osku Salerma
 
 #include "ut_vec.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ut_vec.inl"
 #endif
 #include <cstring>

@@ -547,7 +547,7 @@ quite a large overhead. */
 				with the XA XID */
 /* @} */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "trx0undo.inl"
 #endif
 

@@ -175,7 +175,7 @@ extra mlog buffer size for variable size data */
 #define MLOG_BUF_MARGIN 256
 #endif /* !UNIV_HOTBACKUP */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "mtr_log.inl"
 #endif
 

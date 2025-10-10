@@ -45,7 +45,7 @@ row_undo_mod(
 	que_thr_t*	thr);	/*!< in: query thread */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0umod.inl"
 #endif
 

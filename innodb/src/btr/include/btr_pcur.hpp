@@ -555,7 +555,7 @@ struct btr_pcur_struct{
 #define BTR_PCUR_OLD_STORED	908467085
 #define BTR_PCUR_OLD_NOT_STORED	122766467
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "btr0pcur.inl"
 #endif
 

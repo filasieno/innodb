@@ -1187,7 +1187,7 @@ void
 dict_close(void);
 /*============*/
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "dict0dict.inl"
 #endif
 

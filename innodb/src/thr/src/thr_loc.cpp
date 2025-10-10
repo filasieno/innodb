@@ -24,7 +24,7 @@ Created 10/5/1995 Heikki Tuuri
 *******************************************************/
 
 #include "thr_loc.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "thr0loc.inl"
 #endif
 

@@ -365,7 +365,7 @@ struct mtr_struct{
 #define MTR_COMMITTING		56456
 #define MTR_COMMITTED		34676
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "mtr0mtr.inl"
 #endif
 

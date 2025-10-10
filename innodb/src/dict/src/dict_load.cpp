@@ -26,7 +26,7 @@ Created 4/24/1996 Heikki Tuuri
 
 #include "dict_load.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "dict0load.inl"
 #endif
 

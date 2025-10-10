@@ -111,7 +111,7 @@ dict_print(void);
 /*============*/
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "dict0load.inl"
 #endif
 

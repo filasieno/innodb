@@ -303,7 +303,7 @@ row_raw_format(
 	ulint			buf_size);	/*!< in: output buffer size
 						in bytes */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0row.inl"
 #endif
 

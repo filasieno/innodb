@@ -21,7 +21,7 @@
 
 #include <errno.h>
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ut0mem.inl"
 #endif
 

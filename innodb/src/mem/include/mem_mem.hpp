@@ -351,7 +351,7 @@ struct mem_block_info_struct {
 
 #include "mem_dbg.hpp"
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
   #include "mem_mem.inl"
 #endif
 

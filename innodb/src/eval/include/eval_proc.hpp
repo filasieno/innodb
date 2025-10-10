@@ -97,7 +97,7 @@ return_step(
 	que_thr_t*	thr);	/*!< in: query thread */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "eval0proc.inl"
 #endif
 

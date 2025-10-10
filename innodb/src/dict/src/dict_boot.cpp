@@ -25,7 +25,7 @@ Created 4/18/1996 Heikki Tuuri
 
 #include "dict_boot.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "dict0boot.inl"
 #endif
 

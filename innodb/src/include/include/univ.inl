@@ -190,7 +190,7 @@ operations (very slow); also UNIV_DEBUG must be defined
 // If we want to compile a noninlined version we use the following macro
 // definitions:
 
-#define UNIV_NONINL
+#define IB_DO_NOT_INLINE
 #define IB_INLINE IB_INTERN
 
 #endif	  // UNIV_DEBUG

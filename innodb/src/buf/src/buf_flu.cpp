@@ -25,7 +25,7 @@ Created 11/11/1995 Heikki Tuuri
 
 #include "buf_flu.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "buf0flu.inl"
 #endif
 

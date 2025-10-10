@@ -26,7 +26,7 @@ Created 12/29/1997 Heikki Tuuri
 
 #include "eval_eval.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "eval0eval.inl"
 #endif
 

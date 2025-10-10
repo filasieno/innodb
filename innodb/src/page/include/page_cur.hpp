@@ -339,7 +339,7 @@ struct page_cur_struct{
 	buf_block_t*	block;	/*!< pointer to the block containing rec */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "page_cur.inl"
 #endif
 

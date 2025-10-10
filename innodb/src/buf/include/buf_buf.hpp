@@ -1537,7 +1537,7 @@ FILE_PAGE => NOT_USED	NOTE: This transition is allowed if and only if
 				(3) io_fix == 0.
 */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "buf0buf.inl"
 #endif
 

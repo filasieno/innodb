@@ -25,7 +25,7 @@ Created 5/30/1994 Heikki Tuuri
 
 #include "rem_rec.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "rem0rec.inl"
 #endif
 

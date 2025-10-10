@@ -22,7 +22,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 /// Created 9/6/1995 Heikki Tuuri
 
 #include "os_sync.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "os0sync.inl"
 #endif
 

@@ -119,7 +119,7 @@ struct ib_list_helper_struct {
 	void*		data;
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
   #include "ut0list.inl"
 #endif
 

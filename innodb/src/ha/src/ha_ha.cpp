@@ -24,7 +24,7 @@ Created 8/22/1994 Heikki Tuuri
 *************************************************************************/
 
 #include "ha_ha.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ha0ha.inl"
 #endif
 

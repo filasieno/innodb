@@ -160,7 +160,7 @@ ulint
 os_thread_get_last_error(void);
 /*==========================*/
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "os0thread.inl"
 #endif
 

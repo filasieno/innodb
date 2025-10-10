@@ -18,7 +18,7 @@
 /// Created 4/26/2006 Osku Salerma
 
 #include "ut_list.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ut0list.inl"
 #endif
 

@@ -25,7 +25,7 @@ Created 3/14/1997 Heikki Tuuri
 
 #include "row_purge.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "row0purge.inl"
 #endif
 

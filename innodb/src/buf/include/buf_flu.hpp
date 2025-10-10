@@ -208,7 +208,7 @@ sweep). */
 #define BUF_FLUSH_EXTRA_MARGIN		(BUF_FLUSH_FREE_BLOCK_MARGIN / 4 + 100)
 #endif /* !UNIV_HOTBACKUP */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "buf0flu.inl"
 #endif
 

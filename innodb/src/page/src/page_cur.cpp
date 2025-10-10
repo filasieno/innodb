@@ -27,7 +27,7 @@ Created 10/4/1994 Heikki Tuuri
 
 #include "page_zip.hpp"
 #include "page_cur.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "page0cur.inl"
 #endif
 

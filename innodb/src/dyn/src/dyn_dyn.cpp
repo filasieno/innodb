@@ -24,7 +24,7 @@ Created 2/5/1996 Heikki Tuuri
 *******************************************************/
 
 #include "dyn_dyn.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "dyn0dyn.inl"
 #endif
 

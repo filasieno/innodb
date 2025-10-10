@@ -202,7 +202,7 @@ struct trx_rseg_struct{
 					/* Undo log segment slots */
 /*-------------------------------------------------------------*/
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "trx0rseg.inl"
 #endif
 

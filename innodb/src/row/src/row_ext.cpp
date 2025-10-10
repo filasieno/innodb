@@ -25,7 +25,7 @@ Created September 2006 Marko Makela
 
 #include "row_ext.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "row0ext.inl"
 #endif
 

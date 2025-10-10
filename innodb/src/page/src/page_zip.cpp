@@ -27,7 +27,7 @@ Created June 2005 by Marko Makela
 
 #define THIS_MODULE
 #include "page_zip.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 # include "page0zip.ic"
 #endif
 #undef THIS_MODULE

@@ -19,7 +19,7 @@
 
 #include "ut_rnd.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ut0rnd.inl"
 #endif
 

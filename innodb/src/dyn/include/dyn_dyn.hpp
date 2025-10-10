@@ -181,7 +181,7 @@ struct dyn_block_struct{
 };
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "dyn0dyn.inl"
 #endif
 

@@ -33,7 +33,7 @@ Created 7/19/1997 Heikki Tuuri
 /** The start address for an insert buffer bitmap page bitmap */
 #define IBUF_BITMAP		PAGE_DATA
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ibuf0ibuf.inl"
 #endif
 

@@ -306,7 +306,7 @@ void
 ut_mem_var_init(void);
 /*=================*/
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ut0mem.inl"
 #endif
 

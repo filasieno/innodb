@@ -583,7 +583,7 @@ extern ut_list_base_node_t  mutex_list;
 extern mutex_t mutex_list_mutex;
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "sync0sync.inl"
 #endif
 

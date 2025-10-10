@@ -234,7 +234,7 @@ hash bucket corresponding to a fold value.
 # define ASSERT_HASH_MUTEX_OWN(table, fold) ((void) 0)
 #endif /* !UNIV_HOTBACKUP */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ha0ha.inl"
 #endif
 

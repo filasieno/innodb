@@ -83,7 +83,7 @@ ibool*
 thr_local_get_in_ibuf_field(void);
 /*=============================*/
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "thr0loc.inl"
 #endif
 

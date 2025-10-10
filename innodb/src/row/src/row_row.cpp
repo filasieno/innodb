@@ -25,7 +25,7 @@ Created 4/20/1996 Heikki Tuuri
 
 #include "row_row.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "row0row.inl"
 #endif
 

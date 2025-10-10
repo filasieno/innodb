@@ -88,7 +88,7 @@ typedef struct buf_buddy_stat_struct buf_buddy_stat_t;
 Protected by buf_pool_mutex. */
 extern buf_buddy_stat_t buf_buddy_stat[BUF_BUDDY_SIZES + 1];
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 # include "buf0buddy.ic"
 #endif
 

@@ -47,7 +47,7 @@ Created 10/16/1994 Heikki Tuuri
 
 #include "btr_cur.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "btr0cur.inl"
 #endif
 

@@ -580,7 +580,7 @@ struct	rw_lock_debug_struct {
 };
 #endif /* UNIV_SYNC_DEBUG */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "sync0rw.inl"
 #endif
 #endif /* !UNIV_HOTBACKUP */

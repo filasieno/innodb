@@ -32,7 +32,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #endif
 
 #include "os_proc.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "os0proc.inl"
 #endif
 

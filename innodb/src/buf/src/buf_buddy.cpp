@@ -25,7 +25,7 @@ Created December 2006 by Marko Makela
 
 #define THIS_MODULE
 #include "buf_buddy.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 # include "buf0buddy.ic"
 #endif
 #undef THIS_MODULE

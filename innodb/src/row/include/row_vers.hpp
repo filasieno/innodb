@@ -135,7 +135,7 @@ row_vers_build_for_semi_consistent_read(
 				it was freshly inserted afterwards */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0vers.inl"
 #endif
 

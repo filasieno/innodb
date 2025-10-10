@@ -32,7 +32,7 @@ Created 11/5/1995 Heikki Tuuri
 
 #include "buf_buf.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "buf0buf.inl"
 #endif
 

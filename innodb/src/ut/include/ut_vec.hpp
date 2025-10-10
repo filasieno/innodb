@@ -139,7 +139,7 @@ struct ib_vector_struct {
 	ulint		total;	/*!< number of elements allocated */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ut0vec.inl"
 #endif
 

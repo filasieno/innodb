@@ -88,7 +88,7 @@ struct row_ext_struct{
 	ulint		len[1];	/*!< prefix lengths; 0 if not cached */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0ext.inl"
 #endif
 

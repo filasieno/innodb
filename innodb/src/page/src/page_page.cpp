@@ -25,7 +25,7 @@ Created 2/2/1994 Heikki Tuuri
 
 #define THIS_MODULE
 #include "page_page.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "page0page.inl"
 #endif
 #undef THIS_MODULE

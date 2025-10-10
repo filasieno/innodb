@@ -393,7 +393,7 @@ a limited buffer. */
 extern ib_logger_t ib_logger;
 extern ib_stream_t ib_stream;
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ut0ut.inl"
 #endif
 

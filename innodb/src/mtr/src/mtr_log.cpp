@@ -19,7 +19,7 @@
 
 #include "mtr_log.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "mtr0log.inl"
 #endif
 

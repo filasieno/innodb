@@ -19,7 +19,7 @@
 
 #include "btr_btr.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "btr0btr.inl"
 #endif
 

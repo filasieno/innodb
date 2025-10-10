@@ -101,7 +101,7 @@ lock_rec_get_prev(
 	const lock_t*	in_lock,/*!< in: record lock */
 	ulint		heap_no);/*!< in: heap number of the record */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "lock0priv.inl"
 #endif
 

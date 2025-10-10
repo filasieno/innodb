@@ -25,7 +25,7 @@ Created 12/15/1997 Heikki Tuuri
 
 #include "pars_sym.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "pars0sym.inl"
 #endif
 

@@ -187,7 +187,7 @@ struct cursor_view_struct{
 				processing of this cursor */
 };
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "read0read.inl"
 #endif
 

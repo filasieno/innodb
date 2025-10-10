@@ -31,7 +31,7 @@ Created September 22, 2007 Vasil Dimov
 #include "mem_mem.hpp"
 #include "ut_rnd.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "ha0storage.inl"
 #endif
 

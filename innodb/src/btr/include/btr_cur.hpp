@@ -762,7 +762,7 @@ srv_printf_innodb_monitor(). */
 extern ulint	btr_cur_n_sea_old;
 #endif /* !UNIV_HOTBACKUP */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "btr0cur.inl"
 #endif
 

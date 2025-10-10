@@ -133,7 +133,7 @@ ha_storage_get_size(
 /*================*/
 	const ha_storage_t*	storage);	/*!< in: hash storage */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ha0storage.inl"
 #endif
 

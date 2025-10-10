@@ -28,7 +28,7 @@ on 1/27/1998 */
 
 #include "pars_pars.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "pars0pars.inl"
 #endif
 

@@ -31,7 +31,7 @@ Created 9/11/1995 Heikki Tuuri
 *******************************************************/
 
 #include "sync_rw.hpp"
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "sync0rw.inl"
 #endif
 

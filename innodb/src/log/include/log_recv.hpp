@@ -496,7 +496,7 @@ use these free frames to read in pages when we start applying the
 log records to the database. */
 extern ulint	recv_n_pool_free_frames;
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "log0recv.inl"
 #endif
 

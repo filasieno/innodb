@@ -208,7 +208,7 @@ flst_print(
 	mtr_t*			mtr);	/*!< in: mtr */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "fut0lst.inl"
 #endif
 

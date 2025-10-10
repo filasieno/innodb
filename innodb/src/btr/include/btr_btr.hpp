@@ -505,7 +505,7 @@ btr_validate_index(
 
 #endif // !UNIV_HOTBACKUP
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "btr_btr.inl"
 #endif
 

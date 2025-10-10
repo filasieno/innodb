@@ -18,7 +18,7 @@
 
 #include "mach_data.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "mach_data.inl"
 #endif
 

@@ -107,7 +107,7 @@ eval_cmp(
 	func_node_t*	cmp_node);	/*!< in: comparison node */
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "eval0eval.inl"
 #endif
 

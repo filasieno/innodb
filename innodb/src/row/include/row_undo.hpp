@@ -135,7 +135,7 @@ struct undo_node_struct{
 };
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "row0undo.inl"
 #endif
 

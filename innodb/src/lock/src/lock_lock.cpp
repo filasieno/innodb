@@ -23,7 +23,7 @@
 #include "lock_lock.hpp"
 #include "lock_priv.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "lock0lock.inl"
 #include "lock0priv.inl"
 #endif

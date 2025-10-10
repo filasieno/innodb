@@ -70,7 +70,7 @@ struct sess_struct
 /// to the client
 #define SESS_ERROR		2	/*  */
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "usr_sess.inl"
 
 #endif

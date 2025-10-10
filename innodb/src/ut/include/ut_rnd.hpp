@@ -136,7 +136,7 @@ ut_find_prime(
 	__attribute__((const));
 
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "ut0rnd.inl"
 #endif
 

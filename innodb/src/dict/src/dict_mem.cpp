@@ -23,7 +23,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "dict_mem.hpp"
 
-#ifdef UNIV_NONINL
+#ifdef IB_DO_NOT_INLINE
 #include "dict0mem.inl"
 #endif
 

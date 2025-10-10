@@ -819,7 +819,7 @@ are given in one byte (resp. two byte) format. */
 two upmost bits in a two byte offset for special purposes */
 #define REC_MAX_DATA_SIZE	(16 * 1024)
 
-#ifndef UNIV_NONINL
+#ifndef IB_DO_NOT_INLINE
 #include "rem0rec.inl"
 #endif
 
