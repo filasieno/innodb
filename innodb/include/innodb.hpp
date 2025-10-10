@@ -1,7 +1,7 @@
+// Copyright (c) 2025 Fabio N. Filasieno
+// Copyright (c) 2010, 2025 Stewart Smith
 // Copyright (c) 2008, 2009 Innobase Oy. All rights reserved.
 // Copyright (c) 2008, 2009 Oracle. All rights reserved.
-// Copyright (c) 2010, 2025 Stewart Smith
-// Copyright (c) 2025 Fabio N. Filasieno
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,11 +19,26 @@
 /// \file innodb.hpp
 /// \brief InnoDB API header file
 
+/// \brief Define the Doxygen groups:
+/// \defgroup init Startup/Shutdown functions
+/// \defgroup cursor Cursor functions
+/// \defgroup trx Transaction functions
+/// \defgroup config Configuration functions
+/// \defgroup ddl DDL functions
+/// \defgroup misc Miscellaneous functions
+/// \defgroup tuple Tuple functions
+/// \defgroup sql SQL functions
+/// \defgroup dml DML functions
+/// \defgroup debug Debug and Testing functions
+
+#ifndef INNODB_HPP
+#define INNODB_HPP
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-#if defined(BUILDING_INNODB)
+#if defined(IB_BUILDING_INNODB)
 # if defined(IB_HAVE_VISIBILITY)
 #  define INNODB_API __attribute__ ((visibility("default")))
 #  define INNODB_LOCAL  __attribute__ ((visibility("hidden")))
@@ -42,7 +57,7 @@ extern "C" {
 #  define INNODB_API
 #  define INNODB_LOCAL
 # endif // defined(_MSC_VER)
-#endif // defined(BUILDING_INNODB)
+#endif // defined(IB_BUILDING_INNODB)
 
 /// \brief InnoDB error codes. 
 /// \details Most of the error codes are internal to the engine and will not be seen by user applications. 
@@ -70,20 +85,18 @@ enum db_err {
 	/// \details The thread is suspended internally by InnoDB and is put on a lock wait queue.
 	DB_LOCK_WAIT,
 
-	/// \brief A lock request by a transaction
-	/// resulted in a deadlock. The transaction
-	/// was rolled back
+	/// \brief A lock request by a transaction resulted in a deadlock. 
+	/// \details The transaction was rolled back
 	DB_DEADLOCK,
 
 	/// \brief Not used
 	DB_ROLLBACK,
 
-	/// \brief A record insert or update violates
-	/// a unique contraint.
+	/// \brief A record insert or update violates a unique contraint.
 	DB_DUPLICATE_KEY,
 
 	/// \brief A query thread should be in state suspended but is trying to acquire a lock. 
-	/// Currently this is treated as a hard error and a violation of an invariant.
+	/// \details Currently this is treated as a hard error and a violation of an invariant.
 	DB_QUE_THR_SUSPENDED,
 
 	/// \brief Required history data has been deleted due to lack of space in rollback segment
@@ -204,8 +217,8 @@ enum db_err {
 #include <stdio.h>
 
 #ifdef _MSC_VER
-#define strncasecmp		_strnicmp
-#define strcasecmp		_stricmp
+#define strncasecmp _strnicmp
+#define strcasecmp  _stricmp
 #endif
 
 /// \def IB_NO_IGNORE
@@ -230,16 +243,21 @@ enum db_err {
 /// \see db_err
 /// a complete list of possible error codes.
 typedef enum db_err        ib_err_t;
+
 /// \brief Representation of a byte within InnoDB
 typedef unsigned char      ib_byte_t;
+
 /// \brief Representation of an unsigned long int within InnoDB
 typedef unsigned long int  ib_ulint_t;
+
 /// \brief Representation of a void* within InnoDB
 typedef void*              ib_opaque_t;
-// Ideally we would like to have this as ib_byte_t, but we need to make it
-// the same as the InnoDB internal ibool.
+
 /// \brief Representation of a "boolean" type within InnoDB
+/// \details Ideally we would like to have this as ib_byte_t, but we need to make it
+/// the same as the InnoDB internal ibool.
 typedef ib_ulint_t         ib_bool_t;
+
 /// \brief A character set pointer
 typedef ib_opaque_t        ib_charset_t;
 
@@ -248,42 +266,42 @@ typedef ib_opaque_t        ib_charset_t;
 
 #if defined(_MSC_VER)
 
-/// \brief A signed 8 bit integral type.
-typedef __int8           ib_i8_t;
-/// \brief An unsigned 8 bit integral type.
-typedef unsigned __int8  ib_u8_t;
-/// \brief A signed 16 bit integral type.
-typedef __int16          ib_i16_t;
-/// \brief An unsigned 16 bit integral type.
-typedef unsigned __int16 ib_u16_t;
-/// \brief A signed 32 bit integral type.
-typedef __int32          ib_i32_t;
-/// \brief An unsigned 32 bit integral type.
-typedef unsigned __int32 ib_u32_t;
-/// \brief A signed 64 bit integral type.
-typedef __int64          ib_i64_t;
-/// \brief An unsigned 64 bit integral type.
-typedef unsigned __int64 ib_u64_t;
+	/// \brief A signed 8 bit integral type.
+	typedef __int8           ib_i8_t;
+	/// \brief An unsigned 8 bit integral type.
+	typedef unsigned __int8  ib_u8_t;
+	/// \brief A signed 16 bit integral type.
+	typedef __int16          ib_i16_t;
+	/// \brief An unsigned 16 bit integral type.
+	typedef unsigned __int16 ib_u16_t;
+	/// \brief A signed 32 bit integral type.
+	typedef __int32          ib_i32_t;
+	/// \brief An unsigned 32 bit integral type.
+	typedef unsigned __int32 ib_u32_t;
+	/// \brief A signed 64 bit integral type.
+	typedef __int64          ib_i64_t;
+	/// \brief An unsigned 64 bit integral type.
+	typedef unsigned __int64 ib_u64_t;
 
 #else
 
-#include <stdint.h>
-/// \brief A signed 8 bit integral type.
-typedef int8_t   ib_i8_t;
-/// \brief An unsigned 8 bit integral type.
-typedef uint8_t  ib_u8_t;
-/// \brief A signed 16 bit integral type.
-typedef int16_t  ib_i16_t;
-/// \brief An unsigned 16 bit integral type.
-typedef uint16_t ib_u16_t;
-/// \brief A signed 32 bit integral type.
-typedef int32_t  ib_i32_t;
-/// \brief An unsigned 32 bit integral type.
-typedef uint32_t ib_u32_t;
-/// \brief A signed 64 bit integral type.
-typedef int64_t  ib_i64_t;
-/// \brief An unsigned 64 bit integral type.
-typedef uint64_t ib_u64_t;
+	#include <stdint.h>
+	/// \brief A signed 8 bit integral type.
+	typedef int8_t   ib_i8_t;
+	/// \brief An unsigned 8 bit integral type.
+	typedef uint8_t  ib_u8_t;
+	/// \brief A signed 16 bit integral type.
+	typedef int16_t  ib_i16_t;
+	/// \brief An unsigned 16 bit integral type.
+	typedef uint16_t ib_u16_t;
+	/// \brief A signed 32 bit integral type.
+	typedef int32_t  ib_i32_t;
+	/// \brief An unsigned 32 bit integral type.
+	typedef uint32_t ib_u32_t;
+	/// \brief A signed 64 bit integral type.
+	typedef int64_t  ib_i64_t;
+	/// \brief An unsigned 64 bit integral type.
+	typedef uint64_t ib_u64_t;
 
 #endif
 
@@ -519,11 +537,10 @@ typedef int (*ib_msg_log_t)(ib_msg_stream_t, const char*, ...);
 // by itself will result in pointer decay resulting in subverting
 // of the compiler's type checking.
 
-/// \brief InnoDB tuple handle. This handle can refer to either a cluster index
-/// tuple or a secondary index tuple. There are two types of tuples for each
-/// type of index, making a total of four types of tuple handles. There
-/// is a tuple for reading the entire row contents and another for searching
-/// on the index key.
+/// \brief InnoDB tuple handle. 
+/// \details This handle can refer to either a cluster index tuple or a secondary index tuple. 
+/// There are two types of tuples for each type of index, making a total of four tuple handles. 
+/// There is a tuple for reading the entire row contents and another for searching on the index key.
 typedef struct ib_tpl_struct* ib_tpl_t;
 
 /// \brief InnoDB transaction handle, all database operations need to be covered by transactions.
@@ -543,9 +560,9 @@ typedef struct ib_idx_sch_struct* ib_idx_sch_t;
 
 /// \brief Currently, this is also the number of callback functions in the struct.
 typedef enum {
-	IB_SCHEMA_VISITOR_TABLE = 1,
-	IB_SCHEMA_VISITOR_TABLE_COL = 2,
-	IB_SCHEMA_VISITOR_TABLE_AND_INDEX = 3,
+	IB_SCHEMA_VISITOR_TABLE               = 1,
+	IB_SCHEMA_VISITOR_TABLE_COL           = 2,
+	IB_SCHEMA_VISITOR_TABLE_AND_INDEX     = 3,
 	IB_SCHEMA_VISITOR_TABLE_AND_INDEX_COL = 4
 } ib_schema_visitor_version_t;
 
@@ -698,17 +715,6 @@ typedef int (*ib_client_cmp_t)(const ib_col_meta_t* col_meta, const ib_byte_t* p
 /// \brief Callback function to compare InnoDB key columns in an index.
 extern ib_client_cmp_t ib_client_compare;
 
-/// \brief Define the Doxygen groups:
-/// \defgroup init Startup/Shutdown functions
-/// \defgroup cursor Cursor functions
-/// \defgroup trx Transaction functions
-/// \defgroup config Configuration functions
-/// \defgroup ddl DDL functions
-/// \defgroup misc Miscellaneous functions
-/// \defgroup tuple Tuple functions
-/// \defgroup sql SQL functions
-/// \defgroup dml DML functions
-/// \defgroup debug Debug and Testing functions
 /// \brief Return the API version number, the version number format is: 16 bits future use | 16 bits current | 16 bits revision | 16 bits age
 /// - If the library source code has changed at all since the last release, then revision will be incremented (`c:r:a' becomes `c:r+1:a').
 /// - If any interfaces have been added, removed, or changed since the last update, current will be incremented, and revision will be set to 0.
@@ -734,46 +740,39 @@ INNODB_API ib_err_t ib_init(void) IB_NO_IGNORE;
 INNODB_API ib_err_t ib_startup(const char* format) IB_NO_IGNORE;
 
 /// \brief Shutdown the InnoDB engine. 
-/// Call this function when they are no 
-/// active transactions. It will close all files and release all memory
-/// on successful completion. All internal variables will be reset to their
-/// default values.
+/// \details Call this function when they are no active transactions. It will close all files and release all memory
+/// on successful completion. All internal variables will be reset to their default values.
 /// \ingroup init
 /// \param flag is the shutdown flag
 /// \return	DB_SUCCESS or error code
 INNODB_API ib_err_t ib_shutdown(ib_shutdown_t flag) IB_NO_IGNORE;
 
 /// \brief Start a transaction that's been rolled back. 
-/// \details This special function exists for the case when InnoDB's deadlock detector has rolledack
-/// a transaction. While the transaction has been rolled back the handle
-/// is still valid and can be reused by calling this function. If you
-/// don't want to reuse the transaction handle then you can free the handle
-/// by calling ib_trx_release().
+/// \details This special function exists for the case when InnoDB's deadlock detector has rolledack a transaction. 
+/// While the transaction has been rolled back the handle is still valid and can be reused by calling this function. 
+//  If you don't want to reuse the transaction handle then you can free the handle by calling ib_trx_release().
 /// \ingroup trx	
 /// \param trx is the transaction to restart
 /// \param ib_trx_level is the transaction isolation level
 /// \return	innobase txn handle
 INNODB_API ib_err_t ib_trx_start(ib_trx_t trx, ib_trx_level_t ib_trx_level) IB_NO_IGNORE;
 
-/// \brief Begin a transaction. This will allocate a new transaction handle and
-/// put the transaction in the active state.
+/// \brief Begin a transaction. This will allocate a new transaction handle and put the transaction in the active state.
 /// \ingroup trx
 /// \param ib_trx_level is the transaction isolation level
 /// \return	innobase txn handle
 INNODB_API ib_trx_t ib_trx_begin(ib_trx_level_t ib_trx_level) IB_NO_IGNORE;
 
-/// \brief Set client data for a transaction. This is passed back to the client
-/// in the trx_is_interrupted callback. INNODB will only ever pass this
-/// around, it will never dereference it.
+/// \brief Set client data for a transaction. This is passed back to the client in the trx_is_interrupted callback. 
+/// INNODB will only ever pass this around, it will never dereference it.
 /// \ingroup trx
 /// \param trx is the transaction to set the client data for
 /// \param client_data is client program's data about this transaction
 INNODB_API void ib_trx_set_client_data(ib_trx_t trx, void* client_data);
 
 /// \brief Query the transaction's state. 
-/// \details This function can be used to check for the state of the transaction in case it has been rolled back by the
-/// InnoDB deadlock detector. Note that when a transaction is selected as
-/// a victim for rollback, InnoDB will always return an appropriate error
+/// \details This function can be used to check for the state of the transaction in case it has been rolled back by the InnoDB deadlock detector. 
+//  Note that when a transaction is selected as a victim for rollback, InnoDB will always return an appropriate error
 /// code indicating this. @see DB_DEADLOCK, @see DB_LOCK_TABLE_FULL and
 /// \see DB_LOCK_WAIT_TIMEOUT
 /// \ingroup trx
@@ -782,8 +781,7 @@ INNODB_API void ib_trx_set_client_data(ib_trx_t trx, void* client_data);
 INNODB_API ib_trx_state_t ib_trx_state(ib_trx_t	trx) IB_NO_IGNORE;
 
 /// \brief Release the resources of the transaction. 
-/// If the transaction was selected as a victim by InnoDB and rolled back then use this function
-/// to free the transaction handle.
+/// If the transaction was selected as a victim by InnoDB and rolled back then use this function to free the transaction handle.
 /// \ingroup trx
 /// \param trx is the transaction handle
 /// return	DB_SUCCESS or err code
@@ -805,8 +803,7 @@ INNODB_API ib_err_t ib_trx_commit(ib_trx_t trx) IB_NO_IGNORE;
 INNODB_API ib_err_t ib_trx_rollback(ib_trx_t trx) IB_NO_IGNORE;
 
 /// \brief Add columns to a table schema
-/// Tables are created in InnoDB by first creating a table schema which is identified by a handle. Then you
-/// add the column definitions to the table schema.
+/// Tables are created in InnoDB by first creating a table schema which is identified by a handle. Then you add the column definitions to the table schema.
 /// \ingroup ddl
 /// \param tbl_sch is the table schema instance
 /// \param name is the name of the column to add
@@ -818,8 +815,7 @@ INNODB_API ib_err_t ib_trx_rollback(ib_trx_t trx) IB_NO_IGNORE;
 INNODB_API ib_err_t ib_table_schema_add_col(ib_tbl_sch_t tbl_sch, const char* name, ib_col_type_t col_type, ib_col_attr_t col_attr, ib_u16_t client_type, ib_ulint_t len) IB_NO_IGNORE;
 
 /// \brief Create and add an index key definition to a table schema.
-/// The index schema is owned by the table schema instance and will be freed when
-/// the table schema instance is freed.
+/// \details The index schema is owned by the table schema instance and will be freed when the table schema instance is freed.
 /// \ingroup ddl
 /// \param[in,out] tbl_sch is the schema instance
 /// \param name name of the key definition to create
@@ -915,7 +911,7 @@ INNODB_API ib_err_t ib_index_create(ib_idx_sch_t idx_sch, ib_id_t* index_id) IB_
 INNODB_API ib_err_t ib_table_drop(ib_trx_t trx, const char*	name) IB_NO_IGNORE;
 
 /// \brief Drop a secondary index. 
-/// Ensure that you have acquired the schema lock in exclusive mode.
+/// \details Ensure that you have acquired the schema lock in exclusive mode.
 /// \ingroup ddl
 /// \param trx is the covering transaction.
 /// \param index_id is the id of the index to drop
@@ -1594,32 +1590,28 @@ typedef struct {
 INNODB_API ib_err_t ib_get_table_statistics(ib_crsr_t crsr, ib_table_stats_t *table_stats, size_t sizeof_ib_table_stats_t);
 
 /// \brief Get statistics on number of different key values per index part
+/// \details This function returns the approximate different key values for this index. They are periodically recalculated.
 /// \ingroup misc
 /// \param crsr A Cursor that is opened to a table
 /// \param index_name name of the index
 /// \param ncols returns the number of elements in n_diff
 /// \param n_diff An array allocated with malloc() (user needs to free()) containing the statistics
 /// \return \ref DB_SUCCESS or error. \ref DB_NOT_FOUND if index is not found
-/// This function returns the approximate different key
-/// values for this index. They are periodically recalculated.
 INNODB_API ib_err_t ib_get_index_stat_n_diff_key_vals(ib_crsr_t crsr, const char* index_name, ib_u64_t *ncols, ib_i64_t **n_diff);
 
 /// \brief Force an update of table and index statistics
+/// \details This function forces an update to the table and index statistics for the table crsr is opened on.
 /// \ingroup misc
 /// \param crsr A Cursor that is opened to a table
 /// \return \ref DB_SUCCESS or error.
-/// This function forces an update to the table and index statistics for
-/// the table crsr is opened on.
 INNODB_API ib_err_t ib_update_table_statistics(ib_crsr_t crsr);
 
 /// \brief Inject an error into INNODB
 /// \ingroup debug
 /// \param err The error inject code to insert.
-/// This function will simulate an error condition inside INNODB.
-/// You should not rely on this function. It is for INNODB test suite use only,
-/// parts may only be compiled into debug libraries and this function
-/// can quite legitimately just return DB_ERROR and cause Voldemort to pay
-/// you a visit.
+/// \details This function will simulate an error condition inside INNODB. You should not rely on this function. 
+/// It is for INNODB test suite use only, parts may only be compiled into debug libraries and this function
+/// can quite legitimately just return DB_ERROR and cause Voldemort to pay you a visit.
 INNODB_API ib_err_t ib_error_inject(int err);
 
 #ifdef __cplusplus
