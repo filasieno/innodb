@@ -173,7 +173,7 @@ eval_cmp(
 
 /*****************************************************************//**
 Evaluates a logical operation node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_logical(
 /*=========*/
@@ -214,7 +214,7 @@ eval_logical(
 
 /*****************************************************************//**
 Evaluates an arithmetic operation node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_arith(
 /*=======*/
@@ -258,7 +258,7 @@ eval_arith(
 
 /*****************************************************************//**
 Evaluates an aggregate operation node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_aggregate(
 /*===========*/
@@ -379,7 +379,7 @@ eval_predefined_2(
 
 /*****************************************************************//**
 Evaluates a notfound-function node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_notfound(
 /*==========*/
@@ -421,7 +421,7 @@ eval_notfound(
 
 /*****************************************************************//**
 Evaluates a substr-function node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_substr(
 /*========*/
@@ -566,7 +566,7 @@ match_found:
 
 /*****************************************************************//**
 Evaluates a predefined function node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_binary_to_number(
 /*==================*/
@@ -650,7 +650,7 @@ this function looks at the second argument which is the integer length in
 bytes, and converts the integer to a VARCHAR.
 If the first argument is of some other type, this function converts it to
 BINARY. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_to_binary(
 /*===========*/
@@ -694,7 +694,7 @@ eval_to_binary(
 
 /*****************************************************************//**
 Evaluates a predefined function node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_predefined(
 /*============*/

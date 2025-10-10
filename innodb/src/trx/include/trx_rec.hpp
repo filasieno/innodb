@@ -40,7 +40,7 @@ Created 3/26/1996 Heikki Tuuri
 /***********************************************************************//**
 Copies the undo record to the heap.
 @return	own: copy of undo log record */
-UNIV_INLINE
+IB_INLINE
 trx_undo_rec_t*
 trx_undo_rec_copy(
 /*==============*/
@@ -49,7 +49,7 @@ trx_undo_rec_copy(
 /**********************************************************************//**
 Reads the undo log record type.
 @return	record type */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_undo_rec_get_type(
 /*==================*/
@@ -57,7 +57,7 @@ trx_undo_rec_get_type(
 /**********************************************************************//**
 Reads from an undo log record the record compiler info.
 @return	compiler info */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_undo_rec_get_cmpl_info(
 /*=======================*/
@@ -65,7 +65,7 @@ trx_undo_rec_get_cmpl_info(
 /**********************************************************************//**
 Returns TRUE if an undo log record contains an extern storage field.
 @return	TRUE if extern */
-UNIV_INLINE
+IB_INLINE
 ibool
 trx_undo_rec_get_extern_storage(
 /*============================*/
@@ -73,7 +73,7 @@ trx_undo_rec_get_extern_storage(
 /**********************************************************************//**
 Reads the undo log record number.
 @return	undo no */
-UNIV_INLINE
+IB_INLINE
 undo_no_t
 trx_undo_rec_get_undo_no(
 /*=====================*/
@@ -81,7 +81,7 @@ trx_undo_rec_get_undo_no(
 /**********************************************************************//**
 Returns the start of the undo record data area.
 @return	offset to the data area */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_undo_rec_get_offset(
 /*====================*/

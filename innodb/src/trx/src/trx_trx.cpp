@@ -601,7 +601,7 @@ trx_lists_init_at_db_start(
 Assigns a rollback segment to a transaction in a round-robin fashion.
 Skips the SYSTEM rollback segment if another is available.
 @return	assigned rollback segment id */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_assign_rseg(void)
 /*=================*/

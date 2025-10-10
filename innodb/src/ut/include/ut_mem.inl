@@ -32,7 +32,7 @@ target are not overlapping.
 * @param sour	in: copy from
 * @param n	in: number of bytes to copy
 * @return	dest */
-UNIV_INLINE
+IB_INLINE
 void*
 ut_memcpy(void* dest, const void* sour, ulint n)
 {
@@ -45,7 +45,7 @@ target are overlapping.
 * @param sour	in: copy from
 * @param n	in: number of bytes to copy
 * @return	dest */
-UNIV_INLINE
+IB_INLINE
 void*
 ut_memmove(void* dest, const void* sour, ulint n)
 {
@@ -58,7 +58,7 @@ ut_memmove(void* dest, const void* sour, ulint n)
 * @param n	in: number of bytes to compare
 * @return	negative, 0, or positive if str1 is smaller, equal,
 		or greater than str2, respectively. */
-UNIV_INLINE
+IB_INLINE
 int
 ut_memcmp(const void* str1, const void* str2, ulint n)
 {
@@ -69,7 +69,7 @@ ut_memcmp(const void* str1, const void* str2, ulint n)
 * @param dest	in: copy to
 * @param sour	in: copy from
 * @return	dest */
-UNIV_INLINE
+IB_INLINE
 char*
 ut_strcpy(char* dest, const char* sour)
 {
@@ -79,7 +79,7 @@ ut_strcpy(char* dest, const char* sour)
 /** Wrapper for strlen(3).  Determine the length of a NUL-terminated string.
 * @param str	in: string
 * @return	length of the string in bytes, excluding the terminating NUL */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_strlen(const char* str)
 {
@@ -91,7 +91,7 @@ ut_strlen(const char* str)
 * @param str2	in: second string to compare
 * @return	negative, 0, or positive if str1 is smaller, equal,
 		or greater than str2, respectively. */
-UNIV_INLINE
+IB_INLINE
 int
 ut_strcmp(const char* str1, const char* str2)
 {
@@ -101,7 +101,7 @@ ut_strcmp(const char* str1, const char* str2)
 /**********************************************************************//**
 Compute strlen(ut_strcpyq(str, q)).
 @return	length of the string when quoted */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_strlenq(
 /*=======*/
@@ -125,7 +125,7 @@ truncated if there is not enough space in "hex", make sure "hex_size" is at
 least (2 * raw_size + 1) if you do not want this to happen. Returns the
 actual number of characters written to "hex" (including the NUL).
 @return	number of chars written */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_raw_to_hex(
 /*==========*/
@@ -245,7 +245,7 @@ by doubling them. Returns the number of bytes that were written to "buf"
 (including the terminating NUL). If buf_size is too small then the
 trailing bytes from "str" are discarded.
 @return	number of bytes that were written */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_str_sql_format(
 /*==============*/

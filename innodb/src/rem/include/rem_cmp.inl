@@ -27,7 +27,7 @@ Created 7/1/1994 Heikki Tuuri
 This function is used to compare two data fields for which we know the
 data type.
 @return	1, 0, -1, if data1 is greater, equal, less than data2, respectively */
-UNIV_INLINE
+IB_INLINE
 int
 cmp_data_data(
 /*==========*/
@@ -50,7 +50,7 @@ This function is used to compare two dfields where at least the first
 has its data type field set.
 @return 1, 0, -1, if dfield1 is greater, equal, less than dfield2,
 respectively */
-UNIV_INLINE
+IB_INLINE
 int
 cmp_dfield_dfield(
 /*==============*/
@@ -77,7 +77,7 @@ This function is used to compare two physical records. Only the common
 first fields are compared.
 @return 1, 0 , -1 if rec1 is greater, equal, less, respectively, than
 rec2; only the common first fields are compared */
-UNIV_INLINE
+IB_INLINE
 int
 cmp_rec_rec(
 /*========*/

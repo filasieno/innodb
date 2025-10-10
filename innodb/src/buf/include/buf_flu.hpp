@@ -108,7 +108,7 @@ buf_flush_wait_batch_end(
 This function should be called at a mini-transaction commit, if a page was
 modified in it. Puts the block to the list of modified blocks, if it not
 already in it. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_flush_note_modification(
 /*========================*/
@@ -116,7 +116,7 @@ buf_flush_note_modification(
 	mtr_t*		mtr);	/*!< in: mtr */
 /********************************************************************//**
 This function should be called when recovery has modified a buffer page. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_flush_recv_note_modification(
 /*=============================*/

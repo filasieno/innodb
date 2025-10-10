@@ -30,7 +30,7 @@ Created September 2006 Marko Makela
 Looks up a column prefix of an externally stored column.
 @return column prefix, or NULL if the column is not stored externally,
 or pointer to field_ref_zero if the BLOB pointer is unset */
-UNIV_INLINE
+IB_INLINE
 const byte*
 row_ext_lookup_ith(
 /*===============*/
@@ -57,7 +57,7 @@ row_ext_lookup_ith(
 Looks up a column prefix of an externally stored column.
 @return column prefix, or NULL if the column is not stored externally,
 or pointer to field_ref_zero if the BLOB pointer is unset */
-UNIV_INLINE
+IB_INLINE
 const byte*
 row_ext_lookup(
 /*===========*/

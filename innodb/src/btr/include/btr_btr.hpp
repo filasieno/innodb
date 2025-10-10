@@ -86,7 +86,7 @@ btr_root_get(
 	mtr_t*		mtr);	/*!< in: mtr */
 /**************************************************************//**
 Gets a buffer page and declares its latching order level. */
-UNIV_INLINE
+IB_INLINE
 buf_block_t*
 btr_block_get(
 /*==========*/
@@ -98,7 +98,7 @@ btr_block_get(
 	mtr_t*	mtr);		/*!< in: mtr */
 /**************************************************************//**
 Gets a buffer page and declares its latching order level. */
-UNIV_INLINE
+IB_INLINE
 page_t*
 btr_page_get(
 /*=========*/
@@ -112,7 +112,7 @@ btr_page_get(
 /**************************************************************//**
 Gets the index id field of a page.
 @return	index id */
-UNIV_INLINE
+IB_INLINE
 dulint
 btr_page_get_index_id(
 /*==================*/
@@ -121,7 +121,7 @@ btr_page_get_index_id(
 /********************************************************//**
 Gets the node level field in an index page.
 @return	level, leaf level == 0 */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_page_get_level_low(
 /*===================*/
@@ -129,7 +129,7 @@ btr_page_get_level_low(
 /********************************************************//**
 Gets the node level field in an index page.
 @return	level, leaf level == 0 */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_page_get_level(
 /*===============*/
@@ -138,7 +138,7 @@ btr_page_get_level(
 /********************************************************//**
 Gets the next index page number.
 @return	next page number */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_page_get_next(
 /*==============*/
@@ -147,7 +147,7 @@ btr_page_get_next(
 /********************************************************//**
 Gets the previous index page number.
 @return	prev page number */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_page_get_prev(
 /*==============*/
@@ -177,7 +177,7 @@ btr_get_next_user_rec(
 			needed, also to the next page */
 /**************************************************************//**
 Releases the latch on a leaf page and bufferunfixes it. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_leaf_page_release(
 /*==================*/
@@ -192,7 +192,7 @@ we read the last field according to offsets and assume that it contains
 the child page number. In other words offsets must have been retrieved
 with rec_get_offsets(n_fields=ULINT_UNDEFINED).
 @return	child node address */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_node_ptr_get_child_page_no(
 /*===========================*/

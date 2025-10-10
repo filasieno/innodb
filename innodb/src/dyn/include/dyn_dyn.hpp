@@ -43,7 +43,7 @@ this must be > MLOG_BUF_MARGIN + 30! */
 /*********************************************************************//**
 Initializes a dynamic array.
 @return	initialized dyn array */
-UNIV_INLINE
+IB_INLINE
 dyn_array_t*
 dyn_array_create(
 /*=============*/
@@ -51,7 +51,7 @@ dyn_array_create(
 				size sizeof(dyn_array_t) */
 /************************************************************//**
 Frees a dynamic array. */
-UNIV_INLINE
+IB_INLINE
 void
 dyn_array_free(
 /*===========*/
@@ -61,7 +61,7 @@ Makes room on top of a dyn array and returns a pointer to a buffer in it.
 After copying the elements, the caller must close the buffer using
 dyn_array_close.
 @return	pointer to the buffer */
-UNIV_INLINE
+IB_INLINE
 byte*
 dyn_array_open(
 /*===========*/
@@ -70,7 +70,7 @@ dyn_array_open(
 				smaller than DYN_ARRAY_DATA_SIZE! */
 /*********************************************************************//**
 Closes the buffer returned by dyn_array_open. */
-UNIV_INLINE
+IB_INLINE
 void
 dyn_array_close(
 /*============*/
@@ -81,7 +81,7 @@ Makes room on top of a dyn array and returns a pointer to
 the added element. The caller must copy the element to
 the pointer returned.
 @return	pointer to the element */
-UNIV_INLINE
+IB_INLINE
 void*
 dyn_array_push(
 /*===========*/
@@ -90,7 +90,7 @@ dyn_array_push(
 /************************************************************//**
 Returns pointer to an element in dyn array.
 @return	pointer to element */
-UNIV_INLINE
+IB_INLINE
 void*
 dyn_array_get_element(
 /*==================*/
@@ -100,21 +100,21 @@ dyn_array_get_element(
 /************************************************************//**
 Returns the size of stored data in a dyn array.
 @return	data size in bytes */
-UNIV_INLINE
+IB_INLINE
 ulint
 dyn_array_get_data_size(
 /*====================*/
 	dyn_array_t*	arr);	/*!< in: dyn array */
 /************************************************************//**
 Gets the first block in a dyn array. */
-UNIV_INLINE
+IB_INLINE
 dyn_block_t*
 dyn_array_get_first_block(
 /*======================*/
 	dyn_array_t*	arr);	/*!< in: dyn array */
 /************************************************************//**
 Gets the last block in a dyn array. */
-UNIV_INLINE
+IB_INLINE
 dyn_block_t*
 dyn_array_get_last_block(
 /*=====================*/
@@ -122,7 +122,7 @@ dyn_array_get_last_block(
 /********************************************************************//**
 Gets the next block in a dyn array.
 @return	pointer to next, NULL if end of list */
-UNIV_INLINE
+IB_INLINE
 dyn_block_t*
 dyn_array_get_next_block(
 /*=====================*/
@@ -131,7 +131,7 @@ dyn_array_get_next_block(
 /********************************************************************//**
 Gets the number of used bytes in a dyn array block.
 @return	number of bytes used */
-UNIV_INLINE
+IB_INLINE
 ulint
 dyn_block_get_used(
 /*===============*/
@@ -139,14 +139,14 @@ dyn_block_get_used(
 /********************************************************************//**
 Gets pointer to the start of data in a dyn array block.
 @return	pointer to data */
-UNIV_INLINE
+IB_INLINE
 byte*
 dyn_block_get_data(
 /*===============*/
 	dyn_block_t*	block);	/*!< in: dyn array block */
 /********************************************************//**
 Pushes n bytes to a dyn array. */
-UNIV_INLINE
+IB_INLINE
 void
 dyn_push_string(
 /*============*/

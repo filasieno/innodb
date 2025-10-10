@@ -47,71 +47,71 @@ extern const dulint	ut_dulint_max;
 /// \param high High-order 32 bits.
 /// \param low Low-order 32 bits.
 /// \return Created dulint.
-UNIV_INLINE dulint ut_dulint_create(ulint high, ulint low);
+IB_INLINE dulint ut_dulint_create(ulint high, ulint low);
 
 /// \brief Gets the high-order 32 bits of a dulint.
 /// \param d Dulint.
 /// \return 32 bits in ulint.
-UNIV_INLINE ulint ut_dulint_get_high(dulint d);
+IB_INLINE ulint ut_dulint_get_high(dulint d);
 
 /// \brief Gets the low-order 32 bits of a dulint.
 /// \param d Dulint.
 /// \return 32 bits in ulint.
-UNIV_INLINE ulint ut_dulint_get_low(dulint d);
+IB_INLINE ulint ut_dulint_get_low(dulint d);
 
 /// \brief Converts a dulint (a struct of 2 ulints) to ib_int64_t, which is a 64-bit integer type.
 /// \param d Dulint.
 /// \return Value in ib_int64_t type.
-UNIV_INLINE ib_int64_t ut_conv_dulint_to_longlong(dulint d);
+IB_INLINE ib_int64_t ut_conv_dulint_to_longlong(dulint d);
 
 /// \brief Tests if a dulint is zero.
 /// \param a Dulint.
 /// \return TRUE if zero.
-UNIV_INLINE ibool ut_dulint_is_zero(dulint a);
+IB_INLINE ibool ut_dulint_is_zero(dulint a);
 
 /// \brief Compares two dulints.
 /// \param a Dulint.
 /// \param b Dulint.
 /// \return -1 if a < b, 0 if a == b, 1 if a > b.
-UNIV_INLINE int ut_dulint_cmp(dulint a, dulint b);
+IB_INLINE int ut_dulint_cmp(dulint a, dulint b);
 
 /// \brief Adds a ulint to a dulint.
 /// \param a Dulint.
 /// \param b Ulint.
 /// \return Sum a + b.
 
-UNIV_INLINE dulint ut_dulint_add(dulint	a, ulint b);
+IB_INLINE dulint ut_dulint_add(dulint	a, ulint b);
 
 /// \brief Subtracts a ulint from a dulint.
 /// \param a Dulint.
 /// \param b Ulint.
 /// \return a - b.
-UNIV_INLINE dulint ut_dulint_subtract(dulint a, ulint b); 
+IB_INLINE dulint ut_dulint_subtract(dulint a, ulint b); 
 
 /// \brief Rounds a dulint downward to a multiple of a power of 2.
 /// \param [in] n Dulint.
 /// \param [in] align_no Align by this number which must be a power of 2.
 /// \return Rounded value.
-UNIV_INLINE dulint ut_dulint_align_down(dulint n, ulint align_no);
+IB_INLINE dulint ut_dulint_align_down(dulint n, ulint align_no);
 
 /// \brief Rounds a dulint upward to a multiple of a power of 2.
 /// \param [in] n Dulint.
 /// \param [in] align_no Align by this number which must be a power of 2.
 /// \return Rounded value.
-UNIV_INLINE dulint ut_dulint_align_up(dulint n, ulint align_no);
+IB_INLINE dulint ut_dulint_align_up(dulint n, ulint align_no);
 
 
 /// \brief Rounds a dulint downward to a multiple of a power of 2.
 /// \param [in] n Dulint.
 /// \param [in] align_no Align by this number which must be a power of 2.
 /// \return Rounded value.
-UNIV_INLINE ib_uint64_t ut_uint64_align_down(ib_uint64_t n, ulint align_no);
+IB_INLINE ib_uint64_t ut_uint64_align_down(ib_uint64_t n, ulint align_no);
 
 /// \brief Rounds a dulint upward to a multiple of a power of 2.
 /// \param [in] n Dulint.
 /// \param [in] align_no Align by this number which must be a power of 2.
 /// \return Rounded value.
-UNIV_INLINE ib_uint64_t ut_uint64_align_up(ib_uint64_t n, ulint align_no);
+IB_INLINE ib_uint64_t ut_uint64_align_up(ib_uint64_t n, ulint align_no);
 
 /// \brief Increments a dulint variable by 1.
 /// \param [in,out] D Dulint.
@@ -172,32 +172,32 @@ UNIV_INTERN void ut_dulint_sort(dulint* arr, dulint* aux_arr, ulint low, ulint h
 /// \param ptr Pointer.
 /// \param align_no Align by this number.
 /// \return Aligned pointer.
-UNIV_INLINE void* ut_align(const void*	ptr, ulint align_no);
+IB_INLINE void* ut_align(const void*	ptr, ulint align_no);
 
 /// \brief Rounds down a pointer to the nearest aligned address.
 /// \param ptr Pointer.
 /// \param align_no Align by this number.
 /// \return Aligned pointer.
-UNIV_INLINE void* ut_align_down(const void*	ptr, ulint align_no) __attribute__((const));
+IB_INLINE void* ut_align_down(const void*	ptr, ulint align_no) __attribute__((const));
 
 /// \brief Computes the offset of a pointer from the nearest aligned address.
 /// \param [in] ptr Pointer.
 /// \param [in] align_no Align by this number.
 /// \return Distance from aligned pointer.
-UNIV_INLINE ulint ut_align_offset(const void* ptr, ulint align_no) __attribute__((const));
+IB_INLINE ulint ut_align_offset(const void* ptr, ulint align_no) __attribute__((const));
 
 /// \brief Gets the nth bit of a ulint.
 /// \param a Ulint.
 /// \param n Nth bit requested.
 /// \return TRUE if nth bit is 1; 0th bit is defined to be the least significant */
-UNIV_INLINE ibool ut_bit_get_nth(ulint a, ulint n);
+IB_INLINE ibool ut_bit_get_nth(ulint a, ulint n);
 
 /// \brief Sets the nth bit of a ulint.
 /// \param a Ulint.
 /// \param n Nth bit requested.
 /// \param val Value for the bit to set.
 /// \return The ulint with the bit set as requested.
-UNIV_INLINE ulint ut_bit_set_nth(ulint a, ulint	n, ibool val);
+IB_INLINE ulint ut_bit_set_nth(ulint a, ulint	n, ibool val);
 
 #ifndef UNIV_NONINL
   #include "ut_byte.inl"

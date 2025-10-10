@@ -43,21 +43,21 @@ eval_node_free_val_buf(
 	que_node_t*	node);	/*!< in: query graph node */
 /*****************************************************************//**
 Evaluates a symbol table symbol. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_sym(
 /*=====*/
 	sym_node_t*	sym_node);	/*!< in: symbol table node */
 /*****************************************************************//**
 Evaluates an expression. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_exp(
 /*=====*/
 	que_node_t*	exp_node);	/*!< in: expression */
 /*****************************************************************//**
 Sets an integer value as the value of an expression node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_set_int_val(
 /*==================*/
@@ -66,7 +66,7 @@ eval_node_set_int_val(
 /*****************************************************************//**
 Gets an integer value from an expression node.
 @return	integer value */
-UNIV_INLINE
+IB_INLINE
 lint
 eval_node_get_int_val(
 /*==================*/
@@ -74,7 +74,7 @@ eval_node_get_int_val(
 /*****************************************************************//**
 Copies a binary string value as the value of a query graph node. Allocates a
 new buffer if necessary. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_copy_and_alloc_val(
 /*=========================*/
@@ -83,7 +83,7 @@ eval_node_copy_and_alloc_val(
 	ulint		len);	/*!< in: string length or UNIV_SQL_NULL */
 /*****************************************************************//**
 Copies a query node value to another node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_copy_val(
 /*===============*/
@@ -92,7 +92,7 @@ eval_node_copy_val(
 /*****************************************************************//**
 Gets a iboolean value from a query node.
 @return	iboolean value */
-UNIV_INLINE
+IB_INLINE
 ibool
 eval_node_get_ibool_val(
 /*====================*/

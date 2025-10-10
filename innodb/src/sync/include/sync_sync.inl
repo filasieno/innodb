@@ -73,7 +73,7 @@ mutex_signal_object(
 Performs an atomic test-and-set instruction to the lock_word field of a
 mutex.
 @return	the previous value of lock_word: 0 or 1 */
-UNIV_INLINE
+IB_INLINE
 byte
 mutex_test_and_set(
 /*===============*/
@@ -101,7 +101,7 @@ mutex_test_and_set(
 /******************************************************************//**
 Performs a reset instruction to the lock_word field of a mutex. This
 instruction also serializes memory operations to the program order. */
-UNIV_INLINE
+IB_INLINE
 void
 mutex_reset_lock_word(
 /*==================*/
@@ -121,7 +121,7 @@ mutex_reset_lock_word(
 
 /******************************************************************//**
 Gets the value of the lock word. */
-UNIV_INLINE
+IB_INLINE
 lock_word_t
 mutex_get_lock_word(
 /*================*/
@@ -135,7 +135,7 @@ mutex_get_lock_word(
 /******************************************************************//**
 Gets the waiters field in a mutex.
 @return	value to set */
-UNIV_INLINE
+IB_INLINE
 ulint
 mutex_get_waiters(
 /*==============*/
@@ -153,7 +153,7 @@ mutex_get_waiters(
 
 /******************************************************************//**
 Unlocks a mutex owned by the current thread. */
-UNIV_INLINE
+IB_INLINE
 void
 mutex_exit(
 /*=======*/
@@ -194,7 +194,7 @@ mutex_exit(
 Locks a mutex for the current thread. If the mutex is reserved, the function
 spins a preset time (controlled by SYNC_SPIN_ROUNDS), waiting for the mutex
 before suspending the thread. */
-UNIV_INLINE
+IB_INLINE
 void
 mutex_enter_func(
 /*=============*/

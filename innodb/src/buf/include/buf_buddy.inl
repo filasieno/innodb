@@ -24,8 +24,8 @@ Created December 2006 by Marko Makela
 *******************************************************/
 
 #ifdef UNIV_MATERIALIZE
-# undef UNIV_INLINE
-# define UNIV_INLINE
+# undef IB_INLINE
+# define IB_INLINE
 #endif
 
 #include "buf_buf.hpp"
@@ -65,7 +65,7 @@ buf_buddy_free_low(
 /**********************************************************************//**
 Get the index of buf_pool->zip_free[] for a given block size.
 @return	index of buf_pool->zip_free[], or BUF_BUDDY_SIZES */
-UNIV_INLINE
+IB_INLINE
 ulint
 buf_buddy_get_slot(
 /*===============*/
@@ -91,7 +91,7 @@ control blocks must be properly initialized immediately after
 buf_buddy_alloc() has returned the memory, before releasing
 buf_pool_mutex.
 @return	allocated block, possibly NULL if lru == NULL */
-UNIV_INLINE
+IB_INLINE
 void*
 buf_buddy_alloc(
 /*============*/
@@ -108,7 +108,7 @@ buf_buddy_alloc(
 
 /**********************************************************************//**
 Deallocate a block. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_buddy_free(
 /*===========*/
@@ -122,6 +122,6 @@ buf_buddy_free(
 }
 
 #ifdef UNIV_MATERIALIZE
-# undef UNIV_INLINE
-# define UNIV_INLINE	UNIV_INLINE_ORIGINAL
+# undef IB_INLINE
+# define IB_INLINE	IB_INLINE_ORIGINAL
 #endif

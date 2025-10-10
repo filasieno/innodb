@@ -40,7 +40,7 @@ extern	ulint	 ut_rnd_ulint_counter;
 
 /********************************************************//**
 This is used to set the random number seed. */
-UNIV_INLINE
+IB_INLINE
 void
 ut_rnd_set_seed(
 /*============*/
@@ -52,7 +52,7 @@ ut_rnd_set_seed(
 /********************************************************//**
 The following function generates a series of 'random' ulint integers.
 @return	the next 'random' number */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_rnd_gen_next_ulint(
 /*==================*/
@@ -79,7 +79,7 @@ enumerate the value space of ulint integers in a pseudo random
 fashion. Note that the same integer is repeated always after
 2 to power 32 calls to the generator (if ulint is 32-bit).
 @return	the 'random' number */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_rnd_gen_ulint(void)
 /*==================*/
@@ -99,7 +99,7 @@ ut_rnd_gen_ulint(void)
 /********************************************************//**
 Generates a random integer from a given interval.
 @return	the 'random' number */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_rnd_interval(
 /*============*/
@@ -123,7 +123,7 @@ ut_rnd_interval(
 /*********************************************************//**
 Generates a random iboolean value.
 @return	the random value */
-UNIV_INLINE
+IB_INLINE
 ibool
 ut_rnd_gen_ibool(void)
 /*=================*/
@@ -145,7 +145,7 @@ The following function generates a hash value for a ulint integer
 to a hash table of size table_size, which should be a prime
 or some random number for the hash table to work reliably.
 @return	hash value */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_hash_ulint(
 /*==========*/
@@ -161,7 +161,7 @@ ut_hash_ulint(
 /*************************************************************//**
 Folds a pair of ulints.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_fold_ulint_pair(
 /*===============*/
@@ -175,7 +175,7 @@ ut_fold_ulint_pair(
 /*************************************************************//**
 Folds a dulint.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_fold_dulint(
 /*===========*/
@@ -188,7 +188,7 @@ ut_fold_dulint(
 /*************************************************************//**
 Folds a character string ending in the null character.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_fold_string(
 /*===========*/
@@ -209,7 +209,7 @@ ut_fold_string(
 /*************************************************************//**
 Folds a binary string.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_fold_binary(
 /*===========*/

@@ -35,7 +35,7 @@ dict_hdr_flush_row_id(void);
 /**********************************************************************//**
 Returns a new row id.
 @return	the new id */
-UNIV_INLINE
+IB_INLINE
 dulint
 dict_sys_get_new_row_id(void)
 /*=========================*/
@@ -61,7 +61,7 @@ dict_sys_get_new_row_id(void)
 /**********************************************************************//**
 Reads a row id from a record or other 6-byte stored form.
 @return	row id */
-UNIV_INLINE
+IB_INLINE
 dulint
 dict_sys_read_row_id(
 /*=================*/
@@ -76,7 +76,7 @@ dict_sys_read_row_id(
 
 /**********************************************************************//**
 Writes a row id to a record or other 6-byte stored form. */
-UNIV_INLINE
+IB_INLINE
 void
 dict_sys_write_row_id(
 /*==================*/

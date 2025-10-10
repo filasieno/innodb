@@ -23,7 +23,7 @@
 #include "trx_sys.hpp"
 
 
-UNIV_INLINE byte* mlog_open(mtr_t* mtr, ulint size)
+IB_INLINE byte* mlog_open(mtr_t* mtr, ulint size)
 {
 	dyn_array_t* mlog;
 	mtr->modifications = TRUE;
@@ -35,7 +35,7 @@ UNIV_INLINE byte* mlog_open(mtr_t* mtr, ulint size)
 }
 
 
-UNIV_INLINE void mlog_close(mtr_t* mtr, byte* ptr)
+IB_INLINE void mlog_close(mtr_t* mtr, byte* ptr)
 {
 	dyn_array_t* mlog;
 	ut_ad(mtr_get_log_mode(mtr) != MTR_LOG_NONE);
@@ -45,7 +45,7 @@ UNIV_INLINE void mlog_close(mtr_t* mtr, byte* ptr)
 
 #ifndef UNIV_HOTBACKUP
 
-UNIV_INLINE void mlog_catenate_ulint(mtr_t*	mtr, ulint val, ulint type)
+IB_INLINE void mlog_catenate_ulint(mtr_t*	mtr, ulint val, ulint type)
 {
 	dyn_array_t* mlog;
 	byte* ptr;
@@ -78,7 +78,7 @@ UNIV_INLINE void mlog_catenate_ulint(mtr_t*	mtr, ulint val, ulint type)
 }
 
 
-UNIV_INLINE void mlog_catenate_ulint_compressed(mtr_t* mtr, ulint val)
+IB_INLINE void mlog_catenate_ulint_compressed(mtr_t* mtr, ulint val)
 {
 	byte* log_ptr;
 	log_ptr = mlog_open(mtr, 10);
@@ -91,7 +91,7 @@ UNIV_INLINE void mlog_catenate_ulint_compressed(mtr_t* mtr, ulint val)
 
 /********************************************************//**
 Catenates a compressed dulint to mlog. */
-UNIV_INLINE
+IB_INLINE
 void
 mlog_catenate_dulint_compressed(
 /*============================*/
@@ -118,7 +118,7 @@ Writes the initial part of a log record (3..11 bytes).
 If the implementation of this function is changed, all
 size parameters to mlog_open() should be adjusted accordingly!
 @return	new value of log_ptr */
-UNIV_INLINE
+IB_INLINE
 byte*
 mlog_write_initial_log_record_fast(
 /*===============================*/
@@ -192,7 +192,7 @@ mlog_write_initial_log_record_fast(
 	return(log_ptr);
 }
 
-UNIV_INLINE byte* mlog_write_initial_log_record_for_file_op(
+IB_INLINE byte* mlog_write_initial_log_record_for_file_op(
 	ulint	type,	  /*!< in: MLOG_FILE_CREATE, MLOG_FILE_DELETE, or MLOG_FILE_RENAME */
 	ulint	space_id, /*!< in: space id, if applicable */
 	ulint	page_no, /*!< in: page number (not relevant currently) */

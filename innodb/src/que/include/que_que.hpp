@@ -64,21 +64,21 @@ que_fork_create(
 	mem_heap_t*	heap);		/*!< in: memory heap where created */
 /***********************************************************************//**
 Gets the first thr in a fork. */
-UNIV_INLINE
+IB_INLINE
 que_thr_t*
 que_fork_get_first_thr(
 /*===================*/
 	que_fork_t*	fork);	/*!< in: query fork */
 /***********************************************************************//**
 Gets the child node of the first thr in a fork. */
-UNIV_INLINE
+IB_INLINE
 que_node_t*
 que_fork_get_child(
 /*===============*/
 	que_fork_t*	fork);	/*!< in: query fork */
 /***********************************************************************//**
 Sets the parent of a graph node. */
-UNIV_INLINE
+IB_INLINE
 void
 que_node_set_parent(
 /*================*/
@@ -202,7 +202,7 @@ que_fork_start_command(
 	que_fork_t*	fork);	/*!< in: a query fork */
 /***********************************************************************//**
 Gets the trx of a query thread. */
-UNIV_INLINE
+IB_INLINE
 trx_t*
 thr_get_trx(
 /*========*/
@@ -212,28 +212,28 @@ Determines if this thread is rolling back an incomplete transaction
 in crash recovery.
 @return TRUE if thr is rolling back an incomplete transaction in crash
 recovery */
-UNIV_INLINE
+IB_INLINE
 ibool
 thr_is_recv(
 /*========*/
 	const que_thr_t*	thr);	/*!< in: query thread */
 /***********************************************************************//**
 Gets the type of a graph node. */
-UNIV_INLINE
+IB_INLINE
 ulint
 que_node_get_type(
 /*==============*/
 	que_node_t*	node);	/*!< in: graph node */
 /***********************************************************************//**
 Gets pointer to the value data type field of a graph node. */
-UNIV_INLINE
+IB_INLINE
 dtype_t*
 que_node_get_data_type(
 /*===================*/
 	que_node_t*	node);	/*!< in: graph node */
 /***********************************************************************//**
 Gets pointer to the value dfield of a graph node. */
-UNIV_INLINE
+IB_INLINE
 dfield_t*
 que_node_get_val(
 /*=============*/
@@ -241,14 +241,14 @@ que_node_get_val(
 /***********************************************************************//**
 Gets the value buffer size of a graph node.
 @return	val buffer size, not defined if val.data == NULL in node */
-UNIV_INLINE
+IB_INLINE
 ulint
 que_node_get_val_buf_size(
 /*======================*/
 	que_node_t*	node);	/*!< in: graph node */
 /***********************************************************************//**
 Sets the value buffer size of a graph node. */
-UNIV_INLINE
+IB_INLINE
 void
 que_node_set_val_buf_size(
 /*======================*/
@@ -256,7 +256,7 @@ que_node_set_val_buf_size(
 	ulint		size);	/*!< in: size */
 /*********************************************************************//**
 Gets the next list node in a list of query graph nodes. */
-UNIV_INLINE
+IB_INLINE
 que_node_t*
 que_node_get_next(
 /*==============*/
@@ -264,7 +264,7 @@ que_node_get_next(
 /*********************************************************************//**
 Gets the parent node of a query graph node.
 @return	parent node or NULL */
-UNIV_INLINE
+IB_INLINE
 que_node_t*
 que_node_get_parent(
 /*================*/
@@ -281,7 +281,7 @@ que_node_get_containing_loop_node(
 /*********************************************************************//**
 Catenates a query graph node to a list of them, possible empty list.
 @return	one-way list of nodes */
-UNIV_INLINE
+IB_INLINE
 que_node_t*
 que_node_list_add_last(
 /*===================*/
@@ -290,7 +290,7 @@ que_node_list_add_last(
 /*********************************************************************//**
 Gets a query graph node list length.
 @return	length, for NULL list 0 */
-UNIV_INLINE
+IB_INLINE
 ulint
 que_node_list_get_len(
 /*==================*/
@@ -301,7 +301,7 @@ be stopped.
 @return TRUE if should be stopped; NOTE that if the peek is made
 without reserving the kernel mutex, then another peek with the mutex
 reserved is necessary before deciding the actual stopping */
-UNIV_INLINE
+IB_INLINE
 ibool
 que_thr_peek_stop(
 /*==============*/
@@ -309,7 +309,7 @@ que_thr_peek_stop(
 /***********************************************************************//**
 Returns TRUE if the query graph is for a SELECT statement.
 @return	TRUE if a select */
-UNIV_INLINE
+IB_INLINE
 ibool
 que_graph_is_select(
 /*================*/

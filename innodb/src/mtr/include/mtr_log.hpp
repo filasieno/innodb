@@ -69,13 +69,13 @@ UNIV_INTERN void mlog_write_initial_log_record(const byte *ptr, byte type, mtr_t
 /// \param log_ptr Pointer to mtr log which has been opened.
 /// \param mtr Mtr.
 /// \return New value of log_ptr.
-UNIV_INLINE byte* mlog_write_initial_log_record_for_file_op(ulint type, ulint space_id, ulint page_no, byte *log_ptr, mtr_t *mtr);
+IB_INLINE byte* mlog_write_initial_log_record_for_file_op(ulint type, ulint space_id, ulint page_no, byte *log_ptr, mtr_t *mtr);
 
 /// \brief Catenates 1 - 4 bytes to the mtr log.
 /// \param mtr Mtr.
 /// \param val Value to write.
 /// \param type MLOG_1BYTE, MLOG_2BYTES, MLOG_4BYTES.
-UNIV_INLINE void mlog_catenate_ulint(mtr_t *mtr, ulint val, ulint type);
+IB_INLINE void mlog_catenate_ulint(mtr_t *mtr, ulint val, ulint type);
 
 /// \brief Catenates n bytes to the mtr log.
 /// \param mtr Mtr.
@@ -86,23 +86,23 @@ UNIV_INTERN void mlog_catenate_string(mtr_t *mtr, const byte *str, ulint len);
 /// \brief Catenates a compressed ulint to mlog.
 /// \param mtr Mtr.
 /// \param val Value to write.
-UNIV_INLINE void mlog_catenate_ulint_compressed(mtr_t *mtr, ulint val);
+IB_INLINE void mlog_catenate_ulint_compressed(mtr_t *mtr, ulint val);
 
 /// \brief Catenates a compressed dulint to mlog.
 /// \param mtr Mtr.
 /// \param val Value to write.
-UNIV_INLINE void mlog_catenate_dulint_compressed(mtr_t *mtr, dulint val);
+IB_INLINE void mlog_catenate_dulint_compressed(mtr_t *mtr, dulint val);
 
 /// \brief Opens a buffer to mlog. It must be closed with mlog_close.
 /// \param mtr Mtr.
 /// \param size Buffer size in bytes; MUST be smaller than DYN_ARRAY_DATA_SIZE!
 /// \return Buffer, NULL if log mode MTR_LOG_NONE.
-UNIV_INLINE byte * mlog_open(mtr_t *mtr, ulint size);
+IB_INLINE byte * mlog_open(mtr_t *mtr, ulint size);
 
 /// \brief Closes a buffer opened to mlog.
 /// \param mtr Mtr.
 /// \param ptr Buffer space from ptr up was not used.
-UNIV_INLINE void mlog_close(mtr_t *mtr, byte *ptr);
+IB_INLINE void mlog_close(mtr_t *mtr, byte *ptr);
 
 /// \brief Writes the initial part of a log record (3..11 bytes).
 /// \details If the implementation of this function is changed, all size parameters to mlog_open() should be adjusted accordingly!
@@ -111,7 +111,7 @@ UNIV_INLINE void mlog_close(mtr_t *mtr, byte *ptr);
 /// \param log_ptr Pointer to mtr log which has been opened.
 /// \param mtr Mtr.
 /// \return New value of log_ptr.
-UNIV_INLINE byte* mlog_write_initial_log_record_fast(const byte *ptr, byte type, byte *log_ptr, mtr_t *mtr);
+IB_INLINE byte* mlog_write_initial_log_record_fast(const byte *ptr, byte type, byte *log_ptr, mtr_t *mtr);
 
 #else /* !UNIV_HOTBACKUP */
 

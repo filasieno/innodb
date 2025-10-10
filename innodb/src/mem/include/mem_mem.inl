@@ -47,47 +47,47 @@ UNIV_INTERN void mem_heap_block_free(mem_heap_t* heap, mem_block_t* block);
 /// \return created block, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
 UNIV_INTERN mem_block_t* mem_heap_add_block(mem_heap_t* heap, ulint n);
 
-UNIV_INLINE void mem_block_set_len(mem_block_t* block, ulint len)
+IB_INLINE void mem_block_set_len(mem_block_t* block, ulint len)
 {
 	ut_ad(len > 0);
 	block->len = len;
 }
 
-UNIV_INLINE ulint mem_block_get_len(mem_block_t* block)
+IB_INLINE ulint mem_block_get_len(mem_block_t* block)
 {
 	return(block->len);
 }
 
-UNIV_INLINE void mem_block_set_type(mem_block_t* block, ulint type)
+IB_INLINE void mem_block_set_type(mem_block_t* block, ulint type)
 {
 	ut_ad((type == MEM_HEAP_DYNAMIC) || (type == MEM_HEAP_BUFFER) || (type == MEM_HEAP_BUFFER + MEM_HEAP_BTR_SEARCH));
 	block->type = type;
 }
 
-UNIV_INLINE ulint mem_block_get_type(mem_block_t* block)
+IB_INLINE ulint mem_block_get_type(mem_block_t* block)
 {
 	return(block->type);
 }
 
-UNIV_INLINE void mem_block_set_free(mem_block_t* block, ulint free_block)
+IB_INLINE void mem_block_set_free(mem_block_t* block, ulint free_block)
 {
 	ut_ad(free_block > 0);
 	ut_ad(free_block <= mem_block_get_len(block));
 	block->free = free_block;
 }
 
-UNIV_INLINE ulint mem_block_get_free(mem_block_t* block)
+IB_INLINE ulint mem_block_get_free(mem_block_t* block)
 {
 	return(block->free);
 }
 
-UNIV_INLINE void mem_block_set_start(mem_block_t* block, ulint start)
+IB_INLINE void mem_block_set_start(mem_block_t* block, ulint start)
 {
 	ut_ad(start > 0);
 	block->start = start;
 }
 
-UNIV_INLINE ulint mem_block_get_start(mem_block_t* block)
+IB_INLINE ulint mem_block_get_start(mem_block_t* block)
 {
 	return(block->start);
 }
@@ -96,7 +96,7 @@ UNIV_INLINE ulint mem_block_get_start(mem_block_t* block)
 /// \param [in] heap in: memory heap
 /// \param [in] n in: number of bytes; if the heap is allowed to grow into the buffer pool, this must be <= MEM_MAX_ALLOC_IN_BUF
 /// \return allocated, zero-filled storage
-UNIV_INLINE void* mem_heap_zalloc(mem_heap_t* heap, ulint n)	
+IB_INLINE void* mem_heap_zalloc(mem_heap_t* heap, ulint n)	
 {
 	ut_ad(heap);
 	ut_ad(!(heap->type & MEM_HEAP_BTR_SEARCH));
@@ -107,7 +107,7 @@ UNIV_INLINE void* mem_heap_zalloc(mem_heap_t* heap, ulint n)
 /// \param [in] heap in: memory heap
 /// \param [in] n in: number of bytes; if the heap is allowed to grow into the buffer pool, this must be <= MEM_MAX_ALLOC_IN_BUF
 /// \return allocated storage, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
-UNIV_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
+IB_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
 {
 	ut_ad(mem_heap_check(heap));
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
@@ -146,7 +146,7 @@ UNIV_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
 /// memory block of the heap is not freed. 
 /// \param [in] heap in: heap from which to free
 /// \param [in] old_top in: pointer to old top of heap
-UNIV_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
+IB_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
 {
 #ifdef UNIV_MEM_DEBUG
 	ibool		error;
@@ -199,7 +199,7 @@ UNIV_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top)
 
 /// \brief Empties a memory heap. The first memory block of the heap is not freed.
 /// \param [in] heap heap to empty
-UNIV_INLINE void mem_heap_empty(mem_heap_t*	heap)
+IB_INLINE void mem_heap_empty(mem_heap_t*	heap)
 {
 	mem_heap_free_heap_top(heap, (byte*)heap + mem_block_get_start(heap));
 #ifndef UNIV_HOTBACKUP
@@ -213,7 +213,7 @@ UNIV_INLINE void mem_heap_empty(mem_heap_t*	heap)
 /// \param [in] heap memory heap
 /// \param [in] n size of the topmost element
 /// \return pointer to the topmost element
-UNIV_INLINE void* mem_heap_get_top( mem_heap_t*	heap, ulint n)
+IB_INLINE void* mem_heap_get_top( mem_heap_t*	heap, ulint n)
 {
 	ut_ad(mem_heap_check(heap));
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
@@ -232,7 +232,7 @@ UNIV_INLINE void* mem_heap_get_top( mem_heap_t*	heap, ulint n)
 /// \param [in] heap memory heap
 /// \param [in] n size of the topmost element
 /// \return pointer to the topmost element
-UNIV_INLINE void mem_heap_free_top( mem_heap_t*	heap, ulint n)
+IB_INLINE void mem_heap_free_top( mem_heap_t*	heap, ulint n)
 {
 	ut_ad(mem_heap_check(heap));
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
@@ -261,7 +261,7 @@ UNIV_INLINE void mem_heap_free_top( mem_heap_t*	heap, ulint n)
 /// \param [in] file_name in: file name where created
 /// \param [in] line in: line where created
 /// \return own: memory heap, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
-UNIV_INLINE mem_heap_t* mem_heap_create_func(ulint n, ulint type, const char* file_name, ulint line)		
+IB_INLINE mem_heap_t* mem_heap_create_func(ulint n, ulint type, const char* file_name, ulint line)		
 {
 	if (!n) {
 		n = MEM_BLOCK_START_SIZE;
@@ -286,7 +286,7 @@ UNIV_INLINE mem_heap_t* mem_heap_create_func(ulint n, ulint type, const char* fi
 /// \param [in] heap in, own: heap to be freed
 /// \param [in] file_name file name where freed
 /// \param [in] line line where freed
-UNIV_INLINE void mem_heap_free_func(mem_heap_t*	heap, const char* file_name __attribute__((unused)), ulint line  __attribute__((unused)))
+IB_INLINE void mem_heap_free_func(mem_heap_t*	heap, const char* file_name __attribute__((unused)), ulint line  __attribute__((unused)))
 {
 	ut_ad(mem_heap_check(heap));
 	mem_block_t* block = UT_LIST_GET_LAST(heap->base);
@@ -316,7 +316,7 @@ UNIV_INLINE void mem_heap_free_func(mem_heap_t*	heap, const char* file_name __at
 /// \param [in] file_name file name where created
 /// \param [in] line line where created
 /// \return	own: free storage
-UNIV_INLINE void* mem_alloc_func(ulint n, ulint* size, const char*	file_name, ulint line)	
+IB_INLINE void* mem_alloc_func(ulint n, ulint* size, const char*	file_name, ulint line)	
 {
 	mem_heap_t* heap = mem_heap_create_func(n, MEM_HEAP_DYNAMIC, file_name, line);
 
@@ -343,7 +343,7 @@ UNIV_INLINE void* mem_alloc_func(ulint n, ulint* size, const char*	file_name, ul
 NOTE: Use the corresponding macro instead of this function. Frees a single
 buffer of storage from the dynamic memory of the C compiler. Similar to the
 free of C. */
-UNIV_INLINE
+IB_INLINE
 void
 mem_free_func(
 /*==========*/
@@ -359,7 +359,7 @@ mem_free_func(
 /// Returns the space in bytes occupied by a memory heap.
 /// \param [in] heap the memory heap
 /// \return	the space in bytes occupied by a memory heap
-UNIV_INLINE ulint mem_heap_get_size(mem_heap_t*	heap)
+IB_INLINE ulint mem_heap_get_size(mem_heap_t*	heap)
 {
 	ut_ad(mem_heap_check(heap));
 	ulint size = heap->total_size;
@@ -375,7 +375,7 @@ UNIV_INLINE ulint mem_heap_get_size(mem_heap_t*	heap)
 /// Duplicates a NUL-terminated string.
 /// \param str in: string to be copied
 /// \return	a copy of the string, must be deallocated with mem_free
-UNIV_INLINE char* mem_strdup(const char* str)
+IB_INLINE char* mem_strdup(const char* str)
 {
 	ulint len = strlen(str) + 1;
 	return (char*) memcpy(mem_alloc(len), str, len);
@@ -385,7 +385,7 @@ UNIV_INLINE char* mem_strdup(const char* str)
 /// \param str in: string to be copied
 /// \param len in: length of str, in bytes
 /// \return	a copy of the string, must be deallocated with mem_free
-UNIV_INLINE char* mem_strdupl(const char* str, ulint len)	
+IB_INLINE char* mem_strdupl(const char* str, ulint len)	
 {
 	char* s = (char*) mem_alloc(len + 1);
 	s[len] = 0;
@@ -397,7 +397,7 @@ UNIV_INLINE char* mem_strdupl(const char* str, ulint len)
 /// \param str in: string to be copied
 /// \param len in: length of str, in bytes
 /// \return	a copy of the string
-UNIV_INLINE char* mem_heap_strdupl(mem_heap_t* heap, const char* str, ulint len)
+IB_INLINE char* mem_heap_strdupl(mem_heap_t* heap, const char* str, ulint len)
 {
 	char* s = (char*) mem_heap_alloc(heap, len + 1);
 	s[len] = 0;

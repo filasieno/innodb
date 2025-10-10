@@ -49,7 +49,7 @@ Created 10/16/1994 Heikki Tuuri
 /*********************************************************//**
 Returns the page cursor component of a tree cursor.
 @return	pointer to page cursor component */
-UNIV_INLINE
+IB_INLINE
 page_cur_t*
 btr_cur_get_page_cur(
 /*=================*/
@@ -60,7 +60,7 @@ btr_cur_get_page_cur(
 /*********************************************************//**
 Returns the buffer block on which the tree cursor is positioned.
 @return	pointer to buffer block */
-UNIV_INLINE
+IB_INLINE
 buf_block_t*
 btr_cur_get_block(
 /*==============*/
@@ -68,7 +68,7 @@ btr_cur_get_block(
 /*********************************************************//**
 Returns the record pointer of a tree cursor.
 @return	pointer to record */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 btr_cur_get_rec(
 /*============*/
@@ -76,14 +76,14 @@ btr_cur_get_rec(
 /*********************************************************//**
 Returns the compressed page on which the tree cursor is positioned.
 @return	pointer to compressed page, or NULL if the page is not compressed */
-UNIV_INLINE
+IB_INLINE
 page_zip_des_t*
 btr_cur_get_page_zip(
 /*=================*/
 	btr_cur_t*	cursor);/*!< in: tree cursor */
 /*********************************************************//**
 Invalidates a tree cursor by setting record pointer to NULL. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_invalidate(
 /*===============*/
@@ -91,7 +91,7 @@ btr_cur_invalidate(
 /*********************************************************//**
 Returns the page of a tree cursor.
 @return	pointer to page */
-UNIV_INLINE
+IB_INLINE
 page_t*
 btr_cur_get_page(
 /*=============*/
@@ -99,14 +99,14 @@ btr_cur_get_page(
 /*********************************************************//**
 Returns the index of a cursor.
 @return	index */
-UNIV_INLINE
+IB_INLINE
 dict_index_t*
 btr_cur_get_index(
 /*==============*/
 	btr_cur_t*	cursor);/*!< in: B-tree cursor */
 /*********************************************************//**
 Positions a tree cursor at a given record. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_position(
 /*=============*/

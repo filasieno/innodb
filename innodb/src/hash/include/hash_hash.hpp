@@ -88,7 +88,7 @@ hash_table_free(
 /**************************************************************//**
 Calculates the hash value from a folded value.
 @return	hashed value */
-UNIV_INLINE
+IB_INLINE
 ulint
 hash_calc_hash(
 /*===========*/
@@ -229,7 +229,7 @@ do {									\
 /************************************************************//**
 Gets the nth cell in a hash table.
 @return	pointer to cell */
-UNIV_INLINE
+IB_INLINE
 hash_cell_t*
 hash_get_nth_cell(
 /*==============*/
@@ -238,7 +238,7 @@ hash_get_nth_cell(
 
 /*************************************************************//**
 Clears a hash table so that all the cells become empty. */
-UNIV_INLINE
+IB_INLINE
 void
 hash_table_clear(
 /*=============*/
@@ -247,7 +247,7 @@ hash_table_clear(
 /*************************************************************//**
 Returns the number of cells in a hash table.
 @return	number of cells */
-UNIV_INLINE
+IB_INLINE
 ulint
 hash_get_n_cells(
 /*=============*/
@@ -340,7 +340,7 @@ do {\
 /************************************************************//**
 Gets the mutex index for a fold value in a hash table.
 @return	mutex number */
-UNIV_INLINE
+IB_INLINE
 ulint
 hash_get_mutex_no(
 /*==============*/
@@ -349,7 +349,7 @@ hash_get_mutex_no(
 /************************************************************//**
 Gets the nth heap in a hash table.
 @return	mem heap */
-UNIV_INLINE
+IB_INLINE
 mem_heap_t*
 hash_get_nth_heap(
 /*==============*/
@@ -358,7 +358,7 @@ hash_get_nth_heap(
 /************************************************************//**
 Gets the heap for a fold value in a hash table.
 @return	mem heap */
-UNIV_INLINE
+IB_INLINE
 mem_heap_t*
 hash_get_heap(
 /*==========*/
@@ -367,7 +367,7 @@ hash_get_heap(
 /************************************************************//**
 Gets the nth mutex in a hash table.
 @return	mutex */
-UNIV_INLINE
+IB_INLINE
 mutex_t*
 hash_get_nth_mutex(
 /*===============*/
@@ -376,7 +376,7 @@ hash_get_nth_mutex(
 /************************************************************//**
 Gets the mutex for a fold value in a hash table.
 @return	mutex */
-UNIV_INLINE
+IB_INLINE
 mutex_t*
 hash_get_mutex(
 /*===========*/

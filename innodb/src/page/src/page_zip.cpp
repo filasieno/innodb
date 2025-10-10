@@ -148,7 +148,7 @@ page_zip_empty_size(
 Gets the size of the compressed page trailer (the dense page directory),
 including deleted records (the free list).
 @return	length of dense page directory, in bytes */
-UNIV_INLINE
+IB_INLINE
 ulint
 page_zip_dir_size(
 /*==============*/
@@ -165,7 +165,7 @@ page_zip_dir_size(
 Gets the size of the compressed page trailer (the dense page directory),
 only including user records (excluding the free list).
 @return	length of dense page directory comprising existing records, in bytes */
-UNIV_INLINE
+IB_INLINE
 ulint
 page_zip_dir_user_size(
 /*===================*/
@@ -180,7 +180,7 @@ page_zip_dir_user_size(
 /*************************************************************//**
 Find the slot of the given record in the dense page directory.
 @return	dense directory slot, or NULL if record not found */
-UNIV_INLINE
+IB_INLINE
 byte*
 page_zip_dir_find_low(
 /*==================*/
@@ -203,7 +203,7 @@ page_zip_dir_find_low(
 /*************************************************************//**
 Find the slot of the given non-free record in the dense page directory.
 @return	dense directory slot, or NULL if record not found */
-UNIV_INLINE
+IB_INLINE
 byte*
 page_zip_dir_find(
 /*==============*/
@@ -222,7 +222,7 @@ page_zip_dir_find(
 /*************************************************************//**
 Find the slot of the given free record in the dense page directory.
 @return	dense directory slot, or NULL if record not found */
-UNIV_INLINE
+IB_INLINE
 byte*
 page_zip_dir_find_free(
 /*===================*/
@@ -242,7 +242,7 @@ page_zip_dir_find_free(
 Read a given slot in the dense page directory.
 @return record offset on the uncompressed page, possibly ORed with
 PAGE_ZIP_DIR_SLOT_DEL or PAGE_ZIP_DIR_SLOT_OWNED */
-UNIV_INLINE
+IB_INLINE
 ulint
 page_zip_dir_get(
 /*=============*/
@@ -1421,7 +1421,7 @@ err_exit:
 /**********************************************************************//**
 Compare two page directory entries.
 @return	positive if rec1 > rec2 */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_zip_dir_cmp(
 /*=============*/

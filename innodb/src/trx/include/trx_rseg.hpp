@@ -33,7 +33,7 @@ Created 3/26/1996 Heikki Tuuri
 /******************************************************************//**
 Gets a rollback segment header.
 @return	rollback segment header, page x-latched */
-UNIV_INLINE
+IB_INLINE
 trx_rsegf_t*
 trx_rsegf_get(
 /*==========*/
@@ -45,7 +45,7 @@ trx_rsegf_get(
 /******************************************************************//**
 Gets a newly created rollback segment header.
 @return	rollback segment header, page x-latched */
-UNIV_INLINE
+IB_INLINE
 trx_rsegf_t*
 trx_rsegf_get_new(
 /*==============*/
@@ -57,7 +57,7 @@ trx_rsegf_get_new(
 /***************************************************************//**
 Gets the file page number of the nth undo log slot.
 @return	page number of the undo log segment */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_rsegf_get_nth_undo(
 /*===================*/
@@ -66,7 +66,7 @@ trx_rsegf_get_nth_undo(
 	mtr_t*		mtr);	/*!< in: mtr */
 /***************************************************************//**
 Sets the file page number of the nth undo log slot. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_rsegf_set_nth_undo(
 /*===================*/
@@ -77,7 +77,7 @@ trx_rsegf_set_nth_undo(
 /****************************************************************//**
 Looks for a free slot for an undo log segment.
 @return	slot index or ULINT_UNDEFINED if not found */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_rsegf_undo_find_free(
 /*=====================*/

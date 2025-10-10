@@ -28,7 +28,7 @@ Created 9/20/1997 Heikki Tuuri
 /*******************************************************************//**
 Returns TRUE if recovery is currently running.
 @return	recv_recovery_on */
-UNIV_INLINE
+IB_INLINE
 ibool
 recv_recovery_is_on(void)
 /*=====================*/
@@ -43,7 +43,7 @@ extern ibool	recv_recovery_from_backup_on;
 /*******************************************************************//**
 Returns TRUE if recovery from backup is currently running.
 @return	recv_recovery_from_backup_on */
-UNIV_INLINE
+IB_INLINE
 ibool
 recv_recovery_from_backup_is_on(void)
 /*=================================*/

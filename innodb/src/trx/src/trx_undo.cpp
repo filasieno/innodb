@@ -336,7 +336,7 @@ trx_undo_get_first_rec(
 
 /**********************************************************************//**
 Writes the mtr log entry of an undo log page initialization. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_undo_page_init_log(
 /*===================*/
@@ -505,7 +505,7 @@ trx_undo_seg_create(
 
 /**********************************************************************//**
 Writes the mtr log entry of an undo log header initialization. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_undo_header_create_log(
 /*=======================*/
@@ -699,7 +699,7 @@ trx_undo_header_add_space_for_xid(
 
 /**********************************************************************//**
 Writes the mtr log entry of an undo log header reuse. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_undo_insert_header_reuse_log(
 /*=============================*/
@@ -812,7 +812,7 @@ trx_undo_insert_header_reuse(
 #ifndef UNIV_HOTBACKUP
 /**********************************************************************//**
 Writes the redo log entry of an update undo log header discard. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_undo_discard_latest_log(
 /*========================*/

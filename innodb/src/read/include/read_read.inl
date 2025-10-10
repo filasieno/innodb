@@ -26,7 +26,7 @@ Created 2/16/1997 Heikki Tuuri
 /*********************************************************************//**
 Gets the nth trx id in a read view.
 @return	trx id */
-UNIV_INLINE
+IB_INLINE
 trx_id_t
 read_view_get_nth_trx_id(
 /*=====================*/
@@ -40,7 +40,7 @@ read_view_get_nth_trx_id(
 
 /*********************************************************************//**
 Sets the nth trx id in a read view. */
-UNIV_INLINE
+IB_INLINE
 void
 read_view_set_nth_trx_id(
 /*=====================*/
@@ -56,7 +56,7 @@ read_view_set_nth_trx_id(
 /*********************************************************************//**
 Checks if a read view sees the specified transaction.
 @return	TRUE if sees */
-UNIV_INLINE
+IB_INLINE
 ibool
 read_view_sees_trx_id(
 /*==================*/

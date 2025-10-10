@@ -33,7 +33,7 @@ Created 11/26/1995 Heikki Tuuri
 Starts a mini-transaction and creates a mini-transaction handle
 and a buffer in the memory buffer given by the caller.
 @return	mtr buffer which also acts as the mtr handle */
-UNIV_INLINE
+IB_INLINE
 mtr_t*
 mtr_start(
 /*======*/
@@ -54,7 +54,7 @@ mtr_start(
 
 /***************************************************//**
 Pushes an object to an mtr memo stack. */
-UNIV_INLINE
+IB_INLINE
 void
 mtr_memo_push(
 /*==========*/
@@ -83,7 +83,7 @@ mtr_memo_push(
 /**********************************************************//**
 Sets and returns a savepoint in mtr.
 @return	savepoint */
-UNIV_INLINE
+IB_INLINE
 ulint
 mtr_set_savepoint(
 /*==============*/
@@ -104,7 +104,7 @@ mtr_set_savepoint(
 /**********************************************************//**
 Releases the (index tree) s-latch stored in an mtr memo after a
 savepoint. */
-UNIV_INLINE
+IB_INLINE
 void
 mtr_release_s_latch_at_savepoint(
 /*=============================*/
@@ -137,7 +137,7 @@ mtr_release_s_latch_at_savepoint(
 /**********************************************************//**
 Checks if memo contains the given item.
 @return	TRUE if contains */
-UNIV_INLINE
+IB_INLINE
 ibool
 mtr_memo_contains(
 /*==============*/
@@ -176,7 +176,7 @@ mtr_memo_contains(
 /***************************************************************//**
 Gets the logging mode of a mini-transaction.
 @return	logging mode: MTR_LOG_NONE, ... */
-UNIV_INLINE
+IB_INLINE
 ulint
 mtr_get_log_mode(
 /*=============*/
@@ -192,7 +192,7 @@ mtr_get_log_mode(
 /***************************************************************//**
 Changes the logging mode of a mini-transaction.
 @return	old mode */
-UNIV_INLINE
+IB_INLINE
 ulint
 mtr_set_log_mode(
 /*=============*/
@@ -222,7 +222,7 @@ mtr_set_log_mode(
 #ifndef UNIV_HOTBACKUP
 /*********************************************************************//**
 Locks a lock in s-mode. */
-UNIV_INLINE
+IB_INLINE
 void
 mtr_s_lock_func(
 /*============*/
@@ -241,7 +241,7 @@ mtr_s_lock_func(
 
 /*********************************************************************//**
 Locks a lock in x-mode. */
-UNIV_INLINE
+IB_INLINE
 void
 mtr_x_lock_func(
 /*============*/

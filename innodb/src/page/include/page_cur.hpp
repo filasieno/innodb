@@ -56,7 +56,7 @@ Created 10/4/1994 Heikki Tuuri
 /*********************************************************//**
 Gets pointer to the page frame where the cursor is positioned.
 @return	page */
-UNIV_INLINE
+IB_INLINE
 page_t*
 page_cur_get_page(
 /*==============*/
@@ -64,7 +64,7 @@ page_cur_get_page(
 /*********************************************************//**
 Gets pointer to the buffer block where the cursor is positioned.
 @return	page */
-UNIV_INLINE
+IB_INLINE
 buf_block_t*
 page_cur_get_block(
 /*===============*/
@@ -72,7 +72,7 @@ page_cur_get_block(
 /*********************************************************//**
 Gets pointer to the page frame where the cursor is positioned.
 @return	page */
-UNIV_INLINE
+IB_INLINE
 page_zip_des_t*
 page_cur_get_page_zip(
 /*==================*/
@@ -80,7 +80,7 @@ page_cur_get_page_zip(
 /*********************************************************//**
 Gets the record where the cursor is positioned.
 @return	record */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 page_cur_get_rec(
 /*=============*/
@@ -94,7 +94,7 @@ page_cur_get_rec(
 /*********************************************************//**
 Sets the cursor object to point before the first user record
 on the page. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_set_before_first(
 /*======================*/
@@ -103,7 +103,7 @@ page_cur_set_before_first(
 /*********************************************************//**
 Sets the cursor object to point after the last user record on
 the page. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_set_after_last(
 /*====================*/
@@ -112,7 +112,7 @@ page_cur_set_after_last(
 /*********************************************************//**
 Returns TRUE if the cursor is before first user record on page.
 @return	TRUE if at start */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_cur_is_before_first(
 /*=====================*/
@@ -120,14 +120,14 @@ page_cur_is_before_first(
 /*********************************************************//**
 Returns TRUE if the cursor is after last user record.
 @return	TRUE if at end */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_cur_is_after_last(
 /*===================*/
 	const page_cur_t*	cur);	/*!< in: cursor */
 /**********************************************************//**
 Positions the cursor on the given record. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_position(
 /*==============*/
@@ -137,21 +137,21 @@ page_cur_position(
 	page_cur_t*		cur);	/*!< out: page cursor */
 /**********************************************************//**
 Invalidates a page cursor by setting the record pointer NULL. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_invalidate(
 /*================*/
 	page_cur_t*	cur);	/*!< out: page cursor */
 /**********************************************************//**
 Moves the cursor to the next record on page. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_move_to_next(
 /*==================*/
 	page_cur_t*	cur);	/*!< in/out: cursor; must not be after last */
 /**********************************************************//**
 Moves the cursor to the previous record on page. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_move_to_prev(
 /*==================*/
@@ -163,7 +163,7 @@ succeed, i.e., enough space available, NULL otherwise. The cursor stays at
 the same logical position, but the physical position may change if it is
 pointing to a compressed page that was reorganized.
 @return	pointer to record if succeed, NULL otherwise */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 page_cur_tuple_insert(
 /*==================*/
@@ -179,7 +179,7 @@ succeed, i.e., enough space available, NULL otherwise. The cursor stays at
 the same logical position, but the physical position may change if it is
 pointing to a compressed page that was reorganized.
 @return	pointer to record if succeed, NULL otherwise */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 page_cur_rec_insert(
 /*================*/
@@ -246,7 +246,7 @@ page_cur_delete_rec(
 /****************************************************************//**
 Searches the right position for a page cursor.
 @return	number of matched fields on the left */
-UNIV_INLINE
+IB_INLINE
 ulint
 page_cur_search(
 /*============*/

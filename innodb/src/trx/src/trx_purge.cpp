@@ -107,7 +107,7 @@ static trx_undo_inf_t *trx_purge_arr_store_info(trx_id_t trx_no, undo_no_t undo_
 Removes info of an undo log record during a purge. 
 in: pointer to the storage cell
 */
-UNIV_INLINE void trx_purge_arr_remove_info(trx_undo_inf_t *cell)
+IB_INLINE void trx_purge_arr_remove_info(trx_undo_inf_t *cell)
 {
 	trx_undo_arr_t *arr;
 	arr = purge_sys->arr;
@@ -565,7 +565,7 @@ static void trx_purge_truncate_history(void)
 Does a truncate if the purge array is empty. NOTE that when this function is
 called, the caller must not have any latches on undo log pages!
 @return	TRUE if array empty */
-UNIV_INLINE
+IB_INLINE
 ibool trx_purge_truncate_if_arr_empty(void)
 /*=================================*/
 {

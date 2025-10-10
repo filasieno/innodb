@@ -64,7 +64,7 @@ btr_search_enable(void);
 /********************************************************************//**
 Returns search info for an index.
 @return	search info; search mutex reserved */
-UNIV_INLINE
+IB_INLINE
 btr_search_t*
 btr_search_get_info(
 /*================*/
@@ -88,7 +88,7 @@ btr_search_info_get_ref_count(
 	btr_search_t*   info);	/*!< in: search info. */
 /*********************************************************************//**
 Updates the search info. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_search_info_update(
 /*===================*/

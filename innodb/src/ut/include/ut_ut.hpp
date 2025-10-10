@@ -111,7 +111,7 @@ ut_get_high32(
 /******************************************************//**
 Calculates the minimum of two ulints.
 @return	minimum */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_min(
 /*===*/
@@ -120,7 +120,7 @@ ut_min(
 /******************************************************//**
 Calculates the maximum of two ulints.
 @return	maximum */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_max(
 /*===*/
@@ -128,7 +128,7 @@ ut_max(
 	ulint	 n2);	/*!< in: second number */
 /****************************************************************//**
 Calculates minimum of two ulint-pairs. */
-UNIV_INLINE
+IB_INLINE
 void
 ut_pair_min(
 /*========*/
@@ -141,7 +141,7 @@ ut_pair_min(
 /******************************************************//**
 Compares two ulints.
 @return	1 if a > b, 0 if a == b, -1 if a < b */
-UNIV_INLINE
+IB_INLINE
 int
 ut_ulint_cmp(
 /*=========*/
@@ -150,7 +150,7 @@ ut_ulint_cmp(
 /*******************************************************//**
 Compares two pairs of ulints.
 @return	-1 if a < b, 0 if a == b, 1 if a > b */
-UNIV_INLINE
+IB_INLINE
 int
 ut_pair_cmp(
 /*========*/
@@ -192,7 +192,7 @@ when m is a power of two.  In other words, rounds n up to m * k.
 Calculates fast the 2-logarithm of a number, rounded upward to an
 integer.
 @return	logarithm in the base 2, rounded upward */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_2_log(
 /*=====*/
@@ -200,7 +200,7 @@ ut_2_log(
 /*************************************************************//**
 Calculates 2 to power n.
 @return	2 to power n */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_2_exp(
 /*=====*/

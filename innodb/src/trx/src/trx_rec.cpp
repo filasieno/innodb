@@ -48,7 +48,7 @@ Created 3/26/1996 Heikki Tuuri
 /**********************************************************************//**
 Writes the mtr log entry of the inserted undo log record on the undo log
 page. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_undof_page_add_undo_rec_log(
 /*============================*/
@@ -137,7 +137,7 @@ trx_undo_parse_add_undo_rec(
 /**********************************************************************//**
 Calculates the free space left for extending an undo log record.
 @return	bytes left */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_undo_left(
 /*==========*/
@@ -860,7 +860,7 @@ trx_undo_update_rec_get_sys_cols(
 /**********************************************************************//**
 Reads from an update undo log record the number of updated fields.
 @return	remaining part of undo log record after reading this value */
-UNIV_INLINE
+IB_INLINE
 byte*
 trx_undo_update_rec_get_n_upd_fields(
 /*=================================*/
@@ -876,7 +876,7 @@ trx_undo_update_rec_get_n_upd_fields(
 /**********************************************************************//**
 Reads from an update undo log record a stored field number.
 @return	remaining part of undo log record after reading this value */
-UNIV_INLINE
+IB_INLINE
 byte*
 trx_undo_update_rec_get_field_no(
 /*=============================*/

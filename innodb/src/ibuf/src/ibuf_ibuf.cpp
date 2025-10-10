@@ -187,7 +187,7 @@ static ulint	ibuf_counts[IBUF_COUNT_N_SPACES][IBUF_COUNT_N_PAGES];
 
 /******************************************************************//**
 Checks that the indexes to ibuf_counts[][] are within limits. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_count_check(
 /*=============*/
@@ -286,7 +286,7 @@ ibuf_var_init(void)
 /**********************************************************************
 Sets the flag in the current OS thread local storage denoting that it is
 inside an insert buffer routine. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_enter(void)
 /*============*/
@@ -303,7 +303,7 @@ ibuf_enter(void)
 /******************************************************************//**
 Sets the flag in the current OS thread local storage denoting that it is
 exiting an insert buffer routine. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_exit(void)
 /*===========*/
@@ -609,7 +609,7 @@ ibuf_parse_bitmap_init(
 /********************************************************************//**
 Gets the desired bits for a given page from a bitmap page.
 @return	value of bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 ibuf_bitmap_page_get_bits(
 /*======================*/
@@ -723,7 +723,7 @@ ibuf_bitmap_page_set_bits(
 /********************************************************************//**
 Calculates the bitmap page number for a given page number.
 @return	the bitmap page number where the file page is mapped */
-UNIV_INLINE
+IB_INLINE
 ulint
 ibuf_bitmap_page_no_calc(
 /*=====================*/
@@ -790,7 +790,7 @@ Sets the free bits of the page in the ibuf bitmap. This is done in a separate
 mini-transaction, hence this operation does not restrict further work to only
 ibuf bitmap operations, which would result if the latch to the bitmap page
 were kept. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_set_free_bits_low(
 /*===================*/
@@ -1040,7 +1040,7 @@ ibuf_update_free_bits_for_two_pages_low(
 /**********************************************************************//**
 Returns TRUE if the page is one of the fixed address ibuf pages.
 @return	TRUE if a fixed address ibuf i/o page */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_fixed_addr_page(
 /*=================*/
@@ -1238,7 +1238,7 @@ NOTE that as we copy pointers to fields in ibuf_rec, the caller must
 hold a latch to the ibuf_rec page as long as the entry is used!
 
 @return own: entry to insert to a non-clustered index */
-UNIV_INLINE
+IB_INLINE
 dtuple_t*
 ibuf_build_entry_pre_4_1_x(
 /*=======================*/
@@ -1697,7 +1697,7 @@ ibuf_new_search_tuple_build(
 Checks if there are enough pages in the free list of the ibuf tree that we
 dare to start a pessimistic insert to the insert buffer.
 @return	TRUE if enough free pages in list */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_data_enough_free_for_insert(void)
 /*==================================*/
@@ -1717,7 +1717,7 @@ ibuf_data_enough_free_for_insert(void)
 Checks if there are enough pages in the free list of the ibuf tree that we
 should remove them and free to the file space management.
 @return	TRUE if enough free pages in list */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_data_too_much_free(void)
 /*=========================*/
@@ -2307,7 +2307,7 @@ ibuf_contract_for_n_pages(
 
 /*********************************************************************//**
 Contract insert buffer trees after insert if they are too big. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_contract_after_insert(
 /*=======================*/

@@ -68,7 +68,7 @@ lock_sys_close(void);
 Checks if some transaction has an implicit x-lock on a record in a clustered
 index.
 @return	transaction which has the x-lock, or NULL */
-UNIV_INLINE
+IB_INLINE
 trx_t*
 lock_clust_rec_some_has_impl(
 /*=========================*/
@@ -78,7 +78,7 @@ lock_clust_rec_some_has_impl(
 /*********************************************************************//**
 Gets the heap_no of the smallest user record on a page.
 @return	heap_no of smallest user record, or PAGE_HEAP_NO_SUPREMUM */
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_get_min_heap_no(
 /*=================*/
@@ -515,7 +515,7 @@ lock_remove_all_on_table(
 Calculates the fold value of a page file address: used in inserting or
 searching for a lock in the hash table.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_rec_fold(
 /*==========*/
@@ -526,7 +526,7 @@ lock_rec_fold(
 Calculates the hash value of a page file address: used in inserting or
 searching for a lock in the hash table.
 @return	hashed value */
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_rec_hash(
 /*==========*/

@@ -126,7 +126,7 @@ NOTE! Use the corresponding macro in the header file, not this function
 directly. Locks a mutex for the current thread. If the mutex is reserved
 the function spins a preset time (controlled by SYNC_SPIN_ROUNDS) waiting
 for the mutex before suspending the thread. */
-UNIV_INLINE
+IB_INLINE
 void
 mutex_enter_func(
 /*=============*/
@@ -154,7 +154,7 @@ mutex_enter_nowait_func(
 	ulint		line);		/*!< in: line where requested */
 /******************************************************************//**
 Unlocks a mutex owned by the current thread. */
-UNIV_INLINE
+IB_INLINE
 void
 mutex_exit(
 /*=======*/
@@ -278,7 +278,7 @@ mutex_n_reserved(void);
 /******************************************************************//**
 NOT to be used outside this module except in debugging! Gets the value
 of the lock word. */
-UNIV_INLINE
+IB_INLINE
 lock_word_t
 mutex_get_lock_word(
 /*================*/
@@ -288,7 +288,7 @@ mutex_get_lock_word(
 NOT to be used outside this module except in debugging! Gets the waiters
 field in a mutex.
 @return	value to set */
-UNIV_INLINE
+IB_INLINE
 ulint
 mutex_get_waiters(
 /*==============*/

@@ -30,7 +30,7 @@ Created 1/20/1998 Heikki Tuuri
 /**********************************************************************//**
 Performs an execution step of a procedure node.
 @return	query thread to run next or NULL */
-UNIV_INLINE
+IB_INLINE
 que_thr_t*
 proc_step(
 /*======*/
@@ -65,7 +65,7 @@ proc_step(
 /**********************************************************************//**
 Performs an execution step of a procedure call node.
 @return	query thread to run next or NULL */
-UNIV_INLINE
+IB_INLINE
 que_thr_t*
 proc_eval_step(
 /*===========*/

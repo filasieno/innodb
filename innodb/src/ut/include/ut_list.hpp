@@ -86,14 +86,14 @@ UNIV_INTERN void ib_list_remove(ib_list_t* list, ib_list_node_t* node);
 /// \brief Get the first node in the list.
 /// \param [in] list list
 /// \return first node, or NULL
-UNIV_INLINE ib_list_node_t* ib_list_get_first(ib_list_t* list);
+IB_INLINE ib_list_node_t* ib_list_get_first(ib_list_t* list);
 
 
 
 /// \brief Get the last node in the list.
 /// \param [in] list list
 /// \return last node, or NULL
-UNIV_INLINE ib_list_node_t* ib_list_get_last(ib_list_t* list);
+IB_INLINE ib_list_node_t* ib_list_get_last(ib_list_t* list);
 
 /// \brief List.
 struct ib_list_struct {

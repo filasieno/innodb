@@ -68,7 +68,7 @@ ib_vector_push(
 /****************************************************************//**
 Get the number of elements in the vector.
 @return	number of elements in vector */
-UNIV_INLINE
+IB_INLINE
 ulint
 ib_vector_size(
 /*===========*/
@@ -77,7 +77,7 @@ ib_vector_size(
 /****************************************************************//**
 Test whether a vector is empty or not.
 @return	TRUE if empty */
-UNIV_INLINE
+IB_INLINE
 ibool
 ib_vector_is_empty(
 /*===============*/
@@ -86,7 +86,7 @@ ib_vector_is_empty(
 /****************************************************************//**
 Get the n'th element.
 @return	n'th element */
-UNIV_INLINE
+IB_INLINE
 void*
 ib_vector_get(
 /*==========*/
@@ -96,7 +96,7 @@ ib_vector_get(
 /****************************************************************//**
 Get n'th element as a const pointer.
 @return	n'th element */
-UNIV_INLINE
+IB_INLINE
 const void*
 ib_vector_get_const(
 /*================*/
@@ -106,7 +106,7 @@ ib_vector_get_const(
 /****************************************************************//**
 Set the n'th element and return the previous value.
 @return	n'th element */
-UNIV_INLINE
+IB_INLINE
 void*
 ib_vector_set(
 /*==========*/
@@ -116,7 +116,7 @@ ib_vector_set(
 
 /********************************************************************
 Remove the last element from the vector. */
-UNIV_INLINE
+IB_INLINE
 void*
 ib_vector_pop(
 /*==========*/
@@ -125,7 +125,7 @@ ib_vector_pop(
 /****************************************************************//**
 Free the underlying heap of the vector. Note that vec is invalid
 after this call. */
-UNIV_INLINE
+IB_INLINE
 void
 ib_vector_free(
 /*===========*/

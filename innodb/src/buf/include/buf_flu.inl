@@ -48,7 +48,7 @@ buf_flush_insert_sorted_into_flush_list(
 This function should be called at a mini-transaction commit, if a page was
 modified in it. Puts the block to the list of modified blocks, if it is not
 already in it. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_flush_note_modification(
 /*========================*/
@@ -84,7 +84,7 @@ buf_flush_note_modification(
 
 /********************************************************************//**
 This function should be called when recovery has modified a buffer page. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_flush_recv_note_modification(
 /*=============================*/

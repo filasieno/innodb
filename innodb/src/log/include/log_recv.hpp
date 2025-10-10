@@ -77,7 +77,7 @@ recv_scan_log_seg_for_backup(
 /*******************************************************************//**
 Returns TRUE if recovery is currently running.
 @return	recv_recovery_on */
-UNIV_INLINE
+IB_INLINE
 ibool
 recv_recovery_is_on(void);
 /*=====================*/
@@ -85,7 +85,7 @@ recv_recovery_is_on(void);
 /*******************************************************************//**
 Returns TRUE if recovery from backup is currently running.
 @return	recv_recovery_from_backup_on */
-UNIV_INLINE
+IB_INLINE
 ibool
 recv_recovery_from_backup_is_on(void);
 /*=================================*/

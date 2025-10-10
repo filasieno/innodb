@@ -251,7 +251,7 @@ os_mutex_free(
 Acquires ownership of a fast mutex. Currently in Windows this is the same
 as os_fast_mutex_lock!
 @return	0 if success, != 0 if was reserved by another thread */
-UNIV_INLINE
+IB_INLINE
 ulint
 os_fast_mutex_trylock(
 /*==================*/

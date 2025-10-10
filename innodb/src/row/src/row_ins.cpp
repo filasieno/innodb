@@ -1929,7 +1929,7 @@ equal.
 @return 0 if no update, ROW_INS_PREV if previous should be updated;
 currently we do the search so that only the low_match record can match
 enough to the search tuple, not the next record */
-UNIV_INLINE
+IB_INLINE
 ulint
 row_ins_must_modify(
 /*================*/
@@ -2276,7 +2276,7 @@ row_ins_index_entry_step(
 
 /***********************************************************//**
 Allocates a row id for row and inits the node->index field. */
-UNIV_INLINE
+IB_INLINE
 void
 row_ins_alloc_row_id_step(
 /*======================*/
@@ -2302,7 +2302,7 @@ row_ins_alloc_row_id_step(
 
 /***********************************************************//**
 Gets a row to insert from the values list. */
-UNIV_INLINE
+IB_INLINE
 void
 row_ins_get_row_from_values(
 /*========================*/
@@ -2336,7 +2336,7 @@ row_ins_get_row_from_values(
 
 /***********************************************************//**
 Gets a row to insert from the select list. */
-UNIV_INLINE
+IB_INLINE
 void
 row_ins_get_row_from_select(
 /*========================*/

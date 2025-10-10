@@ -19,7 +19,7 @@
 /// \return plan node
 /// \param node select node
 /// \param i get ith plan node
-UNIV_INLINE
+IB_INLINE
 plan_t *sel_node_get_nth_plan(sel_node_t *node, ulint i)
 {
     ut_ad(i < node->n_tables);
@@ -31,7 +31,7 @@ plan_t *sel_node_get_nth_plan(sel_node_t *node, ulint i)
 /// that it will start fetching from the start of the result set again, regardless
 /// of where it was before, and it will set intention locks on the tables.
 /// \param node select node
-UNIV_INLINE
+IB_INLINE
 void sel_node_reset_cursor(sel_node_t *node)
 {
     node->state = SEL_NODE_OPEN;
@@ -40,7 +40,7 @@ void sel_node_reset_cursor(sel_node_t *node)
 /// \brief Performs an execution step of an open or close cursor statement node.
 /// \return query thread to run next or NULL
 /// \param thr query thread
-UNIV_INLINE
+IB_INLINE
 que_thr_t *open_step(que_thr_t *thr)
 {
     sel_node_t *sel_node;

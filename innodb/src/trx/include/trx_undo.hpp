@@ -37,7 +37,7 @@ Created 3/26/1996 Heikki Tuuri
 /***********************************************************************//**
 Builds a roll pointer.
 @return	roll pointer */
-UNIV_INLINE
+IB_INLINE
 roll_ptr_t
 trx_undo_build_roll_ptr(
 /*====================*/
@@ -47,7 +47,7 @@ trx_undo_build_roll_ptr(
 	ulint	offset);	/*!< in: offset of the undo entry within page */
 /***********************************************************************//**
 Decodes a roll pointer. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_undo_decode_roll_ptr(
 /*=====================*/
@@ -60,7 +60,7 @@ trx_undo_decode_roll_ptr(
 /***********************************************************************//**
 Returns TRUE if the roll pointer is of the insert type.
 @return	TRUE if insert undo log */
-UNIV_INLINE
+IB_INLINE
 ibool
 trx_undo_roll_ptr_is_insert(
 /*========================*/
@@ -70,7 +70,7 @@ trx_undo_roll_ptr_is_insert(
 Writes a roll ptr to an index page. In case that the size changes in
 some future version, this function should be used instead of
 mach_write_... */
-UNIV_INLINE
+IB_INLINE
 void
 trx_write_roll_ptr(
 /*===============*/
@@ -82,7 +82,7 @@ Reads a roll ptr from an index page. In case that the roll ptr size
 changes in some future version, this function should be used instead of
 mach_read_...
 @return	roll ptr */
-UNIV_INLINE
+IB_INLINE
 roll_ptr_t
 trx_read_roll_ptr(
 /*==============*/
@@ -91,7 +91,7 @@ trx_read_roll_ptr(
 /******************************************************************//**
 Gets an undo log page and x-latches it.
 @return	pointer to page x-latched */
-UNIV_INLINE
+IB_INLINE
 page_t*
 trx_undo_page_get(
 /*==============*/
@@ -103,7 +103,7 @@ trx_undo_page_get(
 /******************************************************************//**
 Gets an undo log page and s-latches it.
 @return	pointer to page s-latched */
-UNIV_INLINE
+IB_INLINE
 page_t*
 trx_undo_page_get_s_latched(
 /*========================*/
@@ -116,7 +116,7 @@ trx_undo_page_get_s_latched(
 Returns the previous undo record on the page in the specified log, or
 NULL if none exists.
 @return	pointer to record, NULL if none */
-UNIV_INLINE
+IB_INLINE
 trx_undo_rec_t*
 trx_undo_page_get_prev_rec(
 /*=======================*/
@@ -127,7 +127,7 @@ trx_undo_page_get_prev_rec(
 Returns the next undo log record on the page in the specified log, or
 NULL if none exists.
 @return	pointer to record, NULL if none */
-UNIV_INLINE
+IB_INLINE
 trx_undo_rec_t*
 trx_undo_page_get_next_rec(
 /*=======================*/
@@ -138,7 +138,7 @@ trx_undo_page_get_next_rec(
 Returns the last undo record on the page in the specified undo log, or
 NULL if none exists.
 @return	pointer to record, NULL if none */
-UNIV_INLINE
+IB_INLINE
 trx_undo_rec_t*
 trx_undo_page_get_last_rec(
 /*=======================*/
@@ -149,7 +149,7 @@ trx_undo_page_get_last_rec(
 Returns the first undo record on the page in the specified undo log, or
 NULL if none exists.
 @return	pointer to record, NULL if none */
-UNIV_INLINE
+IB_INLINE
 trx_undo_rec_t*
 trx_undo_page_get_first_rec(
 /*========================*/

@@ -55,7 +55,7 @@ eval_node_alloc_val_buf(
 /*****************************************************************//**
 Allocates a new buffer if needed.
 @return	pointer to buffer */
-UNIV_INLINE
+IB_INLINE
 byte*
 eval_node_ensure_val_buf(
 /*=====================*/
@@ -82,7 +82,7 @@ eval_node_ensure_val_buf(
 
 /*****************************************************************//**
 Evaluates a symbol table symbol. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_sym(
 /*=====*/
@@ -102,7 +102,7 @@ eval_sym(
 
 /*****************************************************************//**
 Evaluates an expression. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_exp(
 /*=====*/
@@ -120,7 +120,7 @@ eval_exp(
 
 /*****************************************************************//**
 Sets an integer value as the value of an expression node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_set_int_val(
 /*==================*/
@@ -146,7 +146,7 @@ eval_node_set_int_val(
 /*****************************************************************//**
 Gets an integer non-SQL null value from an expression node.
 @return	integer value */
-UNIV_INLINE
+IB_INLINE
 lint
 eval_node_get_int_val(
 /*==================*/
@@ -164,7 +164,7 @@ eval_node_get_int_val(
 /*****************************************************************//**
 Gets a iboolean value from a query node.
 @return	iboolean value */
-UNIV_INLINE
+IB_INLINE
 ibool
 eval_node_get_ibool_val(
 /*====================*/
@@ -184,7 +184,7 @@ eval_node_get_ibool_val(
 
 /*****************************************************************//**
 Sets a iboolean value as the value of a function node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_set_ibool_val(
 /*====================*/
@@ -212,7 +212,7 @@ eval_node_set_ibool_val(
 /*****************************************************************//**
 Copies a binary string value as the value of a query graph node. Allocates a
 new buffer if necessary. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_copy_and_alloc_val(
 /*=========================*/
@@ -235,7 +235,7 @@ eval_node_copy_and_alloc_val(
 
 /*****************************************************************//**
 Copies a query node value to another node. */
-UNIV_INLINE
+IB_INLINE
 void
 eval_node_copy_val(
 /*===============*/

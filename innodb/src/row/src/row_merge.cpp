@@ -1950,7 +1950,7 @@ row_merge_file_destroy(
 Determine the precise type of a column that is added to a tem
 if a column must be constrained NOT NULL.
 @return	col->prtype, possibly ORed with DATA_NOT_NULL */
-UNIV_INLINE
+IB_INLINE
 ulint
 row_merge_col_prtype(
 /*=================*/

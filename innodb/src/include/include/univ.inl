@@ -110,7 +110,7 @@
 #define UNIV_BUF_DEBUG				  // Enable buffer pool
 						debugging without UNIV_DEBUG
 #define UNIV_DEBUG					  // Enable ut_ad() assertions
-						and disable UNIV_INLINE
+						and disable IB_INLINE
 #define UNIV_DEBUG_LOCK_VALIDATE	  // Enable
 						ut_ad(lock_rec_validate_page())
 						assertions.
@@ -179,11 +179,11 @@ operations (very slow); also UNIV_DEBUG must be defined
 // Definition for inline version
 
 #ifdef __WIN__
-#define UNIV_INLINE __inline
+#define IB_INLINE __inline
 #elif defined(__SUNPRO_CC) || defined(__SUNPRO_C)
-#define UNIV_INLINE static inline
+#define IB_INLINE static inline
 #else
-#define UNIV_INLINE static __inline__
+#define IB_INLINE static __inline__
 #endif
 
 #else
@@ -191,7 +191,7 @@ operations (very slow); also UNIV_DEBUG must be defined
 // definitions:
 
 #define UNIV_NONINL
-#define UNIV_INLINE UNIV_INTERN
+#define IB_INLINE UNIV_INTERN
 
 #endif	  // UNIV_DEBUG
 

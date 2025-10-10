@@ -94,7 +94,7 @@ trx_doublewrite_page_inside(
 /***************************************************************//**
 Checks if a page address is the trx sys header page.
 @return	TRUE if trx sys header page */
-UNIV_INLINE
+IB_INLINE
 ibool
 trx_sys_hdr_page(
 /*=============*/
@@ -126,7 +126,7 @@ trx_sysf_rseg_find_free(
 /***************************************************************//**
 Gets the pointer in the nth slot of the rseg array.
 @return	pointer to rseg object, NULL if slot not in use */
-UNIV_INLINE
+IB_INLINE
 trx_rseg_t*
 trx_sys_get_nth_rseg(
 /*=================*/
@@ -134,7 +134,7 @@ trx_sys_get_nth_rseg(
 	ulint		n);	/*!< in: index of slot */
 /***************************************************************//**
 Sets the pointer in the nth slot of the rseg array. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_sys_set_nth_rseg(
 /*=================*/
@@ -145,7 +145,7 @@ trx_sys_set_nth_rseg(
 /**********************************************************************//**
 Gets a pointer to the transaction system file copy and x-locks its page.
 @return	pointer to system file copy, page x-locked */
-UNIV_INLINE
+IB_INLINE
 trx_sysf_t*
 trx_sysf_get(
 /*=========*/
@@ -154,7 +154,7 @@ trx_sysf_get(
 Gets the space of the nth rollback segment slot in the trx system
 file copy.
 @return	space id */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_sysf_rseg_get_space(
 /*====================*/
@@ -165,7 +165,7 @@ trx_sysf_rseg_get_space(
 Gets the page number of the nth rollback segment slot in the trx system
 file copy.
 @return	page number, FIL_NULL if slot unused */
-UNIV_INLINE
+IB_INLINE
 ulint
 trx_sysf_rseg_get_page_no(
 /*======================*/
@@ -175,7 +175,7 @@ trx_sysf_rseg_get_page_no(
 /*****************************************************************//**
 Sets the space id of the nth rollback segment slot in the trx system
 file copy. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_sysf_rseg_set_space(
 /*====================*/
@@ -186,7 +186,7 @@ trx_sysf_rseg_set_space(
 /*****************************************************************//**
 Sets the page number of the nth rollback segment slot in the trx system
 file copy. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_sysf_rseg_set_page_no(
 /*======================*/
@@ -198,14 +198,14 @@ trx_sysf_rseg_set_page_no(
 /*****************************************************************//**
 Allocates a new transaction id.
 @return	new, allocated trx id */
-UNIV_INLINE
+IB_INLINE
 trx_id_t
 trx_sys_get_new_trx_id(void);
 /*========================*/
 /*****************************************************************//**
 Allocates a new transaction number.
 @return	new, allocated trx number */
-UNIV_INLINE
+IB_INLINE
 trx_id_t
 trx_sys_get_new_trx_no(void);
 /*========================*/
@@ -214,7 +214,7 @@ trx_sys_get_new_trx_no(void);
 Writes a trx id to an index page. In case that the id size changes in
 some future version, this function should be used instead of
 mach_write_... */
-UNIV_INLINE
+IB_INLINE
 void
 trx_write_trx_id(
 /*=============*/
@@ -226,7 +226,7 @@ Reads a trx id from an index page. In case that the id size changes in
 some future version, this function should be used instead of
 mach_read_...
 @return	id */
-UNIV_INLINE
+IB_INLINE
 trx_id_t
 trx_read_trx_id(
 /*============*/
@@ -234,7 +234,7 @@ trx_read_trx_id(
 /****************************************************************//**
 Looks for the trx handle with the given id in trx_list.
 @return	the trx handle or NULL if not found */
-UNIV_INLINE
+IB_INLINE
 trx_t*
 trx_get_on_id(
 /*==========*/
@@ -245,14 +245,14 @@ the trx can possibly be active. (But, you must look at the trx->conc_state to
 find out if the minimum trx id transaction itself is active, or already
 committed.)
 @return	the minimum trx id, or trx_sys->max_trx_id if the trx list is empty */
-UNIV_INLINE
+IB_INLINE
 trx_id_t
 trx_list_get_min_trx_id(void);
 /*=========================*/
 /****************************************************************//**
 Checks if a transaction with the given id is active.
 @return	TRUE if active */
-UNIV_INLINE
+IB_INLINE
 ibool
 trx_is_active(
 /*==========*/

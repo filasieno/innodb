@@ -404,7 +404,7 @@ static ibool lock_deadlock_occurs(
 /// \details Checks whether a specific bit is set in a record lock's bitmap,
 /// indicating whether a particular record heap position is locked.
 /// \return TRUE if bit set also if i == ULINT_UNDEFINED return FALSE
-UNIV_INLINE
+IB_INLINE
 ibool lock_rec_get_nth_bit(
 	//======================
 	const lock_t *lock, ulint i
@@ -619,7 +619,7 @@ lock_get_size(void)
 /// \details Extracts the lock mode (shared, exclusive, etc.) from a lock structure.
 /// \param lock lock
 /// \return mode
-UNIV_INLINE
+IB_INLINE
 enum lock_mode
 lock_get_mode(
 //======================
@@ -635,7 +635,7 @@ lock_get_mode(
 /// \details Determines whether a lock is in a waiting state or has been granted.
 /// \param lock lock
 /// \return TRUE if waiting
-UNIV_INLINE
+IB_INLINE
 ibool
 lock_get_wait(
 //======================
@@ -786,7 +786,7 @@ func_exit:
 /*********************************************************************/
 /**
 Sets the wait flag of a lock and the back pointer in trx to lock. 
-UNIV_INLINE
+IB_INLINE
 void
 lock_set_lock_and_trx_wait(
 //======================
@@ -804,7 +804,7 @@ lock_set_lock_and_trx_wait(
 /**
 The back pointer to a waiting lock request in the transaction is set to NULL
 and the wait bit in lock type_mode is reset. 
-UNIV_INLINE
+IB_INLINE
 void
 lock_reset_lock_and_trx_wait(
 //======================
@@ -823,7 +823,7 @@ lock_reset_lock_and_trx_wait(
 /**
 Gets the gap flag of a record lock.
 \return	TRUE if gap flag set 
-UNIV_INLINE
+IB_INLINE
 ibool
 lock_rec_get_gap(
 //======================
@@ -844,7 +844,7 @@ lock_rec_get_gap(
 /**
 Gets the LOCK_REC_NOT_GAP flag of a record lock.
 \return	TRUE if LOCK_REC_NOT_GAP flag set 
-UNIV_INLINE
+IB_INLINE
 ibool
 lock_rec_get_rec_not_gap(
 //======================
@@ -865,7 +865,7 @@ lock_rec_get_rec_not_gap(
 /**
 Gets the waiting insert flag of a record lock.
 \return	TRUE if gap flag set 
-UNIV_INLINE
+IB_INLINE
 ibool
 lock_rec_get_insert_intention(
 //======================
@@ -886,7 +886,7 @@ lock_rec_get_insert_intention(
 /**
 Calculates if lock mode 1 is stronger or equal to lock mode 2.
 \return	nonzero if mode1 stronger or equal to mode2 
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_mode_stronger_or_eq(
 //======================
@@ -905,7 +905,7 @@ lock_mode_stronger_or_eq(
 /**
 Calculates if lock mode 1 is compatible with lock mode 2.
 \return	nonzero if mode1 compatible with mode2 
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_mode_compatible(
 //======================
@@ -924,7 +924,7 @@ lock_mode_compatible(
 /**
 Checks if a lock request for a new lock has to wait for request lock2.
 \return	TRUE if new lock has to wait for lock2 to be removed 
-UNIV_INLINE
+IB_INLINE
 ibool
 lock_rec_has_to_wait(
 //======================
@@ -1046,7 +1046,7 @@ lock_has_to_wait(
 /**
 Gets the number of bits in a record lock bitmap.
 \return	number of bits 
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_rec_get_n_bits(
 //======================
@@ -1058,7 +1058,7 @@ lock_rec_get_n_bits(
 /**********************************************************************/
 /**
 Sets the nth bit of a record lock to TRUE. 
-UNIV_INLINE
+IB_INLINE
 void
 lock_rec_set_nth_bit(
 //======================
@@ -1106,7 +1106,7 @@ lock_rec_find_set_bit(
 /**********************************************************************/
 /**
 Resets the nth bit of a record lock. 
-UNIV_INLINE
+IB_INLINE
 void
 lock_rec_reset_nth_bit(
 //======================
@@ -1131,7 +1131,7 @@ lock_rec_reset_nth_bit(
 /**
 Gets the first or next record lock on a page.
 \return	next lock, NULL if none exists 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_get_next_on_page(
 //======================
@@ -1169,7 +1169,7 @@ lock_rec_get_next_on_page(
 Gets the first record lock on a page, where the page is identified by its
 file address.
 \return	first lock, NULL if none exists 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_get_first_on_page_addr(
 //======================
@@ -1226,7 +1226,7 @@ lock_rec_expl_exist_on_page(
 Gets the first record lock on a page, where the page is identified by a
 pointer to it.
 \return	first lock, NULL if none exists 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_get_first_on_page(
 //======================
@@ -1260,7 +1260,7 @@ lock_rec_get_first_on_page(
 /**
 Gets the next explicit lock request on a record.
 \return	next lock, NULL if none exists or if heap_no == ULINT_UNDEFINED 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_get_next(
 //======================
@@ -1281,7 +1281,7 @@ lock_rec_get_next(
 /**
 Gets the first explicit lock request on a record.
 \return	first lock, NULL if none exists 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_get_first(
 //======================
@@ -1394,7 +1394,7 @@ lock_rec_get_prev(
 /**
 Checks if a transaction has the specified table lock, or stronger.
 \return	lock or NULL 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_table_has(
 //======================
@@ -1436,7 +1436,7 @@ lock_table_has(
 Checks if a transaction has a GRANTED explicit lock on rec stronger or equal
 to precise_mode.
 \return	lock or NULL 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_has_expl(
 //======================
@@ -1588,7 +1588,7 @@ Looks for a suitable type record lock struct by the same trx on the same page.
 This can be used to save space when a new record lock should be set on a page:
 no new struct is needed, if a suitable old is found.
 \return	lock or NULL 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_rec_find_similar_on_page(
 //======================
@@ -2010,7 +2010,7 @@ which does NOT look at implicit locks! Checks lock compatibility within
 explicit locks. This function sets a normal next-key lock, or in the case of
 a page supremum record, a gap type lock.
 \return	TRUE if locking succeeded 
-UNIV_INLINE
+IB_INLINE
 ibool
 lock_rec_lock_fast(
 //======================
@@ -3662,7 +3662,7 @@ lock_deadlock_recursive(
 Creates a table lock object and adds it as the last in the lock queue
 of the table. Does NOT check for deadlocks or lock compatibility.
 \return	own: new lock object 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_table_create(
 //======================
@@ -3700,7 +3700,7 @@ lock_table_create(
 Removes a table lock request from the queue and the trx list of locks;
 this is a low-level function which does NOT check if waiting requests
 can now be granted. 
-UNIV_INLINE
+IB_INLINE
 void
 lock_table_remove_low(
 //======================
@@ -3808,7 +3808,7 @@ lock_table_enqueue_waiting(
 Checks if other transactions have an incompatible mode lock request in
 the lock queue.
 \return	lock or NULL 
-UNIV_INLINE
+IB_INLINE
 lock_t*
 lock_table_other_has_incompatible(
 //======================
@@ -5629,7 +5629,7 @@ lock_get_type_str(
 /**
 Gets the table on which the lock is.
 \return	table 
-UNIV_INLINE
+IB_INLINE
 dict_table_t*
 lock_get_table(
 //======================

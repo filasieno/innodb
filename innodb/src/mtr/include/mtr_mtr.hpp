@@ -191,7 +191,7 @@ functions).  The page number parameter was originally written as 0. @{ */
 /// and buffer in the memory buffer given by the caller.
 /// \param mtr Memory buffer for the mtr buffer.
 /// \return Mtr buffer which also acts as the mtr handle.
-UNIV_INLINE
+IB_INLINE
 mtr_t*
 mtr_start(mtr_t* mtr);
 /// \brief Commits a mini-transaction.
@@ -202,7 +202,7 @@ mtr_commit(mtr_t* mtr);
 /// \brief Sets and returns a savepoint in mtr.
 /// \param mtr Mtr.
 /// \return Savepoint.
-UNIV_INLINE
+IB_INLINE
 ulint
 mtr_set_savepoint(mtr_t* mtr);
 /// \brief Releases the latches stored in an mtr memo down to a savepoint.
@@ -218,7 +218,7 @@ mtr_rollback_to_savepoint(mtr_t* mtr, ulint savepoint);
 /// \param mtr Mtr.
 /// \param savepoint Savepoint.
 /// \param lock Latch to release.
-UNIV_INLINE
+IB_INLINE
 void
 mtr_release_s_latch_at_savepoint(mtr_t* mtr, ulint savepoint, rw_lock_t* lock);
 #else /* !UNIV_HOTBACKUP */
@@ -227,14 +227,14 @@ mtr_release_s_latch_at_savepoint(mtr_t* mtr, ulint savepoint, rw_lock_t* lock);
 /// \brief Gets the logging mode of a mini-transaction.
 /// \param mtr Mtr.
 /// \return Logging mode: MTR_LOG_NONE, ...
-UNIV_INLINE
+IB_INLINE
 ulint
 mtr_get_log_mode(mtr_t* mtr);
 /// \brief Changes the logging mode of a mini-transaction.
 /// \param mtr Mtr.
 /// \param mode Logging mode: MTR_LOG_NONE, ...
 /// \return Old mode.
-UNIV_INLINE
+IB_INLINE
 ulint
 mtr_set_log_mode(mtr_t* mtr, ulint mode);
 /// \brief Reads 1 - 4 bytes from a file page buffered in the buffer pool.
@@ -262,7 +262,7 @@ This macro locks an rw-lock in x-mode. */
 /**
 NOTE! Use the macro above!
 Locks a lock in s-mode. */
-UNIV_INLINE void mtr_s_lock_func(
+IB_INLINE void mtr_s_lock_func(
 
 	rw_lock_t*	lock,	/*!< in: rw-lock */
 	const char*	file,	/*!< in: file name */
@@ -271,7 +271,7 @@ UNIV_INLINE void mtr_s_lock_func(
 /**
 NOTE! Use the macro above!
 Locks a lock in x-mode. */
-UNIV_INLINE void mtr_x_lock_func(
+IB_INLINE void mtr_x_lock_func(
 	rw_lock_t*	lock,	/*!< in: rw-lock */
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line number */
@@ -287,7 +287,7 @@ UNIV_INTERN void mtr_memo_release(
 # ifndef UNIV_HOTBACKUP
 /** Checks if memo contains the given item.
 @return	TRUE if contains */
-UNIV_INLINE
+IB_INLINE
 ibool
 mtr_memo_contains(
 /*==============*/
@@ -321,7 +321,7 @@ mtr_print(mtr_t* mtr);
 /// \param mtr Mtr.
 /// \param object Object.
 /// \param type Object type: MTR_MEMO_S_LOCK, ...
-UNIV_INLINE
+IB_INLINE
 void
 mtr_memo_push(mtr_t* mtr, void* object, ulint type);
 

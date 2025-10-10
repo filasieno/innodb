@@ -302,7 +302,7 @@ fil_space_free(
 Remove extraneous '.' && '\' && '/' characters from the prefix.
 Note: Currently it will not handle paths like: ../a/b.
 @return	pointer to normalized path */
-UNIV_INLINE
+IB_INLINE
 const char*
 fil_normalize_path(
 /*===============*/
@@ -327,7 +327,7 @@ Compare two table names. It will compare the two table names using the
 canonical names. e.g., ./a/b == a/b. TODO: /path/to/a/b == a/b if both
 /path/to/a/b and a/b refer to the same file.
 @return	 = 0 if name1 == name2 < 0 if name1 < name2 > 0 if name1 > name2 */
-UNIV_INLINE
+IB_INLINE
 int
 fil_tablename_compare(
 /*==================*/
@@ -406,7 +406,7 @@ blocks at the end of file are ignored: they are not taken into account when
 calculating the byte offset within a space.
 @return DB_SUCCESS, or DB_TABLESPACE_DELETED if we are trying to do
 i/o on a tablespace which does not exist */
-UNIV_INLINE
+IB_INLINE
 ulint
 fil_read(
 /*=====*/
@@ -435,7 +435,7 @@ blocks at the end of file are ignored: they are not taken into account when
 calculating the byte offset within a space.
 @return DB_SUCCESS, or DB_TABLESPACE_DELETED if we are trying to do
 i/o on a tablespace which does not exist */
-UNIV_INLINE
+IB_INLINE
 ulint
 fil_write(
 /*======*/
@@ -460,7 +460,7 @@ fil_write(
 
 /*******************************************************************//**
 Returns the table space by a given id, NULL if not found. */
-UNIV_INLINE
+IB_INLINE
 fil_space_t*
 fil_space_get_by_id(
 /*================*/
@@ -480,7 +480,7 @@ fil_space_get_by_id(
 
 /*******************************************************************//**
 Returns the table space by a given name, NULL if not found. */
-UNIV_INLINE
+IB_INLINE
 fil_space_t*
 fil_space_get_by_name(
 /*==================*/

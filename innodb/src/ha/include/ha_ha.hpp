@@ -36,7 +36,7 @@ Created 8/18/1994 Heikki Tuuri
 Looks for an element in a hash table.
 @return pointer to the data of the first hash table node in chain
 having the fold number, NULL if not found */
-UNIV_INLINE
+IB_INLINE
 void*
 ha_search_and_get_data(
 /*===================*/
@@ -168,7 +168,7 @@ is inserted.
 Looks for an element when we know the pointer to the data and deletes
 it from the hash table if found.
 @return	TRUE if found */
-UNIV_INLINE
+IB_INLINE
 ibool
 ha_search_and_delete_if_found(
 /*==========================*/

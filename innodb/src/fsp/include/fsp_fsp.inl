@@ -26,7 +26,7 @@ Created 12/18/1995 Heikki Tuuri
 /***********************************************************************//**
 Checks if a page address is an extent descriptor page address.
 @return	TRUE if a descriptor page */
-UNIV_INLINE
+IB_INLINE
 ibool
 fsp_descr_page(
 /*===========*/

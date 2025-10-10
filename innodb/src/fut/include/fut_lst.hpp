@@ -48,7 +48,7 @@ typedef	byte	flst_node_t;
 #ifndef UNIV_HOTBACKUP
 /********************************************************************//**
 Initializes a list base node. */
-UNIV_INLINE
+IB_INLINE
 void
 flst_init(
 /*======*/
@@ -129,7 +129,7 @@ flst_truncate_end(
 /********************************************************************//**
 Gets list length.
 @return	length */
-UNIV_INLINE
+IB_INLINE
 ulint
 flst_get_len(
 /*=========*/
@@ -138,7 +138,7 @@ flst_get_len(
 /********************************************************************//**
 Gets list first node address.
 @return	file address */
-UNIV_INLINE
+IB_INLINE
 fil_addr_t
 flst_get_first(
 /*===========*/
@@ -147,7 +147,7 @@ flst_get_first(
 /********************************************************************//**
 Gets list last node address.
 @return	file address */
-UNIV_INLINE
+IB_INLINE
 fil_addr_t
 flst_get_last(
 /*==========*/
@@ -156,7 +156,7 @@ flst_get_last(
 /********************************************************************//**
 Gets list next node address.
 @return	file address */
-UNIV_INLINE
+IB_INLINE
 fil_addr_t
 flst_get_next_addr(
 /*===============*/
@@ -165,7 +165,7 @@ flst_get_next_addr(
 /********************************************************************//**
 Gets list prev node address.
 @return	file address */
-UNIV_INLINE
+IB_INLINE
 fil_addr_t
 flst_get_prev_addr(
 /*===============*/
@@ -173,7 +173,7 @@ flst_get_prev_addr(
 	mtr_t*			mtr);	/*!< in: mini-transaction handle */
 /********************************************************************//**
 Writes a file address. */
-UNIV_INLINE
+IB_INLINE
 void
 flst_write_addr(
 /*============*/
@@ -183,7 +183,7 @@ flst_write_addr(
 /********************************************************************//**
 Reads a file address.
 @return	file address */
-UNIV_INLINE
+IB_INLINE
 fil_addr_t
 flst_read_addr(
 /*===========*/

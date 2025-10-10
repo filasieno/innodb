@@ -1332,7 +1332,7 @@ row_upd_changes_first_fields_binary(
 
 /*********************************************************************//**
 Copies the column values from a record. */
-UNIV_INLINE
+IB_INLINE
 void
 row_upd_copy_columns(
 /*=================*/
@@ -1357,7 +1357,7 @@ row_upd_copy_columns(
 /*********************************************************************//**
 Calculates the new values for fields to update. Note that row_upd_copy_columns
 must have been called first. */
-UNIV_INLINE
+IB_INLINE
 void
 row_upd_eval_new_vals(
 /*==================*/
@@ -1532,7 +1532,7 @@ Updates the secondary index record if it is changed in the row update or
 deletes it if this is a delete.
 @return DB_SUCCESS if operation successfully completed, else error
 code or DB_LOCK_WAIT */
-UNIV_INLINE
+IB_INLINE
 ulint
 row_upd_sec_step(
 /*=============*/

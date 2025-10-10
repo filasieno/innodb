@@ -283,7 +283,7 @@ page_mem_alloc_heap(
 #ifndef UNIV_HOTBACKUP
 /**********************************************************//**
 Writes a log record of page creation. */
-UNIV_INLINE
+IB_INLINE
 void
 page_create_write_log(
 /*==================*/
@@ -826,7 +826,7 @@ page_copy_rec_list_start(
 
 /**********************************************************//**
 Writes a log record of a record list end or start deletion. */
-UNIV_INLINE
+IB_INLINE
 void
 page_delete_rec_list_write_log(
 /*===========================*/
@@ -1263,7 +1263,7 @@ page_rec_write_index_page_no(
 Used to delete n slots from the directory. This function updates
 also n_owned fields in the records, so that the first slot after
 the deleted ones inherits the records of the deleted slots. */
-UNIV_INLINE
+IB_INLINE
 void
 page_dir_delete_slot(
 /*=================*/
@@ -1312,7 +1312,7 @@ page_dir_delete_slot(
 Used to add n slots to the directory. Does not set the record pointers
 in the added slots or update n_owned values: this is the responsibility
 of the caller. */
-UNIV_INLINE
+IB_INLINE
 void
 page_dir_add_slot(
 /*==============*/

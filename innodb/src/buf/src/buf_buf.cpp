@@ -1852,7 +1852,7 @@ got_block:
 
 /********************************************************************//**
 Initialize some fields of a control block. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_block_init_low(
 /*===============*/
@@ -2728,7 +2728,7 @@ buf_page_try_get_func(
 
 /********************************************************************//**
 Initialize some fields of a control block. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_page_init_low(
 /*==============*/

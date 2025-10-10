@@ -78,7 +78,7 @@ read_view_close_for_read_committed(
 /*********************************************************************//**
 Checks if a read view sees the specified transaction.
 @return	TRUE if sees */
-UNIV_INLINE
+IB_INLINE
 ibool
 read_view_sees_trx_id(
 /*==================*/

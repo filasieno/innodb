@@ -260,7 +260,7 @@ static int ib_default_compare(const ib_col_meta_t* ib_col_meta, const ib_byte_t*
 Check if the Innodb persistent cursor is positioned.
 @param pcur InnoDB persistent cursor
 @return	IB_TRUE if positioned */
-UNIV_INLINE ib_bool_t ib_btr_cursor_is_positioned(btr_pcur_t* pcur) {
+IB_INLINE ib_bool_t ib_btr_cursor_is_positioned(btr_pcur_t* pcur) {
 	return(pcur->old_stored == BTR_PCUR_OLD_STORED
 	       && (pcur->pos_state == BTR_PCUR_IS_POSITIONED
 	           || pcur->pos_state == BTR_PCUR_WAS_POSITIONED));
@@ -362,7 +362,7 @@ Increments innobase_active_counter and every INNOBASE_WAKE_INTERVALth
 time calls srv_active_wake_master_thread. This function should be used
 when a single database operation may introduce a small need for
 server utility activity, like checkpointing. */
-UNIV_INLINE
+IB_INLINE
 void
 ib_wake_master_thread(void)
 /*=======================*/
@@ -423,7 +423,7 @@ ib_varchar_len(
 /*********************************************************************//**
 Calculate the max row size of the columns in a cluster index.
 @return	max row length */
-UNIV_INLINE
+IB_INLINE
 ulint
 ib_get_max_row_len(
 /*===============*/
@@ -453,7 +453,7 @@ ib_get_max_row_len(
 
 /*****************************************************************//**
 Read the colums from a rec into a tuple. */
-UNIV_INLINE
+IB_INLINE
 void
 ib_read_tuple(
 /*==========*/
@@ -953,7 +953,7 @@ ib_trx_rollback(
 /*****************************************************************//**
 Check that the combination of values and name makes sense.
 @return	TRUE if OK */
-UNIV_INLINE
+IB_INLINE
 ibool
 ib_check_col_is_ok(
 /*===============*/
@@ -987,7 +987,7 @@ ib_check_col_is_ok(
 /*****************************************************************//**
 Find an index definition from the index vector using index name.
 @return	index def. if found else NULL */
-UNIV_INLINE
+IB_INLINE
 const ib_index_def_t*
 ib_table_find_index(
 /*================*/
@@ -1014,7 +1014,7 @@ ib_table_find_index(
 /*****************************************************************//**
 Get the InnoDB internal precise type from the schema column definition.
 @return	precise type in api format */
-UNIV_INLINE
+IB_INLINE
 ulint
 ib_col_get_prtype(
 /*==============*/
@@ -1052,7 +1052,7 @@ ib_col_get_prtype(
 /*****************************************************************//**
 Get the InnoDB internal main type from the schema column definition.
 @return	column main type */
-UNIV_INLINE
+IB_INLINE
 ulint
 ib_col_get_mtype(
 /*==============*/
@@ -1068,7 +1068,7 @@ ib_col_get_mtype(
 /*****************************************************************//**
 Find a column in the the column vector with the same name.
 @return	col. def. if found else NULL */
-UNIV_INLINE
+IB_INLINE
 const ib_col_t*
 ib_table_find_col(
 /*==============*/
@@ -1095,7 +1095,7 @@ ib_table_find_col(
 /*****************************************************************//**
 Find a column in the the column list with the same name.
 @return	col. def. if found else NULL */
-UNIV_INLINE
+IB_INLINE
 const ib_key_col_t*
 ib_index_find_col(
 /*==============*/
@@ -1682,7 +1682,7 @@ ib_index_schema_create(
 /*****************************************************************//**
 Get an index definition that is tagged as a clustered index.
 @return	cluster index schema */
-UNIV_INLINE
+IB_INLINE
 ib_index_def_t*
 ib_find_clustered_index(
 /*====================*/
@@ -3233,7 +3233,7 @@ ib_cursor_close(
 /**********************************************************************//**
 Run the insert query and do error handling.
 @return	DB_SUCCESS or error code */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_insert_row_with_lock_retry(
 /*==========================*/
@@ -3441,7 +3441,7 @@ ib_cursor_insert_row(
 /*********************************************************************//**
 Gets pointer to a prebuilt update vector used in updates.
 @return	update vector */
-UNIV_INLINE
+IB_INLINE
 upd_t*
 ib_update_vector_create(
 /*====================*/
@@ -3577,7 +3577,7 @@ ib_calc_diff(
 /**********************************************************************//**
 Run the update query and do error handling.
 @return	DB_SUCCESS or error code */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_update_row_with_lock_retry(
 /*==========================*/
@@ -3625,7 +3625,7 @@ ib_update_row_with_lock_retry(
 /*********************************************************************//**
 Does an update or delete of a row.
 @return	DB_SUCCESS or err code */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_execute_update_query_graph(
 /*==========================*/
@@ -4024,7 +4024,7 @@ ib_cursor_next(
 /*****************************************************************//**
 Move cursor to the first record in the table.
 @return	DB_SUCCESS or err code */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_cursor_position(
 /*===============*/
@@ -4190,7 +4190,7 @@ ib_cursor_set_match_mode(
 /*****************************************************************//**
 Get the dfield instance for the column in the tuple.
 @return	dfield instance in tuple */
-UNIV_INLINE
+IB_INLINE
 dfield_t*
 ib_col_get_dfield(
 /*==============*/
@@ -4209,7 +4209,7 @@ ib_col_get_dfield(
 /*****************************************************************//**
 Predicate to check whether a column type contains variable length data.
 @return	DB_SUCCESS or error code */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_col_is_capped(
 /*==============*/
@@ -4387,7 +4387,7 @@ ib_col_get_len(
 /*****************************************************************//**
 Copy a column value from the tuple.
 @return	bytes copied or IB_SQL_NULL */
-UNIV_INLINE
+IB_INLINE
 ib_ulint_t
 ib_col_copy_value_low(
 /*==================*/
@@ -4473,7 +4473,7 @@ ib_col_copy_value(
 /*****************************************************************//**
 Get the InnoDB column attribute from the internal column precise type.
 @return	precise type in api format */
-UNIV_INLINE
+IB_INLINE
 ib_col_attr_t
 ib_col_get_attr(
 /*============*/
@@ -4509,7 +4509,7 @@ ib_col_get_attr(
 /*****************************************************************//**
 Get a column type, length and attributes from the tuple.
 @return	len of column data */
-UNIV_INLINE
+IB_INLINE
 ib_ulint_t
 ib_col_get_meta_low(
 /*================*/
@@ -4543,7 +4543,7 @@ ib_col_get_meta_low(
 
 /*************************************************************//**
 Read a signed int 8 bit column from an InnoDB tuple. */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_tuple_check_int(
 /*===============*/
@@ -6160,7 +6160,7 @@ ib_schema_tables_iterate(
 /*************************************************************//**
 Convert and write an INT column value to an InnoDB tuple.
 @return	DB_SUCCESS or error */
-UNIV_INLINE
+IB_INLINE
 ib_err_t
 ib_tuple_write_int(
 /*===============*/

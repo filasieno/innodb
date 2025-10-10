@@ -26,7 +26,7 @@ Created 5/30/1994 Heikki Tuuri
 /*******************************************************//**
 Creates a 64-bit dulint out of two ulints.
 @return	created dulint */
-UNIV_INLINE
+IB_INLINE
 dulint
 ut_dulint_create(
 /*=============*/
@@ -47,7 +47,7 @@ ut_dulint_create(
 /*******************************************************//**
 Gets the high-order 32 bits of a dulint.
 @return	32 bits in ulint */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_dulint_get_high(
 /*===============*/
@@ -59,7 +59,7 @@ ut_dulint_get_high(
 /*******************************************************//**
 Gets the low-order 32 bits of a dulint.
 @return	32 bits in ulint */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_dulint_get_low(
 /*==============*/
@@ -72,7 +72,7 @@ ut_dulint_get_low(
 Converts a dulint (a struct of 2 ulints) to ib_int64_t, which is a 64-bit
 integer type.
 @return	value in ib_int64_t type */
-UNIV_INLINE
+IB_INLINE
 ib_int64_t
 ut_conv_dulint_to_longlong(
 /*=======================*/
@@ -85,7 +85,7 @@ ut_conv_dulint_to_longlong(
 /*******************************************************//**
 Tests if a dulint is zero.
 @return	TRUE if zero */
-UNIV_INLINE
+IB_INLINE
 ibool
 ut_dulint_is_zero(
 /*==============*/
@@ -102,7 +102,7 @@ ut_dulint_is_zero(
 /*******************************************************//**
 Compares two dulints.
 @return	-1 if a < b, 0 if a == b, 1 if a > b */
-UNIV_INLINE
+IB_INLINE
 int
 ut_dulint_cmp(
 /*==========*/
@@ -125,7 +125,7 @@ ut_dulint_cmp(
 /*******************************************************//**
 Adds a ulint to a dulint.
 @return	sum a + b */
-UNIV_INLINE
+IB_INLINE
 dulint
 ut_dulint_add(
 /*==========*/
@@ -148,7 +148,7 @@ ut_dulint_add(
 /*******************************************************//**
 Subtracts a ulint from a dulint.
 @return	a - b */
-UNIV_INLINE
+IB_INLINE
 dulint
 ut_dulint_subtract(
 /*===============*/
@@ -175,7 +175,7 @@ ut_dulint_subtract(
 /********************************************************//**
 Rounds a dulint downward to a multiple of a power of 2.
 @return	rounded value */
-UNIV_INLINE
+IB_INLINE
 dulint
 ut_dulint_align_down(
 /*=================*/
@@ -199,7 +199,7 @@ ut_dulint_align_down(
 /********************************************************//**
 Rounds a dulint upward to a multiple of a power of 2.
 @return	rounded value */
-UNIV_INLINE
+IB_INLINE
 dulint
 ut_dulint_align_up(
 /*===============*/
@@ -213,7 +213,7 @@ ut_dulint_align_up(
 /********************************************************//**
 Rounds ib_uint64_t downward to a multiple of a power of 2.
 @return	rounded value */
-UNIV_INLINE
+IB_INLINE
 ib_uint64_t
 ut_uint64_align_down(
 /*=================*/
@@ -230,7 +230,7 @@ ut_uint64_align_down(
 /********************************************************//**
 Rounds ib_uint64_t upward to a multiple of a power of 2.
 @return	rounded value */
-UNIV_INLINE
+IB_INLINE
 ib_uint64_t
 ut_uint64_align_up(
 /*===============*/
@@ -249,7 +249,7 @@ ut_uint64_align_up(
 /*********************************************************//**
 The following function rounds up a pointer to the nearest aligned address.
 @return	aligned pointer */
-UNIV_INLINE
+IB_INLINE
 void*
 ut_align(
 /*=====*/
@@ -269,7 +269,7 @@ ut_align(
 The following function rounds down a pointer to the nearest
 aligned address.
 @return	aligned pointer */
-UNIV_INLINE
+IB_INLINE
 void*
 ut_align_down(
 /*==========*/
@@ -289,7 +289,7 @@ ut_align_down(
 The following function computes the offset of a pointer from the nearest
 aligned address.
 @return	distance from aligned pointer */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_align_offset(
 /*============*/
@@ -308,7 +308,7 @@ ut_align_offset(
 /*****************************************************************//**
 Gets the nth bit of a ulint.
 @return	TRUE if nth bit is 1; 0th bit is defined to be the least significant */
-UNIV_INLINE
+IB_INLINE
 ibool
 ut_bit_get_nth(
 /*===========*/
@@ -325,7 +325,7 @@ ut_bit_get_nth(
 /*****************************************************************//**
 Sets the nth bit of a ulint.
 @return	the ulint with the bit set as requested */
-UNIV_INLINE
+IB_INLINE
 ulint
 ut_bit_set_nth(
 /*===========*/

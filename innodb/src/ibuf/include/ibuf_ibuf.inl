@@ -89,7 +89,7 @@ ibuf_set_free_bits_func(
 /**********************************************************************//**
 A basic partial test if an insert to the insert buffer could be possible and
 recommended. */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_should_try(
 /*============*/
@@ -120,7 +120,7 @@ ibuf_should_try(
 /***********************************************************************//**
 Checks if a page address is an ibuf bitmap page address.
 @return	TRUE if a bitmap page */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_bitmap_page(
 /*=============*/
@@ -142,7 +142,7 @@ ibuf_bitmap_page(
 /*********************************************************************//**
 Translates the free space on a page to a value in the ibuf bitmap.
 @return	value for ibuf bitmap bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 ibuf_index_page_calc_free_bits(
 /*===========================*/
@@ -178,7 +178,7 @@ ibuf_index_page_calc_free_bits(
 /*********************************************************************//**
 Translates the ibuf free bits to the free space on a page in bytes.
 @return	maximum insert size after reorganize for the page */
-UNIV_INLINE
+IB_INLINE
 ulint
 ibuf_index_page_calc_free_from_bits(
 /*================================*/
@@ -210,7 +210,7 @@ ibuf_index_page_calc_free_from_bits(
 /*********************************************************************//**
 Translates the free space on a compressed page to a value in the ibuf bitmap.
 @return	value for ibuf bitmap bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 ibuf_index_page_calc_free_zip(
 /*==========================*/
@@ -245,7 +245,7 @@ ibuf_index_page_calc_free_zip(
 /*********************************************************************//**
 Translates the free space on a page to a value in the ibuf bitmap.
 @return	value for ibuf bitmap bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 ibuf_index_page_calc_free(
 /*======================*/
@@ -285,7 +285,7 @@ momentarily be set too high.  It is only safe to use this function for
 decrementing the free bits.  Should more free space become available,
 we must not update the free bits here, because that would break crash
 recovery. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_update_free_bits_if_full(
 /*==========================*/

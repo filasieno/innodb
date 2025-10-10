@@ -26,7 +26,7 @@ Created 4/26/2006 Osku Salerma
 /****************************************************************//**
 Get the first node in the list.
 @return	first node, or NULL */
-UNIV_INLINE
+IB_INLINE
 ib_list_node_t*
 ib_list_get_first(
 /*==============*/
@@ -38,7 +38,7 @@ ib_list_get_first(
 /****************************************************************//**
 Get the last node in the list.
 @return	last node, or NULL */
-UNIV_INLINE
+IB_INLINE
 ib_list_node_t*
 ib_list_get_last(
 /*=============*/

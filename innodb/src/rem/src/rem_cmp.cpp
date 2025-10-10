@@ -81,7 +81,7 @@ Transforms the character code so that it is ordered appropriately for the
 language. This is only used for the latin1 char set. The client does the
 comparisons for other char sets.
 @return	collation order position */
-UNIV_INLINE
+IB_INLINE
 ulint
 cmp_collate(
 /*========*/

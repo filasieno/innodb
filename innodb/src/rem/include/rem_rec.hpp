@@ -83,7 +83,7 @@ offsets[] array, first passed to rec_get_offsets() */
 The following function is used to get the pointer of the next chained record
 on the same page.
 @return	pointer to the next chained record, or NULL if none */
-UNIV_INLINE
+IB_INLINE
 const rec_t*
 rec_get_next_ptr_const(
 /*===================*/
@@ -93,7 +93,7 @@ rec_get_next_ptr_const(
 The following function is used to get the pointer of the next chained record
 on the same page.
 @return	pointer to the next chained record, or NULL if none */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 rec_get_next_ptr(
 /*=============*/
@@ -103,7 +103,7 @@ rec_get_next_ptr(
 The following function is used to get the offset of the
 next chained record on the same page.
 @return	the page offset of the next chained record, or 0 if none */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_next_offs(
 /*==============*/
@@ -112,7 +112,7 @@ rec_get_next_offs(
 /******************************************************//**
 The following function is used to set the next record offset field
 of an old-style record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_next_offs_old(
 /*==================*/
@@ -121,7 +121,7 @@ rec_set_next_offs_old(
 /******************************************************//**
 The following function is used to set the next record offset field
 of a new-style record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_next_offs_new(
 /*==================*/
@@ -131,7 +131,7 @@ rec_set_next_offs_new(
 The following function is used to get the number of fields
 in an old-style record.
 @return	number of data fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_n_fields_old(
 /*=================*/
@@ -140,7 +140,7 @@ rec_get_n_fields_old(
 The following function is used to get the number of fields
 in a record.
 @return	number of data fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_n_fields(
 /*=============*/
@@ -150,14 +150,14 @@ rec_get_n_fields(
 The following function is used to get the number of records owned by the
 previous directory record.
 @return	number of owned records */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_n_owned_old(
 /*================*/
 	const rec_t*	rec);	/*!< in: old-style physical record */
 /******************************************************//**
 The following function is used to set the number of owned records. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_n_owned_old(
 /*================*/
@@ -167,14 +167,14 @@ rec_set_n_owned_old(
 The following function is used to get the number of records owned by the
 previous directory record.
 @return	number of owned records */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_n_owned_new(
 /*================*/
 	const rec_t*	rec);	/*!< in: new-style physical record */
 /******************************************************//**
 The following function is used to set the number of owned records. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_n_owned_new(
 /*================*/
@@ -185,7 +185,7 @@ rec_set_n_owned_new(
 The following function is used to retrieve the info bits of
 a record.
 @return	info bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_info_bits(
 /*==============*/
@@ -193,7 +193,7 @@ rec_get_info_bits(
 	ulint		comp);	/*!< in: nonzero=compact page format */
 /******************************************************//**
 The following function is used to set the info bits of a record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_info_bits_old(
 /*==================*/
@@ -201,7 +201,7 @@ rec_set_info_bits_old(
 	ulint	bits);	/*!< in: info bits */
 /******************************************************//**
 The following function is used to set the info bits of a record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_info_bits_new(
 /*==================*/
@@ -210,7 +210,7 @@ rec_set_info_bits_new(
 /******************************************************//**
 The following function retrieves the status bits of a new-style record.
 @return	status bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_status(
 /*===========*/
@@ -218,7 +218,7 @@ rec_get_status(
 
 /******************************************************//**
 The following function is used to set the status bits of a new-style record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_status(
 /*===========*/
@@ -229,7 +229,7 @@ rec_set_status(
 The following function is used to retrieve the info and status
 bits of a record.  (Only compact records have status bits.)
 @return	info bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_info_and_status_bits(
 /*=========================*/
@@ -238,7 +238,7 @@ rec_get_info_and_status_bits(
 /******************************************************//**
 The following function is used to set the info and status
 bits of a record.  (Only compact records have status bits.) */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_info_and_status_bits(
 /*=========================*/
@@ -248,7 +248,7 @@ rec_set_info_and_status_bits(
 /******************************************************//**
 The following function tells if record is delete marked.
 @return	nonzero if delete marked */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_deleted_flag(
 /*=================*/
@@ -256,7 +256,7 @@ rec_get_deleted_flag(
 	ulint		comp);	/*!< in: nonzero=compact page format */
 /******************************************************//**
 The following function is used to set the deleted bit. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_deleted_flag_old(
 /*=====================*/
@@ -264,7 +264,7 @@ rec_set_deleted_flag_old(
 	ulint	flag);	/*!< in: nonzero if delete marked */
 /******************************************************//**
 The following function is used to set the deleted bit. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_deleted_flag_new(
 /*=====================*/
@@ -274,7 +274,7 @@ rec_set_deleted_flag_new(
 /******************************************************//**
 The following function tells if a new-style record is a node pointer.
 @return	TRUE if node pointer */
-UNIV_INLINE
+IB_INLINE
 ibool
 rec_get_node_ptr_flag(
 /*==================*/
@@ -283,7 +283,7 @@ rec_get_node_ptr_flag(
 The following function is used to get the order number
 of an old-style record in the heap of the index page.
 @return	heap order number */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_heap_no_old(
 /*================*/
@@ -291,7 +291,7 @@ rec_get_heap_no_old(
 /******************************************************//**
 The following function is used to set the heap number
 field in an old-style record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_heap_no_old(
 /*================*/
@@ -301,7 +301,7 @@ rec_set_heap_no_old(
 The following function is used to get the order number
 of a new-style record in the heap of the index page.
 @return	heap order number */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_heap_no_new(
 /*================*/
@@ -309,7 +309,7 @@ rec_get_heap_no_new(
 /******************************************************//**
 The following function is used to set the heap number
 field in a new-style record. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_heap_no_new(
 /*================*/
@@ -319,7 +319,7 @@ rec_set_heap_no_new(
 The following function is used to test whether the data offsets
 in the record are stored in one-byte or two-byte format.
 @return	TRUE if 1-byte form */
-UNIV_INLINE
+IB_INLINE
 ibool
 rec_get_1byte_offs_flag(
 /*====================*/
@@ -399,7 +399,7 @@ rec_get_offsets_reverse(
 /************************************************************//**
 Validates offsets returned by rec_get_offsets().
 @return	TRUE if valid */
-UNIV_INLINE
+IB_INLINE
 ibool
 rec_offs_validate(
 /*==============*/
@@ -411,7 +411,7 @@ rec_offs_validate(
 /************************************************************//**
 Updates debug data in offsets, in order to avoid bogus
 rec_offs_validate() failures. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_offs_make_valid(
 /*================*/
@@ -442,7 +442,7 @@ Gets the physical size of an old-style field.
 Also an SQL null may have a field of size > 0,
 if the data type is of a fixed size.
 @return	field size in bytes */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_nth_field_size(
 /*===================*/
@@ -452,7 +452,7 @@ rec_get_nth_field_size(
 The following function is used to get an offset to the nth
 data field in a record.
 @return	offset from the origin of rec */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_nth_field_offs(
 /*===================*/
@@ -466,7 +466,7 @@ rec_get_nth_field_offs(
 Determine if the offsets are for a record in the new
 compact format.
 @return	nonzero if compact format */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_comp(
 /*==========*/
@@ -475,7 +475,7 @@ rec_offs_comp(
 Determine if the offsets are for a record containing
 externally stored columns.
 @return	nonzero if externally stored */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_any_extern(
 /*================*/
@@ -483,7 +483,7 @@ rec_offs_any_extern(
 /******************************************************//**
 Returns nonzero if the extern bit is set in nth field of rec.
 @return	nonzero if externally stored */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_nth_extern(
 /*================*/
@@ -492,7 +492,7 @@ rec_offs_nth_extern(
 /******************************************************//**
 Returns nonzero if the SQL NULL bit is set in nth field of rec.
 @return	nonzero if SQL NULL */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_nth_sql_null(
 /*==================*/
@@ -501,7 +501,7 @@ rec_offs_nth_sql_null(
 /******************************************************//**
 Gets the physical size of a field.
 @return	length of field */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_nth_size(
 /*==============*/
@@ -511,7 +511,7 @@ rec_offs_nth_size(
 /******************************************************//**
 Returns the number of extern bits set in a record.
 @return	number of externally stored fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_n_extern(
 /*==============*/
@@ -522,7 +522,7 @@ The previous value must have exactly the same size as the new value. If len
 is UNIV_SQL_NULL then the field is treated as an SQL null.
 For records in ROW_FORMAT=COMPACT (new-style records), len must not be
 UNIV_SQL_NULL unless the field already is SQL null. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_set_nth_field(
 /*==============*/
@@ -537,7 +537,7 @@ record, that is the sum of field lengths. SQL null fields
 are counted as length 0 fields. The value returned by the function
 is the distance from record origin to record end in bytes.
 @return	size */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_data_size_old(
 /*==================*/
@@ -546,7 +546,7 @@ rec_get_data_size_old(
 The following function returns the number of allocated elements
 for an array of offsets.
 @return	number of elements */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_get_n_alloc(
 /*=================*/
@@ -554,7 +554,7 @@ rec_offs_get_n_alloc(
 /**********************************************************//**
 The following function sets the number of allocated elements
 for an array of offsets. */
-UNIV_INLINE
+IB_INLINE
 void
 rec_offs_set_n_alloc(
 /*=================*/
@@ -566,7 +566,7 @@ rec_offs_set_n_alloc(
 /**********************************************************//**
 The following function returns the number of fields in a record.
 @return	number of fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_n_fields(
 /*==============*/
@@ -577,7 +577,7 @@ record, that is the sum of field lengths. SQL null fields
 are counted as length 0 fields. The value returned by the function
 is the distance from record origin to record end in bytes.
 @return	size */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_data_size(
 /*===============*/
@@ -587,7 +587,7 @@ Returns the total size of record minus data size of record.
 The value returned by the function is the distance from record
 start to record origin in bytes.
 @return	size */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_extra_size(
 /*================*/
@@ -595,7 +595,7 @@ rec_offs_extra_size(
 /**********************************************************//**
 Returns the total size of a physical record.
 @return	size */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_offs_size(
 /*==========*/
@@ -603,7 +603,7 @@ rec_offs_size(
 /**********************************************************//**
 Returns a pointer to the start of the record.
 @return	pointer to start */
-UNIV_INLINE
+IB_INLINE
 byte*
 rec_get_start(
 /*==========*/
@@ -612,7 +612,7 @@ rec_get_start(
 /**********************************************************//**
 Returns a pointer to the end of the record.
 @return	pointer to end */
-UNIV_INLINE
+IB_INLINE
 byte*
 rec_get_end(
 /*========*/
@@ -621,7 +621,7 @@ rec_get_end(
 /***************************************************************//**
 Copies a physical record to a buffer.
 @return	pointer to the origin of the copy */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 rec_copy(
 /*=====*/
@@ -648,7 +648,7 @@ rec_copy_prefix_to_buf(
 /************************************************************//**
 Folds a prefix of a physical record to a ulint.
 @return	the folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_fold(
 /*=====*/
@@ -695,7 +695,7 @@ rec_convert_dtuple_to_rec(
 Returns the extra size of an old-style physical record if we know its
 data size and number of fields.
 @return	extra size */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_converted_extra_size(
 /*=========================*/
@@ -736,7 +736,7 @@ rec_get_converted_size_comp(
 The following function returns the size of a data tuple when converted to
 a physical record.
 @return	size */
-UNIV_INLINE
+IB_INLINE
 ulint
 rec_get_converted_size(
 /*===================*/

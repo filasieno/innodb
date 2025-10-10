@@ -24,8 +24,8 @@ Created June 2005 by Marko Makela
 *******************************************************/
 
 #ifdef UNIV_MATERIALIZE
-# undef UNIV_INLINE
-# define UNIV_INLINE
+# undef IB_INLINE
+# define IB_INLINE
 #endif
 
 #include "page_zip.hpp"
@@ -112,7 +112,7 @@ In summary, the compressed page looks like this:
 /**********************************************************************//**
 Determine the size of a compressed page in bytes.
 @return	size in bytes */
-UNIV_INLINE
+IB_INLINE
 ulint
 page_zip_get_size(
 /*==============*/
@@ -133,7 +133,7 @@ page_zip_get_size(
 }
 /**********************************************************************//**
 Set the size of a compressed page in bytes. */
-UNIV_INLINE
+IB_INLINE
 void
 page_zip_set_size(
 /*==============*/
@@ -160,7 +160,7 @@ page_zip_set_size(
 /**********************************************************************//**
 Determine if a record is so big that it needs to be stored externally.
 @return	FALSE if the entire record can be stored locally on the page */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_zip_rec_needs_ext(
 /*===================*/
@@ -203,7 +203,7 @@ page_zip_rec_needs_ext(
 /**********************************************************************//**
 Validate a compressed page descriptor.
 @return	TRUE if ok */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_zip_simple_validate(
 /*=====================*/
@@ -226,7 +226,7 @@ page_zip_simple_validate(
 Determine if the length of the page trailer.
 @return length of the page trailer, in bytes, not including the
 terminating zero byte of the modification log */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_zip_get_trailer_len(
 /*=====================*/
@@ -265,7 +265,7 @@ page_zip_get_trailer_len(
 Determine how big record can be inserted without recompressing the page.
 @return a positive number indicating the maximum size of a record
 whose insertion is guaranteed to succeed, or zero or negative */
-UNIV_INLINE
+IB_INLINE
 lint
 page_zip_max_ins_size(
 /*==================*/
@@ -295,7 +295,7 @@ page_zip_max_ins_size(
 /**********************************************************************//**
 Determine if enough space is available in the modification log.
 @return	TRUE if enough space is available */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_zip_available(
 /*===============*/
@@ -336,7 +336,7 @@ page_zip_available(
 
 /**********************************************************************//**
 Initialize a compressed page descriptor. */
-UNIV_INLINE
+IB_INLINE
 void
 page_zip_des_init(
 /*==============*/
@@ -362,7 +362,7 @@ already have been written to the uncompressed page.
 However, the data portion of the uncompressed page may differ from
 the compressed page when a record is being inserted in
 page_cur_insert_rec_zip(). */
-UNIV_INLINE
+IB_INLINE
 void
 page_zip_write_header(
 /*==================*/
@@ -394,6 +394,6 @@ page_zip_write_header(
 }
 
 #ifdef UNIV_MATERIALIZE
-# undef UNIV_INLINE
-# define UNIV_INLINE	UNIV_INLINE_ORIGINAL
+# undef IB_INLINE
+# define IB_INLINE	IB_INLINE_ORIGINAL
 #endif

@@ -467,7 +467,7 @@ ulint log_group_get_capacity(
 Calculates the offset within a log group, when the log file headers are not
 included.
 @return	size offset (<= offset) */
-UNIV_INLINE
+IB_INLINE
 ulint log_group_calc_size_offset(
 	// =======================
 	ulint offset, /*!< in: real offset within the
@@ -484,7 +484,7 @@ ulint log_group_calc_size_offset(
 Calculates the offset within a log group, when the log file headers are
 included.
 @return	real offset (>= offset) */
-UNIV_INLINE
+IB_INLINE
 ulint log_group_calc_real_offset(
 	// =======================
 	ulint offset, /*!< in: size offset within the
@@ -902,7 +902,7 @@ void log_group_init(
 
 /******************************************************************/ /**
 Does the unlockings needed in flush i/o completion. */
-UNIV_INLINE
+IB_INLINE
 void log_flush_do_unlocks(
 	// =================
 	ulint code
@@ -935,7 +935,7 @@ void log_flush_do_unlocks(
 Checks if a flush is completed for a log group and does the completion
 routine if yes.
 @return	LOG_UNLOCK_NONE_FLUSHED_LOCK or 0 */
-UNIV_INLINE
+IB_INLINE
 ulint log_group_check_flush_completion(
 	// =============================
 	log_group_t *group

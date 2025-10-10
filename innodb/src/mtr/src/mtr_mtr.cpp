@@ -36,7 +36,7 @@
 /// @param mtr in: mtr
 /// @param slot in: memo slot
 
-UNIV_INLINE
+IB_INLINE
 void mtr_memo_slot_release(mtr_t *mtr, mtr_memo_slot_t *slot)
 {
 	void *object;
@@ -74,7 +74,7 @@ void mtr_memo_slot_release(mtr_t *mtr, mtr_memo_slot_t *slot)
 /// destroyed.
 /// @param mtr in: mtr
 
-UNIV_INLINE
+IB_INLINE
 void mtr_memo_pop_all(mtr_t *mtr)
 {
 	mtr_memo_slot_t *slot;

@@ -352,7 +352,7 @@ fsp_get_size_low(
 /**********************************************************************//**
 Gets a pointer to the space header and x-locks its page.
 @return	pointer to the space header, page x-locked */
-UNIV_INLINE
+IB_INLINE
 fsp_header_t*
 fsp_get_space_header(
 /*=================*/
@@ -382,7 +382,7 @@ fsp_get_space_header(
 /**********************************************************************//**
 Gets a descriptor bit of a page.
 @return	TRUE if free */
-UNIV_INLINE
+IB_INLINE
 ibool
 xdes_get_bit(
 /*=========*/
@@ -412,7 +412,7 @@ xdes_get_bit(
 
 /**********************************************************************//**
 Sets a descriptor bit of a page. */
-UNIV_INLINE
+IB_INLINE
 void
 xdes_set_bit(
 /*=========*/
@@ -450,7 +450,7 @@ Looks for a descriptor bit having the desired value. Starts from hint
 and scans upward; at the end of the extent the search is wrapped to
 the start of the extent.
 @return	bit index of the bit, ULINT_UNDEFINED if not found */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_find_bit(
 /*==========*/
@@ -487,7 +487,7 @@ xdes_find_bit(
 Looks for a descriptor bit having the desired value. Scans the extent in
 a direction opposite to xdes_find_bit.
 @return	bit index of the bit, ULINT_UNDEFINED if not found */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_find_bit_downward(
 /*===================*/
@@ -523,7 +523,7 @@ xdes_find_bit_downward(
 /**********************************************************************//**
 Returns the number of used pages in a descriptor.
 @return	number of pages used */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_get_n_used(
 /*============*/
@@ -547,7 +547,7 @@ xdes_get_n_used(
 /**********************************************************************//**
 Returns true if extent contains no used pages.
 @return	TRUE if totally free */
-UNIV_INLINE
+IB_INLINE
 ibool
 xdes_is_free(
 /*=========*/
@@ -565,7 +565,7 @@ xdes_is_free(
 /**********************************************************************//**
 Returns true if extent contains no free pages.
 @return	TRUE if full */
-UNIV_INLINE
+IB_INLINE
 ibool
 xdes_is_full(
 /*=========*/
@@ -582,7 +582,7 @@ xdes_is_full(
 
 /**********************************************************************//**
 Sets the state of an xdes. */
-UNIV_INLINE
+IB_INLINE
 void
 xdes_set_state(
 /*===========*/
@@ -601,7 +601,7 @@ xdes_set_state(
 /**********************************************************************//**
 Gets the state of an xdes.
 @return	state */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_get_state(
 /*===========*/
@@ -620,7 +620,7 @@ xdes_get_state(
 
 /**********************************************************************//**
 Inits an extent descriptor to the free and clean state. */
-UNIV_INLINE
+IB_INLINE
 void
 xdes_init(
 /*======*/
@@ -643,7 +643,7 @@ xdes_init(
 /********************************************************************//**
 Calculates the page where the descriptor of a page resides.
 @return	descriptor page offset */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_calc_descriptor_page(
 /*======================*/
@@ -675,7 +675,7 @@ xdes_calc_descriptor_page(
 /********************************************************************//**
 Calculates the descriptor index within a descriptor page.
 @return	descriptor index */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_calc_descriptor_index(
 /*=======================*/
@@ -701,7 +701,7 @@ list, if not free limit == space size. This adding is necessary to make the
 descriptor defined, as they are uninitialized above the free limit.
 @return pointer to the extent descriptor, NULL if the page does not
 exist in the space or if the offset exceeds the free limit */
-UNIV_INLINE
+IB_INLINE
 xdes_t*
 xdes_get_descriptor_with_space_hdr(
 /*===============================*/
@@ -800,7 +800,7 @@ Gets pointer to a the extent descriptor if the file address
 of the descriptor list node is known. The page where the
 extent descriptor resides is x-locked.
 @return	pointer to the extent descriptor */
-UNIV_INLINE
+IB_INLINE
 xdes_t*
 xdes_lst_get_descriptor(
 /*====================*/
@@ -825,7 +825,7 @@ xdes_lst_get_descriptor(
 /********************************************************************//**
 Returns page offset of the first page in extent described by a descriptor.
 @return	offset of the first page in extent */
-UNIV_INLINE
+IB_INLINE
 ulint
 xdes_get_offset(
 /*============*/
@@ -1808,7 +1808,7 @@ fsp_free_extent(
 /**********************************************************************//**
 Returns the nth inode slot on an inode page.
 @return	segment inode */
-UNIV_INLINE
+IB_INLINE
 fseg_inode_t*
 fsp_seg_inode_page_get_nth_inode(
 /*=============================*/
@@ -2110,7 +2110,7 @@ fseg_inode_get(
 /**********************************************************************//**
 Gets the page number from the nth fragment page slot.
 @return	page number, FIL_NULL if not in use */
-UNIV_INLINE
+IB_INLINE
 ulint
 fseg_get_nth_frag_page_no(
 /*======================*/
@@ -2128,7 +2128,7 @@ fseg_get_nth_frag_page_no(
 
 /**********************************************************************//**
 Sets the page number in the nth fragment page slot. */
-UNIV_INLINE
+IB_INLINE
 void
 fseg_set_nth_frag_page_no(
 /*======================*/

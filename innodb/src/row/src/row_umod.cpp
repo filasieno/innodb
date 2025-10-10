@@ -63,7 +63,7 @@ Checks if also the previous version of the clustered index record was
 modified or inserted by the same transaction, and its undo number is such
 that it should be undone in the same rollback.
 @return	TRUE if also previous modify or insert of this row should be undone */
-UNIV_INLINE
+IB_INLINE
 ibool
 row_undo_mod_undo_also_prev_vers(
 /*=============================*/

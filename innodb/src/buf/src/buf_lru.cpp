@@ -167,7 +167,7 @@ buf_LRU_var_init(void)
 Determines if the unzip_LRU list should be used for evicting a victim
 instead of the general LRU list.
 @return	TRUE if should use unzip_LRU */
-UNIV_INLINE
+IB_INLINE
 ibool
 buf_LRU_evict_from_unzip_LRU(void)
 /*==============================*/
@@ -548,7 +548,7 @@ buf_LRU_insert_zip_clean(
 Try to free an uncompressed page of a compressed block from the unzip
 LRU list.  The compressed page is preserved, and it need not be clean.
 @return	TRUE if freed */
-UNIV_INLINE
+IB_INLINE
 ibool
 buf_LRU_free_from_unzip_LRU_list(
 /*=============================*/
@@ -619,7 +619,7 @@ buf_LRU_free_from_unzip_LRU_list(
 /******************************************************************//**
 Try to free a clean page from the common LRU list.
 @return	TRUE if freed */
-UNIV_INLINE
+IB_INLINE
 ibool
 buf_LRU_free_from_common_LRU_list(
 /*==============================*/
@@ -999,7 +999,7 @@ loop:
 /*******************************************************************//**
 Moves the LRU_old pointer so that the length of the old blocks list
 is inside the allowed limits. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_LRU_old_adjust_len(void)
 /*========================*/
@@ -1120,7 +1120,7 @@ buf_unzip_LRU_remove_block_if_needed(
 
 /******************************************************************//**
 Removes a block from the LRU list. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_LRU_remove_block(
 /*=================*/
@@ -1219,7 +1219,7 @@ buf_unzip_LRU_add_block(
 
 /******************************************************************//**
 Adds a block to the LRU list end. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_LRU_add_block_to_end_low(
 /*=========================*/
@@ -1264,7 +1264,7 @@ buf_LRU_add_block_to_end_low(
 
 /******************************************************************//**
 Adds a block to the LRU list. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_LRU_add_block_low(
 /*==================*/

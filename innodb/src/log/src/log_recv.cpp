@@ -1176,7 +1176,7 @@ static byte *recv_parse_or_apply_log_rec_body(
 Calculates the fold value of a page file address: used in inserting or
 searching for a log record in the hash table.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint recv_fold(
 	// ======
 	ulint space,	// !< in: space
@@ -1190,7 +1190,7 @@ ulint recv_fold(
 Calculates the hash value of a page file address: used in inserting or
 searching for a log record in the hash table.
 @return	folded value */
-UNIV_INLINE
+IB_INLINE
 ulint recv_hash(
 	// ======
 	ulint space,	// !< in: space

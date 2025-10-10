@@ -30,7 +30,7 @@ Created 12/9/1995 Heikki Tuuri
 
 /*************************************************************************//**
 Acquire the log mutex. */
-UNIV_INLINE
+IB_INLINE
 void
 log_acquire(void)
 /*=============*/
@@ -41,7 +41,7 @@ log_acquire(void)
 
 /*************************************************************************//**
 Releases the log mutex. */
-UNIV_INLINE
+IB_INLINE
 void
 log_release(void)
 /*=============*/
@@ -68,7 +68,7 @@ log_check_log_recs(
 /************************************************************//**
 Gets a log block flush bit.
 @return	TRUE if this block was the first to be written in a log flush */
-UNIV_INLINE
+IB_INLINE
 ibool
 log_block_get_flush_bit(
 /*====================*/
@@ -85,7 +85,7 @@ log_block_get_flush_bit(
 
 /************************************************************//**
 Sets the log block flush bit. */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_set_flush_bit(
 /*====================*/
@@ -108,7 +108,7 @@ log_block_set_flush_bit(
 /************************************************************//**
 Gets a log block number stored in the header.
 @return	log block number stored in the block header */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_get_hdr_no(
 /*=================*/
@@ -121,7 +121,7 @@ log_block_get_hdr_no(
 /************************************************************//**
 Sets the log block number stored in the header; NOTE that this must be set
 before the flush bit! */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_set_hdr_no(
 /*=================*/
@@ -138,7 +138,7 @@ log_block_set_hdr_no(
 /************************************************************//**
 Gets a log block data length.
 @return	log block data length measured as a byte offset from the block start */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_get_data_len(
 /*===================*/
@@ -149,7 +149,7 @@ log_block_get_data_len(
 
 /************************************************************//**
 Sets the log block data length. */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_set_data_len(
 /*===================*/
@@ -163,7 +163,7 @@ log_block_set_data_len(
 Gets a log block first mtr log record group offset.
 @return first mtr log record group byte offset from the block start, 0
 if none */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_get_first_rec_group(
 /*==========================*/
@@ -174,7 +174,7 @@ log_block_get_first_rec_group(
 
 /************************************************************//**
 Sets the log block first mtr log record group offset. */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_set_first_rec_group(
 /*==========================*/
@@ -187,7 +187,7 @@ log_block_set_first_rec_group(
 /************************************************************//**
 Gets a log block checkpoint number field (4 lowest bytes).
 @return	checkpoint no (4 lowest bytes) */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_get_checkpoint_no(
 /*========================*/
@@ -198,7 +198,7 @@ log_block_get_checkpoint_no(
 
 /************************************************************//**
 Sets a log block checkpoint number field (4 lowest bytes). */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_set_checkpoint_no(
 /*========================*/
@@ -211,7 +211,7 @@ log_block_set_checkpoint_no(
 /************************************************************//**
 Converts a lsn to a log block number.
 @return	log block number, it is > 0 and <= 1G */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_convert_lsn_to_no(
 /*========================*/
@@ -223,7 +223,7 @@ log_block_convert_lsn_to_no(
 /************************************************************//**
 Calculates the checksum for a log block.
 @return	checksum */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_calc_checksum(
 /*====================*/
@@ -253,7 +253,7 @@ log_block_calc_checksum(
 /************************************************************//**
 Gets a log block checksum field value.
 @return	checksum */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_block_get_checksum(
 /*===================*/
@@ -265,7 +265,7 @@ log_block_get_checksum(
 
 /************************************************************//**
 Sets a log block checksum field value. */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_set_checksum(
 /*===================*/
@@ -279,7 +279,7 @@ log_block_set_checksum(
 
 /************************************************************//**
 Initializes a log block in the log buffer. */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_init(
 /*===========*/
@@ -301,7 +301,7 @@ log_block_init(
 /************************************************************//**
 Initializes a log block in the log buffer in the old format, where there
 was no checksum yet. */
-UNIV_INLINE
+IB_INLINE
 void
 log_block_init_in_old_format(
 /*=========================*/
@@ -326,7 +326,7 @@ log_block_init_in_old_format(
 Writes to the log the string given. The log must be released with
 log_release().
 @return	end lsn of the log record, zero if did not succeed */
-UNIV_INLINE
+IB_INLINE
 ib_uint64_t
 log_reserve_and_write_fast(
 /*=======================*/
@@ -406,7 +406,7 @@ log_reserve_and_write_fast(
 /************************************************************//**
 Gets the current lsn.
 @return	current lsn */
-UNIV_INLINE
+IB_INLINE
 ib_uint64_t
 log_get_lsn(void)
 /*=============*/
@@ -426,7 +426,7 @@ log_get_lsn(void)
 Gets the log group capacity. It is OK to read the value without
 holding log_sys->mutex because it is constant.
 @return	log group capacity */
-UNIV_INLINE
+IB_INLINE
 ulint
 log_get_capacity(void)
 /*==================*/
@@ -439,7 +439,7 @@ Checks if there is need for a log buffer flush or a new checkpoint, and does
 this if yes. Any database operation should call this when it has modified
 more than about 4 pages. NOTE that this function may only be called when the
 OS thread owns no synchronization objects except the dictionary mutex. */
-UNIV_INLINE
+IB_INLINE
 void
 log_free_check(void)
 /*================*/

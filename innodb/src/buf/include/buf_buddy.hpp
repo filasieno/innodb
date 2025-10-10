@@ -25,8 +25,8 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #define buf0buddy_h
 
 #ifdef UNIV_MATERIALIZE
-# undef UNIV_INLINE
-# define UNIV_INLINE
+# undef IB_INLINE
+# define IB_INLINE
 #endif
 
 #include "univ.i"
@@ -42,7 +42,7 @@ control blocks must be properly initialized immediately after
 buf_buddy_alloc() has returned the memory, before releasing
 buf_pool_mutex.
 @return	allocated block, possibly NULL if lru == NULL */
-UNIV_INLINE
+IB_INLINE
 void*
 buf_buddy_alloc(
 /*============*/
@@ -55,7 +55,7 @@ buf_buddy_alloc(
 
 /**********************************************************************//**
 Release a block. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_buddy_free(
 /*===========*/

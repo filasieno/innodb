@@ -68,7 +68,7 @@ trx_undo_arr_free(
 /*******************************************************************//**
 Returns pointer to nth element in an undo number array.
 @return	pointer to the nth element */
-UNIV_INLINE
+IB_INLINE
 trx_undo_inf_t*
 trx_undo_arr_get_nth_info(
 /*======================*/

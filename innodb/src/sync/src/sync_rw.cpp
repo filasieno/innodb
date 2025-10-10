@@ -491,7 +491,7 @@ rw_lock_x_lock_move_ownership(
 /******************************************************************//**
 Function for the next writer to call. Waits for readers to exit.
 The caller must have already decremented lock_word by X_LOCK_DECR. */
-UNIV_INLINE
+IB_INLINE
 void
 rw_lock_x_lock_wait(
 /*================*/
@@ -559,7 +559,7 @@ rw_lock_x_lock_wait(
 /******************************************************************//**
 Low-level function for acquiring an exclusive lock.
 @return	RW_LOCK_NOT_LOCKED if did not succeed, RW_LOCK_EX if success. */
-UNIV_INLINE
+IB_INLINE
 ibool
 rw_lock_x_lock_low(
 /*===============*/

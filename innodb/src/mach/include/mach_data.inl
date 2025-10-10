@@ -22,21 +22,21 @@
 
 #include <string.h>
 
-UNIV_INLINE void mach_write_to_1(byte* b, ulint n)
+IB_INLINE void mach_write_to_1(byte* b, ulint n)
 {
 	ut_ad(b);
 	ut_ad(n <= 0xFFUL);
 	b[0] = (byte)n;
 }
 
-UNIV_INLINE ulint mach_read_from_1(const byte* b)
+IB_INLINE ulint mach_read_from_1(const byte* b)
 {
 	ut_ad(b);
 	return((ulint)(b[0]));
 }
 
 
-UNIV_INLINE void mach_write_to_2(byte* b, ulint n)
+IB_INLINE void mach_write_to_2(byte* b, ulint n)
 {
 	ut_ad(b);
 	ut_ad(n <= 0xFFFFUL);
@@ -45,13 +45,13 @@ UNIV_INLINE void mach_write_to_2(byte* b, ulint n)
 	b[1] = (byte)(n);
 }
 
-UNIV_INLINE ulint mach_read_from_2(const byte* b)
+IB_INLINE ulint mach_read_from_2(const byte* b)
 {
 	ut_ad(b);
 	return ((ulint)(b[0]) << 8) + (ulint)(b[1]);
 }
 
-UNIV_INLINE ib_uint16_t mach_encode_2(ulint n)
+IB_INLINE ib_uint16_t mach_encode_2(ulint n)
 {
 	ib_uint16_t	ret;
 	ut_ad(2 == sizeof ret);
@@ -59,13 +59,13 @@ UNIV_INLINE ib_uint16_t mach_encode_2(ulint n)
 	return ret;
 }
 
-UNIV_INLINE ulint mach_decode_2(ib_uint16_t	n)
+IB_INLINE ulint mach_decode_2(ib_uint16_t	n)
 {
 	ut_ad(2 == sizeof n);
 	return mach_read_from_2((const byte*) &n);
 }
 
-UNIV_INLINE void mach_write_to_3(byte* b, ulint n)
+IB_INLINE void mach_write_to_3(byte* b, ulint n)
 {
 	ut_ad(b);
 	ut_ad(n <= 0xFFFFFFUL);
@@ -75,14 +75,14 @@ UNIV_INLINE void mach_write_to_3(byte* b, ulint n)
 	b[2] = (byte)(n);
 }
 
-UNIV_INLINE ulint mach_read_from_3(const byte* b)
+IB_INLINE ulint mach_read_from_3(const byte* b)
 {
 	ut_ad(b);
 	return ((ulint)(b[0]) << 16) + ((ulint)(b[1]) << 8) + (ulint)(b[2]);
 }
 
 
-UNIV_INLINE void mach_write_to_4(byte* b, ulint n)
+IB_INLINE void mach_write_to_4(byte* b, ulint n)
 {
 	ut_ad(b);
 
@@ -92,13 +92,13 @@ UNIV_INLINE void mach_write_to_4(byte* b, ulint n)
 	b[3] = (byte)n;
 }
 
-UNIV_INLINE ulint mach_read_from_4(const byte* b)
+IB_INLINE ulint mach_read_from_4(const byte* b)
 {
 	ut_ad(b); 
 	return ((ulint)(b[0]) << 24) + ((ulint)(b[1]) << 16) + ((ulint)(b[2]) << 8) + (ulint)(b[3]);
 }
 
-UNIV_INLINE ulint mach_write_compressed(byte* b, ulint n)
+IB_INLINE ulint mach_write_compressed(byte* b, ulint n)
 {
 	ut_ad(b);
 	if (n < 0x80UL) {
@@ -120,7 +120,7 @@ UNIV_INLINE ulint mach_write_compressed(byte* b, ulint n)
 	}
 }
 
-UNIV_INLINE ulint mach_get_compressed_size(ulint n)
+IB_INLINE ulint mach_get_compressed_size(ulint n)
 {
 	if (n < 0x80UL) {
 		return 1;
@@ -135,7 +135,7 @@ UNIV_INLINE ulint mach_get_compressed_size(ulint n)
 	}
 }
 
-UNIV_INLINE ulint mach_read_compressed(const byte* b)
+IB_INLINE ulint mach_read_compressed(const byte* b)
 {
 	ut_ad(b);
 
@@ -154,7 +154,7 @@ UNIV_INLINE ulint mach_read_compressed(const byte* b)
 	}
 }
 
-UNIV_INLINE void mach_write_to_8(byte* b, dulint n)
+IB_INLINE void mach_write_to_8(byte* b, dulint n)
 {
 	ut_ad(b);
 
@@ -162,7 +162,7 @@ UNIV_INLINE void mach_write_to_8(byte* b, dulint n)
 	mach_write_to_4(b + 4, ut_dulint_get_low(n));
 }
 
-UNIV_INLINE void mach_write_ull(byte* b, ib_uint64_t n)
+IB_INLINE void mach_write_ull(byte* b, ib_uint64_t n)
 {
 	ut_ad(b);
 
@@ -170,7 +170,7 @@ UNIV_INLINE void mach_write_ull(byte* b, ib_uint64_t n)
 	mach_write_to_4(b + 4, (ulint) n);
 }
 
-UNIV_INLINE dulint mach_read_from_8(const byte*	b)
+IB_INLINE dulint mach_read_from_8(const byte*	b)
 {
 	ut_ad(b);
 
@@ -180,7 +180,7 @@ UNIV_INLINE dulint mach_read_from_8(const byte*	b)
 	return ut_dulint_create(high, low);
 }
 
-UNIV_INLINE ib_uint64_t mach_read_ull(const byte* b)
+IB_INLINE ib_uint64_t mach_read_ull(const byte* b)
 {
 	ib_uint64_t ull = ((ib_uint64_t) mach_read_from_4(b)) << 32;
 	ib_uint64_t ull |= (ib_uint64_t) mach_read_from_4(b + 4);
@@ -188,14 +188,14 @@ UNIV_INLINE ib_uint64_t mach_read_ull(const byte* b)
 	return ull;
 }
 
-UNIV_INLINE void mach_write_to_7(byte* b, dulint n)
+IB_INLINE void mach_write_to_7(byte* b, dulint n)
 {
 	ut_ad(b);
 	mach_write_to_3(b, ut_dulint_get_high(n));
 	mach_write_to_4(b + 3, ut_dulint_get_low(n));
 }
 
-UNIV_INLINE dulint mach_read_from_7(const byte*	b)
+IB_INLINE dulint mach_read_from_7(const byte*	b)
 {
 	ut_ad(b);
 	ulint high = mach_read_from_3(b);
@@ -203,14 +203,14 @@ UNIV_INLINE dulint mach_read_from_7(const byte*	b)
 	return ut_dulint_create(high, low);
 }
 
-UNIV_INLINE void mach_write_to_6(byte* b, dulint n)
+IB_INLINE void mach_write_to_6(byte* b, dulint n)
 {
 	ut_ad(b);
 	mach_write_to_2(b, ut_dulint_get_high(n));
 	mach_write_to_4(b + 2, ut_dulint_get_low(n));
 }
 
-UNIV_INLINE dulint mach_read_from_6(const byte*	b)
+IB_INLINE dulint mach_read_from_6(const byte*	b)
 {
 	ut_ad(b);
 	ulint high = mach_read_from_2(b);
@@ -218,7 +218,7 @@ UNIV_INLINE dulint mach_read_from_6(const byte*	b)
 	return ut_dulint_create(high, low);
 }
 
-UNIV_INLINE ulint mach_dulint_write_compressed(byte* b, dulint n)	
+IB_INLINE ulint mach_dulint_write_compressed(byte* b, dulint n)	
 {
 	ut_ad(b);
 	ulint size = mach_write_compressed(b, ut_dulint_get_high(n));
@@ -226,12 +226,12 @@ UNIV_INLINE ulint mach_dulint_write_compressed(byte* b, dulint n)
 	return size + 4;
 }
 
-UNIV_INLINE ulint mach_dulint_get_compressed_size(dulint n)	
+IB_INLINE ulint mach_dulint_get_compressed_size(dulint n)	
 {
 	return(4 + mach_get_compressed_size(ut_dulint_get_high(n)));
 }
 
-UNIV_INLINE dulint mach_dulint_read_compressed(const byte*	b)	
+IB_INLINE dulint mach_dulint_read_compressed(const byte*	b)	
 {
 	ut_ad(b);
 	ulint high = mach_read_compressed(b);
@@ -240,7 +240,7 @@ UNIV_INLINE dulint mach_dulint_read_compressed(const byte*	b)
 	return ut_dulint_create(high, low);
 }
 
-UNIV_INLINE ulint mach_dulint_write_much_compressed(byte* b, dulint n)	
+IB_INLINE ulint mach_dulint_write_much_compressed(byte* b, dulint n)	
 {
 	ulint size;
 	ut_ad(b);
@@ -253,7 +253,7 @@ UNIV_INLINE ulint mach_dulint_write_much_compressed(byte* b, dulint n)
 	return size;
 }
 
-UNIV_INLINE ulint mach_dulint_get_much_compressed_size(dulint n)	
+IB_INLINE ulint mach_dulint_get_much_compressed_size(dulint n)	
 {
 	if (0 == ut_dulint_get_high(n)) {
 		return mach_get_compressed_size(ut_dulint_get_low(n));
@@ -261,7 +261,7 @@ UNIV_INLINE ulint mach_dulint_get_much_compressed_size(dulint n)
 	return 1 + mach_get_compressed_size(ut_dulint_get_high(n)) + mach_get_compressed_size(ut_dulint_get_low(n));
 }
 
-UNIV_INLINE dulint mach_dulint_read_much_compressed(const byte* b)	
+IB_INLINE dulint mach_dulint_read_much_compressed(const byte* b)	
 {
 	ut_ad(b);
 
@@ -284,7 +284,7 @@ UNIV_INLINE dulint mach_dulint_read_much_compressed(const byte* b)
 }
 
 #ifndef UNIV_HOTBACKUP
-UNIV_INLINE double mach_double_read(const byte*	b)	
+IB_INLINE double mach_double_read(const byte*	b)	
 {
 	double d;
 	byte* ptr = (byte*)&d;
@@ -298,7 +298,7 @@ UNIV_INLINE double mach_double_read(const byte*	b)
 	return d;
 }
 
-UNIV_INLINE void mach_double_ptr_write(byte* b, const byte* ptr)	
+IB_INLINE void mach_double_ptr_write(byte* b, const byte* ptr)	
 {
 	for (ulint i = 0; i < sizeof(double); i++) {
 #ifdef WORDS_BIGENDIAN
@@ -309,12 +309,12 @@ UNIV_INLINE void mach_double_ptr_write(byte* b, const byte* ptr)
 	}
 }
 
-UNIV_INLINE void mach_double_write(byte* b, double d)	
+IB_INLINE void mach_double_write(byte* b, double d)	
 {
 	mach_double_ptr_write(b, (byte*) &d);
 }
 
-UNIV_INLINE float mach_float_read(const byte*	b)	
+IB_INLINE float mach_float_read(const byte*	b)	
 {
 	float d;
 	ulint i;
@@ -329,7 +329,7 @@ UNIV_INLINE float mach_float_read(const byte*	b)
 	return d;
 }
 
-UNIV_INLINE void mach_float_ptr_write(byte* b, const byte* ptr)	
+IB_INLINE void mach_float_ptr_write(byte* b, const byte* ptr)	
 {
 	ulint i;
 	for (i = 0; i < sizeof(float); i++) {
@@ -341,12 +341,12 @@ UNIV_INLINE void mach_float_ptr_write(byte* b, const byte* ptr)
 	}
 }
 
-UNIV_INLINE void mach_float_write(byte* b, float d)	
+IB_INLINE void mach_float_write(byte* b, float d)	
 {
 	mach_float_ptr_write(b, (byte*)&d);
 }
 
-UNIV_INLINE ulint mach_read_from_n_little_endian(const byte* buf, ulint buf_size)	
+IB_INLINE ulint mach_read_from_n_little_endian(const byte* buf, ulint buf_size)	
 {
 	ulint n	= 0;
 	const byte*	ptr;
@@ -364,7 +364,7 @@ UNIV_INLINE ulint mach_read_from_n_little_endian(const byte* buf, ulint buf_size
 	return n;
 }
 
-UNIV_INLINE void mach_write_to_n_little_endian(byte* dest, ulint dest_size, ulint n)		
+IB_INLINE void mach_write_to_n_little_endian(byte* dest, ulint dest_size, ulint n)		
 {
 	ut_ad(dest_size <= sizeof(ulint));
 	ut_ad(dest_size > 0);
@@ -380,12 +380,12 @@ UNIV_INLINE void mach_write_to_n_little_endian(byte* dest, ulint dest_size, ulin
 	ut_ad(n == 0);
 }
 
-UNIV_INLINE ulint mach_read_from_2_little_endian(const byte*	buf)		
+IB_INLINE ulint mach_read_from_2_little_endian(const byte*	buf)		
 {
 	return((ulint)(*buf) + ((ulint)(*(buf + 1))) * 256);
 }
 
-UNIV_INLINE void mach_write_to_2_little_endian(byte* dest, ulint n)		
+IB_INLINE void mach_write_to_2_little_endian(byte* dest, ulint n)		
 {
 	ut_ad(n < 256 * 256);
 	*dest = (byte)(n & 0xFFUL);
@@ -394,7 +394,7 @@ UNIV_INLINE void mach_write_to_2_little_endian(byte* dest, ulint n)
 	*dest = (byte)(n & 0xFFUL);
 }
 
-UNIV_INLINE void mach_swap_byte_order(byte* dest, const byte* from, ulint len)		
+IB_INLINE void mach_swap_byte_order(byte* dest, const byte* from, ulint len)		
 {
 	ut_ad(len > 0);
 	ut_ad(len <= 8);
@@ -411,7 +411,7 @@ UNIV_INLINE void mach_swap_byte_order(byte* dest, const byte* from, ulint len)
 	}
 }
 
-UNIV_INLINE void mach_read_int_type(void* dst, const byte* src, ibool usign)		
+IB_INLINE void mach_read_int_type(void* dst, const byte* src, ibool usign)		
 {
 #ifdef WORDS_BIGENDIAN
 	memcpy(dst, src, len);
@@ -423,7 +423,7 @@ UNIV_INLINE void mach_read_int_type(void* dst, const byte* src, ibool usign)
 #endif
 }
 
-UNIV_INLINE void mach_write_int_type(byte* dest, const byte* src, ulint len, ibool usign)		
+IB_INLINE void mach_write_int_type(byte* dest, const byte* src, ulint len, ibool usign)		
 {
 #ifdef WORDS_BIGENDIAN
 	memcpy(dest, src, len);
@@ -435,35 +435,35 @@ UNIV_INLINE void mach_write_int_type(byte* dest, const byte* src, ulint len, ibo
 #endif
 }
 
-UNIV_INLINE ib_uint64_t mach_read_uint64(const byte* src)		
+IB_INLINE ib_uint64_t mach_read_uint64(const byte* src)		
 {
 	ib_uint64_t	dst;
 	mach_read_int_type(&dst, src, sizeof(dst), TRUE);
 	return dst;
 }
 
-UNIV_INLINE ib_int64_t mach_read_int64(const byte*	src)		
+IB_INLINE ib_int64_t mach_read_int64(const byte*	src)		
 {
 	ib_uint64_t	dst;
 	mach_read_int_type(&dst, src, sizeof(dst), FALSE);
 	return dst;
 }
 
-UNIV_INLINE ib_uint32_t mach_read_uint32(const byte* src)		
+IB_INLINE ib_uint32_t mach_read_uint32(const byte* src)		
 {
 	ib_uint32_t	dst;
 	mach_read_int_type(&dst, src, sizeof(dst), TRUE);
 	return dst;
 }
 
-UNIV_INLINE ib_int32_t mach_read_int32(const byte* src)		
+IB_INLINE ib_int32_t mach_read_int32(const byte* src)		
 {
 	ib_int32_t dst;
 	mach_read_int_type(&dst, src, sizeof(dst), FALSE);
 	return dst;
 }
 
-UNIV_INLINE void
+IB_INLINE void
 mach_write_uint64(byte* dest, ib_uint64_t	n)
 {
 	ut_ad(dest != NULL);
@@ -471,17 +471,17 @@ mach_write_uint64(byte* dest, ib_uint64_t	n)
 	mach_write_int_type(dest, (const byte*) &n, sizeof(n), TRUE);
 }
 
-UNIV_INLINE void mach_write_int64(byte* dest, ib_int64_t n)		
+IB_INLINE void mach_write_int64(byte* dest, ib_int64_t n)		
 {
 	mach_write_int_type(dest, (const byte*) &n, sizeof(n), FALSE);
 }
 
-UNIV_INLINE void mach_write_uint32(byte* dest, ib_uint32_t n)		
+IB_INLINE void mach_write_uint32(byte* dest, ib_uint32_t n)		
 {
 	mach_write_int_type(dest, (const byte*) &n, sizeof(n), TRUE);
 }
 
-UNIV_INLINE void mach_write_int32(byte* dest, ib_int32_t n)		
+IB_INLINE void mach_write_int32(byte* dest, ib_int32_t n)		
 {
 	mach_write_int_type(dest, (const byte*) &n, sizeof(n), FALSE);
 }

@@ -35,7 +35,7 @@ extern byte data_error;
 /*********************************************************************//**
 Gets pointer to the type struct of SQL data field.
 @return	pointer to the type struct */
-UNIV_INLINE
+IB_INLINE
 dtype_t*
 dfield_get_type(
 /*============*/
@@ -49,7 +49,7 @@ dfield_get_type(
 
 /*********************************************************************//**
 Sets the type struct of SQL data field. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_set_type(
 /*============*/
@@ -65,7 +65,7 @@ dfield_set_type(
 /*********************************************************************//**
 Gets pointer to the data in a field.
 @return	pointer to data */
-UNIV_INLINE
+IB_INLINE
 void*
 dfield_get_data(
 /*============*/
@@ -82,7 +82,7 @@ dfield_get_data(
 /*********************************************************************//**
 Gets length of field data.
 @return	length of data; UNIV_SQL_NULL if SQL null data */
-UNIV_INLINE
+IB_INLINE
 ulint
 dfield_get_len(
 /*===========*/
@@ -97,7 +97,7 @@ dfield_get_len(
 
 /*********************************************************************//**
 Sets length in a field. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_set_len(
 /*===========*/
@@ -116,7 +116,7 @@ dfield_set_len(
 /*********************************************************************//**
 Determines if a field is SQL NULL
 @return	nonzero if SQL null data */
-UNIV_INLINE
+IB_INLINE
 ulint
 dfield_is_null(
 /*===========*/
@@ -130,7 +130,7 @@ dfield_is_null(
 /*********************************************************************//**
 Determines if a field is externally stored
 @return	nonzero if externally stored */
-UNIV_INLINE
+IB_INLINE
 ulint
 dfield_is_ext(
 /*==========*/
@@ -143,7 +143,7 @@ dfield_is_ext(
 
 /*********************************************************************//**
 Sets the "external storage" flag */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_set_ext(
 /*===========*/
@@ -156,7 +156,7 @@ dfield_set_ext(
 
 /*********************************************************************//**
 Sets pointer to the data and length in a field. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_set_data(
 /*============*/
@@ -176,7 +176,7 @@ dfield_set_data(
 
 /*********************************************************************//**
 Sets a data field to SQL NULL. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_set_null(
 /*============*/
@@ -187,7 +187,7 @@ dfield_set_null(
 
 /*********************************************************************//**
 Copies the data and len fields. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_copy_data(
 /*=============*/
@@ -203,7 +203,7 @@ dfield_copy_data(
 
 /*********************************************************************//**
 Copies a data field to another. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_copy(
 /*========*/
@@ -215,7 +215,7 @@ dfield_copy(
 
 /*********************************************************************//**
 Copies the data pointed to by a data field. */
-UNIV_INLINE
+IB_INLINE
 void
 dfield_dup(
 /*=======*/
@@ -231,7 +231,7 @@ dfield_dup(
 /*********************************************************************//**
 Tests if data length and content is equal for two dfields.
 @return	TRUE if equal */
-UNIV_INLINE
+IB_INLINE
 ibool
 dfield_datas_are_binary_equal(
 /*==========================*/
@@ -250,7 +250,7 @@ dfield_datas_are_binary_equal(
 /*********************************************************************//**
 Gets info bits in a data tuple.
 @return	info bits */
-UNIV_INLINE
+IB_INLINE
 ulint
 dtuple_get_info_bits(
 /*=================*/
@@ -263,7 +263,7 @@ dtuple_get_info_bits(
 
 /*********************************************************************//**
 Sets info bits in a data tuple. */
-UNIV_INLINE
+IB_INLINE
 void
 dtuple_set_info_bits(
 /*=================*/
@@ -278,7 +278,7 @@ dtuple_set_info_bits(
 /*********************************************************************//**
 Gets number of fields used in record comparisons.
 @return	number of fields used in comparisons in rem0cmp.* */
-UNIV_INLINE
+IB_INLINE
 ulint
 dtuple_get_n_fields_cmp(
 /*====================*/
@@ -291,7 +291,7 @@ dtuple_get_n_fields_cmp(
 
 /*********************************************************************//**
 Sets number of fields used in record comparisons. */
-UNIV_INLINE
+IB_INLINE
 void
 dtuple_set_n_fields_cmp(
 /*====================*/
@@ -308,7 +308,7 @@ dtuple_set_n_fields_cmp(
 /*********************************************************************//**
 Gets number of fields in a data tuple.
 @return	number of fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 dtuple_get_n_fields(
 /*================*/
@@ -323,7 +323,7 @@ dtuple_get_n_fields(
 /*********************************************************************//**
 Gets nth field of a tuple.
 @return	nth field */
-UNIV_INLINE
+IB_INLINE
 dfield_t*
 dtuple_get_nth_field(
 /*=================*/
@@ -341,7 +341,7 @@ dtuple_get_nth_field(
 Creates a data tuple to a memory heap. The default value for number
 of fields used in record comparisons for this tuple is n_fields.
 @return	own: created tuple */
-UNIV_INLINE
+IB_INLINE
 dtuple_t*
 dtuple_create(
 /*==========*/
@@ -386,7 +386,7 @@ dtuple_create(
 Wrap data fields in a tuple. The default value for number
 of fields used in record comparisons for this tuple is n_fields.
 @return	data tuple */
-UNIV_INLINE
+IB_INLINE
 const dtuple_t*
 dtuple_from_fields(
 /*===============*/
@@ -406,7 +406,7 @@ dtuple_from_fields(
 Copies a data tuple to another.  This is a shallow copy; if a deep copy
 is desired, dfield_dup() will have to be invoked on each field.
 @return	own: copy of tuple */
-UNIV_INLINE
+IB_INLINE
 dtuple_t*
 dtuple_copy(
 /*========*/
@@ -431,7 +431,7 @@ The following function returns the sum of data lengths of a tuple. The space
 occupied by the field structs or the tuple struct is not counted. Neither
 is possible space in externally stored parts of the field.
 @return	sum of data lengths */
-UNIV_INLINE
+IB_INLINE
 ulint
 dtuple_get_data_size(
 /*=================*/
@@ -468,7 +468,7 @@ dtuple_get_data_size(
 /*********************************************************************//**
 Computes the number of externally stored fields in a data tuple.
 @return	number of externally stored fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 dtuple_get_n_ext(
 /*=============*/
@@ -491,7 +491,7 @@ dtuple_get_n_ext(
 
 /*******************************************************************//**
 Sets types of fields binary in a tuple. */
-UNIV_INLINE
+IB_INLINE
 void
 dtuple_set_types_binary(
 /*====================*/
@@ -510,7 +510,7 @@ dtuple_set_types_binary(
 /************************************************************//**
 Folds a prefix given as the number of fields of a tuple.
 @return	the folded value */
-UNIV_INLINE
+IB_INLINE
 ulint
 dtuple_fold(
 /*========*/
@@ -565,7 +565,7 @@ dtuple_fold(
 
 /**********************************************************************//**
 Writes an SQL null field full of zeros. */
-UNIV_INLINE
+IB_INLINE
 void
 data_write_sql_null(
 /*================*/
@@ -578,7 +578,7 @@ data_write_sql_null(
 /**********************************************************************//**
 Checks if a dtuple contains an SQL null value.
 @return	TRUE if some field is SQL null */
-UNIV_INLINE
+IB_INLINE
 ibool
 dtuple_contains_null(
 /*=================*/
@@ -601,7 +601,7 @@ dtuple_contains_null(
 
 /**************************************************************//**
 Frees the memory in a big rec vector. */
-UNIV_INLINE
+IB_INLINE
 void
 dtuple_big_rec_free(
 /*================*/

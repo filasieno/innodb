@@ -290,7 +290,7 @@ sel_node_free_private(
 /*********************************************************************//**
 Evaluates the values in a select list. If there are aggregate functions,
 their argument value is added to the aggregate total. */
-UNIV_INLINE
+IB_INLINE
 void
 sel_eval_select_list(
 /*=================*/
@@ -310,7 +310,7 @@ sel_eval_select_list(
 /*********************************************************************//**
 Assigns the values in the select list to the possible into-variables in
 SELECT ... INTO ... */
-UNIV_INLINE
+IB_INLINE
 void
 sel_assign_into_var_values(
 /*=======================*/
@@ -339,7 +339,7 @@ sel_assign_into_var_values(
 /*********************************************************************//**
 Resets the aggregate value totals in the select list of an aggregate type
 query. */
-UNIV_INLINE
+IB_INLINE
 void
 sel_reset_aggregate_vals(
 /*=====================*/
@@ -362,7 +362,7 @@ sel_reset_aggregate_vals(
 
 /*********************************************************************//**
 Copies the input variable values when an explicit cursor is opened. */
-UNIV_INLINE
+IB_INLINE
 void
 row_sel_copy_input_variable_vals(
 /*=============================*/
@@ -567,7 +567,7 @@ next_col:
 /*********************************************************************//**
 Pushes the column values for a prefetched, cached row to the column prefetch
 buffers from the val fields in the column nodes. */
-UNIV_INLINE
+IB_INLINE
 void
 sel_push_prefetched_row(
 /*====================*/
@@ -640,7 +640,7 @@ next_col:
 Tests the conditions which determine when the index segment we are searching
 through has been exhausted.
 @return	TRUE if row passed the tests */
-UNIV_INLINE
+IB_INLINE
 ibool
 row_sel_test_end_conds(
 /*===================*/
@@ -677,7 +677,7 @@ row_sel_test_end_conds(
 /*********************************************************************//**
 Tests the other conditions.
 @return	TRUE if row passed the tests */
-UNIV_INLINE
+IB_INLINE
 ibool
 row_sel_test_other_conds(
 /*=====================*/
@@ -902,7 +902,7 @@ err_exit:
 /*********************************************************************//**
 Sets a lock on a record.
 @return	DB_SUCCESS or error code */
-UNIV_INLINE
+IB_INLINE
 ulint
 sel_set_rec_lock(
 /*=============*/
@@ -1110,7 +1110,7 @@ row_sel_restore_pcur_pos(
 
 /*********************************************************************//**
 Resets a plan cursor to a closed state. */
-UNIV_INLINE
+IB_INLINE
 void
 plan_reset_cursor(
 /*==============*/
@@ -2503,7 +2503,7 @@ row_sel_restore_position(
 /********************************************************************//**
 Reset the row cache. The memory is not freed only the stack pointers
 are reset. */
-UNIV_INLINE
+IB_INLINE
 void
 row_sel_row_cache_reset(
 /*====================*/
@@ -2539,7 +2539,7 @@ row_sel_row_cache_fetch_in_progress(
 
 /************************************************************************
 Check if row cache is full. */
-UNIV_INLINE
+IB_INLINE
 ibool
 row_sel_row_cache_is_full(
 /*======================*/
@@ -2586,7 +2586,7 @@ row_sel_row_cache_next(
 
 /********************************************************************//**
 Add a record to the fetch cache. */
-UNIV_INLINE
+IB_INLINE
 void
 row_sel_row_cache_add(
 /*==================*/

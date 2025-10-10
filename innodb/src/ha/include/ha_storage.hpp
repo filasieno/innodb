@@ -45,7 +45,7 @@ typedef struct ha_storage_struct	ha_storage_t;
 Creates a hash storage. If any of the parameters is 0, then a default
 value is used.
 @return	own: hash storage */
-UNIV_INLINE
+IB_INLINE
 ha_storage_t*
 ha_storage_create(
 /*==============*/
@@ -108,7 +108,7 @@ Strings are considered to be equal if strcmp(str1, str2) == 0.
 Empties a hash storage, freeing memory occupied by data chunks.
 This invalidates any pointers previously returned by ha_storage_put().
 The hash storage is not invalidated itself and can be used again. */
-UNIV_INLINE
+IB_INLINE
 void
 ha_storage_empty(
 /*=============*/
@@ -118,7 +118,7 @@ ha_storage_empty(
 Frees a hash storage and everything it contains, it cannot be used after
 this call.
 This invalidates any pointers previously returned by ha_storage_put(). */
-UNIV_INLINE
+IB_INLINE
 void
 ha_storage_free(
 /*============*/
@@ -127,7 +127,7 @@ ha_storage_free(
 /*******************************************************************//**
 Gets the size of the memory used by a storage.
 @return	bytes used */
-UNIV_INLINE
+IB_INLINE
 ulint
 ha_storage_get_size(
 /*================*/

@@ -60,7 +60,7 @@ Retrieves the error_info field from a trx.
 @return	the error info 
 in: trx object
 */
-UNIV_INLINE const dict_index_t* trx_get_error_info(const trx_t*	trx);
+IB_INLINE const dict_index_t* trx_get_error_info(const trx_t*	trx);
 /****************************************************************//**
 Creates and initializes a transaction object.
 @return	own: the transaction */
@@ -134,7 +134,7 @@ trx_start_low(
 			automatically in a round-robin fashion */
 /*************************************************************//**
 Starts the transaction if it is not yet started. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_start_if_not_started(
 /*=====================*/
@@ -331,7 +331,7 @@ typedef enum trx_dict_op {
 /**********************************************************************//**
 Determine if a transaction is a dictionary operation.
 @return	dictionary operation mode */
-UNIV_INLINE
+IB_INLINE
 enum trx_dict_op
 trx_get_dict_operation(
 /*===================*/
@@ -339,7 +339,7 @@ trx_get_dict_operation(
 	__attribute__((pure));
 /**********************************************************************//**
 Flag a transaction a dictionary operation. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_set_dict_operation(
 /*===================*/
@@ -379,7 +379,7 @@ trx_weight_cmp(
 /*******************************************************************//**
 Retrieves transacion's id, represented as unsigned long long.
 @return	transaction's id */
-UNIV_INLINE
+IB_INLINE
 ib_uint64_t
 trx_get_id(
 /*=======*/
@@ -416,7 +416,7 @@ trx_get_que_state_str(). */
 Retrieves transaction's que state in a human readable string. The string
 should not be free()'d or modified.
 @return	string in the data segment */
-UNIV_INLINE
+IB_INLINE
 const char*
 trx_get_que_state_str(
 /*==================*/

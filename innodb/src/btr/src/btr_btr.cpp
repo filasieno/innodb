@@ -487,7 +487,7 @@ void btr_page_free(
 
 /**************************************************************/ /**
 Sets the child node file address in a node pointer. */
-UNIV_INLINE
+IB_INLINE
 void btr_node_ptr_set_child_page_no(
 	/*===========================*/
 	rec_t *rec,				  /*!< in: node pointer record */
@@ -2153,7 +2153,7 @@ btr_level_list_remove(
 /****************************************************************/ /**
 Writes the redo log record for setting an index record as the predefined
 minimum record. */
-UNIV_INLINE
+IB_INLINE
 void btr_set_min_rec_mark_log(
 	/*=====================*/
 	rec_t *rec, /*!< in: record */

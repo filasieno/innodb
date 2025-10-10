@@ -48,7 +48,7 @@ extern trx_undo_rec_t trx_purge_dummy_rec;
  * \param node_addr File address of the history list node of the log
  * \return File address of the log
  */
-UNIV_INLINE
+IB_INLINE
 fil_addr_t trx_purge_get_log_from_hist(fil_addr_t node_addr);
 /**
  * \brief Checks if trx_id is >= purge_view: then it is guaranteed that its update

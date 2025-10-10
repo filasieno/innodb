@@ -37,7 +37,7 @@ Created 12/27/1996 Heikki Tuuri
 /*********************************************************************//**
 Creates an update vector object.
 @return	own: update vector object */
-UNIV_INLINE
+IB_INLINE
 upd_t*
 upd_create(
 /*=======*/
@@ -60,7 +60,7 @@ upd_create(
 Returns the number of fields in the update vector == number of columns
 to be updated by an update vector.
 @return	number of fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 upd_get_n_fields(
 /*=============*/
@@ -75,7 +75,7 @@ upd_get_n_fields(
 /*********************************************************************//**
 Returns the nth field of an update vector.
 @return	update vector field */
-UNIV_INLINE
+IB_INLINE
 upd_field_t*
 upd_get_nth_field(
 /*==============*/
@@ -92,7 +92,7 @@ upd_get_nth_field(
 #ifndef UNIV_HOTBACKUP
 /*********************************************************************//**
 Sets an index field number to be updated by an update vector field. */
-UNIV_INLINE
+IB_INLINE
 void
 upd_field_set_field_no(
 /*===================*/
@@ -122,7 +122,7 @@ upd_field_set_field_no(
 /*********************************************************************//**
 Returns a field of an update vector by field_no.
 @return	update vector field, or NULL */
-UNIV_INLINE
+IB_INLINE
 const upd_field_t*
 upd_get_field_by_field_no(
 /*======================*/
@@ -145,7 +145,7 @@ upd_get_field_by_field_no(
 /*********************************************************************//**
 Updates the trx id and roll ptr field in a clustered index record when
 a row is updated or marked deleted. */
-UNIV_INLINE
+IB_INLINE
 void
 row_upd_rec_sys_fields(
 /*===================*/

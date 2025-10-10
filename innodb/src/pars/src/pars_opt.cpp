@@ -392,7 +392,7 @@ opt_calc_index_goodness(
 /*******************************************************************//**
 Calculates the number of matched fields based on an index goodness.
 @return	number of excatly or partially matched fields */
-UNIV_INLINE
+IB_INLINE
 ulint
 opt_calc_n_fields_from_goodness(
 /*============================*/
@@ -405,7 +405,7 @@ opt_calc_n_fields_from_goodness(
 Converts a comparison operator to the corresponding search mode PAGE_CUR_GE,
 ...
 @return	search mode */
-UNIV_INLINE
+IB_INLINE
 ulint
 opt_op_to_search_mode(
 /*==================*/

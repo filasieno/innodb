@@ -79,7 +79,7 @@ page_cur_lcg_prng(void)
 /****************************************************************//**
 Tries a search shortcut based on the last insert.
 @return	TRUE on success */
-UNIV_INLINE
+IB_INLINE
 ibool
 page_cur_try_search_shortcut(
 /*=========================*/
@@ -1518,7 +1518,7 @@ use_heap:
 Writes a log record of copying a record list end to a new created page.
 @return 4-byte field where to write the log data length, or NULL if
 logging is disabled */
-UNIV_INLINE
+IB_INLINE
 byte*
 page_copy_rec_list_to_created_page_write_log(
 /*=========================================*/
@@ -1774,7 +1774,7 @@ page_copy_rec_list_end_to_created_page(
 
 /***********************************************************//**
 Writes log record of a record delete on a page. */
-UNIV_INLINE
+IB_INLINE
 void
 page_cur_delete_rec_write_log(
 /*==========================*/

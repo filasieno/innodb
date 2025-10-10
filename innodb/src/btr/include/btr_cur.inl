@@ -30,7 +30,7 @@ Created 10/16/1994 Heikki Tuuri
 /*********************************************************//**
 Returns the page cursor component of a tree cursor.
 @return	pointer to page cursor component */
-UNIV_INLINE
+IB_INLINE
 page_cur_t*
 btr_cur_get_page_cur(
 /*=================*/
@@ -42,7 +42,7 @@ btr_cur_get_page_cur(
 /*********************************************************//**
 Returns the buffer block on which the tree cursor is positioned.
 @return	pointer to buffer block */
-UNIV_INLINE
+IB_INLINE
 buf_block_t*
 btr_cur_get_block(
 /*==============*/
@@ -54,7 +54,7 @@ btr_cur_get_block(
 /*********************************************************//**
 Returns the record pointer of a tree cursor.
 @return	pointer to record */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 btr_cur_get_rec(
 /*============*/
@@ -67,7 +67,7 @@ btr_cur_get_rec(
 /*********************************************************//**
 Returns the compressed page on which the tree cursor is positioned.
 @return	pointer to compressed page, or NULL if the page is not compressed */
-UNIV_INLINE
+IB_INLINE
 page_zip_des_t*
 btr_cur_get_page_zip(
 /*=================*/
@@ -79,7 +79,7 @@ btr_cur_get_page_zip(
 
 /*********************************************************//**
 Invalidates a tree cursor by setting record pointer to NULL. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_invalidate(
 /*===============*/
@@ -91,7 +91,7 @@ btr_cur_invalidate(
 /*********************************************************//**
 Returns the page of a tree cursor.
 @return	pointer to page */
-UNIV_INLINE
+IB_INLINE
 page_t*
 btr_cur_get_page(
 /*=============*/
@@ -103,7 +103,7 @@ btr_cur_get_page(
 /*********************************************************//**
 Returns the index of a cursor.
 @return	index */
-UNIV_INLINE
+IB_INLINE
 dict_index_t*
 btr_cur_get_index(
 /*==============*/
@@ -114,7 +114,7 @@ btr_cur_get_index(
 
 /*********************************************************//**
 Positions a tree cursor at a given record. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_position(
 /*=============*/
@@ -134,7 +134,7 @@ btr_cur_position(
 Checks if compressing an index page where a btr cursor is placed makes
 sense.
 @return	TRUE if compression is recommended */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_cur_compress_recommendation(
 /*============================*/
@@ -168,7 +168,7 @@ btr_cur_compress_recommendation(
 Checks if the record on which the cursor is placed can be deleted without
 making tree compression necessary (or, recommended).
 @return	TRUE if can be deleted without recommended compression */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_cur_can_delete_without_compress(
 /*================================*/

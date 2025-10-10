@@ -140,7 +140,7 @@ TODO: proof this
 /*********************************************************************//**
 Creates a read view object.
 @return	own: read view struct */
-UNIV_INLINE
+IB_INLINE
 read_view_t*
 read_view_create_low(
 /*=================*/

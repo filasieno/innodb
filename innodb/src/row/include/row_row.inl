@@ -30,7 +30,7 @@ Created 4/20/1996 Heikki Tuuri
 /*********************************************************************//**
 Reads the trx id field from a clustered index record.
 @return	value of the field */
-UNIV_INLINE
+IB_INLINE
 trx_id_t
 row_get_rec_trx_id(
 /*===============*/
@@ -55,7 +55,7 @@ row_get_rec_trx_id(
 /*********************************************************************//**
 Reads the roll pointer field from a clustered index record.
 @return	value of the field */
-UNIV_INLINE
+IB_INLINE
 roll_ptr_t
 row_get_rec_roll_ptr(
 /*=================*/
@@ -80,7 +80,7 @@ row_get_rec_roll_ptr(
 /*******************************************************************//**
 Builds from a secondary index record a row reference with which we can
 search the clustered index record. */
-UNIV_INLINE
+IB_INLINE
 void
 row_build_row_ref_fast(
 /*===================*/

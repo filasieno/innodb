@@ -65,7 +65,7 @@ sel_col_prefetch_buf_free(
 /*********************************************************************//**
 Gets the plan node for the nth table in a join.
 @return	plan node */
-UNIV_INLINE
+IB_INLINE
 plan_t*
 sel_node_get_nth_plan(
 /*==================*/
@@ -83,7 +83,7 @@ row_sel_step(
 /**********************************************************************//**
 Performs an execution step of an open or close cursor statement node.
 @return	query thread to run next or NULL */
-UNIV_INLINE
+IB_INLINE
 que_thr_t*
 open_step(
 /*======*/

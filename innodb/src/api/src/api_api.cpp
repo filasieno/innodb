@@ -211,7 +211,7 @@ static int ib_default_compare(const ib_col_meta_t* ib_col_meta, const ib_byte_t*
 	return ret < 0 ? -1 : ((ret > 0) ? 1 : 0);
 }
 
-UNIV_INLINE ib_bool_t ib_btr_cursor_is_positioned(btr_pcur_t* pcur)
+IB_INLINE ib_bool_t ib_btr_cursor_is_positioned(btr_pcur_t* pcur)
 {
 	return pcur->old_stored == BTR_PCUR_OLD_STORED && (pcur->pos_state == BTR_PCUR_IS_POSITIONED || pcur->pos_state == BTR_PCUR_WAS_POSITIONED);
 }
@@ -278,7 +278,7 @@ static dict_table_t* ib_lookup_table_by_name(const char* name)
 	return table;
 }
 
-UNIV_INLINE void ib_wake_master_thread(void)
+IB_INLINE void ib_wake_master_thread(void)
 {
 	static ulint ib_signal_counter = 0;
 	UT_DBG_ENTER_FUNC;
@@ -313,7 +313,7 @@ static ulint ib_varchar_len(const dtype_t* dtype, ib_byte_t* ptr, ulint len)
 }
 #endif
 
-UNIV_INLINE ulint ib_get_max_row_len(dict_index_t* )
+IB_INLINE ulint ib_get_max_row_len(dict_index_t* )
 {
 	UT_DBG_ENTER_FUNC;
 
@@ -329,7 +329,7 @@ UNIV_INLINE ulint ib_get_max_row_len(dict_index_t* )
 	return max_len;
 }
 
-UNIV_INLINE void ib_read_tuple(const rec_t* rec, ib_bool_t page_format, ib_tuple_t* tuple) 	
+IB_INLINE void ib_read_tuple(const rec_t* rec, ib_bool_t page_format, ib_tuple_t* tuple) 	
 {
 	ulint i;
 	void* ptr;
@@ -611,7 +611,7 @@ ib_err_t ib_trx_rollback(ib_trx_t ib_trx)
 	return err;
 }
 
-UNIV_INLINE ibool ib_check_col_is_ok(const char* name, ib_col_type_t ib_col_type, ib_col_attr_t ib_col_attr, ib_ulint_t len)
+IB_INLINE ibool ib_check_col_is_ok(const char* name, ib_col_type_t ib_col_type, ib_col_attr_t ib_col_attr, ib_ulint_t len)
 {
 	UT_DBG_ENTER_FUNC;
 	if (ut_strlen(name) > IB_MAX_COL_NAME_LEN) {
@@ -636,7 +636,7 @@ UNIV_INLINE ibool ib_check_col_is_ok(const char* name, ib_col_type_t ib_col_type
 	return TRUE;
 }
 
-UNIV_INLINE const ib_index_def_t* ib_table_find_index(ib_vector_t* indexes, const char* name) 	
+IB_INLINE const ib_index_def_t* ib_table_find_index(ib_vector_t* indexes, const char* name) 	
 {
 	ulint i;
 	UT_DBG_ENTER_FUNC;
@@ -650,7 +650,7 @@ UNIV_INLINE const ib_index_def_t* ib_table_find_index(ib_vector_t* indexes, cons
 	return NULL;
 }
 
-UNIV_INLINE ulint ib_col_get_prtype(const ib_col_t* ib_col)
+IB_INLINE ulint ib_col_get_prtype(const ib_col_t* ib_col)
 {
 	ulint prtype = 0;
 	UT_DBG_ENTER_FUNC;
@@ -673,7 +673,7 @@ UNIV_INLINE ulint ib_col_get_prtype(const ib_col_t* ib_col)
 	return prtype;
 }
 
-UNIV_INLINE ulint ib_col_get_mtype(const ib_col_t* ib_col)
+IB_INLINE ulint ib_col_get_mtype(const ib_col_t* ib_col)
 {
 	UT_DBG_ENTER_FUNC;
 	/* Note: The api0api.h types should map directly to
@@ -681,7 +681,7 @@ UNIV_INLINE ulint ib_col_get_mtype(const ib_col_t* ib_col)
 	return(ib_col->ib_col_type);
 }
 
-UNIV_INLINE const ib_col_t* ib_table_find_col(const ib_vector_t* cols, const char* name)
+IB_INLINE const ib_col_t* ib_table_find_col(const ib_vector_t* cols, const char* name)
 {
 	ulint i;
 	UT_DBG_ENTER_FUNC;
@@ -695,7 +695,7 @@ UNIV_INLINE const ib_col_t* ib_table_find_col(const ib_vector_t* cols, const cha
 	return NULL;
 }
 
-UNIV_INLINE const ib_key_col_t* ib_index_find_col(ib_vector_t* cols, const char* name) 
+IB_INLINE const ib_key_col_t* ib_index_find_col(ib_vector_t* cols, const char* name) 
 {
 	ulint i;
 	UT_DBG_ENTER_FUNC;
@@ -1103,7 +1103,7 @@ ib_err_t ib_index_schema_create(ib_trx_t ib_usr_trx, const char* name, const cha
 	return err;
 }
 
-UNIV_INLINE ib_index_def_t* ib_find_clustered_index(ib_vector_t* indexes) 
+IB_INLINE ib_index_def_t* ib_find_clustered_index(ib_vector_t* indexes) 
 {
 	ulint i;
 	ulint n_indexes;
@@ -2092,7 +2092,7 @@ ib_err_t ib_cursor_close( ib_crsr_t ib_crsr)
 	return DB_SUCCESS;
 }
 
-UNIV_INLINE ib_err_t ib_insert_row_with_lock_retry(que_thr_t* thr, trx_savept_t* savept) 
+IB_INLINE ib_err_t ib_insert_row_with_lock_retry(que_thr_t* thr, trx_savept_t* savept) 
 {
 	trx_t* 	trx;
 	ib_err_t err;
@@ -2209,7 +2209,7 @@ ib_err_t ib_cursor_insert_row(ib_crsr_t ib_crsr, const ib_tpl_t ib_tpl)
 	return err;
 }
 
-UNIV_INLINE upd_t* ib_update_vector_create(ib_cursor_t* cursor) 	
+IB_INLINE upd_t* ib_update_vector_create(ib_cursor_t* cursor) 	
 {
 	trx_t* trx = cursor->prebuilt->trx;
 	mem_heap_t* heap = cursor->query_heap;
@@ -2295,7 +2295,7 @@ static ib_err_t ib_calc_diff(ib_cursor_t* cursor, upd_t* upd, const ib_tuple_t*o
 	return(err);
 }
 
-UNIV_INLINE ib_err_t ib_update_row_with_lock_retry(que_thr_t* thr, upd_node_t* node, trx_savept_t* savept) 	
+IB_INLINE ib_err_t ib_update_row_with_lock_retry(que_thr_t* thr, upd_node_t* node, trx_savept_t* savept) 	
 {
 	ib_err_t err;
 	ib_bool_t lock_wait;
@@ -2321,7 +2321,7 @@ UNIV_INLINE ib_err_t ib_update_row_with_lock_retry(que_thr_t* thr, upd_node_t* n
 	return err;
 }
 
-UNIV_INLINE ib_err_t ib_execute_update_query_graph(ib_cursor_t* cursor, btr_pcur_t* pcur) 	
+IB_INLINE ib_err_t ib_execute_update_query_graph(ib_cursor_t* cursor, btr_pcur_t* pcur) 	
 {
 	ib_err_t err;
 	que_thr_t* thr;
@@ -2573,7 +2573,7 @@ ib_err_t ib_cursor_next(ib_crsr_t ib_crsr)
 	return(err);
 }
 
-UNIV_INLINE ib_err_t ib_cursor_position(ib_srch_mode_t mode) 	
+IB_INLINE ib_err_t ib_cursor_position(ib_srch_mode_t mode) 	
 {
 	ib_err_t err;
 	row_prebuilt_t* prebuilt = cursor->prebuilt;
@@ -2655,7 +2655,7 @@ void ib_cursor_set_match_mode(ib_crsr_t ib_crsr, ib_match_mode_t match_mode)
 	cursor->match_mode = match_mode;
 }
 
-UNIV_INLINE dfield_t* ib_col_get_dfield(ib_tuple_t* tuple, ulint col_no) 	
+IB_INLINE dfield_t* ib_col_get_dfield(ib_tuple_t* tuple, ulint col_no) 	
 {
 	dfield_t* dfield;
 	UT_DBG_ENTER_FUNC;
@@ -2663,7 +2663,7 @@ UNIV_INLINE dfield_t* ib_col_get_dfield(ib_tuple_t* tuple, ulint col_no)
 	return(dfield);
 }
 
-UNIV_INLINE ib_err_t ib_col_is_capped(const dtype_t* dtype) 
+IB_INLINE ib_err_t ib_col_is_capped(const dtype_t* dtype) 
 {
 
 	return 
@@ -2787,7 +2787,7 @@ ib_ulint_t ib_col_get_len(ib_ulint_t i)
 	return data_len == UNIV_SQL_NULL ? IB_SQL_NULL : data_len;
 }
 
-UNIV_INLINE ib_ulint_t ib_col_copy_value_low(ib_ulint_t i, void* dst, ib_ulint_t len)
+IB_INLINE ib_ulint_t ib_col_copy_value_low(ib_ulint_t i, void* dst, ib_ulint_t len)
 {
 	const void* data;
 	const dfield_t* dfield;
@@ -2842,7 +2842,7 @@ ib_ulint_t ib_col_copy_value(ib_tpl_t ib_tpl, ib_ulint_t i, void* dst, ib_ulint_
 	return(ib_col_copy_value_low(ib_tpl, i, dst, len));
 }
 
-UNIV_INLINE ib_col_attr_t ib_col_get_attr(ulint prtype) 	
+IB_INLINE ib_col_attr_t ib_col_get_attr(ulint prtype) 	
 {
 	ib_col_attr_t attr = IB_COL_NONE;
 	UT_DBG_ENTER_FUNC;
@@ -2864,7 +2864,7 @@ UNIV_INLINE ib_col_attr_t ib_col_get_attr(ulint prtype)
 	return(attr);
 }
 
-UNIV_INLINE ib_ulint_t ib_col_get_meta_low(ib_tpl_t ib_tpl, ib_ulint_t i, ib_col_meta_t* ib_col_meta) 
+IB_INLINE ib_ulint_t ib_col_get_meta_low(ib_tpl_t ib_tpl, ib_ulint_t i, ib_col_meta_t* ib_col_meta) 
 {
 	UT_DBG_ENTER_FUNC;
 
@@ -2880,7 +2880,7 @@ UNIV_INLINE ib_ulint_t ib_col_get_meta_low(ib_tpl_t ib_tpl, ib_ulint_t i, ib_col
 	return data_len;
 }
 
-UNIV_INLINE ib_err_t ib_tuple_check_int(ib_tpl_t ib_tpl, ib_ulint_t i, ib_bool_t usign, ulint size) 
+IB_INLINE ib_err_t ib_tuple_check_int(ib_tpl_t ib_tpl, ib_ulint_t i, ib_bool_t usign, ulint size) 
 {
 	ib_col_meta_t ib_col_meta;
 	ib_col_get_meta_low(ib_tpl, i, &ib_col_meta);
@@ -3803,7 +3803,7 @@ ib_err_t ib_schema_tables_iterate(ib_trx_t ib_trx, ib_schema_visitor_table_all_t
 	return err;
 }
 
-UNIV_INLINE ib_err_t ib_tuple_write_int(ib_tpl_t ib_tpl, ulint col_no, const void* value, ulint value_len) 
+IB_INLINE ib_err_t ib_tuple_write_int(ib_tpl_t ib_tpl, ulint col_no, const void* value, ulint value_len) 
 {
 	const dfield_t* dfield;
 	ulint 	data_len;

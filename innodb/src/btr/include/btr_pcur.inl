@@ -27,7 +27,7 @@ Created 2/23/1996 Heikki Tuuri
 /*********************************************************//**
 Gets the rel_pos field for a cursor whose position has been stored.
 @return	BTR_PCUR_ON, ... */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_pcur_get_rel_pos(
 /*=================*/
@@ -44,7 +44,7 @@ btr_pcur_get_rel_pos(
 
 /*********************************************************//**
 Sets the mtr field for a pcur. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_set_mtr(
 /*=============*/
@@ -59,7 +59,7 @@ btr_pcur_set_mtr(
 /*********************************************************//**
 Gets the mtr field for a pcur.
 @return	mtr */
-UNIV_INLINE
+IB_INLINE
 mtr_t*
 btr_pcur_get_mtr(
 /*=============*/
@@ -74,7 +74,7 @@ btr_pcur_get_mtr(
 /*********************************************************//**
 Returns the btr cursor component of a persistent cursor.
 @return	pointer to btr cursor component */
-UNIV_INLINE
+IB_INLINE
 btr_cur_t*
 btr_pcur_get_btr_cur(
 /*=================*/
@@ -87,7 +87,7 @@ btr_pcur_get_btr_cur(
 /*********************************************************//**
 Returns the page cursor component of a persistent cursor.
 @return	pointer to page cursor component */
-UNIV_INLINE
+IB_INLINE
 page_cur_t*
 btr_pcur_get_page_cur(
 /*==================*/
@@ -99,7 +99,7 @@ btr_pcur_get_page_cur(
 /*********************************************************//**
 Returns the page of a persistent cursor.
 @return	pointer to the page */
-UNIV_INLINE
+IB_INLINE
 page_t*
 btr_pcur_get_page(
 /*==============*/
@@ -113,7 +113,7 @@ btr_pcur_get_page(
 /*********************************************************//**
 Returns the buffer block of a persistent cursor.
 @return	pointer to the block */
-UNIV_INLINE
+IB_INLINE
 buf_block_t*
 btr_pcur_get_block(
 /*===============*/
@@ -127,7 +127,7 @@ btr_pcur_get_block(
 /*********************************************************//**
 Returns the record of a persistent cursor.
 @return	pointer to the record */
-UNIV_INLINE
+IB_INLINE
 rec_t*
 btr_pcur_get_rec(
 /*=============*/
@@ -143,7 +143,7 @@ btr_pcur_get_rec(
 Gets the up_match value for a pcur after a search.
 @return number of matched fields at the cursor or to the right if
 search mode was PAGE_CUR_GE, otherwise undefined */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_pcur_get_up_match(
 /*==================*/
@@ -165,7 +165,7 @@ btr_pcur_get_up_match(
 Gets the low_match value for a pcur after a search.
 @return number of matched fields at the cursor or to the right if
 search mode was PAGE_CUR_LE, otherwise undefined */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_pcur_get_low_match(
 /*===================*/
@@ -185,7 +185,7 @@ btr_pcur_get_low_match(
 /*********************************************************//**
 Checks if the persistent cursor is after the last user record on
 a page. */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_is_after_last_on_page(
 /*===========================*/
@@ -200,7 +200,7 @@ btr_pcur_is_after_last_on_page(
 /*********************************************************//**
 Checks if the persistent cursor is before the first user record on
 a page. */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_is_before_first_on_page(
 /*=============================*/
@@ -214,7 +214,7 @@ btr_pcur_is_before_first_on_page(
 
 /*********************************************************//**
 Checks if the persistent cursor is on a user record. */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_is_on_user_rec(
 /*====================*/
@@ -235,7 +235,7 @@ btr_pcur_is_on_user_rec(
 /*********************************************************//**
 Checks if the persistent cursor is before the first user record in
 the index tree. */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_is_before_first_in_tree(
 /*=============================*/
@@ -256,7 +256,7 @@ btr_pcur_is_before_first_in_tree(
 /*********************************************************//**
 Checks if the persistent cursor is after the last user record in
 the index tree. */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_is_after_last_in_tree(
 /*===========================*/
@@ -276,7 +276,7 @@ btr_pcur_is_after_last_in_tree(
 
 /*********************************************************//**
 Moves the persistent cursor to the next record on the same page. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_move_to_next_on_page(
 /*==========================*/
@@ -292,7 +292,7 @@ btr_pcur_move_to_next_on_page(
 
 /*********************************************************//**
 Moves the persistent cursor to the previous record on the same page. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_move_to_prev_on_page(
 /*==========================*/
@@ -308,7 +308,7 @@ btr_pcur_move_to_prev_on_page(
 
 /*********************************************************//**
 Moves the persistent cursor to the last record on the same page. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_move_to_last_on_page(
 /*==========================*/
@@ -328,7 +328,7 @@ btr_pcur_move_to_last_on_page(
 Moves the persistent cursor to the next user record in the tree. If no user
 records are left, the cursor ends up 'after last in tree'.
 @return	TRUE if the cursor moved forward, ending on a user record */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_move_to_next_user_rec(
 /*===========================*/
@@ -364,7 +364,7 @@ loop:
 Moves the persistent cursor to the prev user record in the tree. If no user
 records are left, the cursor ends up 'before first in tree'.
 @return	TRUE if the cursor moved backward, ending on a user record */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_move_to_prev_user_rec(
 /*===========================*/
@@ -400,7 +400,7 @@ loop:
 Moves the persistent cursor to the next record in the tree. If no records are
 left, the cursor stays 'after last in tree'.
 @return	TRUE if the cursor was not after last in tree */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_move_to_next(
 /*==================*/
@@ -434,7 +434,7 @@ btr_pcur_move_to_next(
 Moves the persistent cursor to the previous record in the tree. If no records
 are left, the cursor stays 'before first in tree'.
 @return	TRUE if the cursor was not before first in tree */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_move_to_prev(
 /*==================*/
@@ -470,7 +470,7 @@ that is, the cursor becomes detached. If there have been modifications
 to the page where pcur is positioned, this can be used instead of
 btr_pcur_release_leaf. Function btr_pcur_store_position should be used
 before calling this, if restoration of cursor is wanted later. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_commit_specify_mtr(
 /*========================*/
@@ -488,7 +488,7 @@ btr_pcur_commit_specify_mtr(
 
 /**************************************************************//**
 Sets the pcur latch mode to BTR_NO_LATCHES. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_detach(
 /*============*/
@@ -504,7 +504,7 @@ btr_pcur_detach(
 /**************************************************************//**
 Tests if a cursor is detached: that is the latch mode is BTR_NO_LATCHES.
 @return	TRUE if detached */
-UNIV_INLINE
+IB_INLINE
 ibool
 btr_pcur_is_detached(
 /*=================*/
@@ -520,7 +520,7 @@ btr_pcur_is_detached(
 
 /**************************************************************//**
 Sets the old_rec_buf field to NULL. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_init(
 /*==========*/
@@ -534,7 +534,7 @@ btr_pcur_init(
 /**************************************************************//**
 Initializes and opens a persistent cursor to an index tree. It should be
 closed with btr_pcur_close. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_open_func(
 /*===============*/
@@ -575,7 +575,7 @@ btr_pcur_open_func(
 /**************************************************************//**
 Opens an persistent cursor to an index tree without initializing the
 cursor. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_open_with_no_init_func(
 /*============================*/
@@ -621,7 +621,7 @@ btr_pcur_open_with_no_init_func(
 
 /*****************************************************************//**
 Opens a persistent cursor at either end of an index. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_open_at_index_side(
 /*========================*/
@@ -656,7 +656,7 @@ btr_pcur_open_at_index_side(
 
 /**********************************************************************//**
 Positions a cursor at a randomly chosen position within a B-tree. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_open_at_rnd_pos_func(
 /*==========================*/
@@ -686,7 +686,7 @@ btr_pcur_open_at_rnd_pos_func(
 /**************************************************************//**
 Frees the possible memory heap of a persistent cursor and sets the latch
 mode of the persistent cursor to BTR_NO_LATCHES. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_pcur_close(
 /*===========*/

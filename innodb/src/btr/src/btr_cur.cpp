@@ -183,7 +183,7 @@ btr_rec_get_externally_stored_len(
 
 /******************************************************//**
 The following function is used to set the deleted bit of a record. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_rec_set_deleted_flag(
 /*=====================*/
@@ -966,7 +966,7 @@ btr_cur_insert_if_possible(
 /*************************************************************//**
 For an insert, checks the locks and does the undo logging if desired.
 @return	DB_SUCCESS, DB_WAIT_LOCK, DB_FAIL, or error number */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_cur_ins_lock_and_undo(
 /*======================*/
@@ -1462,7 +1462,7 @@ btr_cur_pessimistic_insert(
 /*************************************************************//**
 For an update, checks the locks and does the undo logging.
 @return	DB_SUCCESS, DB_WAIT_LOCK, or error number */
-UNIV_INLINE
+IB_INLINE
 ulint
 btr_cur_upd_lock_and_undo(
 /*======================*/
@@ -1525,7 +1525,7 @@ btr_cur_upd_lock_and_undo(
 
 /***********************************************************//**
 Writes a redo log record of updating a record in-place. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_update_in_place_log(
 /*========================*/
@@ -2406,7 +2406,7 @@ return_after_reservations:
 /****************************************************************//**
 Writes the redo log record for delete marking or unmarking of an index
 record. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_del_mark_set_clust_rec_log(
 /*===============================*/
@@ -2625,7 +2625,7 @@ func_exit:
 /****************************************************************//**
 Writes the redo log record for a delete mark setting of a secondary
 index record. */
-UNIV_INLINE
+IB_INLINE
 void
 btr_cur_del_mark_set_sec_rec_log(
 /*=============================*/

@@ -85,7 +85,7 @@ struct lock_struct {
 /*********************************************************************//**
 Gets the type of a lock.
 @return	LOCK_TABLE or LOCK_REC */
-UNIV_INLINE
+IB_INLINE
 ulint
 lock_get_type_low(
 /*==============*/

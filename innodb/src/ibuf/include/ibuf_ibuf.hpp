@@ -122,7 +122,7 @@ momentarily be set too high.  It is only safe to use this function for
 decrementing the free bits.  Should more free space become available,
 we must not update the free bits here, because that would break crash
 recovery. */
-UNIV_INLINE
+IB_INLINE
 void
 ibuf_update_free_bits_if_full(
 /*==========================*/
@@ -189,7 +189,7 @@ ibuf_update_free_bits_for_two_pages_low(
 /**********************************************************************//**
 A basic partial test if an insert to the insert buffer could be possible and
 recommended. */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_should_try(
 /*============*/
@@ -212,7 +212,7 @@ ibuf_inside(void);
 /***********************************************************************//**
 Checks if a page address is an ibuf bitmap page (level 3 page) address.
 @return	TRUE if a bitmap page */
-UNIV_INLINE
+IB_INLINE
 ibool
 ibuf_bitmap_page(
 /*=============*/

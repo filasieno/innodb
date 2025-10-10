@@ -63,7 +63,7 @@ buf_buddy_var_init(void)
 /**************************************************************************
 Get the offset of the buddy of a compressed page frame.
 @return	the buddy relative of page */
-UNIV_INLINE
+IB_INLINE
 byte*
 buf_buddy_get(
 /*==========*/
@@ -84,7 +84,7 @@ buf_buddy_get(
 
 /**********************************************************************//**
 Add a block to the head of the appropriate buddy free list. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_buddy_add_to_free(
 /*==================*/
@@ -110,7 +110,7 @@ buf_buddy_add_to_free(
 
 /**********************************************************************//**
 Remove a block from the appropriate buddy free list. */
-UNIV_INLINE
+IB_INLINE
 void
 buf_buddy_remove_from_free(
 /*=======================*/

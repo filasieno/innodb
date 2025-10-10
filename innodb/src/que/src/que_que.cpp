@@ -318,7 +318,7 @@ que_thr_end_wait_no_next_thr(
 
 /**********************************************************************//**
 Inits a query thread for a command. */
-UNIV_INLINE
+IB_INLINE
 void
 que_thr_init_command(
 /*=================*/
@@ -463,7 +463,7 @@ que_fork_error_handle(
 Tests if all the query threads in the same fork have a given state.
 @return TRUE if all the query threads in the same fork were in the
 given state */
-UNIV_INLINE
+IB_INLINE
 ibool
 que_fork_all_thrs_in_state(
 /*=======================*/
@@ -1149,7 +1149,7 @@ que_node_print_info(
 Performs an execution step on a query thread.
 @return query thread to run next: it may differ from the input
 parameter if, e.g., a subprocedure call is made */
-UNIV_INLINE
+IB_INLINE
 que_thr_t*
 que_thr_step(
 /*=========*/

@@ -25,7 +25,7 @@ Created 3/26/1996 Heikki Tuuri
 
 /*************************************************************//**
 Starts the transaction if it is not yet started. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_start_if_not_started(
 /*=====================*/
@@ -42,7 +42,7 @@ trx_start_if_not_started(
 /****************************************************************//**
 Retrieves the error_info field from a trx.
 @return	the error info */
-UNIV_INLINE
+IB_INLINE
 const dict_index_t*
 trx_get_error_info(
 /*===============*/
@@ -54,7 +54,7 @@ trx_get_error_info(
 /*******************************************************************//**
 Retrieves transacion's id, represented as unsigned long long.
 @return	transaction's id */
-UNIV_INLINE
+IB_INLINE
 ib_uint64_t
 trx_get_id(
 /*=======*/
@@ -67,7 +67,7 @@ trx_get_id(
 Retrieves transaction's que state in a human readable string. The string
 should not be free()'d or modified.
 @return	string in the data segment */
-UNIV_INLINE
+IB_INLINE
 const char*
 trx_get_que_state_str(
 /*==================*/
@@ -91,7 +91,7 @@ trx_get_que_state_str(
 /**********************************************************************//**
 Determine if a transaction is a dictionary operation.
 @return	dictionary operation mode */
-UNIV_INLINE
+IB_INLINE
 enum trx_dict_op
 trx_get_dict_operation(
 /*===================*/
@@ -112,7 +112,7 @@ trx_get_dict_operation(
 }
 /**********************************************************************//**
 Flag a transaction a dictionary operation. */
-UNIV_INLINE
+IB_INLINE
 void
 trx_set_dict_operation(
 /*===================*/

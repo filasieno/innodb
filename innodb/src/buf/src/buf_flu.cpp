@@ -348,7 +348,7 @@ buf_flush_ready_for_replace(
 /********************************************************************//**
 Returns TRUE if the block is modified and ready for flushing.
 @return	TRUE if can flush immediately */
-UNIV_INLINE
+IB_INLINE
 ibool
 buf_flush_ready_for_flush(
 /*======================*/

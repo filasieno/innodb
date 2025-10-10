@@ -38,7 +38,7 @@ ha_delete_hash_node(
 /******************************************************************//**
 Gets a hash node data.
 @return	pointer to the data */
-UNIV_INLINE
+IB_INLINE
 void*
 ha_node_get_data(
 /*=============*/
@@ -49,7 +49,7 @@ ha_node_get_data(
 
 /******************************************************************//**
 Sets hash node data. */
-UNIV_INLINE
+IB_INLINE
 void
 ha_node_set_data_func(
 /*==================*/
@@ -82,7 +82,7 @@ ha_node_set_data_func(
 /******************************************************************//**
 Gets the next node in a hash chain.
 @return	next node, NULL if none */
-UNIV_INLINE
+IB_INLINE
 ha_node_t*
 ha_chain_get_next(
 /*==============*/
@@ -94,7 +94,7 @@ ha_chain_get_next(
 /******************************************************************//**
 Gets the first node in a hash chain.
 @return	first node, NULL if none */
-UNIV_INLINE
+IB_INLINE
 ha_node_t*
 ha_chain_get_first(
 /*===============*/
@@ -109,7 +109,7 @@ ha_chain_get_first(
 Looks for an element in a hash table.
 @return pointer to the first hash table node in chain having the fold
 number, NULL if not found */
-UNIV_INLINE
+IB_INLINE
 ha_node_t*
 ha_search(
 /*======*/
@@ -138,7 +138,7 @@ ha_search(
 Looks for an element in a hash table.
 @return pointer to the data of the first hash table node in chain
 having the fold number, NULL if not found */
-UNIV_INLINE
+IB_INLINE
 void*
 ha_search_and_get_data(
 /*===================*/
@@ -166,7 +166,7 @@ ha_search_and_get_data(
 /*********************************************************//**
 Looks for an element when we know the pointer to the data.
 @return	pointer to the hash table node, NULL if not found in the table */
-UNIV_INLINE
+IB_INLINE
 ha_node_t*
 ha_search_with_data(
 /*================*/
@@ -196,7 +196,7 @@ ha_search_with_data(
 Looks for an element when we know the pointer to the data, and deletes
 it from the hash table, if found.
 @return	TRUE if found */
-UNIV_INLINE
+IB_INLINE
 ibool
 ha_search_and_delete_if_found(
 /*==========================*/
