@@ -1,4 +1,4 @@
-# Module update notes
+# Defs module AI comments
 
 ## The Good
 

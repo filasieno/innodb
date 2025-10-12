@@ -255,7 +255,7 @@ handle_new_error:
 	default:
 		ib_logger(ib_stream, "InnoDB: unknown error code %lu\n",
 			(ulong) err);
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (trx->error_state != DB_SUCCESS) {

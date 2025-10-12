@@ -185,7 +185,7 @@ static ulint mem_heap_printf_low(char *buf, const char *format, va_list ap)
 			break;
 		}
 		default:
-			ut_error;
+			UT_ERROR;
 		}
 	}
 
@@ -245,7 +245,7 @@ IB_INTERN mem_block_t *mem_heap_create_block(mem_heap_t *heap, ulint n, ulint ty
 	ut_ad((type == MEM_HEAP_DYNAMIC) || (type == MEM_HEAP_BUFFER) || (type == MEM_HEAP_BUFFER + MEM_HEAP_BTR_SEARCH));
 
 	if (heap && heap->magic_n != MEM_BLOCK_MAGIC_N) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	// In dynamic allocation, calculate the size: block header + data.
@@ -379,7 +379,7 @@ IB_INTERN void mem_heap_block_free(mem_heap_t *heap, mem_block_t *block)
 #endif /* !IB_HOTBACKUP */
 
 	if (block->magic_n != MEM_BLOCK_MAGIC_N) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	UT_LIST_REMOVE(list, heap->base, block);

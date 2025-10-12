@@ -871,7 +871,7 @@ buf_chunk_not_freed(
 		case BUF_BLOCK_ZIP_DIRTY:
 			/* The uncompressed buffer pool should never
 			contain compressed block descriptors. */
-			ut_error;
+			UT_ERROR;
 			break;
 		case BUF_BLOCK_NOT_USED:
 		case BUF_BLOCK_READY_FOR_USE:
@@ -1201,7 +1201,7 @@ buf_relocate(
 	case BUF_BLOCK_FILE_PAGE:
 	case BUF_BLOCK_MEMORY:
 	case BUF_BLOCK_REMOVE_HASH:
-		ut_error;
+		UT_ERROR;
 	case BUF_BLOCK_ZIP_DIRTY:
 	case BUF_BLOCK_ZIP_PAGE:
 		break;
@@ -1491,7 +1491,7 @@ buf_pool_page_hash_rebuild(void)
 		case BUF_BLOCK_READY_FOR_USE:
 		case BUF_BLOCK_MEMORY:
 		case BUF_BLOCK_REMOVE_HASH:
-			ut_error;
+			UT_ERROR;
 			break;
 		}
 	}
@@ -1800,7 +1800,7 @@ err_exit:
 		goto got_block;
 	}
 
-	ut_error;
+	UT_ERROR;
 	goto err_exit;
 
 got_block:
@@ -1982,7 +1982,7 @@ buf_block_align(
 				memory is allocated from
 				buf_pool->chunks, in IB_PAGE_SIZE
 				blocks flagged as BUF_BLOCK_MEMORY. */
-				ut_error;
+				UT_ERROR;
 				break;
 			case BUF_BLOCK_NOT_USED:
 			case BUF_BLOCK_READY_FOR_USE:
@@ -2019,7 +2019,7 @@ buf_block_align(
 	}
 
 	/* The block should always be found. */
-	ut_error;
+	UT_ERROR;
 	return(NULL);
 }
 
@@ -2175,7 +2175,7 @@ loop2:
 				space, offset,
 				BUF_PAGE_READ_MAX_RETRIES);
 
-			ut_error;
+			UT_ERROR;
 		}
 
 #if defined IB_DEBUG || defined IB_BUF_DEBUG
@@ -2341,7 +2341,7 @@ wait_until_unfixed:
 	case BUF_BLOCK_READY_FOR_USE:
 	case BUF_BLOCK_MEMORY:
 	case BUF_BLOCK_REMOVE_HASH:
-		ut_error;
+		UT_ERROR;
 		break;
 	}
 
@@ -2799,7 +2799,7 @@ buf_page_init(
 		buf_validate();
 		buf_LRU_validate();
 #endif /* IB_DEBUG || IB_BUF_DEBUG */
-		ut_error;
+		UT_ERROR;
 	}
 
 	buf_page_init_low(&block->page);
@@ -3358,7 +3358,7 @@ corrupt:
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 #ifdef IB_DEBUG
@@ -3477,7 +3477,7 @@ buf_validate(void)
 			case BUF_BLOCK_ZIP_DIRTY:
 				/* These should only occur on
 				zip_clean, zip_free[], or flush_list. */
-				ut_error;
+				UT_ERROR;
 				break;
 
 			case BUF_BLOCK_FILE_PAGE:
@@ -3515,7 +3515,7 @@ buf_validate(void)
 						n_single_flush++;
 						break;
 					default:
-						ut_error;
+						UT_ERROR;
 					}
 
 					break;
@@ -3568,7 +3568,7 @@ buf_validate(void)
 			buf_page_get_gen() from decompressing the block. */
 			break;
 		default:
-			ut_error;
+			UT_ERROR;
 			break;
 		}
 		ut_a(!b->oldest_modification);
@@ -3607,7 +3607,7 @@ buf_validate(void)
 					n_single_flush++;
 					break;
 				default:
-					ut_error;
+					UT_ERROR;
 				}
 				break;
 			}
@@ -3621,7 +3621,7 @@ buf_validate(void)
 		case BUF_BLOCK_READY_FOR_USE:
 		case BUF_BLOCK_MEMORY:
 		case BUF_BLOCK_REMOVE_HASH:
-			ut_error;
+			UT_ERROR;
 			break;
 		}
 		ut_a(buf_page_hash_get(b->space, b->offset) == b);
@@ -3633,7 +3633,7 @@ buf_validate(void)
 		ib_logger(ib_stream, "n LRU %lu, n free %lu, pool %lu zip %lu\n",
 			(ulong) n_lru, (ulong) n_free,
 			(ulong) buf_pool->curr_size, (ulong) n_zip);
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_a(UT_LIST_GET_LEN(buf_pool->LRU) == n_lru);
@@ -3641,7 +3641,7 @@ buf_validate(void)
 		ib_logger(ib_stream, "Free list len %lu, free blocks %lu\n",
 			(ulong) UT_LIST_GET_LEN(buf_pool->free),
 			(ulong) n_free);
-		ut_error;
+		UT_ERROR;
 	}
 	ut_a(UT_LIST_GET_LEN(buf_pool->flush_list) == n_flush);
 
@@ -3853,7 +3853,7 @@ buf_get_latched_pages_number(void)
 		case BUF_BLOCK_READY_FOR_USE:
 		case BUF_BLOCK_MEMORY:
 		case BUF_BLOCK_REMOVE_HASH:
-			ut_error;
+			UT_ERROR;
 			break;
 		}
 	}
@@ -4055,7 +4055,7 @@ buf_all_freed(void)
 				"Page %lu %lu still fixed or dirty\n",
 				(ulong) block->page.space,
 				(ulong) block->page.offset);
-			ut_error;
+			UT_ERROR;
 		}
 	}
 

@@ -377,7 +377,7 @@ buf_buddy_relocate_block(
 	case BUF_BLOCK_FILE_PAGE:
 	case BUF_BLOCK_MEMORY:
 	case BUF_BLOCK_REMOVE_HASH:
-		ut_error;
+		UT_ERROR;
 	case BUF_BLOCK_ZIP_DIRTY:
 		/* Cannot relocate dirty pages. */
 		return(FALSE);

@@ -321,7 +321,7 @@ btr_cur_latch_leaves(
 		return;
 	}
 
-	ut_error;
+	UT_ERROR;
 }
 
 /********************************************************************//**
@@ -1257,7 +1257,7 @@ fail_err:
 					      dict_index);
 			ib_logger(ib_stream, "\nInnoDB: max insert size %lu\n",
 				(ulong) max_size);
-			ut_error;
+			UT_ERROR;
 		}
 	}
 
@@ -4224,7 +4224,7 @@ btr_check_blob_fil_page_type(
 			" on BLOB %s space %lu page %lu flags %lx\n",
 			(ulong) type, read ? "read" : "purge",
 			(ulong) space_id, (ulong) page_no, (ulong) flags);
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -4358,7 +4358,7 @@ btr_free_externally_stored_field(
 			case FIL_PAGE_TYPE_ZBLOB2:
 				break;
 			default:
-				ut_error;
+				UT_ERROR;
 			}
 			next_page_no = mach_read_from_4(page + FIL_PAGE_NEXT);
 

@@ -148,7 +148,7 @@ page_dir_find_owner_slot(
 
 			buf_page_print(page, 0);
 
-			ut_error;
+			UT_ERROR;
 		}
 
 		slot += PAGE_DIR_SLOT_SIZE;
@@ -520,7 +520,7 @@ page_create_zip(
 	if (IB_UNLIKELY(!page_zip_compress(page_zip, page, index, mtr))) {
 		/* The compression of a newly created page
 		should always succeed. */
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(page);
@@ -585,7 +585,7 @@ page_copy_rec_list_end_no_locks(
 				(ulong) page_offset(rec),
 				(ulong) page_offset(page_cur_get_rec(&cur1)),
 				(ulong) page_offset(cur2));
-			ut_error;
+			UT_ERROR;
 		}
 
 		page_cur_move_to_next(&cur1);
@@ -681,7 +681,7 @@ page_copy_rec_list_end(
 				if (IB_UNLIKELY
 				    (!page_zip_decompress(new_page_zip,
 							  new_page, FALSE))) {
-					ut_error;
+					UT_ERROR;
 				}
 				ut_ad(page_validate(new_page, index));
 				return(NULL);
@@ -799,7 +799,7 @@ page_copy_rec_list_start(
 				if (IB_UNLIKELY
 				    (!page_zip_decompress(new_page_zip,
 							  new_page, FALSE))) {
-					ut_error;
+					UT_ERROR;
 				}
 				ut_ad(page_validate(new_page, index));
 				return(NULL);

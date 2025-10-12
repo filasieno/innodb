@@ -2914,7 +2914,7 @@ row_search_for_client(
 		ut_print_name(ib_stream, trx, TRUE, prebuilt->table->name);
 		ib_logger(ib_stream, "\n");
 
-		ut_error;
+		UT_ERROR;
 	}
 
 #if 0
@@ -2991,7 +2991,7 @@ row_search_for_client(
 		if (IB_UNLIKELY(direction != prebuilt->row_cache.direction)) {
 
 			if (!row_sel_row_cache_is_empty(prebuilt)) {
-				ut_error;
+				UT_ERROR;
 				/* TODO: scrollable cursor: restore cursor to
 				the place of the latest returned row,
 				or better: prevent caching for a scroll

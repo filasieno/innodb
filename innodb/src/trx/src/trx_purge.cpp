@@ -302,7 +302,7 @@ void trx_purge_add_update_undo_to_history(
 
 		if (undo->id >= TRX_RSEG_N_SLOTS) {
 			ib_logger(ib_stream, "InnoDB: Error: undo->id is %lu\n", (ulong)undo->id);
-			ut_error;
+			UT_ERROR;
 		}
 
 		trx_rsegf_set_nth_undo(rseg_header, undo->id, FIL_NULL, mtr);
@@ -987,7 +987,7 @@ IB_INTERN ulint trx_purge(void)
 	mutex_enter(&(purge_sys->mutex));
 	if (purge_sys->trx->n_active_thrs > 0) {
 		mutex_exit(&(purge_sys->mutex));
-		ut_error;
+		UT_ERROR;
 		return 0;
 	}
 	rw_lock_x_lock(&(purge_sys->latch));

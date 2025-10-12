@@ -166,7 +166,7 @@ buf_page_get_state(
 	case BUF_BLOCK_REMOVE_HASH:
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 #endif /* IB_DEBUG */
 
@@ -198,7 +198,7 @@ buf_page_set_state(
 	switch (old_state) {
 #ifdef WITH_ZIP
 	case BUF_BLOCK_ZIP_FREE:
-		ut_error;
+		UT_ERROR;
 		break;
 	case BUF_BLOCK_ZIP_PAGE:
 		ut_a(state == BUF_BLOCK_ZIP_DIRTY);
@@ -257,7 +257,7 @@ buf_page_in_file(
 	case BUF_BLOCK_ZIP_FREE:
 		/* This is a free page in buf_pool->zip_free[].
 		Such pages should only be accessed by the buddy allocator. */
-		ut_error;
+		UT_ERROR;
 		break;
 	case BUF_BLOCK_ZIP_PAGE:
 	case BUF_BLOCK_ZIP_DIRTY:
@@ -304,7 +304,7 @@ buf_page_get_mutex(
 #ifdef WITH_ZIP
 	switch (buf_page_get_state(bpage)) {
 	case BUF_BLOCK_ZIP_FREE:
-		ut_error;
+		UT_ERROR;
 		return(NULL);
 	case BUF_BLOCK_ZIP_PAGE:
 	case BUF_BLOCK_ZIP_DIRTY:
@@ -337,7 +337,7 @@ buf_page_get_flush_type(
 	case BUF_FLUSH_N_TYPES:
 		break;
 	}
-	ut_error;
+	UT_ERROR;
 #endif /* IB_DEBUG */
 	return(flush_type);
 }
@@ -386,7 +386,7 @@ buf_page_get_io_fix(
 	case BUF_IO_WRITE:
 		return(io_fix);
 	}
-	ut_error;
+	UT_ERROR;
 #endif /* IB_DEBUG */
 	return(io_fix);
 }
@@ -570,7 +570,7 @@ buf_block_get_frame(
 	case BUF_BLOCK_ZIP_DIRTY:
 #endif /* WITH_ZIP */
 	case BUF_BLOCK_NOT_USED:
-		ut_error;
+		UT_ERROR;
 		break;
 	case BUF_BLOCK_FILE_PAGE:
 # ifndef IB_HOTBACKUP
@@ -582,7 +582,7 @@ buf_block_get_frame(
 	case BUF_BLOCK_REMOVE_HASH:
 		goto ok;
 	}
-	ut_error;
+	UT_ERROR;
 ok:
 	return((buf_frame_t*) block->frame);
 }
@@ -1050,7 +1050,7 @@ buf_page_release_zip(
 		break;
 	}
 
-	ut_error;
+	UT_ERROR;
 }
 #endif /* WITH_ZIP */
 

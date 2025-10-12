@@ -547,7 +547,7 @@ row_ins_cascade_calc_update_vec(
 
 					switch (IB_EXPECT(col->mbminlen,1)) {
 					default:
-						ut_error;
+						UT_ERROR;
 						return(ULINT_UNDEFINED);
 					case 1:
 						if (IB_UNLIKELY

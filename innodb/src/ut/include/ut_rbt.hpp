@@ -22,8 +22,7 @@ Red-Black tree implementation.
 Created 2007-03-20 Sunny Bains
 ************************************************************************/
 
-#ifndef INNOBASE_UT0RBT_H
-#define INNOBASE_UT0RBT_H
+#pragma once
 
 #if !defined(IB_RBT_TESTING)
 #include "univ.i"
@@ -38,7 +37,7 @@ Created 2007-03-20 Sunny Bains
 #define	ut_free		free
 #define	ulint		unsigned long
 #define	ut_a(c)		assert(c)
-#define ut_error	assert(0)
+#define UT_ERROR	assert(0)
 #define	ibool		unsigned int
 #define	TRUE		1
 #define	FALSE		0
@@ -305,5 +304,3 @@ rbt_print(
 /*======*/
 	const ib_rbt_t*		tree,	/*!< in: tree to traverse */
 	ib_rbt_print_node	print);	/*!< in: print function */
-
-#endif /* INNOBASE_UT0RBT_H */

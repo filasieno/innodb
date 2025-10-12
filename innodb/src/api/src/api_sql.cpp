@@ -130,7 +130,7 @@ ib_exec_vsql(
 				break;
 			}
 			default:
-				ut_error;
+				UT_ERROR;
 			}
 			pars_info_add_literal(info, n, p, l, DATA_INT, prtype);
 			break;
@@ -148,7 +148,7 @@ ib_exec_vsql(
 		}
 		default:
 			/* FIXME: Do the other types too */
-			ut_error;
+			UT_ERROR;
 		}
 	}
 

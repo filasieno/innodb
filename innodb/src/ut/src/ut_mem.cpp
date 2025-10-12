@@ -192,7 +192,7 @@ retry:
 			return (NULL);
 		}
 #else
-		ut_error;
+		UT_ERROR;
 #endif
 	}
 

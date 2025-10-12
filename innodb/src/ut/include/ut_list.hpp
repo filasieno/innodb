@@ -43,8 +43,7 @@ automatically freeing the list node when the item's heap is freed.
 
 ************************************************************************/
 
-#ifndef IB_LIST_H
-#define IB_LIST_H
+#pragma once
 
 #include "mem_mem.hpp"
 
@@ -114,13 +113,11 @@ struct ib_list_node_struct {
 
 /// \brief Quite often, the only additional piece of data you need is the per-item
 /// memory heap, so we have this generic struct available to use in those cases.
-struct ib_list_helper_struct {
+struct ib_list_helper_struct { 
 	mem_heap_t* heap;
-	void*		data;
+	void* data;
 };
 
 #ifndef IB_DO_NOT_INLINE
   #include "ut0list.inl"
-#endif
-
 #endif

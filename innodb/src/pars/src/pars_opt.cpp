@@ -68,7 +68,7 @@ opt_invert_cmp_op(
 	} else if (op == PARS_GE_TOKEN) {
 		return(PARS_LE_TOKEN);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(0);
@@ -432,7 +432,7 @@ opt_op_to_search_mode(
 		ut_a(!asc);
 		return(PAGE_CUR_LE);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(0);

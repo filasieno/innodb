@@ -134,7 +134,7 @@ static ib_err_t ib_cfg_var_validate_numeric(const struct ib_cfg_var* cfg_var, co
 		}
 	}
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 	// UNREACHABLE
 	return DB_ERROR;
@@ -1013,7 +1013,7 @@ ib_err_t ib_cfg_init()
 	srv_win_file_flush_method = SRV_WIN_IO_UNBUFFERED;
 	os_aio_print_debug = FALSE;
 	os_aio_use_native_aio = FALSE;
-#define IB_CFG_SET(name, var)  if (ib_cfg_set(name, var) != DB_SUCCESS) ut_error
+#define IB_CFG_SET(name, var)  if (ib_cfg_set(name, var) != DB_SUCCESS) UT_ERROR
 	IB_CFG_SET("additional_mem_pool_size", 4 * 1024 * 1024);
 	IB_CFG_SET("buffer_pool_size",         8 * 1024 * 1024);
 	IB_CFG_SET("data_file_path",           "ibdata1:32M:autoextend");

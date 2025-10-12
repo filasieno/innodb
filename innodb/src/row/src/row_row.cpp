@@ -580,7 +580,7 @@ notfound:
 		ib_logger(ib_stream, " for index ");
 		ut_print_name(ib_stream, trx, FALSE, index->name);
 		ib_logger(ib_stream, " not found\n");
-		ut_error;
+		UT_ERROR;
 	}
 
 	clust_index = dict_table_get_first_index(index->table);

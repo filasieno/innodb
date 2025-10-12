@@ -316,7 +316,7 @@ os_thread_set_priority(
 	} else if (pri == OS_THREAD_PRIORITY_ABOVE_NORMAL) {
 		os_pri = THREAD_PRIORITY_HIGHEST;
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_a(SetThreadPriority(handle, os_pri));
@@ -349,7 +349,7 @@ os_thread_get_priority(
 	} else if (os_pri == THREAD_PRIORITY_HIGHEST) {
 		pri = OS_THREAD_PRIORITY_ABOVE_NORMAL;
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(pri);

@@ -513,7 +513,7 @@ rec_get_n_fields(
 	case REC_STATUS_SUPREMUM:
 		return(1);
 	default:
-		ut_error;
+		UT_ERROR;
 		return(ULINT_UNDEFINED);
 	}
 }
@@ -990,7 +990,7 @@ rec_offs_validate(
 				max_n_fields = 1;
 				break;
 			default:
-				ut_error;
+				UT_ERROR;
 			}
 		}
 		/* dict_index->n_def == 0 for dummy indexes if !comp */

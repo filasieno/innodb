@@ -833,7 +833,7 @@ rw_lock_remove_debug_info(
 		info = UT_LIST_GET_NEXT(list, info);
 	}
 
-	ut_error;
+	UT_ERROR;
 }
 #endif /* IB_SYNC_DEBUG */
 
@@ -904,7 +904,7 @@ rw_lock_is_locked(
 			ret = TRUE;
 		}
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(ret);
@@ -1028,7 +1028,7 @@ rw_lock_debug_print(
 	} else if (rwt == RW_LOCK_WAIT_EX) {
 		ib_logger(ib_stream, "WAIT X-LOCK");
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 	if (info->pass != 0) {
 		ib_logger(ib_stream, " pass value %lu", (ulong) info->pass);

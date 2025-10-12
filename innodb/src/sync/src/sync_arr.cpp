@@ -187,7 +187,7 @@ sync_array_enter(
 	} else if (protection == SYNC_ARRAY_MUTEX) {
 		mutex_enter(&(arr->mutex));
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -208,7 +208,7 @@ sync_array_exit(
 	} else if (protection == SYNC_ARRAY_MUTEX) {
 		mutex_exit(&(arr->mutex));
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -249,7 +249,7 @@ sync_array_create(
 	} else if (protection == SYNC_ARRAY_MUTEX) {
 		mutex_create(&arr->mutex, SYNC_NO_ORDER_CHECK);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(arr);
@@ -278,7 +278,7 @@ sync_array_free(
 	} else if (protection == SYNC_ARRAY_MUTEX) {
 		mutex_free(&(arr->mutex));
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_free(arr->array);
@@ -396,7 +396,7 @@ sync_array_reserve_cell(
 		}
 	}
 
-	ut_error; /* No free cell found */
+	UT_ERROR; /* No free cell found */
 
 	return;
 }
@@ -442,7 +442,7 @@ sync_array_wait_event(
 
 		ib_logger(ib_stream, 
 			"########################################\n");
-		ut_error;
+		UT_ERROR;
 	}
 
 	rw_lock_debug_mutex_exit();
@@ -532,7 +532,7 @@ sync_array_cell_print(
 			rwlock->last_x_file_name,
 			(ulong) rwlock->last_x_line);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (!cell->waiting) {
@@ -759,7 +759,7 @@ print:
 		return(FALSE);
 
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(TRUE);	/* Execution never reaches this line: for compiler

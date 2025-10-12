@@ -375,7 +375,7 @@ buf_read_ahead_linear(
 		frame = ((buf_block_t*) bpage)->frame;
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 		break;
 	}
 

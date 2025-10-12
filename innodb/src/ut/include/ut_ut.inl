@@ -23,28 +23,12 @@ Various utilities
 Created 5/30/1994 Heikki Tuuri
 *******************************************************************/
 
-/******************************************************//**
-Calculates the minimum of two ulints.
-@return	minimum */
-IB_INLINE
-ulint
-ut_min(
-/*===*/
-	ulint	 n1,	/*!< in: first number */
-	ulint	 n2)	/*!< in: second number */
+IB_INLINE ulint ut_min(ulint n1, ulint n2)
 {
-	return((n1 <= n2) ? n1 : n2);
+	return (n1 <= n2) ? n1 : n2;
 }
 
-/******************************************************//**
-Calculates the maximum of two ulints.
-@return	maximum */
-IB_INLINE
-ulint
-ut_max(
-/*===*/
-	ulint	 n1,	/*!< in: first number */
-	ulint	 n2)	/*!< in: second number */
+IB_INLINE ulint ut_max(ulint n1, ulint n2)
 {
 	return((n1 <= n2) ? n2 : n1);
 }

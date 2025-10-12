@@ -242,7 +242,7 @@ void mlog_write_ulint(byte *ptr, ulint val, byte type, mtr_t *mtr)
 			mach_write_to_4(ptr, val);
 			break;
 		default:
-			ut_error;
+			UT_ERROR;
 	}
 
 	log_ptr = mlog_open(mtr, 11 + 2 + 5);

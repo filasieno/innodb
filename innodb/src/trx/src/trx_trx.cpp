@@ -916,7 +916,7 @@ trx_commit_off_kernel(
 
 			log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
 		} else {
-			ut_error;
+			UT_ERROR;
 		}
 
 		trx->commit_lsn = lsn;
@@ -1192,7 +1192,7 @@ trx_sig_is_compatible(
 
 		return(TRUE);
 	} else {
-		ut_error;
+		UT_ERROR;
 
 		return(FALSE);
 	}
@@ -1230,7 +1230,7 @@ trx_sig_send(
 		/* The signal is not compatible with the other signals in
 		the queue: die */
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	/* Queue the signal object */
@@ -1270,7 +1270,7 @@ trx_sig_send(
 	}
 
 	if ((sender != TRX_SIG_SELF) || (type == TRX_SIG_BREAK_EXECUTION)) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	/* If there were no other signals ahead in the queue, try to start
@@ -1405,7 +1405,7 @@ loop:
 		trx_sig_reply(sig, next_thr);
 		trx_sig_remove(trx, sig);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	goto loop;
@@ -1600,7 +1600,7 @@ trx_commit_flush_log(
 
 		log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	trx->must_flush_log_later = FALSE;
@@ -1859,7 +1859,7 @@ trx_prepare_off_kernel(
 
 			log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
 		} else {
-			ut_error;
+			UT_ERROR;
 		}
 
 		mutex_enter(&kernel_mutex);

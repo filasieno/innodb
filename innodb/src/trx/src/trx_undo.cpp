@@ -1302,7 +1302,7 @@ trx_undo_mem_create_at_db_start(
 	if (id >= TRX_RSEG_N_SLOTS) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: undo->id is %lu\n", (ulong) id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	undo_page = trx_undo_page_get(rseg->space, rseg->zip_size,
@@ -1485,7 +1485,7 @@ trx_undo_mem_create(
 	if (id >= TRX_RSEG_N_SLOTS) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: undo->id is %lu\n", (ulong) id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	undo = mem_alloc(sizeof(trx_undo_t));
@@ -1542,7 +1542,7 @@ trx_undo_mem_init_for_reuse(
 		ib_logger(ib_stream, "InnoDB: Error: undo->id is %lu\n",
 			(ulong) undo->id);
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	undo->state = TRX_UNDO_ACTIVE;
@@ -1569,7 +1569,7 @@ trx_undo_mem_free(
 	if (undo->id >= TRX_RSEG_N_SLOTS) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: undo->id is %lu\n", (ulong) undo->id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	mem_free(undo);
@@ -1698,7 +1698,7 @@ trx_undo_reuse_cached(
 	if (undo->id >= TRX_RSEG_N_SLOTS) {
 		ib_logger(ib_stream, "InnoDB: Error: undo->id is %lu\n",
 			(ulong) undo->id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	undo_page = trx_undo_page_get(undo->space, undo->zip_size,
@@ -1755,7 +1755,7 @@ trx_undo_mark_as_dict_operation(
 
 	switch (trx_get_dict_operation(trx)) {
 	case TRX_DICT_OP_NONE:
-		ut_error;
+		UT_ERROR;
 	case TRX_DICT_OP_INDEX:
 		/* Do not discard the table on recovery. */
 		undo->table_id = ut_dulint_zero;
@@ -1872,7 +1872,7 @@ trx_undo_set_state_at_finish(
 	if (undo->id >= TRX_RSEG_N_SLOTS) {
 		ib_logger(ib_stream, "InnoDB: Error: undo->id is %lu\n",
 			(ulong) undo->id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	undo_page = trx_undo_page_get(undo->space, undo->zip_size,
@@ -1935,7 +1935,7 @@ trx_undo_set_state_at_prepare(
 	if (undo->id >= TRX_RSEG_N_SLOTS) {
 		ib_logger(ib_stream, "InnoDB: Error: undo->id is %lu\n",
 			(ulong) undo->id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	undo_page = trx_undo_page_get(undo->space, undo->zip_size,

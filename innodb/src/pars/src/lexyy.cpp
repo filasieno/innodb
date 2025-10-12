@@ -752,7 +752,7 @@ Created 12/14/1997 Heikki Tuuri
 #define malloc(A)	ut_malloc(A)
 #define free(A)		ut_free(A)
 #define realloc(P, A)	ut_realloc(P, A)
-#define exit(A) 	ut_error
+#define exit(A) 	UT_ERROR
 
 #define YY_INPUT(buf, result, max_size) pars_get_lex_chars(buf, &result, max_size)
 
@@ -1084,7 +1084,7 @@ case 2:
 YY_RULE_SETUP
 #line 133 "pars0lex.l"
 {
-			ut_error;	/* not implemented */
+			UT_ERROR;	/* not implemented */
 
 			return(PARS_FLOAT_LIT);
 }
@@ -1984,7 +1984,7 @@ YY_RULE_SETUP
 			ib_logger(ib_stream,"Unrecognized character: %02x\n",
 				*yytext);
 
-			ut_error;
+			UT_ERROR;
 
 			return(0);
 }

@@ -533,14 +533,14 @@ check_next_foreign:
 		if (err != DB_OUT_OF_FILE_SPACE) {
 			ib_logger(ib_stream,
 				"InnoDB: Error: unexpected err: %d", err);
-			ut_error;
+			UT_ERROR;
 		}
 
 		err = DB_MUST_GET_MORE_FILE_SPACE;
 
 		ib_handle_errors(&err, trx, NULL, NULL);
 
-		ut_error;
+		UT_ERROR;
 	} else {
 		ibool		is_path;
 		const char*	name_or_path;

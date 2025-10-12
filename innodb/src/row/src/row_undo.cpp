@@ -366,7 +366,7 @@ row_undo_step(
 				" your tablespace.\n");
 		}
 
-		ut_error;
+		UT_ERROR;
 
 		return(NULL);
 	}

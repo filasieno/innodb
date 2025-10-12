@@ -402,7 +402,7 @@ buf_flush_remove(
 	case BUF_BLOCK_READY_FOR_USE:
 	case BUF_BLOCK_MEMORY:
 	case BUF_BLOCK_REMOVE_HASH:
-		ut_error;
+		UT_ERROR;
 		return;
 	case BUF_BLOCK_ZIP_DIRTY:
 		buf_page_set_state(bpage, BUF_BLOCK_ZIP_PAGE);
@@ -628,7 +628,7 @@ corrupted_page:
 					(ulong) buf_block_get_page_no(block),
 					(ulong) buf_block_get_space(block));
 
-				ut_error;
+				UT_ERROR;
 			}
 		} else if (IB_UNLIKELY
 			   (!page_simple_validate_old(block->frame))) {
@@ -898,7 +898,7 @@ buf_flush_init_for_writing(
 			"\nInnoDB: Possibly older version of the page:");
 		ut_print_buf(ib_stream, page_zip->data, zip_size);
 		ib_logger(ib_stream, "\n");
-		ut_error;
+		UT_ERROR;
 	}
 
 	/* Write the newest modification lsn to the page header and trailer */
@@ -977,7 +977,7 @@ buf_flush_write_block_low(
 	case BUF_BLOCK_READY_FOR_USE:
 	case BUF_BLOCK_MEMORY:
 	case BUF_BLOCK_REMOVE_HASH:
-		ut_error;
+		UT_ERROR;
 		break;
 	case BUF_BLOCK_ZIP_DIRTY:
 		frame = bpage->zip.data;
@@ -1108,7 +1108,7 @@ buf_flush_page(
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	/* Even though bpage is not protected by any mutex at this

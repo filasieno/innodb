@@ -1840,7 +1840,7 @@ lock_rec_enqueue_waiting(
 
 	if (IB_UNLIKELY(que_thr_stop(thr))) {
 
-		ut_error;
+		UT_ERROR;
 
 		return(DB_QUE_THR_SUSPENDED);
 	}
@@ -1935,7 +1935,7 @@ lock_rec_add_to_queue(
 	case LOCK_S:
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (!(type_mode & (LOCK_WAIT | LOCK_GAP))) {
@@ -2700,7 +2700,7 @@ lock_move_reorganize_page(
 					"lock_move_reorganize_page():"
 					" %lu not moved in %p\n",
 					(ulong) i, (void*) lock);
-				ut_error;
+				UT_ERROR;
 			}
 		}
 #endif // IB_DEBUG
@@ -2906,7 +2906,7 @@ lock_move_rec_list_start(
 						"lock_move_rec_list_start():"
 						" %lu not moved in %p\n",
 						(ulong) i, (void*) lock);
-					ut_error;
+					UT_ERROR;
 				}
 			}
 		}
@@ -3746,7 +3746,7 @@ lock_table_enqueue_waiting(
 	stopped anyway 
 
 	if (que_thr_stop(thr)) {
-		ut_error;
+		UT_ERROR;
 
 		return(DB_QUE_THR_SUSPENDED);
 	}
@@ -4213,7 +4213,7 @@ lock_remove_all_on_table(
 			// HACK: For testing
 			if (lock_get_wait(lock)) {
 			       if (remove_also_table_sx_locks) {
-					ut_error;
+					UT_ERROR;
 				} else {
 					goto next;
 				}
@@ -4332,7 +4332,7 @@ lock_rec_print(
 	} else if (lock_get_mode(lock) == LOCK_X) {
 		ib_logger(ib_stream, " lock_mode X");
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (lock_rec_get_gap(lock)) {
@@ -4732,7 +4732,7 @@ lock_rec_queue_validate(
 			case TRX_COMMITTED_IN_MEMORY:
 				break;
 			default:
-				ut_error;
+				UT_ERROR;
 			}
 
 			ut_a(trx_in_trx_list(lock->trx));
@@ -5641,7 +5641,7 @@ lock_get_table(
 	case LOCK_TABLE:
 		return(lock->un_member.tab_lock.table);
 	default:
-		ut_error;
+		UT_ERROR;
 		return(NULL);
 	}
 }

@@ -124,7 +124,7 @@ row_prebuilt_free(
 		ut_print_name(ib_stream, NULL, TRUE, prebuilt->table->name);
 		ib_logger(ib_stream, "\n");
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	prebuilt->magic_n = ROW_PREBUILT_FREED;
@@ -210,7 +210,7 @@ row_prebuilt_update_trx(
 			"InnoDB: trx handle. Magic n %lu\n",
 			(ulong) trx->magic_n);
 
-		ut_error;
+		UT_ERROR;
 	} else if (prebuilt->magic_n != ROW_PREBUILT_ALLOCATED) {
 		ib_logger(ib_stream,
 			"InnoDB: Error: trying to use a corrupt\n"
@@ -219,7 +219,7 @@ row_prebuilt_update_trx(
 		ut_print_name(ib_stream, NULL, TRUE, prebuilt->table->name);
 		ib_logger(ib_stream, "\n");
 
-		ut_error;
+		UT_ERROR;
 	} else {
 		prebuilt->trx = trx;
 

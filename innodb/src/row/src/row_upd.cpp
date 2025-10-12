@@ -2129,7 +2129,7 @@ row_upd_step(
 			/* An explicit cursor should be positioned on a row
 			to update */
 
-			ut_error;
+			UT_ERROR;
 
 			err = DB_ERROR;
 

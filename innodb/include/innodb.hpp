@@ -394,26 +394,13 @@ typedef enum {
 
 /// \brief InnoDB column attributes
 typedef enum {
-	/// \brief No special attributes.
-	IB_COL_NONE = 0,
-
-	/// \brief Column data can't be NULL.
-	IB_COL_NOT_NULL = 1,
-
-	/// \brief Column is IB_INT and unsigned.
-	IB_COL_UNSIGNED = 2,
-
-	/// \brief Future use, reserved.
-	IB_COL_NOT_USED = 4,
-
-	/// \brief Custom precision type, this is a bit that is ignored by InnoDB and so can be set and queried by users.
-	IB_COL_CUSTOM1 = 8,
-
-	/// \brief Custom precision type, this is a bit that is ignored by InnoDB and so can be set and queried by users.
-	IB_COL_CUSTOM2 = 16,
-
-	/// \brief Custom precision type, this is a bit that is ignored by InnoDB and so can be set and queried by users.
-	IB_COL_CUSTOM3 = 32
+	IB_COL_NONE     = 0,  //!< No special attributes.
+	IB_COL_NOT_NULL = 1,  //!< Column data can't be NULL.
+	IB_COL_UNSIGNED = 2,  //!< Column is IB_INT and unsigned.
+	IB_COL_NOT_USED = 4,  //!< Future use, reserved.
+	IB_COL_CUSTOM1  = 8,  //!< Custom precision type, this is a bit that is ignored by InnoDB and so can be set and queried by users.
+	IB_COL_CUSTOM2  = 16, //!< Custom precision type, this is a bit that is ignored by InnoDB and so can be set and queried by users.
+	IB_COL_CUSTOM3  = 32  //!< Custom precision type, this is a bit that is ignored by InnoDB and so can be set and queried by users.
 } ib_col_attr_t;
 
 /// \brief ib_lck_mode_t InnoDB lock modes.
@@ -431,29 +418,17 @@ typedef enum {
 /// \brief ib_srch_mode_t InnoDB cursor search modes for ib_cursor_moveto().
 /// \details Values must match those found in page_cur.h
 typedef enum {
-	/// \brief If search key is not found then position the cursor on the row that is greater than the search key
-	IB_CUR_G = 1,
-
-	/// \brief If the search key not found then position the cursor on the row that is greater than or equal to the search key
-	IB_CUR_GE = 2,
-
-	/// \brief If search key is not found then position the cursor on the row that is less than the search key
-	IB_CUR_L = 3,
-
-	/// \brief If search key is not found then position the cursor on the row that is less than or equal to the search key
-	IB_CUR_LE = 4
+	IB_CUR_G  = 1,  //!< If search key is not found then position the cursor on the row that is greater than the search key
+	IB_CUR_GE = 2,  //!< If the search key not found then position the cursor on the row that is greater than or equal to the search key
+	IB_CUR_L  = 3,  //!< If search key is not found then position the cursor on the row that is less than the search key
+	IB_CUR_LE = 4   //!< If search key is not found then position the cursor on the row that is less than or equal to the search key
 } ib_srch_mode_t;
 
 /// \brief ib_match_mode_t Various match modes used by ib_cursor_moveto()
 typedef enum {
-	/// \brief Closest match possible
-	IB_CLOSEST_MATCH,
-
-	/// \brief Search using a complete key value
-	IB_EXACT_MATCH,
-
-	/// \brief Search using a key prefix which must match to rows: the prefix may contain an incomplete field (the last field in prefix may be just a prefix of a fixed length column)
-	IB_EXACT_PREFIX
+	IB_CLOSEST_MATCH, //!< Closest match possible
+	IB_EXACT_MATCH,   //!< Search using a complete key value
+	IB_EXACT_PREFIX   //!<  Search using a key prefix which must match to rows: the prefix may contain an incomplete field (the last field in prefix may be just a prefix of a fixed length column)
 } ib_match_mode_t;
 
 /// \brief InnoDB column meta data.
@@ -574,11 +549,11 @@ typedef enum {
 typedef int (*ib_schema_visitor_table_all_t) (void* arg, const char* name, int IB_NAME_LEN);
 
 /// \brief Table visitor
-/// \param arg User callback arg
-/// \param name Table name
-/// \param tbl_fmt Table type
+/// \param arg       User callback arg
+/// \param name      Table name
+/// \param tbl_fmt   Table type
 /// \param page_size Table page size
-/// \param n_cols No. of cols defined
+/// \param n_cols    No. of cols defined
 /// \param n_indexes No. of indexes defined
 /// \return 0 on success, nonzero on failure (abort traversal)
 typedef int (*ib_schema_visitor_table_t) (void* arg, const char* name, ib_tbl_fmt_t	tbl_fmt, ib_ulint_t	page_size, int n_cols, int n_indexes);

@@ -35,28 +35,22 @@ Created 5/30/1994 Heikki Tuuri
 #define UT_XOR_RND1		187678878
 #define UT_XOR_RND2		143537923
 
-/** Seed value of ut_rnd_gen_ulint() */
 extern	ulint	 ut_rnd_ulint_counter;
 
-/********************************************************//**
-This is used to set the random number seed. */
 IB_INLINE
 void
 ut_rnd_set_seed(
 /*============*/
-	ulint	 seed)		 /*!< in: seed */
+	ulint	 seed)
 {
 	ut_rnd_ulint_counter = seed;
 }
 
-/********************************************************//**
-The following function generates a series of 'random' ulint integers.
-@return	the next 'random' number */
 IB_INLINE
 ulint
 ut_rnd_gen_next_ulint(
 /*==================*/
-	ulint	rnd)	/*!< in: the previous random number value */
+	ulint	rnd)
 {
 	ulint	n_bits;
 
@@ -73,12 +67,6 @@ ut_rnd_gen_next_ulint(
 	return(rnd);
 }
 
-/********************************************************//**
-The following function generates 'random' ulint integers which
-enumerate the value space of ulint integers in a pseudo random
-fashion. Note that the same integer is repeated always after
-2 to power 32 calls to the generator (if ulint is 32-bit).
-@return	the 'random' number */
 IB_INLINE
 ulint
 ut_rnd_gen_ulint(void)
@@ -96,15 +84,12 @@ ut_rnd_gen_ulint(void)
 	return(rnd);
 }
 
-/********************************************************//**
-Generates a random integer from a given interval.
-@return	the 'random' number */
 IB_INLINE
 ulint
 ut_rnd_interval(
 /*============*/
-	ulint	low,	/*!< in: low limit; can generate also this value */
-	ulint	high)	/*!< in: high limit; can generate also this value */
+	ulint	low,
+	ulint	high)
 {
 	ulint	rnd;
 
@@ -120,9 +105,6 @@ ut_rnd_interval(
 	return(low + (rnd % (high - low + 1)));
 }
 
-/*********************************************************//**
-Generates a random iboolean value.
-@return	the random value */
 IB_INLINE
 ibool
 ut_rnd_gen_ibool(void)
@@ -140,17 +122,12 @@ ut_rnd_gen_ibool(void)
 	return(FALSE);
 }
 
-/*******************************************************//**
-The following function generates a hash value for a ulint integer
-to a hash table of size table_size, which should be a prime
-or some random number for the hash table to work reliably.
-@return	hash value */
 IB_INLINE
 ulint
 ut_hash_ulint(
 /*==========*/
-	ulint	 key,		/*!< in: value to be hashed */
-	ulint	 table_size)	/*!< in: hash table size */
+	ulint	 key,
+	ulint	 table_size)
 {
 	ut_ad(table_size);
 	key = key ^ UT_HASH_RANDOM_MASK2;
@@ -158,41 +135,32 @@ ut_hash_ulint(
 	return(key % table_size);
 }
 
-/*************************************************************//**
-Folds a pair of ulints.
-@return	folded value */
 IB_INLINE
 ulint
 ut_fold_ulint_pair(
 /*===============*/
-	ulint	n1,	/*!< in: ulint */
-	ulint	n2)	/*!< in: ulint */
+	ulint	n1,
+	ulint	n2)
 {
 	return(((((n1 ^ n2 ^ UT_HASH_RANDOM_MASK2) << 8) + n1)
 		^ UT_HASH_RANDOM_MASK) + n2);
 }
 
-/*************************************************************//**
-Folds a dulint.
-@return	folded value */
 IB_INLINE
 ulint
 ut_fold_dulint(
 /*===========*/
-	dulint	d)	/*!< in: dulint */
+	dulint	d)
 {
 	return(ut_fold_ulint_pair(ut_dulint_get_low(d),
 				  ut_dulint_get_high(d)));
 }
 
-/*************************************************************//**
-Folds a character string ending in the null character.
-@return	folded value */
 IB_INLINE
 ulint
 ut_fold_string(
 /*===========*/
-	const char*	str)	/*!< in: null-terminated string */
+	const char*	str)
 {
 	ulint	fold = 0;
 
@@ -206,15 +174,12 @@ ut_fold_string(
 	return(fold);
 }
 
-/*************************************************************//**
-Folds a binary string.
-@return	folded value */
 IB_INLINE
 ulint
 ut_fold_binary(
 /*===========*/
-	const byte*	str,	/*!< in: string of bytes */
-	ulint		len)	/*!< in: length */
+	const byte*	str,
+	ulint		len)
 {
 	const byte*	str_end	= str + len;
 	ulint		fold = 0;

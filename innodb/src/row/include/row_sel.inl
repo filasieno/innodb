@@ -77,7 +77,7 @@ que_thr_t *open_step(que_thr_t *thr)
         // SQL error detected
         ib_logger(ib_stream, "SQL error %lu\n", (ulong)err);
 
-        ut_error;
+        UT_ERROR;
     }
 
     thr->run_node = que_node_get_parent(node);

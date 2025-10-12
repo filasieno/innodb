@@ -916,7 +916,7 @@ page_cur_parse_insert_rec(
 
 		buf_page_print(page, 0);
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_memcpy(buf, rec_get_start(cursor_rec, offsets), mismatch_index);
@@ -939,7 +939,7 @@ page_cur_parse_insert_rec(
 					       index, offsets, mtr))) {
 		/* The redo log record should only have been written
 		after the write was successful. */
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (buf != buf1) {
@@ -1210,7 +1210,7 @@ page_cur_insert_rec_zip_reorg(
 
 	/* Out of space: restore the page */
 	if (!page_zip_decompress(page_zip, page, FALSE)) {
-		ut_error; /* Memory corrupted? */
+		UT_ERROR; /* Memory corrupted? */
 	}
 	ut_ad(page_validate(page, index));
 	return(NULL);

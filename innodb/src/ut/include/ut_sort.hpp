@@ -23,8 +23,7 @@ Sort utility
 Created 11/9/1995 Heikki Tuuri
 ***********************************************************************/
 
-#ifndef ut0sort_h
-#define ut0sort_h
+#pragma once
 
 #include "univ.i"
 
@@ -103,5 +102,4 @@ two elements from the array and returns 1, if the first is bigger,
 }\
 
 
-#endif
 

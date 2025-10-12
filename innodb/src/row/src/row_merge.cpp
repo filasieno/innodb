@@ -1329,7 +1329,7 @@ err_exit:
 				    (!row_merge_buf_add(buf, row, ext))) {
 					/* An empty buffer should have enough
 					room for at least one record. */
-					ut_error;
+					UT_ERROR;
 				}
 
 				file->n_rec++;
@@ -1471,7 +1471,7 @@ corrupt:
 			ROW_MERGE_WRITE_GET_NEXT(1, goto merged);
 			break;
 		default:
-			ut_error;
+			UT_ERROR;
 		}
 
 	}

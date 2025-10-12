@@ -183,7 +183,7 @@ IB_INLINE dulint mach_dulint_read_compressed(const byte* b) __attribute__((nonnu
 /// \param [in] b pointer to memory where to store
 /// \param [in] n integer to be stored 
 /// \return size in bytes 
-IB_INLINE ulint mach_dulint_write_much_compressed(byte* b, dulint n); /*!< in: */
+IB_INLINE ulint mach_dulint_write_much_compressed(byte* b, dulint n);
 
 /// \brief Returns the size of a dulint when written in the compressed form.
 /// \return compressed size in bytes 

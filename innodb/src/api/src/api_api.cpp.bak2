@@ -1317,7 +1317,7 @@ ib_index_is_prefix_allowed(
 		break;
 
 	case ULINT_UNDEFINED:
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(allowed);
@@ -1596,7 +1596,7 @@ ib_table_def_get_flags(
 		break;
 	}
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(flags);
@@ -4080,7 +4080,7 @@ ib_col_set_value(
 		break;
 
 	case DATA_SYS:
-		ut_error;
+		UT_ERROR;
 		break;
 
 	case DATA_CHAR: {
@@ -4109,7 +4109,7 @@ ib_col_set_value(
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (dst != dfield_get_data(dfield)) {

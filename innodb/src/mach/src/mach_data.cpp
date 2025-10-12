@@ -19,7 +19,7 @@
 #include "mach_data.hpp"
 
 #ifdef IB_DO_NOT_INLINE
-#include "mach_data.inl"
+   #include "mach_data.inl"
 #endif
 
 IB_INTERN byte *mach_parse_compressed(byte *ptr, byte *end_ptr, ulint *val)

@@ -1038,7 +1038,7 @@ void log_io_complete(
 		return;
 	}
 
-	ut_error; /*!< We currently use synchronous writing of the
+	UT_ERROR; /*!< We currently use synchronous writing of the
 			logs and cannot end up here! */
 
 	if (srv_unix_file_flush_method != SRV_UNIX_O_DSYNC && srv_unix_file_flush_method != SRV_UNIX_NOSYNC && srv_flush_log_at_trx_commit != 2) {
@@ -1443,7 +1443,7 @@ do_waits:
 		case LOG_NO_WAIT:
 			break;
 		default:
-			ut_error;
+			UT_ERROR;
 #endif	  // IB_DEBUG
 	}
 }

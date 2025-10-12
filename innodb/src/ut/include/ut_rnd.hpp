@@ -23,8 +23,7 @@ Random numbers and hashing
 Created 1/20/1994 Heikki Tuuri
 ***********************************************************************/
 
-#ifndef ut0rnd_h
-#define ut0rnd_h
+#pragma once
 
 #include "univ.i"
 
@@ -137,7 +136,5 @@ ut_find_prime(
 
 
 #ifndef IB_DO_NOT_INLINE
-#include "ut0rnd.inl"
-#endif
-
+#include "ut_rnd.inl"
 #endif

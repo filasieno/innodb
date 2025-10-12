@@ -296,7 +296,7 @@ cmp_whole_field(
 		ib_logger(ib_stream,
 			"InnoDB: unknown type number %lu\n",
 			(ulong) mtype);
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(0);

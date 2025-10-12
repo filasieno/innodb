@@ -874,7 +874,7 @@ trx_rollback(
 
 		trx->roll_limit = trx->last_sql_stat_start.least_undo_no;
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_a(ut_dulint_cmp(trx->roll_limit, trx->undo_no) <= 0);

@@ -1713,7 +1713,7 @@ dict_index_remove_from_cache(
 		/* To avoid a hang here we commit suicide if the
 		ref_count doesn't drop to zero in 600 seconds. */
 		if (retries >= 60000) {
-			ut_error;
+			UT_ERROR;
 		}
 	}
 

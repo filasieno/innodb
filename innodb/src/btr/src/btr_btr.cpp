@@ -398,7 +398,7 @@ ulint btr_get_size(
 
 		n += fseg_n_reserved_pages(seg_header, &dummy, &mtr);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	mtr_commit(&mtr);
@@ -613,7 +613,7 @@ btr_page_get_father_node_ptr_func(
 				  "InnoDB: forcing recovery. "
 				  "Then dump + drop + reimport.\n");
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	return (offsets);

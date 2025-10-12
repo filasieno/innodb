@@ -168,7 +168,7 @@ row_purge_remove_clust_if_poss_low(
 		} else if (err == DB_OUT_OF_FILE_SPACE) {
 			success = FALSE;
 		} else {
-			ut_error;
+			UT_ERROR;
 		}
 	}
 

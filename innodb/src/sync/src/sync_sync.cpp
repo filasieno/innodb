@@ -1093,7 +1093,7 @@ sync_thread_levels_nonempty_gen(
 			    && slot->level != SYNC_DICT_OPERATION))) {
 
 			mutex_exit(&sync_thread_mutex);
-			ut_error;
+			UT_ERROR;
 
 			return(slot->latch);
 		}
@@ -1213,7 +1213,7 @@ sync_thread_add_level(
 			ib_logger(ib_stream,
 				"InnoDB: sync_thread_levels_g(array, %lu)"
 				" does not hold!\n", level);
-			ut_error;
+			UT_ERROR;
 		}
 		break;
 	case SYNC_BUF_BLOCK:
@@ -1307,7 +1307,7 @@ sync_thread_add_level(
 #endif /* IB_DEBUG */
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
@@ -1362,7 +1362,7 @@ sync_thread_reset_level(
 
 	if (thread_slot == NULL) {
 
-		ut_error;
+		UT_ERROR;
 
 		mutex_exit(&sync_thread_mutex);
 		return(FALSE);
@@ -1395,7 +1395,7 @@ sync_thread_reset_level(
 		}
 	}
 
-	ut_error;
+	UT_ERROR;
 
 	mutex_exit(&sync_thread_mutex);
 

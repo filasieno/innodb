@@ -652,7 +652,7 @@ static void rbt_remove_node_and_rebalance(
 				child = rbt_balance_left(tree->nil, parent, parent->left);
 
 			} else {
-				ut_error;
+				UT_ERROR;
 			}
 
 			if (child) {

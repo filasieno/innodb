@@ -233,7 +233,7 @@ btr_pcur_restore_position_func(
 			trx_print(ib_stream, cursor->trx_if_known, 0);
 		}
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (IB_UNLIKELY
@@ -476,7 +476,7 @@ btr_pcur_move_backward_from_page(
 		latch_mode2 = BTR_MODIFY_PREV;
 	} else {
 		latch_mode2 = 0; /* To eliminate compiler warning */
-		ut_error;
+		UT_ERROR;
 	}
 
 	btr_pcur_store_position(cursor, mtr);
@@ -554,6 +554,6 @@ btr_pcur_open_on_user_rec_func(
 
 		/* Not implemented yet */
 
-		ut_error;
+		UT_ERROR;
 	}
 }

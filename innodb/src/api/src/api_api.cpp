@@ -1022,7 +1022,7 @@ static int ib_index_is_prefix_allowed(const ib_index_def_t* ib_index_def, const 
 		allowed = FALSE;
 		break;
 	case ULINT_UNDEFINED:
-		ut_error;
+		UT_ERROR;
 	}
 	return allowed;
 }
@@ -1192,7 +1192,7 @@ static ulint ib_table_def_get_flags(const ib_table_def_t* table_def)
 		break;
 	}
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 	return flags;
 }
@@ -2741,7 +2741,7 @@ ib_err_t ib_col_set_value(ib_tpl_t ib_tpl, ib_ulint_t col_no, const void* src, i
 		}
 		break;
 	case DATA_SYS:
-		ut_error;
+		UT_ERROR;
 		break;
 	case DATA_CHAR: {
 		ulint pad_char = ULINT_UNDEFINED;
@@ -2764,7 +2764,7 @@ ib_err_t ib_col_set_value(ib_tpl_t ib_tpl, ib_ulint_t col_no, const void* src, i
 		memcpy(dst, src, len);
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 	if (dst != dfield_get_data(dfield)) {
 		dfield_set_data(dfield, dst, len);

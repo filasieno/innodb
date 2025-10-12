@@ -722,7 +722,7 @@ page_rec_get_next_low(
 			(ulong) page_get_page_no(page));
 		buf_page_print(page, 0);
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (IB_UNLIKELY(offs == 0)) {

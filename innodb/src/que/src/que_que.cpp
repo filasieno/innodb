@@ -397,7 +397,7 @@ que_fork_start_command(
 			break;
 
 		case QUE_THR_LOCK_WAIT:
-			ut_error;
+			UT_ERROR;
 
 		}
 
@@ -548,7 +548,7 @@ que_graph_free_recursive(
 				"que_thr struct appears corrupt;"
 				" magic n %lu\n",
 				(unsigned long) thr->magic_n);
-			ut_error;
+			UT_ERROR;
 		}
 
 		thr->magic_n = QUE_THR_MAGIC_FREED;
@@ -667,7 +667,7 @@ que_graph_free_recursive(
 		ib_logger(ib_stream,
 			"que_node struct appears corrupt; type %lu\n",
 			(unsigned long) que_node_get_type(node));
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -827,7 +827,7 @@ que_thr_dec_refer_count(
 
 				*next_thr = thr;
 			} else {
-				ut_error;
+				UT_ERROR;
 				srv_que_task_enqueue_low(thr);
 			}
 
@@ -877,7 +877,7 @@ que_thr_dec_refer_count(
 			break;
 
 		default:
-			ut_error;	/* not used */
+			UT_ERROR;	/* not used */
 		}
 	}
 
@@ -966,7 +966,7 @@ que_thr_stop_for_client_no_error(
 			"que_thr struct appears corrupt; magic n %lu\n",
 			(unsigned long) thr->magic_n);
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	thr->state = QUE_THR_COMPLETED;
@@ -993,7 +993,7 @@ que_thr_move_to_run_state_for_client(
 			"que_thr struct appears corrupt; magic n %lu\n",
 			(unsigned long) thr->magic_n);
 
-		ut_error;
+		UT_ERROR;
 	} else if (!thr->is_active) {
 
 		thr->graph->n_active_thrs++;
@@ -1207,7 +1207,7 @@ que_thr_step(
 		} else if (type == QUE_NODE_WHILE) {
 			while_step(thr);
 		} else {
-			ut_error;
+			UT_ERROR;
 		}
 	} else if (type == QUE_NODE_ASSIGNMENT) {
 		assign_step(thr);
@@ -1226,7 +1226,7 @@ que_thr_step(
 
 	} else if (type == QUE_NODE_LOCK) {
 
-		ut_error;
+		UT_ERROR;
 		/*
 		thr = que_lock_step(thr);
 		*/
@@ -1251,7 +1251,7 @@ que_thr_step(
 	} else if (type == QUE_NODE_ROW_PRINTF) {
 		thr = row_printf_step(thr);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (type == QUE_NODE_EXIT) {
@@ -1376,7 +1376,7 @@ loop:
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	mutex_exit(&kernel_mutex);

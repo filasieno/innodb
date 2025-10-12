@@ -89,7 +89,7 @@ trx_rsegf_get_nth_undo(
 		ib_logger(ib_stream,
 			"InnoDB: Error: trying to get slot %lu of rseg\n",
 			(ulong) n);
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(mtr_read_ulint(rsegf + TRX_RSEG_UNDO_SLOTS
@@ -111,7 +111,7 @@ trx_rsegf_set_nth_undo(
 		ib_logger(ib_stream,
 			"InnoDB: Error: trying to set slot %lu of rseg\n",
 			(ulong) n);
-		ut_error;
+		UT_ERROR;
 	}
 
 	mlog_write_ulint(rsegf + TRX_RSEG_UNDO_SLOTS + n * TRX_RSEG_SLOT_SIZE,

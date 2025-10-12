@@ -23,124 +23,88 @@ A vector of pointers to data items
 Created 4/6/2006 Osku Salerma
 ************************************************************************/
 
-#ifndef IB_VECTOR_H
-#define IB_VECTOR_H
+#pragma once
 
-#include "univ.i"
+#include "defs.hpp"
 #include "mem_mem.hpp"
 
-/** An automatically resizing vector data type. */
-typedef struct ib_vector_struct ib_vector_t;
-
-/* An automatically resizing vector datatype with the following properties:
-
- -Contains void* items.
-
- -The items are owned by the caller.
-
- -All memory allocation is done through a heap owned by the caller, who is
- responsible for freeing it when done with the vector.
-
- -When the vector is resized, the old memory area is left allocated since it
- uses the same heap as the new memory area, so this is best used for
- relatively small or short-lived uses.
-*/
-
-/****************************************************************//**
-Create a new vector with the given initial size.
-@return	vector */
-IB_INTERN
-ib_vector_t*
-ib_vector_create(
-/*=============*/
-	mem_heap_t*	heap,	/*!< in: heap */
-	ulint		size);	/*!< in: initial size */
-
-/****************************************************************//**
-Push a new element to the vector, increasing its size if necessary. */
-IB_INTERN
-void
-ib_vector_push(
-/*===========*/
-	ib_vector_t*	vec,	/*!< in: vector */
-	void*		elem);	/*!< in: data element */
-
-/****************************************************************//**
-Get the number of elements in the vector.
-@return	number of elements in vector */
-IB_INLINE
-ulint
-ib_vector_size(
-/*===========*/
-	const ib_vector_t*	vec);	/*!< in: vector */
-
-/****************************************************************//**
-Test whether a vector is empty or not.
-@return	TRUE if empty */
-IB_INLINE
-ibool
-ib_vector_is_empty(
-/*===============*/
-	const ib_vector_t*	vec);	/*!< in: vector */
-
-/****************************************************************//**
-Get the n'th element.
-@return	n'th element */
-IB_INLINE
-void*
-ib_vector_get(
-/*==========*/
-	ib_vector_t*	vec,	/*!< in: vector */
-	ulint		n);	/*!< in: element index to get */
-
-/****************************************************************//**
-Get n'th element as a const pointer.
-@return	n'th element */
-IB_INLINE
-const void*
-ib_vector_get_const(
-/*================*/
-	const ib_vector_t*	vec,	/*!< in: vector */
-	ulint		n);	/*!< in: element index to get */
-
-/****************************************************************//**
-Set the n'th element and return the previous value.
-@return	n'th element */
-IB_INLINE
-void*
-ib_vector_set(
-/*==========*/
-	ib_vector_t*	vec,	/*!< in: vector */
-	ulint		n,	/*!< in: element index to set */
-	void*		p);	/*!< in: new value to set */
-
-/********************************************************************
-Remove the last element from the vector. */
-IB_INLINE
-void*
-ib_vector_pop(
-/*==========*/
-	ib_vector_t*	vec);	/*!< in: vector */
-
-/****************************************************************//**
-Free the underlying heap of the vector. Note that vec is invalid
-after this call. */
-IB_INLINE
-void
-ib_vector_free(
-/*===========*/
-	ib_vector_t*	vec);	/*!< in,own: vector */
-
-/** An automatically resizing vector data type. */
+/// \brief An automatically resizing vector data type.
+/// \details Contains T items.
+///
+/// - The items are owned by the caller.
+/// - All memory allocation is done through a heap owned by the caller, who is responsible for freeing it when done with the vector.
+/// - When the vector is resized, the old memory area is left allocated since it uses the same heap as the new memory area, so this is best used for
+///   relatively small or short-lived uses.
+/// \tparam T The type of the items in the vector.
+template <typename T>
 struct ib_vector_struct {
-	mem_heap_t*	heap;	/*!< heap */
-	void**		data;	/*!< data elements */
-	ulint		used;	/*!< number of elements currently used */
-	ulint		total;	/*!< number of elements allocated */
+	mem_heap_t*	heap;	//!< heap
+	T*          data;	//!< data elements
+	ulint		used;	//!< number of elements currently used
+	ulint		total;	//!< number of elements allocated
 };
 
-#ifndef IB_DO_NOT_INLINE
-#include "ut0vec.inl"
-#endif
+/// \brief An automatically resizing vector data type.
+template <typename T>
+using ib_vector_t = ib_vector_struct<T>;
 
+/// \brief Create a new vector with the given initial size.
+/// \param [in] heap heap
+/// \param [in] size initial size
+/// \return vector
+template <typename T>
+IB_INTERN ib_vector_t<T>* ib_vector_create(mem_heap_t* heap, ulint size);
+
+/// \brief Push a new element to the vector, increasing its size if necessary.
+/// \param [in] vec vector
+/// \param [in] elem data element
+template <typename T>
+IB_INTERN void ib_vector_push(ib_vector_t<T>* vec, T* elem);
+
+/// \brief Get the number of elements in the vector.
+/// \param [in] vec vector
+/// \return number of elements in vector
+template <typename T>
+IB_INTERN ulint ib_vector_size(const ib_vector_t<T>* vec);
+
+/// \brief Test whether a vector is empty or not.
+/// \param [in] vec vector
+/// \return TRUE if empty
+template <typename T>
+IB_INTERN bool ib_vector_is_empty(const ib_vector_t<T>* vec);
+
+/// \brief Get the n'th element.
+/// \param [in] vec vector
+/// \param [in] n element index to get
+/// \return n'th element
+template <typename T>
+IB_INTERN T* ib_vector_get(ib_vector_t<T>* vec, ulint n);
+
+/// \brief Get the n'th element as a const pointer.
+/// \param [in] vec vector
+/// \param [in] n element index to get
+/// \return n'th element
+template <typename T>
+IB_INTERN const T* ib_vector_get(const ib_vector_t<T>* vec, ulint n);
+
+/// \brief Set the n'th element and return the previous value.
+/// \param [in] vec vector
+/// \param [in] n element index to set
+/// \param [in] p new value to set
+/// \return n'th element
+template <typename T>
+IB_INLINE T* ib_vector_set(ib_vector_t<T>* vec, ulint n, T* p);
+
+/// Remove the last element from the vector. 
+template <typename T>
+IB_INLINE T ib_vector_pop(ib_vector_t<T>* vec);
+
+/// \brief Free the underlying heap of the vector. Note that vec is invalid after this call.
+/// \param [in] vec vector
+/// \return void
+template <typename T>
+IB_INLINE void ib_vector_free(ib_vector_t<T>* vec);
+
+#ifndef IB_DO_NOT_INLINE
+  #include "ut_vec.inl"
 #endif

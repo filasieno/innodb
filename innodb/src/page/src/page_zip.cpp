@@ -2214,7 +2214,7 @@ zlib_error:
 
 zlib_done:
 	if (IB_UNLIKELY(inflateEnd(d_stream) != Z_OK)) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	{
@@ -2378,7 +2378,7 @@ zlib_error:
 
 zlib_done:
 	if (IB_UNLIKELY(inflateEnd(d_stream) != Z_OK)) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	{
@@ -2719,7 +2719,7 @@ zlib_error:
 
 zlib_done:
 	if (IB_UNLIKELY(inflateEnd(d_stream) != Z_OK)) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	{
@@ -2951,7 +2951,7 @@ zlib_error:
 
 	if (IB_UNLIKELY(inflateInit2(&d_stream, IB_PAGE_SIZE_SHIFT)
 			  != Z_OK)) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	d_stream.next_in = page_zip->data + PAGE_DATA;

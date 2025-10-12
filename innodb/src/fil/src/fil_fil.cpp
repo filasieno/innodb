@@ -785,7 +785,7 @@ fil_node_open_file(
 				"InnoDB: but in file %s it is %lu!\n",
 				space->id, node->name, space_id);
 
-			ut_error;
+			UT_ERROR;
 		}
 
 		if (IB_UNLIKELY(space_id == ULINT_UNDEFINED
@@ -795,7 +795,7 @@ fil_node_open_file(
 				" in file %s is not sensible\n",
 				(ulong) space_id, node->name);
 
-			ut_error;
+			UT_ERROR;
 		}
 
 		if (IB_UNLIKELY(space->flags != flags)) {
@@ -805,7 +805,7 @@ fil_node_open_file(
 				"InnoDB: but the flags in file %s are %lx!\n",
 				space->flags, node->name, flags);
 
-			ut_error;
+			UT_ERROR;
 		}
 
 		if (size_bytes >= 1024 * 1024) {
@@ -1709,7 +1709,7 @@ fil_set_max_space_id_if_bigger(
 		ib_logger(ib_stream,
 			"InnoDB: Fatal error: max tablespace id"
 			" is too high, %lu\n", (ulong) max_id);
-		ut_error;
+		UT_ERROR;
 	}
 
 	mutex_enter(&fil_system->mutex);
@@ -2178,7 +2178,7 @@ fil_op_log_parse_or_replay(
 				why we pass NULL as the first argument */
 				if (!fil_rename_tablespace(NULL, space_id,
 							   new_name)) {
-					ut_error;
+					UT_ERROR;
 				}
 			}
 		}
@@ -2202,14 +2202,14 @@ fil_op_log_parse_or_replay(
 			if (fil_create_new_single_table_tablespace(
 				    &space_id, name, FALSE, flags,
 				    FIL_IBD_FILE_INITIAL_SIZE) != DB_SUCCESS) {
-				ut_error;
+				UT_ERROR;
 			}
 		}
 
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(ptr);
@@ -4451,7 +4451,7 @@ fil_io(
 				block_offset, space_id, space->name,
 				byte_offset, len, type);
 
-			ut_error;
+			UT_ERROR;
 		}
 
 		if (space->id != 0 && node->size == 0) {
@@ -4482,7 +4482,7 @@ fil_io(
 			block_offset, space_id, space->name, byte_offset,
 			len, type);
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	/* Now we have made the changes in the data structures of fil_system */
@@ -4506,7 +4506,7 @@ fil_io(
 		case 4096: zip_size_shift = 12; break;
 		case 8192: zip_size_shift = 13; break;
 		case 16384: zip_size_shift = 14; break;
-		default: ut_error;
+		default: UT_ERROR;
 		}
 		offset_high = block_offset >> (32 - zip_size_shift);
 		offset_low = (block_offset << zip_size_shift & 0xFFFFFFFFUL)
@@ -4579,7 +4579,7 @@ fil_aio_wait(
 					    &message, &type);
 #else
 		ret = 0; /* Eliminate compiler warning */
-		ut_error;
+		UT_ERROR;
 #endif
 	} else {
 		os_set_io_thread_op_info(segment, "simulated aio handle");

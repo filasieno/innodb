@@ -1614,7 +1614,7 @@ fsp_alloc_free_page(
 		ut_print_buf(ib_stream, ((byte*)descr) - 500, 1000);
 		ib_logger(ib_stream, "\n");
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	page_no = xdes_get_offset(descr) + free;
@@ -1725,7 +1725,7 @@ fsp_free_page(
 			return;
 		}
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (xdes_get_bit(descr, XDES_FREE_BIT, page % FSP_EXTENT_SIZE, mtr)) {
@@ -1797,7 +1797,7 @@ fsp_free_extent(
 		ut_print_buf(ib_stream, (byte*)descr - 500, 1000);
 		ib_logger(ib_stream, "\n");
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	xdes_init(descr, mtr);
@@ -2700,7 +2700,7 @@ fseg_alloc_free_page_low(
 		} else if (flst_get_len(seg_inode + FSEG_FREE, mtr) > 0) {
 			first = flst_get_first(seg_inode + FSEG_FREE, mtr);
 		} else {
-			ut_error;
+			UT_ERROR;
 			return(FIL_NULL);
 		}
 
@@ -2788,7 +2788,7 @@ fseg_alloc_free_page_low(
 		if (IB_UNLIKELY(block != buf_page_get(space, zip_size,
 							ret_page, RW_X_LATCH,
 							mtr))) {
-			ut_error;
+			UT_ERROR;
 		}
 
 		/* The prior contents of the page should be ignored */
@@ -3281,7 +3281,7 @@ crash:
 		ib_logger("InnoDB: Please refer to\n"
 		      "InnoDB: the InnoDB website for details"
 		      "InnoDB: about forcing recovery.\n", ib_stream);
-		ut_error;
+		UT_ERROR;
 	}
 
 	state = xdes_get_state(descr, mtr);
@@ -3614,7 +3614,7 @@ fseg_free_step_not_header(
 	n = fseg_find_last_used_frag_page_slot(inode, mtr);
 
 	if (n == ULINT_UNDEFINED) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	page_no = fseg_get_nth_frag_page_no(inode, n, mtr);

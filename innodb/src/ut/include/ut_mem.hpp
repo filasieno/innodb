@@ -1,313 +1,231 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+/// \file include/ut0mem.h
+/// \brief Memory primitives
+/// 5/30/1994 Heikki Tuuri
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
+#pragma once
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/*******************************************************************//**
-@file include/ut0mem.h
-Memory primitives
-
-Created 5/30/1994 Heikki Tuuri
-************************************************************************/
-
-#ifndef ut0mem_h
-#define ut0mem_h
-
-#include "univ.i"
+#include "defs.hpp"
 #include <string.h>
+
 #ifndef IB_HOTBACKUP
-# include "os0sync.h"
+	#include "os_sync.h"
 
-/** The total amount of memory currently allocated from the operating
-system with os_mem_alloc_large() or malloc().  Does not count malloc()
-if srv_use_sys_malloc is set.  Protected by ut_list_mutex. */
-extern ulint		ut_total_allocated_memory;
+	/// \brief The total amount of memory currently allocated from the operating
+	//. system with os_mem_alloc_large() or malloc().  Does not count malloc()
+	/// if srv_use_sys_malloc is set.  Protected by ut_list_mutex.
+	extern ulint ut_total_allocated_memory;
 
-/** Mutex protecting ut_total_allocated_memory and ut_mem_block_list */
-extern os_fast_mutex_t	ut_list_mutex;
-#endif /* !IB_HOTBACKUP */
+	/// \brief Mutex protecting ut_total_allocated_memory and ut_mem_block_list
+	extern os_fast_mutex_t	ut_list_mutex;
+#endif // !IB_HOTBACKUP
 
-/** Wrapper for memcpy(3).  Copy memory area when the source and
-target are not overlapping.
-* @param dest	in: copy to
-* @param sour	in: copy from
-* @param n	in: number of bytes to copy
-* @return	dest */
-IB_INLINE
-void*
-ut_memcpy(void* dest, const void* sour, ulint n);
+/// \brief Wrapper for memcpy(3).  
+/// \details Copy memory area when the source andtarget are not overlapping.
+/// \param [in] dest copy to
+/// \param [in] sour copy from
+/// \param [in] n number of bytes to copy
+/// \return dest
+IB_INLINE void* ut_memcpy(void* dest, const void* sour, ulint n);
 
-/** Wrapper for memmove(3).  Copy memory area when the source and
-target are overlapping.
-* @param dest	in: copy to
-* @param sour	in: copy from
-* @param n	in: number of bytes to copy
-* @return	dest */
-IB_INLINE
-void*
-ut_memmove(void* dest, const void* sour, ulint n);
+/// \brief Wrapper for memmove(3).  
+/// \details Copy memory area when the source andtarget are overlapping.
+/// \param [in] dest copy to
+/// \param [in] sour copy from
+/// \param [in] n number of bytes to copy
+/// \return dest
+IB_INLINE void* ut_memmove(void* dest, const void* sour, ulint n);
 
-/** Wrapper for memcmp(3).  Compare memory areas.
-* @param str1	in: first memory block to compare
-* @param str2	in: second memory block to compare
-* @param n	in: number of bytes to compare
-* @return	negative, 0, or positive if str1 is smaller, equal,
-		or greater than str2, respectively. */
-IB_INLINE
-int
-ut_memcmp(const void* str1, const void* str2, ulint n);
+/// \brief Wrapper for memcmp(3).  
+/// \details Compare memory areas.
+/// \param [in] str1 first memory block to compare
+/// \param [in] str2 second memory block to compare
+/// \param [in] n number of bytes to compare
+/// \return negative, 0, or positive if str1 is smaller, equal, or greater than str2, respectively.
+IB_INLINE int ut_memcmp(const void* str1, const void* str2, ulint n);
 
-/**********************************************************************//**
-Initializes the mem block list at database startup. */
-IB_INTERN
-void
-ut_mem_init(void);
-/*=============*/
 
-/**********************************************************************//**
-Allocates memory. Sets it also to zero if IB_SET_MEM_TO_ZERO is
-defined and set_to_zero is TRUE.
-@return	own: allocated memory */
-IB_INTERN
-void*
-ut_malloc_low(
-/*==========*/
-	ulint	n,			/*!< in: number of bytes to allocate */
-	ibool	set_to_zero,		/*!< in: TRUE if allocated memory
-					should be set to zero if
-					IB_SET_MEM_TO_ZERO is defined */
-	ibool	assert_on_error);	/*!< in: if TRUE, we crash the
-					engine if the memory cannot be
-					allocated */
-/**********************************************************************//**
-Allocates memory. Sets it also to zero if IB_SET_MEM_TO_ZERO is
-defined.
-@return	own: allocated memory */
-IB_INTERN
-void*
-ut_malloc(
-/*======*/
-	ulint	n);	/*!< in: number of bytes to allocate */
+/// \brief Initializes the mem block list at database startup.
+IB_INTERN void ut_mem_init(void);
+
+
+/// \brief Allocates memory.
+/// \details Sets it also to zero if IB_SET_MEM_TO_ZERO is defined and set_to_zero is TRUE.
+/// \param [in] n number of bytes to allocate
+/// \param [in] set_to_zero TRUE if allocated memory should be set to zero if IB_SET_MEM_TO_ZERO is defined
+/// \param [in] assert_on_error If TRUE, we crash the server if the memory cannot be allocated
+/// \return Allocated memory
+IB_INTERN void* ut_malloc_low(ulint n, ibool set_to_zero, ibool assert_on_error);
+
+/// \brief Allocates memory.
+/// \details Sets it also to zero if IB_SET_MEM_TO_ZERO is defined.
+/// \param [in] n number of bytes to allocate
+/// \return Allocated memory
+IB_INTERN void* ut_malloc(ulint n);
+
 #ifndef IB_HOTBACKUP
-/**********************************************************************//**
-Tests if malloc of n bytes would succeed. ut_malloc() asserts if memory runs
-out. It cannot be used if we want to return an error message. Prints to
-stderr a message if fails.
-@return	TRUE if succeeded */
-IB_INTERN
-ibool
-ut_test_malloc(
-/*===========*/
-	ulint	n);	/*!< in: try to allocate this many bytes */
-#endif /* !IB_HOTBACKUP */
-/**********************************************************************//**
-Frees a memory block allocated with ut_malloc. */
-IB_INTERN
-void
-ut_free(
-/*====*/
-	void* ptr);  /*!< in, own: memory block */
+
+	/// \brief Tests if malloc of n bytes would succeed. ut_malloc() asserts if memory runs
+	/// \details out. It cannot be used if we want to return an error message. Prints to stderr a message if fails.
+	/// \param [in] n try to allocate this many bytes
+	/// \return TRUE if succeeded
+	IB_INTERN ibool ut_test_malloc(ulint n);
+
+#endif // !IB_HOTBACKUP
+
+
+/// \brief Frees a memory block allocated with ut_malloc.
+/// \param [in] ptr memory block
+IB_INTERN void ut_free(void* ptr);
+
+
 #ifndef IB_HOTBACKUP
-/**********************************************************************//**
-Implements realloc. This is needed by /pars/lexyy.c. Otherwise, you should not
-use this function because the allocation functions in mem0mem.h are the
-recommended ones in InnoDB.
 
-man realloc in Linux, 2004:
 
-       realloc()  changes the size of the memory block pointed to
-       by ptr to size bytes.  The contents will be  unchanged  to
-       the minimum of the old and new sizes; newly allocated mem�
-       ory will be uninitialized.  If ptr is NULL,  the	 call  is
-       equivalent  to malloc(size); if size is equal to zero, the
-       call is equivalent to free(ptr).	 Unless ptr is	NULL,  it
-       must  have  been	 returned by an earlier call to malloc(),
-       calloc() or realloc().
+	/// \brief Implements realloc.
+	/// \details This is needed by /pars/lexyy.c. Otherwise, you should not use this function because the allocation functions in mem0mem.h are the recommended ones in InnoDB.
+	/// man realloc in Linux, 2004:
+	///        realloc()  changes the size of the memory block pointed to
+	///        by ptr to size bytes.  The contents will be  unchanged  to
+	///        the minimum of the old and new sizes; newly allocated mem�
+	///        ory will be uninitialized.  If ptr is NULL,  the	 call  is
+	///        equivalent  to malloc(size); if size is equal to zero, the
+	///        call is equivalent to free(ptr).	 Unless ptr is	NULL,  it
+	///        must  have  been	 returned by an earlier call to malloc(),
+	///        calloc() or realloc().
+	/// RETURN VALUE
+	///        realloc() returns a pointer to the newly allocated memory,
+	///        which is suitably aligned for any kind of variable and may
+	///        be different from ptr, or NULL if the  request  fails.  If
+	///        size  was equal to 0, either NULL or a pointer suitable to
+	///        be passed to free() is returned.	 If realloc()  fails  the
+	///        original	 block	is  left  untouched  - it is not freed or
+	///        moved.
+	/// \param [in] ptr pointer to old block or NULL
+	/// \param [in] size desired size
+	/// \return pointer to new mem block or NULL
+	IB_INTERN void* ut_realloc(void* ptr, ulint size);
 
-RETURN VALUE
-       realloc() returns a pointer to the newly allocated memory,
-       which is suitably aligned for any kind of variable and may
-       be different from ptr, or NULL if the  request  fails.  If
-       size  was equal to 0, either NULL or a pointer suitable to
-       be passed to free() is returned.	 If realloc()  fails  the
-       original	 block	is  left  untouched  - it is not freed or
-       moved.
-@return	own: pointer to new mem block or NULL */
-IB_INTERN
-void*
-ut_realloc(
-/*=======*/
-	void*	ptr,	/*!< in: pointer to old block or NULL */
-	ulint	size);	/*!< in: desired size */
-/**********************************************************************//**
-Frees in shutdown all allocated memory not freed yet. */
-IB_INTERN
-void
-ut_free_all_mem(void);
-/*=================*/
-#endif /* !IB_HOTBACKUP */
 
-/** Wrapper for strcpy(3).  Copy a NUL-terminated string.
-* @param dest	in: copy to
-* @param sour	in: copy from
-* @return	dest */
-IB_INLINE
-char*
-ut_strcpy(char* dest, const char* sour);
+	/// \brief Frees in shutdown all allocated memory not freed yet.
+	IB_INTERN void ut_free_all_mem(void);
 
-/** Wrapper for strlen(3).  Determine the length of a NUL-terminated string.
-* @param str	in: string
-* @return	length of the string in bytes, excluding the terminating NUL */
-IB_INLINE
-ulint
-ut_strlen(const char* str);
+#endif // !IB_HOTBACKUP
 
-/** Wrapper for strcmp(3).  Compare NUL-terminated strings.
-* @param str1	in: first string to compare
-* @param str2	in: second string to compare
-* @return	negative, 0, or positive if str1 is smaller, equal,
-		or greater than str2, respectively. */
-IB_INLINE
-int
-ut_strcmp(const char* str1, const char* str2);
+/// \brief Wrapper for strcpy(3).  
+/// \details Copy a NUL-terminated string.
+/// \param [in] dest copy to
+/// \param [in] sour copy from
+/// \return dest
+IB_INLINE char* ut_strcpy(char* dest, const char* sour);
 
-/**********************************************************************//**
-Copies up to size - 1 characters from the NUL-terminated string src to
-dst, NUL-terminating the result. Returns strlen(src), so truncation
-occurred if the return value >= size.
-@return	strlen(src) */
-IB_INTERN
-ulint
-ut_strlcpy(
-/*=======*/
-	char*		dst,	/*!< in: destination buffer */
-	const char*	src,	/*!< in: source buffer */
-	ulint		size);	/*!< in: size of destination buffer */
+/// \brief Wrapper for strlen(3).
+/// \details Determine the length of a NUL-terminated string.
+/// \param [in] str string
+/// \return length of the string in bytes, excluding the terminating NUL
+IB_INLINE ulint ut_strlen(const char* str);
 
-/**********************************************************************//**
-Like ut_strlcpy, but if src doesn't fit in dst completely, copies the last
-(size - 1) bytes of src, not the first.
-@return	strlen(src) */
-IB_INTERN
-ulint
-ut_strlcpy_rev(
-/*===========*/
-	char*		dst,	/*!< in: destination buffer */
-	const char*	src,	/*!< in: source buffer */
-	ulint		size);	/*!< in: size of destination buffer */
+/// \brief Wrapper for strcmp(3).  Compare NUL-terminated strings.
+/// \details Compare NUL-terminated strings.
+/// \param [in] str1 first string to compare
+/// \param [in] str2 second string to compare
+/// \return negative, 0, or positive if str1 is smaller, equal, or greater than str2, respectively.
+IB_INLINE int ut_strcmp(const char* str1, const char* str2);
 
-/**********************************************************************//**
-Compute strlen(ut_strcpyq(str, q)).
-@return	length of the string when quoted */
-IB_INLINE
-ulint
-ut_strlenq(
-/*=======*/
-	const char*	str,	/*!< in: null-terminated string */
-	char		q);	/*!< in: the quote character */
+/// \brief Copies up to size - 1 characters from the NUL-terminated string src to dst, NUL-terminating the result. Returns strlen(src), so truncation occurred if the return value >= size.
+/// \details Copies up to size - 1 characters from the NUL-terminated string src to dst, NUL-terminating the result. Returns strlen(src), so truncation occurred if the return value >= size.
+/// \param [in] dst destination buffer
+/// \param [in] src source buffer
+/// \param [in] size size of destination buffer
+/// \return strlen(src)
+IB_INTERN ulint ut_strlcpy(char* dst, const char* src, ulint size);
 
-/**********************************************************************//**
-Make a quoted copy of a NUL-terminated string.	Leading and trailing
-quotes will not be included; only embedded quotes will be escaped.
-See also ut_strlenq() and ut_memcpyq().
-@return	pointer to end of dest */
-IB_INTERN
-char*
-ut_strcpyq(
-/*=======*/
-	char*		dest,	/*!< in: output buffer */
-	char		q,	/*!< in: the quote character */
-	const char*	src);	/*!< in: null-terminated string */
+/// \brief Like ut_strlcpy, but if src doesn't fit in dst completely, copies the last (size - 1) bytes of src, not the first.
+/// \details Like ut_strlcpy, but if src doesn't fit in dst completely, copies the last (size - 1) bytes of src, not the first.
+/// \param [in] dst destination buffer
+/// \param [in] src source buffer
+/// \param [in] size size of destination buffer
+/// \return strlen(src)
+IB_INTERN ulint ut_strlcpy_rev(char* dst, const char* src, ulint size);
 
-/**********************************************************************//**
-Make a quoted copy of a fixed-length string.  Leading and trailing
-quotes will not be included; only embedded quotes will be escaped.
-See also ut_strlenq() and ut_strcpyq().
-@return	pointer to end of dest */
-IB_INTERN
-char*
-ut_memcpyq(
-/*=======*/
-	char*		dest,	/*!< in: output buffer */
-	char		q,	/*!< in: the quote character */
-	const char*	src,	/*!< in: string to be quoted */
-	ulint		len);	/*!< in: length of src */
+/// \brief Compute strlen(ut_strcpyq(str, q)).
+/// \details Compute strlen(ut_strcpyq(str, q)).
+/// \param [in] str null-terminated string
+/// \param [in] q the quote character
+/// \return length of the string when quoted
+IB_INLINE ulint ut_strlenq(const char* str, char q);
 
-/**********************************************************************//**
-Return the number of times s2 occurs in s1. Overlapping instances of s2
-are only counted once.
-@return	the number of times s2 occurs in s1 */
-IB_INTERN
-ulint
-ut_strcount(
-/*========*/
-	const char*	s1,	/*!< in: string to search in */
-	const char*	s2);	/*!< in: string to search for */
+/// \brief Make a quoted copy of a NUL-terminated string.
+/// \details Leading and trailing quotes will not be included; only embedded quotes will be escaped. See also ut_strlenq() and ut_memcpyq().
+/// \param [in] dest output buffer
+/// \param [in] q the quote character
+/// \param [in] src string to be quoted
+/// \return pointer to end of dest
+IB_INTERN char* ut_strcpyq(char* dest, char q, const char* src);
 
-/**********************************************************************//**
-Replace every occurrence of s1 in str with s2. Overlapping instances of s1
-are only replaced once.
-@return	own: modified string, must be freed with mem_free() */
-IB_INTERN
-char*
-ut_strreplace(
-/*==========*/
-	const char*	str,	/*!< in: string to operate on */
-	const char*	s1,	/*!< in: string to replace */
-	const char*	s2);	/*!< in: string to replace s1 with */
+/// \brief Make a quoted copy of a fixed-length string.
+/// \details Leading and trailing quotes will not be included; only embedded quotes will be escaped. See also ut_strlenq() and ut_strcpyq().
+/// \param [in] dest output buffer
+/// \param [in] q the quote character
+/// \param [in] src string to be quoted
+/// \param [in] len length of src
+/// \return pointer to end of dest
+IB_INTERN char* ut_memcpyq(char* dest,char q, const char* src, ulint len);
 
-/**********************************************************************//**
-Converts a raw binary data to a NUL-terminated hex string. The output is
-truncated if there is not enough space in "hex", make sure "hex_size" is at
-least (2 * raw_size + 1) if you do not want this to happen. Returns the
-actual number of characters written to "hex" (including the NUL).
-@return	number of chars written */
-IB_INLINE
-ulint
-ut_raw_to_hex(
-/*==========*/
-	const void*	raw,		/*!< in: raw data */
-	ulint		raw_size,	/*!< in: "raw" length in bytes */
-	char*		hex,		/*!< out: hex string */
-	ulint		hex_size);	/*!< in: "hex" size in bytes */
+/// \brief Return the number of times s2 occurs in s1. Overlapping instances of s2 are only counted once.
+/// \details Overlapping instances of s2 are only counted once.
+/// \param [in] s1 string to search in
+/// \param [in] s2 string to search for
+/// \return the number of times s2 occurs in s1
+IB_INTERN ulint ut_strcount(const char*	s1, const char*	s2);
 
-/*******************************************************************//**
-Adds single quotes to the start and end of string and escapes any quotes
-by doubling them. Returns the number of bytes that were written to "buf"
-(including the terminating NUL). If buf_size is too small then the
-trailing bytes from "str" are discarded.
-@return	number of bytes that were written */
-IB_INLINE
-ulint
-ut_str_sql_format(
-/*==============*/
-	const char*	str,		/*!< in: string */
-	ulint		str_len,	/*!< in: string length in bytes */
-	char*		buf,		/*!< out: output buffer */
-	ulint		buf_size);	/*!< in: output buffer size
-					in bytes */
-/**************************************************************************
-Reset the variables. */
-IB_INTERN
-void
-ut_mem_var_init(void);
-/*=================*/
+/// \brief Replace every occurrence of s1 in str with s2. Overlapping instances of s1 are only replaced once.
+/// \details Overlapping instances of s1 are only replaced once.
+/// \param [in] str string to operate on
+/// \param [in] s1 string to replace
+/// \param [in] s2 string to replace s1 with
+/// \return own: modified string, must be freed with mem_free()
+IB_INTERN char* ut_strreplace(const char*	str, const char* s1, const char* s2);
+
+/// \brief Converts a raw binary data to a NUL-terminated hex string. 
+/// \details The output is truncated if there is not enough space in "hex", make sure "hex_size" is at
+/// least (2 * raw_size + 1) if you do not want this to happen. Returns the
+/// actual number of characters written to "hex" (including the NUL).
+/// \param [in] raw raw data
+/// \param [in] raw_size "raw" length in bytes
+/// \param [out] hex hex string
+/// \param [in] hex_size "hex" size in bytes
+/// \return number of chars written 
+IB_INLINE ulint ut_raw_to_hex(const void* raw, ulint raw_size, char* hex, ulint hex_size);
+
+
+/// \brief Adds single quotes to the start and end of string and escapes any quotes by doubling them.
+/// \details Returns the number of bytes that were written to "buf" (including the terminating NUL). If buf_size is too small then the trailing bytes from "str" are discarded.
+/// \param [in] str string
+/// \param [in] str_len string length in bytes
+/// \param [out] buf output buffer
+/// \param [in] buf_size output buffer size in bytes
+/// \return	number of bytes that were written
+IB_INLINE ulint ut_str_sql_format(const char* str, ulint str_len, char* buf, ulint buf_size);
+
+/// \brief Reset the variables.
+IB_INTERN void ut_mem_var_init(void);
 
 #ifndef IB_DO_NOT_INLINE
-#include "ut0mem.inl"
+  #include "ut_mem.inl"
 #endif
 
 #endif

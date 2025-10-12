@@ -555,7 +555,7 @@ rec_get_offsets_func(
 			n = 1;
 			break;
 		default:
-			ut_error;
+			UT_ERROR;
 			return(NULL);
 		}
 	} else {
@@ -883,7 +883,7 @@ rec_get_converted_size_comp(
 		}
 		return(REC_N_NEW_EXTRA_BYTES + 8);
 	default:
-		ut_error;
+		UT_ERROR;
 		return(ULINT_UNDEFINED);
 	}
 
@@ -1108,7 +1108,7 @@ rec_convert_dtuple_to_rec_comp(
 		n_node_ptr_field = ULINT_UNDEFINED;
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 		return;
 	}
 
@@ -1419,7 +1419,7 @@ rec_copy_prefix_to_buf(
 	case REC_STATUS_SUPREMUM:
 		/* infimum or supremum record: no sense to copy anything */
 	default:
-		ut_error;
+		UT_ERROR;
 		return(NULL);
 	}
 

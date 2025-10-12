@@ -23,26 +23,20 @@ A double-linked list
 Created 4/26/2006 Osku Salerma
 ************************************************************************/
 
-/****************************************************************//**
-Get the first node in the list.
-@return	first node, or NULL */
 IB_INLINE
 ib_list_node_t*
 ib_list_get_first(
 /*==============*/
-	ib_list_t*	list)	/*!< in: list */
+	ib_list_t*	list)
 {
 	return(list->first);
 }
 
-/****************************************************************//**
-Get the last node in the list.
-@return	last node, or NULL */
 IB_INLINE
 ib_list_node_t*
 ib_list_get_last(
 /*=============*/
-	ib_list_t*	list)	/*!< in: list */
+	ib_list_t*	list)
 {
 	return(list->last);
 }

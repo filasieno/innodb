@@ -349,10 +349,9 @@ IB_INLINE void mach_float_write(byte* b, float d)
 IB_INLINE ulint mach_read_from_n_little_endian(const byte* buf, ulint buf_size)	
 {
 	ulint n	= 0;
-	const byte*	ptr;
 	ut_ad(buf_size <= sizeof(ulint));
 	ut_ad(buf_size > 0);
-	ptr = buf + buf_size;
+	const byte* ptr = buf + buf_size;
 	for (;;) {
 		ptr--;
 		n = n << 8;
@@ -463,8 +462,7 @@ IB_INLINE ib_int32_t mach_read_int32(const byte* src)
 	return dst;
 }
 
-IB_INLINE void
-mach_write_uint64(byte* dest, ib_uint64_t	n)
+IB_INLINE void mach_write_uint64(byte* dest, ib_uint64_t n)
 {
 	ut_ad(dest != NULL);
 

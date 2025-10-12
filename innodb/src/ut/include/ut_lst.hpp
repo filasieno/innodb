@@ -21,8 +21,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 ///
 /// Created 9/10/1995 Heikki Tuuri
 
-#ifndef ut0lst_h
-#define ut0lst_h
+#pragma once
 
 #include "univ.i"
 
@@ -254,6 +253,4 @@ do {									\
 									\
 	ut_a(ut_list_node_313 == NULL);					\
 } while (0)
-
-#endif
 

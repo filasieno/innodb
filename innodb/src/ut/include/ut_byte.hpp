@@ -1,20 +1,16 @@
-/*****************************************************************************
-
-Copyright (c) 1994, 2025, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
+// Copyright (c) 1994, 2025, Innobase Oy. All Rights Reserved.
+// 
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+// 
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
 /// \file ut_byte.hpp
 /// \brief Utilities for byte operations
@@ -23,7 +19,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 #pragma once
 
-#include "univ.i"
+#include "defs.hpp"
 
 /// \brief Pair of ulint integers
 typedef	struct dulint_struct dulint;
@@ -45,7 +41,7 @@ extern const dulint	ut_dulint_max;
 
 /// \brief Creates a 64-bit dulint out of two ulints.
 /// \param high High-order 32 bits.
-/// \param low Low-order 32 bits.
+/// \param low  Low-order 32 bits.
 /// \return Created dulint.
 IB_INLINE dulint ut_dulint_create(ulint high, ulint low);
 
@@ -79,7 +75,7 @@ IB_INLINE int ut_dulint_cmp(dulint a, dulint b);
 /// \param a Dulint.
 /// \param b Ulint.
 /// \return Sum a + b.
-IB_INLINE dulint ut_dulint_add(dulint	a, ulint b);
+IB_INLINE dulint ut_dulint_add(dulint a, ulint b);
 
 /// \brief Subtracts a ulint from a dulint.
 /// \param a Dulint.
@@ -165,19 +161,20 @@ IB_INLINE ib_uint64_t ut_uint64_align_up(ib_uint64_t n, ulint align_no);
 /// \param low in: low bound of sort interval, inclusive
 /// \param high in: high bound of sort interval, noninclusive
 IB_INTERN void ut_dulint_sort(dulint* arr, dulint* aux_arr, ulint low, ulint high);
+
 #endif /* notdefined */
 
 /// \brief Rounds up a pointer to the nearest aligned address.
 /// \param ptr Pointer.
 /// \param align_no Align by this number.
 /// \return Aligned pointer.
-IB_INLINE void* ut_align(const void*	ptr, ulint align_no);
+IB_INLINE void* ut_align(const void* ptr, ulint align_no);
 
 /// \brief Rounds down a pointer to the nearest aligned address.
 /// \param ptr Pointer.
 /// \param align_no Align by this number.
 /// \return Aligned pointer.
-IB_INLINE void* ut_align_down(const void*	ptr, ulint align_no) __attribute__((const));
+IB_INLINE void* ut_align_down(const void* ptr, ulint align_no) __attribute__((const));
 
 /// \brief Computes the offset of a pointer from the nearest aligned address.
 /// \param [in] ptr Pointer.

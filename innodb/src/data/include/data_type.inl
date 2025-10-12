@@ -414,7 +414,7 @@ dtype_get_fixed_size_low(
 	case DATA_BLOB:
 		return(0);
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(0);
@@ -474,7 +474,7 @@ dtype_get_min_size_low(
 	case DATA_BLOB:
 		return(0);
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(0);
@@ -507,7 +507,7 @@ dtype_get_max_size_low(
 	case DATA_BLOB:
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(ULINT_MAX);

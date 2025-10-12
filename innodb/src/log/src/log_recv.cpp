@@ -334,7 +334,7 @@ static void recv_sys_empty_hash(void)
 			(ulong)recv_sys->n_addrs,
 			(ulong)recv_max_parsed_page_no
 		);
-		ut_error;
+		UT_ERROR;
 	}
 
 	hash_table_free(recv_sys->addr_hash);
@@ -946,7 +946,7 @@ static byte *recv_parse_or_apply_log_rec_body(
 
 				switch (type) {
 					default:
-						ut_error;
+						UT_ERROR;
 					case MLOG_2BYTES:
 						/* Note that this can fail when the
 				redo log been written with something
@@ -2019,7 +2019,7 @@ static void recv_report_corrupt_log(
 			"InnoDB: Set innodb_force_recovery"
 			" to ignore this error.\n"
 		);
-		ut_error;
+		UT_ERROR;
 	}
 #endif	  // !IB_HOTBACKUP
 
@@ -2442,7 +2442,7 @@ ibool recv_scan_log_recs(
 			/* This is not really an error, but currently
 			we stop here in the debug version: */
 
-			ut_error;
+			UT_ERROR;
 #endif
 			break;
 		}
@@ -2500,7 +2500,7 @@ ibool recv_scan_log_recs(
 						" innodb_force_recovery"
 						" to ignore this error.\n"
 					);
-					ut_error;
+					UT_ERROR;
 				}
 #endif	  // !IB_HOTBACKUP
 
@@ -2993,7 +2993,7 @@ ulint recv_recovery_from_checkpoint_start_func(
 			return (DB_SUCCESS);
 		}
 
-		ut_error;
+		UT_ERROR;
 
 		return (DB_ERROR);
 	}

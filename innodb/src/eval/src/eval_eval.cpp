@@ -206,7 +206,7 @@ eval_logical(
 	} else if (func == PARS_NOT_TOKEN) {
 		val = TRUE - val1;
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	eval_node_set_ibool_val(logical_node, val);
@@ -373,7 +373,7 @@ eval_predefined_2(
 			eval_rnd = ut_rnd_gen_next_ulint(eval_rnd);
 		}
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -486,7 +486,7 @@ eval_replstr(
 	if ((dfield_get_len(que_node_get_val(arg1)) < len1 + len2)
 	    || (dfield_get_len(que_node_get_val(arg2)) < len2)) {
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_memcpy(str1 + len1, str2, len2);
@@ -526,7 +526,7 @@ eval_instr(
 	len2 = dfield_get_len(dfield2);
 
 	if (len2 == 0) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	match_char = str2[0];
@@ -587,7 +587,7 @@ eval_binary_to_number(
 	len1 = dfield_get_len(dfield);
 
 	if (len1 > 4) {
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (len1 == 4) {
@@ -684,7 +684,7 @@ eval_to_binary(
 
 	if (len1 > 4) {
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	dfield = que_node_get_val(func_node);
@@ -814,7 +814,7 @@ eval_func(
 		    && (class != PARS_FUNC_CMP)
 		    && (func != PARS_NOTFOUND_TOKEN)
 		    && (func != PARS_PRINTF_TOKEN)) {
-			ut_error;
+			UT_ERROR;
 		}
 
 		arg = que_node_get_next(arg);

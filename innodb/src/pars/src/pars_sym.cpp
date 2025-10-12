@@ -241,7 +241,7 @@ sym_tab_add_bound_lit(
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 	dtype_set(dfield_get_type(&node->common.val),

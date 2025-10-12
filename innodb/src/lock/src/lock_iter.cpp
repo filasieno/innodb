@@ -56,7 +56,7 @@ IB_INTERN void lock_queue_iterator_reset(lock_queue_iterator_t *iter, const lock
 				ut_a(iter->bit_no != ULINT_UNDEFINED);
 				break;
 			default:
-				ut_error;
+				UT_ERROR;
 		}
 	}
 }
@@ -82,7 +82,7 @@ IB_INTERN const lock_t *lock_queue_iterator_get_prev(lock_queue_iterator_t *iter
 			break;
 		}
 		default:
-			ut_error;
+			UT_ERROR;
 	}
 	if (prev_lock != NULL) {
 		iter->current_lock = prev_lock;

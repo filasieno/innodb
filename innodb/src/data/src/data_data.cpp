@@ -231,7 +231,7 @@ dfield_check_typed(
 			(ulong) dfield_get_type(field)->mtype,
 			(ulong) dfield_get_len(field));
 
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(TRUE);
@@ -350,7 +350,7 @@ dfield_print(
 		ib_logger(ib_stream, "%d", (int)mach_read_from_4(data));
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 }
 

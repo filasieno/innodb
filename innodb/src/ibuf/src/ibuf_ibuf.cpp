@@ -205,7 +205,7 @@ ibuf_count_check(
 		"InnoDB: page_no=%lu, should be 0<=page_no<%lu\n",
 		(ulint) space_id, (ulint) IBUF_COUNT_N_SPACES,
 		(ulint) page_no, (ulint) IBUF_COUNT_N_PAGES);
-	ut_error;
+	UT_ERROR;
 }
 #endif
 
@@ -2864,7 +2864,7 @@ ibuf_insert(
 		break;
 	}
 
-	ut_error; /* unknown value of ibuf_use */
+	UT_ERROR; /* unknown value of ibuf_use */
 
 do_insert:
 	entry_size = rec_get_converted_size(index, entry, 0);
@@ -3106,7 +3106,7 @@ ibuf_delete_rec(
 		ib_logger(ib_stream,
 			"InnoDB: Validating insert buffer tree:\n");
 		if (!btr_validate_index(ibuf->index, NULL)) {
-			ut_error;
+			UT_ERROR;
 		}
 
 		ib_logger(ib_stream, "InnoDB: ibuf tree ok\n");

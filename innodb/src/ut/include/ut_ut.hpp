@@ -30,8 +30,7 @@ Various utilities
 Created 1/20/1994 Heikki Tuuri
 ***********************************************************************/
 
-#ifndef ut0ut_h
-#define ut0ut_h
+#pragma once
 
 #include "univ.i"
 
@@ -98,121 +97,110 @@ do {								\
 } while (0)
 #endif /* !IB_HOTBACKUP */
 
-/********************************************************//**
-Gets the high 32 bits in a ulint. That is makes a shift >> 32,
-but since there seem to be compiler bugs in both gcc and Visual C++,
+
+/// \brief Gets the high 32 bits in a ulint. That is makes a shift >> 32,
+/// but since there seem to be compiler bugs in both gcc and Visual C++,
 we do this by a special conversion.
-@return	a >> 32 */
-IB_INTERN
-ulint
-ut_get_high32(
-/*==========*/
-	ulint	a);	/*!< in: ulint */
-/******************************************************//**
-Calculates the minimum of two ulints.
-@return	minimum */
-IB_INLINE
-ulint
-ut_min(
-/*===*/
-	ulint	 n1,	/*!< in: first number */
-	ulint	 n2);	/*!< in: second number */
-/******************************************************//**
-Calculates the maximum of two ulints.
-@return	maximum */
-IB_INLINE
-ulint
-ut_max(
-/*===*/
-	ulint	 n1,	/*!< in: first number */
-	ulint	 n2);	/*!< in: second number */
-/****************************************************************//**
-Calculates minimum of two ulint-pairs. */
-IB_INLINE
-void
-ut_pair_min(
-/*========*/
-	ulint*	a,	/*!< out: more significant part of minimum */
-	ulint*	b,	/*!< out: less significant part of minimum */
-	ulint	a1,	/*!< in: more significant part of first pair */
-	ulint	b1,	/*!< in: less significant part of first pair */
-	ulint	a2,	/*!< in: more significant part of second pair */
-	ulint	b2);	/*!< in: less significant part of second pair */
-/******************************************************//**
-Compares two ulints.
-@return	1 if a > b, 0 if a == b, -1 if a < b */
-IB_INLINE
-int
-ut_ulint_cmp(
-/*=========*/
-	ulint	a,	/*!< in: ulint */
-	ulint	b);	/*!< in: ulint */
-/*******************************************************//**
-Compares two pairs of ulints.
-@return	-1 if a < b, 0 if a == b, 1 if a > b */
-IB_INLINE
-int
-ut_pair_cmp(
-/*========*/
-	ulint	a1,	/*!< in: more significant part of first pair */
-	ulint	a2,	/*!< in: less significant part of first pair */
-	ulint	b1,	/*!< in: more significant part of second pair */
-	ulint	b2);	/*!< in: less significant part of second pair */
-/*************************************************************//**
+/// \param a in: ulint
+/// \return a >> 32
+IB_INTERN ulint ut_get_high32(ulint	a);
+
+/// \brief Calculates the minimum of two ulints.
+/// \param n1 in: first number
+/// \param n2 in: second number
+/// \return minimum
+IB_INLINE ulint ut_min(ulint n1, ulint n2);
+
+/// \brief Calculates the maximum of two ulints.
+/// \param n1 in: first number
+/// \param n2 in: second number
+/// \return maximum
+IB_INLINE ulint ut_max(ulint n1, ulint n2);
+
+/// \brief Calculates minimum of two ulint-pairs.
+/// \param a1 in: more significant part of first pair
+/// \param b1 in: less significant part of first pair
+/// \param a2 in: more significant part of second pair
+/// \param b2 in: less significant part of second pair
+/// \return minimum
+IB_INLINE void ut_pair_min(ulint* a, ulint* b, ulint a1, ulint b1, ulint a2, ulint b2);
+
+
+/// \brief Calculates minimum of two ulint-pairs.
+/// \param a in: more significant part of minimum
+/// \param b in: less significant part of minimum
+/// \param a1 in: more significant part of first pair
+/// \param b1 in: less significant part of first pair
+/// \param a2 in: more significant part of second pair
+/// \param b2 in: less significant part of second pair
+/// \return minimum
+IB_INLINE void ut_pair_min(ulint* a, ulint* b, ulint a1, ulint b1, ulint a2, ulint b2);
+
+/// \brief Compares two ulints.
+/// \param a in: ulint
+/// \param b in: ulint
+/// \return 1 if a > b, 0 if a == b, -1 if a < b
+IB_INLINE int ut_ulint_cmp(ulint a, ulint b);
+
+
+/// \brief Compares two pairs of ulints.
+/// \param a1 in: more significant part of first pair
+/// \param b1 in: less significant part of first pair
+/// \param a2 in: more significant part of second pair
+/// \param b2 in: less significant part of second pair
+/// \return -1 if a < b, 0 if a == b, 1 if a > b
+IB_INLINE int ut_pair_cmp(ulint a1, ulint b1, ulint a2, ulint b2);
+
+/**
 Determines if a number is zero or a power of two.
 @param n	in: number
 @return		nonzero if n is zero or a power of two; zero otherwise */
 #define ut_is_2pow(n) IB_LIKELY(!((n) & ((n) - 1)))
-/*************************************************************//**
+
+/**
 Calculates fast the remainder of n/m when m is a power of two.
 @param n	in: numerator
 @param m	in: denominator, must be a power of two
 @return		the remainder of n/m */
 #define ut_2pow_remainder(n, m) ((n) & ((m) - 1))
-/*************************************************************//**
+
+/**
 Calculates the biggest multiple of m that is not bigger than n
 when m is a power of two.  In other words, rounds n down to m * k.
 @param n	in: number to round down
 @param m	in: alignment, must be a power of two
 @return		n rounded down to the biggest possible integer multiple of m */
 #define ut_2pow_round(n, m) ((n) & ~((m) - 1))
+
 /** Align a number down to a multiple of a power of two.
 @param n	in: number to round down
 @param m	in: alignment, must be a power of two
 @return		n rounded down to the biggest possible integer multiple of m */
 #define ut_calc_align_down(n, m) ut_2pow_round(n, m)
-/********************************************************//**
+
+/**
 Calculates the smallest multiple of m that is not smaller than n
 when m is a power of two.  In other words, rounds n up to m * k.
 @param n	in: number to round up
 @param m	in: alignment, must be a power of two
 @return		n rounded up to the smallest possible integer multiple of m */
 #define ut_calc_align(n, m) (((n) + ((m) - 1)) & ~((m) - 1))
-/*************************************************************//**
+
+/**
 Calculates fast the 2-logarithm of a number, rounded upward to an
 integer.
 @return	logarithm in the base 2, rounded upward */
-IB_INLINE
-ulint
-ut_2_log(
-/*=====*/
-	ulint	n);	/*!< in: number */
-/*************************************************************//**
+IB_INLINE ulint ut_2_log(ulint n);	/*!< in: number */
+
+/**
 Calculates 2 to power n.
 @return	2 to power n */
-IB_INLINE
-ulint
-ut_2_exp(
-/*=====*/
-	ulint	n);	/*!< in: number */
-/*************************************************************//**
+IB_INLINE ulint ut_2_exp(ulint n);	/*!< in: number */
+
+	/**
 Calculates fast the number rounded up to the nearest power of 2.
 @return	first power of 2 which is >= n */
-IB_INTERN
-ulint
-ut_2_power_up(
-/*==========*/
-	ulint	n)	/*!< in: number != 0 */
+IB_INTERN ulint ut_2_power_up(ulint	n)	/*!< in: number != 0 */
 	__attribute__((const));
 
 /** Determine how many bytes (groups of 8 bits) are needed to
@@ -221,39 +209,32 @@ store the given number of bits.
 @return		number of bytes (octets) needed to represent b */
 #define UT_BITS_IN_BYTES(b) (((b) + 7) / 8)
 
-/**********************************************************//**
+/**
 Returns system time. We do not specify the format of the time returned:
 the only way to manipulate it is to use the function ut_difftime.
 @return	system time */
-IB_INTERN
-ib_time_t
-ut_time(void);
+IB_INTERN ib_time_t ut_time(void);
 /*=========*/
 #ifndef IB_HOTBACKUP
-/**********************************************************//**
+
+/**
 Returns system time.
 Upon successful completion, the value 0 is returned; otherwise the
 value -1 is returned and the global variable errno is set to indicate the
 error.
 @return	0 on success, -1 otherwise */
-IB_INTERN
-int
-ut_usectime(
-/*========*/
+IB_INTERN int ut_usectime(
 	ulint*	sec,	/*!< out: seconds since the Epoch */
 	ulint*	ms);	/*!< out: microseconds since the Epoch+*sec */
 
-/**********************************************************//**
+/**
 Returns the number of microseconds since epoch. Similar to
 time(3), the return value is also stored in *tloc, provided
 that tloc is non-NULL.
 @return	us since epoch */
-IB_INTERN
-ib_uint64_t
-ut_time_us(
-/*=======*/
-	ib_uint64_t*	tloc);	/*!< out: us since epoch, if non-NULL */
-/**********************************************************//**
+IB_INTERN ib_uint64_t ut_time_us(ib_uint64_t*	tloc);	/*!< out: us since epoch, if non-NULL */
+
+	/**
 Returns the number of milliseconds since some epoch.  The
 value may wrap around.  It should only be used for heuristic
 purposes.
@@ -261,77 +242,69 @@ purposes.
 IB_INTERN
 ulint
 ut_time_ms(void);
-/*============*/
+
 #endif /* !IB_HOTBACKUP */
 
-/**********************************************************//**
-Returns the difference of two times in seconds.
-@return	time2 - time1 expressed in seconds */
-IB_INTERN
-double
-ut_difftime(
-/*========*/
-	ib_time_t	time2,	/*!< in: time */
-	ib_time_t	time1);	/*!< in: time */
-/**********************************************************//**
-Prints a timestamp to a file. */
+/// \brief Returns the difference of two times in seconds.
+/// \param time2 in: time
+/// \param time1 in: time
+/// \return time2 - time1 expressed in seconds
+IB_INTERN double ut_difftime(ib_time_t time2, ib_time_t time1);
+
+/**Prints a timestamp to a file. */
 IB_INTERN
 void
-ut_print_timestamp(
-/*===============*/
-	ib_stream_t	ib_stream); /*!< in: file where to print */
-/**********************************************************//**
+ut_print_timestamp(ib_stream_t	ib_stream); /*!< in: file where to print */
+
+/**
 Sprintfs a timestamp to a buffer, 13..14 chars plus terminating NUL. */
 IB_INTERN
 void
-ut_sprintf_timestamp(
-/*=================*/
-	char*	buf); /*!< in: buffer where to sprintf */
+ut_sprintf_timestamp(char*	buf); /*!< in: buffer where to sprintf */
 #ifdef IB_HOTBACKUP
-/**********************************************************//**
+
+/**
 Sprintfs a timestamp to a buffer with no spaces and with ':' characters
 replaced by '_'. */
 IB_INTERN
 void
-ut_sprintf_timestamp_without_extra_chars(
-/*=====================================*/
-	char*	buf); /*!< in: buffer where to sprintf */
-/**********************************************************//**
+ut_sprintf_timestamp_without_extra_chars(char* buf); /*!< in: buffer where to sprintf */
+
+/**
 Returns current year, month, day. */
 IB_INTERN
 void
 ut_get_year_month_day(
-/*==================*/
 	ulint*	year,	/*!< out: current year */
 	ulint*	month,	/*!< out: month */
 	ulint*	day);	/*!< out: day */
 #else /* IB_HOTBACKUP */
-/*************************************************************//**
+
+/**
 Runs an idle loop on CPU. The argument gives the desired delay
 in microseconds on 100 MHz Pentium + Visual C++.
 @return	dummy value */
 IB_INTERN
 ulint
-ut_delay(
-/*=====*/
-	ulint	delay);	/*!< in: delay in microseconds on 100 MHz Pentium */
+ut_delay(ulint delay);	/*!< in: delay in microseconds on 100 MHz Pentium */
 #endif /* IB_HOTBACKUP */
-/*************************************************************//**
+
+/**
 Prints the contents of a memory buffer in hex and ascii. */
 IB_INTERN
 void
 ut_print_buf(
-/*=========*/
+
 	ib_stream_t	ib_stream,	/*!< in: file where to print */
 	const void*	buf,		/*!< in: memory buffer */
 	ulint		len);		/*!< in: length of the buffer */
 
-/**********************************************************************//**
+/**
 Outputs a NUL-terminated file name, quoted with apostrophes. */
 IB_INTERN
 void
 ut_print_filename(
-/*==============*/
+
 	ib_stream_t	ib_stream,	/*!< in: output stream */
 	const char*	name);		/*!< in: name to print */
 
@@ -339,7 +312,7 @@ ut_print_filename(
 /* Forward declaration of transaction handle */
 struct trx_struct;
 
-/**********************************************************************//**
+/**
 Outputs a fixed-length string, quoted as an SQL identifier.
 If the string contains a slash '/', the string will be
 output as two identifiers separated by a period (.),
@@ -347,14 +320,14 @@ as in SQL database_name.identifier. */
 IB_INTERN
 void
 ut_print_name(
-/*==========*/
+
 	ib_stream_t	ib_stream,	/*!< in: output stream */
 	struct trx_struct*trx,		/*!< in: transaction */
 	ibool		table_id,	/*!< in: TRUE=print a table name,
 					FALSE=print other identifier */
 	const char*	name);		/*!< in: name to print */
 
-/**********************************************************************//**
+/**
 Outputs a fixed-length string, quoted as an SQL identifier.
 If the string contains a slash '/', the string will be
 output as two identifiers separated by a period (.),
@@ -362,7 +335,6 @@ as in SQL database_name.identifier. */
 IB_INTERN
 void
 ut_print_namel(
-/*===========*/
 	ib_stream_t	ib_stream,	/*!< in: output stream */
 	const char*	name,		/*!< in: name to print */
 	ulint		namelen);	/*!< in: length of name */
@@ -370,7 +342,7 @@ ut_print_namel(
 #endif /* !IB_HOTBACKUP */
 
 #ifdef __WIN__
-/**********************************************************************//**
+/**
 A substitute for snprintf(3), formatted output conversion into
 a limited buffer.
 @return number of characters that would have been printed if the size
@@ -384,7 +356,9 @@ ut_snprintf(
 	const char*	fmt,	/*!< in: format */
 	...);			/*!< in: format values */
 #else
-/**********************************************************************//**
+
+
+/**
 A wrapper for snprintf(3), formatted output conversion into
 a limited buffer. */
 # define ut_snprintf	snprintf
@@ -394,8 +368,6 @@ extern ib_logger_t ib_logger;
 extern ib_stream_t ib_stream;
 
 #ifndef IB_DO_NOT_INLINE
-#include "ut0ut.inl"
-#endif
-
+  #include "ut_ut.inl"
 #endif
 

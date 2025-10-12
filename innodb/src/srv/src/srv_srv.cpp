@@ -1272,7 +1272,7 @@ srv_table_reserve_slot_for_user_thread(void)
 							 slot->suspend_time));
 			}
 
-			ut_error;
+			UT_ERROR;
 		}
 
 		slot = srv_client_table + i;
@@ -2133,7 +2133,7 @@ loop:
 				" because it appears to be hung.\n",
 				(ulong) srv_fatal_semaphore_wait_threshold);
 
-			ut_error;
+			UT_ERROR;
 		}
 	} else {
 		fatal_cnt = 0;

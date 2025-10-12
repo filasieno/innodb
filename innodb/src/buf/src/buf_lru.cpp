@@ -439,7 +439,7 @@ scan_again:
 						prev_bpage->buf_fix_count++;
 						break;
 					default:
-						ut_error;
+						UT_ERROR;
 					}
 				}
 			} else if (((buf_block_t*) bpage)->is_hashed) {
@@ -610,7 +610,7 @@ buf_LRU_free_from_unzip_LRU_list(
 
 		/* inappropriate return value from
 		buf_LRU_free_block() */
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(FALSE);
@@ -677,7 +677,7 @@ buf_LRU_free_from_common_LRU_list(
 
 		/* inappropriate return value from
 		buf_LRU_free_block() */
-		ut_error;
+		UT_ERROR;
 	}
 
 	return(FALSE);
@@ -845,7 +845,7 @@ loop:
 			(ulong) (buf_pool->curr_size
 				 / (1024 * 1024 / IB_PAGE_SIZE)));
 
-		ut_error;
+		UT_ERROR;
 
 	} else if (!recv_recovery_on
 		   && (UT_LIST_GET_LEN(buf_pool->free)
@@ -1637,7 +1637,7 @@ buf_LRU_block_free_non_file_page(
 	case BUF_BLOCK_READY_FOR_USE:
 		break;
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
@@ -1760,7 +1760,7 @@ buf_LRU_block_remove_hashed_page(
 				ut_print_buf(ib_stream, bpage->zip.data,
 					     zip_size);
 				ib_logger(ib_stream, "\n");
-				ut_error;
+				UT_ERROR;
 			}
 
 			break;
@@ -1777,7 +1777,7 @@ buf_LRU_block_remove_hashed_page(
 	case BUF_BLOCK_READY_FOR_USE:
 	case BUF_BLOCK_MEMORY:
 	case BUF_BLOCK_REMOVE_HASH:
-		ut_error;
+		UT_ERROR;
 		break;
 	}
 
@@ -1807,7 +1807,7 @@ buf_LRU_block_remove_hashed_page(
 		buf_validate();
 		buf_LRU_validate();
 #endif /* IB_DEBUG || IB_BUF_DEBUG */
-		ut_error;
+		UT_ERROR;
 	}
 
 	ut_ad(!bpage->in_zip_hash);
@@ -1871,7 +1871,7 @@ buf_LRU_block_remove_hashed_page(
 		break;
 	}
 
-	ut_error;
+	UT_ERROR;
 	return(BUF_BLOCK_ZIP_FREE);
 }
 
@@ -2017,7 +2017,7 @@ buf_LRU_validate(void)
 		case BUF_BLOCK_READY_FOR_USE:
 		case BUF_BLOCK_MEMORY:
 		case BUF_BLOCK_REMOVE_HASH:
-			ut_error;
+			UT_ERROR;
 			break;
 		case BUF_BLOCK_FILE_PAGE:
 			ut_ad(((buf_block_t*) bpage)->in_unzip_LRU_list

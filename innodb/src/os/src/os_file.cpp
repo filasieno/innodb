@@ -360,11 +360,11 @@ ulint os_get_os_version(void)
 			return(OS_WIN2000);
 		}
 	} else {
-		ut_error;
+		UT_ERROR;
 		return(0);
 	}
 #else
-	ut_error;
+	UT_ERROR;
 
 	return(0);
 #endif
@@ -1081,13 +1081,13 @@ try_again:
 		/* create subdirs along the path if needed  */
 		*success = os_file_create_subdirs_if_needed(name);
 		if (!*success) {
-			ut_error;
+			UT_ERROR;
 		}
 		create_flag = CREATE_NEW;
 		create_mode = OS_FILE_CREATE;
 	} else {
 		create_flag = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (access_type == OS_FILE_READ_ONLY) {
@@ -1096,7 +1096,7 @@ try_again:
 		access = GENERIC_READ | GENERIC_WRITE;
 	} else {
 		access = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	file = CreateFile((LPCTSTR) name,
@@ -1149,7 +1149,7 @@ try_again:
 		create_mode = OS_FILE_CREATE;
 	} else {
 		create_flag = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (create_mode == OS_FILE_CREATE) {
@@ -1218,7 +1218,7 @@ os_file_create_simple_no_error_handling(
 		create_flag = CREATE_NEW;
 	} else {
 		create_flag = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (access_type == OS_FILE_READ_ONLY) {
@@ -1234,7 +1234,7 @@ os_file_create_simple_no_error_handling(
 						file */
 	} else {
 		access = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	file = CreateFile((LPCTSTR) name,
@@ -1268,7 +1268,7 @@ os_file_create_simple_no_error_handling(
 		create_flag = O_RDWR | O_CREAT | O_EXCL;
 	} else {
 		create_flag = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (create_mode == OS_FILE_CREATE) {
@@ -1386,7 +1386,7 @@ try_again:
 		create_flag = CREATE_ALWAYS;
 	} else {
 		create_flag = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (purpose == OS_FILE_AIO) {
@@ -1430,7 +1430,7 @@ try_again:
 #endif /* IB_NON_BUFFERED_IO */
 	} else {
 		attributes = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	file = CreateFile((LPCTSTR) name,
@@ -1499,7 +1499,7 @@ try_again:
 		create_flag = O_RDWR | O_CREAT | O_TRUNC;
 	} else {
 		create_flag = 0;
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (type == OS_LOG_FILE) {
@@ -1507,7 +1507,7 @@ try_again:
 	} else if (type == OS_DATA_FILE) {
 		type_str = "DATA";
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 	if (purpose == OS_FILE_AIO) {
@@ -1515,7 +1515,7 @@ try_again:
 	} else if (purpose == OS_FILE_NORMAL) {
 		purpose_str = "NORMAL";
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 #if 0
@@ -2106,7 +2106,7 @@ os_file_flush(
 
 	/* It is a fatal error if a file flush does not succeed, because then
 	the database can get corrupt on disk */
-	ut_error;
+	UT_ERROR;
 
 	return(FALSE);
 #else
@@ -2163,7 +2163,7 @@ os_file_flush(
 
 	/* It is a fatal error if a file flush does not succeed, because then
 	the database can get corrupt on disk */
-	ut_error;
+	UT_ERROR;
 
 	return(FALSE);
 #endif
@@ -2500,7 +2500,7 @@ error_handling:
 #endif
 		);
 
-	ut_error;
+	UT_ERROR;
 
 	return(FALSE);
 }
@@ -3685,7 +3685,7 @@ try_again:
 		array = os_aio_sync_array;
 	} else {
 		array = NULL; /* Eliminate compiler warning */
-		ut_error;
+		UT_ERROR;
 	}
 
 	slot = os_aio_array_reserve_slot(type, array, message1, message2, file,
@@ -3721,7 +3721,7 @@ try_again:
 			}
 		}
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 
 #ifdef WIN_ASYNC_IO
@@ -3891,7 +3891,7 @@ os_aio_windows_handle(
 
 			break;
 		default:
-			ut_error;
+			UT_ERROR;
 		}
 
 		if (!ret && GetLastError() == ERROR_IO_PENDING) {

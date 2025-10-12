@@ -106,7 +106,7 @@ trx_get_dict_operation(
 	case TRX_DICT_OP_INDEX:
 		return(op);
 	}
-	ut_error;
+	UT_ERROR;
 #endif /* IB_DEBUG */
 	return((enum trx_dict_op) IB_EXPECT(op, TRX_DICT_OP_NONE));
 }
@@ -125,7 +125,7 @@ trx_set_dict_operation(
 
 	switch (op) {
 	case TRX_DICT_OP_NONE:
-		ut_error;
+		UT_ERROR;
 		break;
 	case TRX_DICT_OP_TABLE:
 		switch (old_op) {
@@ -134,7 +134,7 @@ trx_set_dict_operation(
 		case TRX_DICT_OP_TABLE:
 			goto ok;
 		}
-		ut_error;
+		UT_ERROR;
 		break;
 	case TRX_DICT_OP_INDEX:
 		ut_ad(old_op == TRX_DICT_OP_NONE);

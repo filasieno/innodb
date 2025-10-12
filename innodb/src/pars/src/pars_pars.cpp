@@ -391,7 +391,7 @@ pars_resolve_func_data_type(
 		break;
 
 	default:
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -1201,7 +1201,7 @@ pars_set_dfield_type(
 		dtype_set(dfield_get_type(dfield), DATA_BLOB,
 			  DATA_BINARY_TYPE | flags, 0);
 	} else {
-		ut_error;
+		UT_ERROR;
 	}
 }
 
@@ -1824,7 +1824,7 @@ pars_stored_procedure_call(
 	sym_node_t*	sym_node __attribute__((unused)))
 					/*!< in: stored procedure name */
 {
-	ut_error;
+	UT_ERROR;
 	return(NULL);
 }
 
@@ -1889,7 +1889,7 @@ yyerror(
 
 	ib_logger(ib_stream, "PARSER ERROR: Syntax error in SQL string\n");
 
-	ut_error;
+	UT_ERROR;
 }
 
 /*************************************************************//**
