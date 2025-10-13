@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file buf_types.hpp
-/// \brief Buffer module types header file
+/// \file dyn_types.hpp
+/// \brief dyn module types header file
 /// \author Fabio N. Filasieno
 /// \date 2025-10-13
 
