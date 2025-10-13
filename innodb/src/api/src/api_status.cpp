@@ -21,28 +21,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 /// \brief HailDB API status functions
 
 #ifdef IB_HAVE_STRINGS_H
-#include <strings.h>
+  #include <strings.h>
 #endif
 
-#include "univ.i"
+#include "defs.hpp"
 #include "srv_srv.hpp"
 #include "api_api.hpp"
 #include "api_ucode.hpp"
 
-/** InnoDB status variables types. */
+/// \brief InnoDB status variables types.
 typedef enum {
-	IB_STATUS_IBOOL,		/*!< Boolean status variable, ibool */
-	IB_STATUS_I64,			/*!< ib_int64_t status variable */
-	IB_STATUS_ULINT			/*!< uling status variable */
+	IB_STATUS_IBOOL, //!< Boolean status variable, ibool
+	IB_STATUS_I64,	 //!< ib_int64_t status variable
+	IB_STATUS_ULINT	 //!< uling status variable
 } ib_status_type_t;
 
-/** InnoDB status variables */
+/// \brief InnoDB status variables
 typedef struct {
-	const char*		name;	/*!< Status variable name */
-
-	ib_status_type_t	type;	/*!< Status varable type */
-
-	const void*		val;	/*!< Pointer to status value */
+	const char*      name;  //!< Status variable name
+	ib_status_type_t type;  //!< Status varable type
+	const void*      val;   //!< Pointer to status value
 } ib_status_t;
 
 /* All status variables that a user can query. */
@@ -87,7 +85,7 @@ static const ib_status_t status_vars[] = {
 	{ "row_total_updated",            IB_STATUS_ULINT,   &export_vars.innodb_rows_updated},
 	{ "row_total_deleted",            IB_STATUS_ULINT,   &export_vars.innodb_rows_deleted},
 	{ "page_size",                    IB_STATUS_ULINT,   &export_vars.innodb_page_size },              // Miscellaneous
-	{ "IB_HAVE_atomic_builtins",         IB_STATUS_IBOOL,   &export_vars.innodb_IB_HAVE_atomic_builtins},
+	{ "IB_HAVE_atomic_builtins",      IB_STATUS_IBOOL,   &export_vars.innodb_IB_HAVE_atomic_builtins},
 	{ NULL, 0, 0}
 };
 
@@ -102,13 +100,12 @@ out: number of strings returned
 */
 ib_err_t ib_status_get_all(const char*** names, ib_u32_t* names_num)
 {
-	ib_u32_t	i;
 	*names_num = UT_ARR_SIZE(status_vars);
 	*names = (const char**) malloc(*names_num * sizeof(const char*));
 	if (*names == NULL) {
 		return(DB_OUT_OF_MEMORY);
 	}
-	for (i = 0; i < *names_num; i++) {
+	for (ib_u32_t i = 0; i < *names_num; i++) {
 		(*names)[i] = status_vars[i].name;
 	}
 	return DB_SUCCESS;
@@ -120,11 +117,10 @@ Get the status variable that matches name.
 out: pointer to entry
 in: Variable to lookup
 @return DB_SUCCESS if found else DB_NOT_FOUND */
-static ib_err_t ib_status_lookup(const char*	name, const ib_status_t** var)
+static ib_err_t ib_status_lookup(const char* name, const ib_status_t** var)
 {
-	const ib_status_t*	ptr;
 	*var = NULL;
-	for (ptr = status_vars; ptr && ptr->name != NULL; ++ptr) {
+	for (const ib_status_t* ptr = status_vars; ptr && ptr->name != NULL; ++ptr) {
 		if (ib_utf8_strcasecmp(name, ptr->name) == 0) {
 			*var = ptr;
 			return(DB_SUCCESS);
@@ -144,9 +140,8 @@ DB_NOT_FOUND otherwise.
 */
 ib_err_t ib_status_get_i64(const char*	name, ib_i64_t* dst)
 {
-	ib_err_t err;
-	const ib_status_t*	var;
-	err = ib_status_lookup(name, &var);
+	const ib_status_t* var;
+	ib_err_t err = ib_status_lookup(name, &var);
 	if (err == DB_SUCCESS) {
 		// Read the latest values into export_vars
 		srv_export_innodb_status();

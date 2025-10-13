@@ -50,100 +50,70 @@ void __cdecl _dosmaperr(unsigned long);
 /* The length was chosen arbitrarily and should be generous. */
 #define WIN_MAX_PATH	512
 
-/******************************************************************//**
+/**
 @file api/api0misc.c
 Create a temporary file in Windows.
 @return	file descriptor, or -1 */
-static
-int
-ib_win_create_tempfile(
-/*===================*/
-	const char*	prefix)		/*!< in: temp file prefix */
+static int ib_win_create_tempfile(const char* prefix)		/*!< in: temp file prefix */
 {
-	ulint		ret;
-	TCHAR		path[WIN_MAX_PATH];
-	TCHAR		tempname[WIN_MAX_PATH];
-
-	int		fh = -1;
-
+	ulint ret;
+	TCHAR path[WIN_MAX_PATH];
+	TCHAR tempname[WIN_MAX_PATH];
+	int fh = -1;
 	ret = GetTempPath(sizeof(path), path);
-
 	if (ret > sizeof(path) || ret == 0) {
 		_dosmaperr(GetLastError());
 	} else if (!GetTempFileName(path, prefix, 0, tempname)) {
 		_dosmaperr(GetLastError());
 	} else {
-		HANDLE		handle;
-
-		/* Create the actual file with the relevant attributes. */
-		handle = CreateFile(
+		HANDLE handle = CreateFile(
 			tempname,
 			GENERIC_READ | GENERIC_WRITE | DELETE,
 			FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 			NULL,
 			CREATE_ALWAYS,
-			FILE_ATTRIBUTE_NORMAL
-			| FILE_FLAG_DELETE_ON_CLOSE
-			| FILE_ATTRIBUTE_TEMPORARY
-			| FILE_FLAG_SEQUENTIAL_SCAN,
+			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE | FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_SEQUENTIAL_SCAN,
 			NULL);
-
 		if (handle == INVALID_HANDLE_VALUE) {
 			_dosmaperr(GetLastError());
 		} else {
 			do {
-				DWORD	oserr;
-
+				DWORD oserr;
 				fh = _open_osfhandle((intptr_t) handle, 0);
-
-				/* We need to map the Windows OS error
-				number (if any) to errno. */
+				// We need to map the Windows OS error number (if any) to errno.
 				oserr = GetLastError();
 				if (oserr) {
 					_dosmaperr(oserr);
 				}
 			} while (fh == -1 && errno == EINTR);
-
 			if (fh == -1) {
 				_dosmaperr(GetLastError());
 				CloseHandle(handle);
-			}
 		}
-	}
-
-	return(fh);
-}
-#endif
-
-/******************************************************************//**
+		}
+	}	return fh;
+} #endi
+/**
 Create a temporary file. FIXME: This is a Q&D solution. */
-
-int
-ib_create_tempfile(
-/*===============*/
-	const char*	prefix)		/*!< in: temp filename prefix */
+/*!< in: temp filename prefix */
+int ib_create_tempfile(const char* prefix)
 {
-	int		fh = -1;
+	int fh = -1;
 
 #ifdef __WIN__
 	fh = ib_win_create_tempfile(prefix);
-#else
-	FILE*		file;
-
+#els
+	FILE* file;
 	(void) prefix;
-
-	file = tmpfile();
-
-	if (file != NULL) {
-		fh = dup(fileno(file));
+file = tmpfile();
+	if (file != NULL) {		fh = dup(fileno(file));
 		fclose(file);
-	}
+	
 #endif
-
 	return(fh);
 }
 
-/**********************************************************************//**
+/**
 Determines if the currently running transaction has been interrupted.
 @return	TRUE if interrupted */
 
@@ -161,13 +131,10 @@ trx_is_interrupted(
 	return(FALSE);
 }
 
-/****************************************************************//**
+/**
 Handles user errors and lock waits detected by the database engine.
 @return	TRUE if it was a lock wait and we should continue running the query thread */
-
-ibool
-ib_handle_errors(
-/*=============*/
+ibool ib_handle_errors(
 	enum db_err*	new_err,/*!< out: possible new error encountered in
 				lock wait, or if no new error, the value
 				of trx->error_state at the entry of this
@@ -177,38 +144,26 @@ ib_handle_errors(
 	trx_savept_t*	savept)	/*!< in: savepoint or NULL */
 {
 	enum db_err	err;
-
 handle_new_error:
 	err = trx->error_state;
-
 	ut_a(err != DB_SUCCESS);
-
 	trx->error_state = DB_SUCCESS;
-
 	switch (err) {
 	case DB_LOCK_WAIT_TIMEOUT:
 		if (ses_rollback_on_timeout) {
 			trx_general_rollback(trx, FALSE, NULL);
 			break;
 		}
-		/* fall through */
-	case DB_DUPLICATE_KEY:
-	case DB_FOREIGN_DUPLICATE_KEY:
-	case DB_TOO_BIG_RECORD:
+		/* fall through * DB_DUPLICATE_KEY:
+	case DB_FOREIGN_DUPLICATE_KEY se DB_TOO_BIG_RECORD:
 	case DB_ROW_IS_REFERENCED:
 	case DB_NO_REFERENCED_ROW:
 	case DB_CANNOT_ADD_CONSTRAINT:
 	case DB_TOO_MANY_CONCURRENT_TRXS:
-	case DB_OUT_OF_FILE_SPACE:
-		if (savept) {
-			/* Roll back the latest, possibly incomplete
-			insertion or update */
-
-			trx_general_rollback(trx, TRUE, savept);
-		}
-		break;
-	case DB_LOCK_WAIT:
-		srv_suspend_user_thread(thr);
+	case DB_OUT_OF_FILE_SPACE , possibly incomplete
+			insertion or update */ trx, TRUE, savept);
+		 
+	case DB_LOCK_WAIT thr);
 
 		if (trx->error_state != DB_SUCCESS) {
 			que_thr_stop_client(thr);
@@ -230,53 +185,39 @@ handle_new_error:
 
 	case DB_MUST_GET_MORE_FILE_SPACE:
 		srv_panic(DB_ERROR,
-		      "InnoDB: The database cannot continue"
-		      " operation because of\n"
-		      "InnoDB: lack of space. You must add"
-		      " a new data file\n"
+		      "InnoDB: The database cannot continue operation because of\n"
+		      "InnoDB: lack of space. You must add a new data file\n"
 		      "InnoDB: and restart the database.\n");
 		break;
 
 	case DB_CORRUPTION:
 		ib_logger(ib_stream,
-		      "InnoDB: We detected index corruption"
-		      " in an InnoDB type table.\n"
-		      "InnoDB: You have to dump + drop + reimport"
-		      " the table or, in\n"
-		      "InnoDB: a case of widespread corruption,"
-		      " dump all InnoDB\n"
-		      "InnoDB: tables and recreate the"
-		      " whole InnoDB tablespace.\n"
-		      "InnoDB: If the server crashes"
-		      " after the startup or when\n"
+		      "InnoDB: We detected index corruption in an InnoDB type table.\n"
+		      "InnoDB: You have to dump + drop + reimport the table or, in\n"
+		      "InnoDB: a case of widespread corruption, dump all InnoDB\n"
+		      "InnoDB: tables and recreate the whole InnoDB tablespace.\n"
+		      "InnoDB: If the server crashes after the startup or when\n"
 		      "InnoDB: you dump the tables, check the \n"
 		      "InnoDB: InnoDB website for help.\n");
 		break;
 	default:
-		ib_logger(ib_stream, "InnoDB: unknown error code %lu\n",
-			(ulong) err);
+		ib_logger(ib_stream, "InnoDB: unknown error code %lu\n", (ulong) err);
 		UT_ERROR;
 	}
-
 	if (trx->error_state != DB_SUCCESS) {
 		*new_err = trx->error_state;
 	} else {
 		*new_err = err;
 	}
-
 	trx->error_state = DB_SUCCESS;
-
-	return(FALSE);
+	return FALSE;
 }
 
-/*********************************************************************//**
+/**
 Sets a lock on a table.
 @return	error code or DB_SUCCESS */
-
-enum db_err
-ib_trx_lock_table_with_retry(
-/*=========================*/
-	trx_t*		trx,		/*!< in/out: transaction */
+enum db_err ib_trx_lock_table_with_retry(
+	trx_t*          trx,		/*!< in/out: transaction */
 	dict_table_t*	table,		/*!< in: table to lock */
 	enum lock_mode	mode)		/*!< in: LOCK_X or LOCK_S */
 {
@@ -284,89 +225,60 @@ ib_trx_lock_table_with_retry(
 	enum db_err	err;
 	mem_heap_t*	heap;
 	sel_node_t*	node;
-
 	ut_ad(trx->client_thread_id == os_thread_get_curr_id());
-
 	heap = mem_heap_create(512);
-
 	trx->op_info = "setting table lock";
-
 	node = sel_node_create(heap);
 	thr = pars_complete_graph_for_exec(node, trx, heap);
 	thr->graph->state = QUE_FORK_ACTIVE;
-
-	/* We use the select query graph as the dummy graph needed
-	in the lock module call */
-
+	// We use the select query graph as the dummy graph needed in the lock module call
 	thr = que_fork_get_first_thr(que_node_get_parent(thr));
 	que_thr_move_to_run_state(thr);
-
 run_again:
 	thr->run_node = thr;
 	thr->prev_node = thr->common.parent;
-
 	err = lock_table(0, table, mode, thr);
-
 	trx->error_state = err;
-
 	if (IB_LIKELY(err == DB_SUCCESS)) {
 		que_thr_stop_for_client_no_error(thr, trx);
 	} else {
 		que_thr_stop_client(thr);
-
 		if (err != DB_QUE_THR_SUSPENDED) {
-			ibool	was_lock_wait;
-
-			was_lock_wait = ib_handle_errors(&err, trx, thr, NULL);
-
+			ibool was_lock_wait = ib_handle_errors(&err, trx, thr, NULL);
 			if (was_lock_wait) {
 				goto run_again;
 			}
 		} else {
 			que_thr_t*	run_thr;
 			que_node_t*	parent;
-
 			parent = que_node_get_parent(thr);
 			run_thr = que_fork_start_command(parent);
-
 			ut_a(run_thr == thr);
-
-			/* There was a lock wait but the thread was not
-			in a ready to run or running state. */
+			// There was a lock wait but the thread was not in a ready to run or running state.
 			trx->error_state = DB_LOCK_WAIT;
-
 			goto run_again;
 		}
 	}
-
 	que_graph_free(thr->graph);
 	trx->op_info = "";
-
-	return(err);
+	return err;
 }
 
-/*********************************************************************//**
+/**
 Updates the table modification counter and calculates new estimates
 for table and index statistics if necessary. */
-
-void
-ib_update_statistics_if_needed(
-/*===========================*/
-	dict_table_t*	table)	/*!< in/out: table */
+/*!< in/out: table */
+void ib_update_statistics_if_needed(
+	dict_table_t* table)
 {
-	ulint	counter;
-
+	ulint counter;
 	counter = table->stat_modified_counter++;
-
 	/* Calculate new statistics if 1 / 16 of table has been modified
 	since the last time a statistics batch was run, or if
 	stat_modified_counter > 2 000 000 000 (to avoid wrap-around).
 	We calculate statistics at most every 16th round, since we may have
 	a counter table which is very small and updated very often. */
-
-	if (counter > 2000000000
-	    || ((ib_int64_t)counter > 16 + table->stat_n_rows / 16)) {
-
+	if (counter > 2000000000 || ((ib_int64_t)counter > 16 + table->stat_n_rows / 16)) {
 		dict_update_statistics(table);
 	}
 }

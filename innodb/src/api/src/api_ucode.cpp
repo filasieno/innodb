@@ -31,64 +31,53 @@
 @file api/api0ucode.c
 Determines the connection character set.
 @return	connection character set */
-IB_INTERN
-const charset_t*
-ib_ucode_get_connection_charset(void)
+IB_INTERN const charset_t* ib_ucode_get_connection_charset()
 {
-	return(NULL);
+	return NULL;
 }
 
 /**
 Determines the character set based on id.
 FIXME: If the id can't be found then what do we do, return some default ?
 @return	character set or NULL */
-IB_INTERN
-const charset_t*
-ib_ucode_get_charset(
-	ulint		id)		/*!< in: Charset-collation code */
+/*!< in: Charset-collation code */
+IB_INTERN const charset_t* ib_ucode_get_charset(ulint id)
 {
 	return(NULL);
 }
 
-/**
-Get the variable length bounds of the given (multibyte) character set. */
-IB_INTERN void ib_ucode_get_charset_width(
-	const charset_t*cs,		/*!< in: Charset */
-	ulint*		mbminlen,	/*!< out: min len of a char (in bytes) */
-	ulint*		mbmaxlen)	/*!< out: max len of a char (in bytes) */
+/** Get the variable length bounds of the given (multibyte) character set. */
+/*!< in: Charset */
+/*!< out: min len of a char (in bytes) */
+/*!< out: max len of a char (in bytes) */
+IB_INTERN void ib_ucode_get_charset_width(const charset_t* cs, ulint* mbminlen, ulint* mbmaxlen)
 {
         *mbminlen = *mbmaxlen = 0;
-
         if (cs) {
-		//FIXME
-		//*mbminlen = charset_get_minlen(cs);
-		//*mbmaxlen = charset_get_maxlen(cs);
+			//FIXME
+			//*mbminlen = charset_get_minlen(cs);
+			//*mbmaxlen = charset_get_maxlen(cs);
 		}
 }
 
-/**
-Compare two strings ignoring case.
-@return	0 if equal */
 
-int
-ib_utf8_strcasecmp(
-/*================*/
-	const char*	p1,		/*!< in: string to compare */
-	const char*	p2)		/*!< in: string to compare */
+/// \brief Compare two strings ignoring case.
+/// \param p1 First string to compare.
+/// \param p2 Second string to compare.
+/// \return 0 if equal
+int ib_utf8_strcasecmp(const char* p1, const char* p2)
 {
 	/* FIXME: Call the UTF-8 comparison function. */
 	/* FIXME: This should take cs as the parameter. */
-	return(strcasecmp(p1, p2));
+	return strcasecmp(p1, p2) ;
 }
 
-/**
-Compare two strings ignoring case.
-@return	0 if equal */
-int
-ib_utf8_strncasecmp(
-	const char*	p1,		/*!< in: string to compare */
-	const char*	p2,		/*!< in: string to compare */
-	ulint		len)		/*!< in: length of string */
+/// \brief Compare two strings ignoring case.
+/// \param p1 First string to compare.
+/// \param p2 Second string to compare.
+/// \param len Length of strings to compare.
+/// \return 0 if equal
+int ib_utf8_strncasecmp(const char* p1, const char* p2, ulint len)
 {
 	/* FIXME: Call the UTF-8 comparison function. */
 	/* FIXME: This should take cs as the parameter. */
@@ -99,12 +88,9 @@ ib_utf8_strncasecmp(
 	return(strncasecmp(p1, p2, len));
 }
 
-/**
-Makes all characters in a NUL-terminated UTF-8 string lower case. */
-IB_INTERN
-void
-ib_utf8_casedown(
-	char*		a)		/*!< in/out: str to put in lower case */
+/// \brief Makes all characters in a NUL-terminated UTF-8 string lower case.
+/// \param a String to put in lower case.
+IB_INTERN void ib_utf8_casedown(char* a)
 {
 	/* FIXME: Call the UTF-8 tolower() equivalent. */
 	/* FIXME: Is this function really needed?  The proper
@@ -118,17 +104,12 @@ ib_utf8_casedown(
 	}
 }
 
-/**
-Converts an identifier to a table name. */
-IB_INTERN
-void
-ib_utf8_convert_from_table_id(
-	const charset_t*cs,		/*!< in: the 'from' character set */
-	char*		to,		/*!< out: converted identifier */
-	const char*	from,		/*!< in: identifier to convert */
-	ulint		len)		/*!< in: length of 'to', in bytes;
-					should be at least
-					5 * strlen(to) + 1 */
+/// \brief Converts an identifier to a table name.
+/// \param cs The 'from' character set.
+/// \param to Converted identifier.
+/// \param from Identifier to convert.
+/// \param len Length of 'to', in bytes; should be at least 5 * strlen(to) + 1.
+IB_INTERN void ib_utf8_convert_from_table_id(const charset_t*cs, char* to, const char* from, ulint len)
 {
 	/* FIXME: why 5*strlen(to)+1?  That is a relic from the MySQL
 	5.1 filename safe encoding that encodes some chars in
@@ -140,17 +121,17 @@ ib_utf8_convert_from_table_id(
 }
 
 
-/**
-Converts an identifier to UTF-8. */
+/// \brief Converts an identifier to UTF-8.
+/// \param cs The 'from' character set.
+/// \param to Converted identifier.
+/// \param from Identifier to convert.
+/// \param len Length of 'to', in bytes; should be at least 3 * strlen(to) + 1.
 IB_INTERN
-void
-ib_utf8_convert_from_id(
-	const charset_t*cs,		/*!< in: the 'from' character set */
-	char*		to,		/*!< out: converted identifier */
-	const char*	from,		/*!< in: identifier to convert */
-	ulint		len)		/*!< in: length of 'to', in bytes;
-					should be at least
-					3 * strlen(to) + 1 */
+void ib_utf8_convert_from_id(
+	const charset_t*cs,
+	char* to,
+	const char* from,
+	ulint len)
 {
 	/* FIXME: why 3*strlen(to)+1?  I suppose that it comes from
 	MySQL, where the connection charset can be 8-bit, such as
@@ -163,37 +144,32 @@ ib_utf8_convert_from_id(
 	strncpy(to, from, len);
 }
 
-/**
-Test whether a UTF-8 character is a space or not.
-@return	TRUE if isspace(c) */
-IB_INTERN
-int
-ib_utf8_isspace(
-	const charset_t*cs,		/*!< in: charset */
-	char		c)		/*!< in: character to test */
+
+/// \brief Test whether a UTF-8 character is a space or not.
+/// \param cs Character set.
+/// \param c Character to test.
+/// \return TRUE if isspace(c)
+IB_INTERN int ib_utf8_isspace(const charset_t* cs, char c)
 {
 	/* FIXME: Call the equivalent UTF-8 function. */
 	/* FIXME: Do we really need this function?  This is needed by
 	the InnoDB foreign key parser in MySQL, because U+00A0 is a
 	space in the MySQL connection charset latin1 but not in
 	utf8. */
-	return(isspace(c));
+	return isspace(c) ;
 }
 
-/**
-This function is used to find the storage length in bytes of the
-characters that will fit into prefix_len bytes.
-@return	number of bytes required to copy the characters that will fit into prefix_len bytes. */
-IB_INTERN
-ulint
-ib_ucode_get_storage_size(
-	const charset_t*cs,		/*!< in: character set */
-	ulint		prefix_len,	/*!< in: prefix length in bytes */
-	ulint		str_len,	/*!< in: length of the string in bytes */
-	const char*	str)		/*!< in: character string */
+/// \brief This function is used to find the storage length in bytes of the characters that will fit into prefix_len bytes.
+/// \param cs Character set.
+/// \param prefix_len Prefix length in bytes.
+/// \param str_len Length of the string in bytes.
+/// \param str Character string.
+/// \return Number of bytes required to copy the characters that will fit into prefix_len bytes.
+IB_INTERN ulint ib_ucode_get_storage_size(const charset_t* cs, ulint prefix_len, ulint str_len, const char* str)	
 {
-	/* FIXME: Do we really need this function?  Can't we assume
-	that all strings are UTF-8?  (We still may want to support
-	different collations.) */
-	return(ut_min(prefix_len, str_len));
+	//  FIXME: Do we really need this function?  Can't we assume
+	// that all strings are UTF-8?  (We still may want to support
+	// different collations.) 
+	return ut_min(prefix_len, str_len);
 }
+
