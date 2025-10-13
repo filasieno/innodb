@@ -22,42 +22,37 @@
 #include "ut_mem.hpp"
 #include "api_ucode.hpp"
 #include <ctype.h>
+
 #ifdef IB_HAVE_STRINGS_H
-#include <strings.h>
+  #include <strings.h>
 #endif
 
-
-/**********************************************************************//**
+/**
 @file api/api0ucode.c
 Determines the connection character set.
 @return	connection character set */
 IB_INTERN
 const charset_t*
 ib_ucode_get_connection_charset(void)
-/*========-========================*/
 {
 	return(NULL);
 }
 
-/**********************************************************************//**
+/**
 Determines the character set based on id.
 FIXME: If the id can't be found then what do we do, return some default ?
 @return	character set or NULL */
 IB_INTERN
 const charset_t*
 ib_ucode_get_charset(
-/*=================*/
 	ulint		id)		/*!< in: Charset-collation code */
 {
 	return(NULL);
 }
 
-/******************************************************************//**
+/**
 Get the variable length bounds of the given (multibyte) character set. */
-IB_INTERN
-void
-ib_ucode_get_charset_width(
-/*=======================*/
+IB_INTERN void ib_ucode_get_charset_width(
 	const charset_t*cs,		/*!< in: Charset */
 	ulint*		mbminlen,	/*!< out: min len of a char (in bytes) */
 	ulint*		mbmaxlen)	/*!< out: max len of a char (in bytes) */
@@ -66,12 +61,12 @@ ib_ucode_get_charset_width(
 
         if (cs) {
 		//FIXME
-                //*mbminlen = charset_get_minlen(cs);
-                //*mbmaxlen = charset_get_maxlen(cs);
-	}
+		//*mbminlen = charset_get_minlen(cs);
+		//*mbmaxlen = charset_get_maxlen(cs);
+		}
 }
 
-/******************************************************************//**
+/**
 Compare two strings ignoring case.
 @return	0 if equal */
 
@@ -86,13 +81,11 @@ ib_utf8_strcasecmp(
 	return(strcasecmp(p1, p2));
 }
 
-/******************************************************************//**
+/**
 Compare two strings ignoring case.
 @return	0 if equal */
-
 int
 ib_utf8_strncasecmp(
-/*=================*/
 	const char*	p1,		/*!< in: string to compare */
 	const char*	p2,		/*!< in: string to compare */
 	ulint		len)		/*!< in: length of string */
@@ -106,12 +99,11 @@ ib_utf8_strncasecmp(
 	return(strncasecmp(p1, p2, len));
 }
 
-/******************************************************************//**
+/**
 Makes all characters in a NUL-terminated UTF-8 string lower case. */
 IB_INTERN
 void
 ib_utf8_casedown(
-/*=============*/
 	char*		a)		/*!< in/out: str to put in lower case */
 {
 	/* FIXME: Call the UTF-8 tolower() equivalent. */
@@ -126,12 +118,11 @@ ib_utf8_casedown(
 	}
 }
 
-/******************************************************************//**
+/**
 Converts an identifier to a table name. */
 IB_INTERN
 void
 ib_utf8_convert_from_table_id(
-/*==========================*/
 	const charset_t*cs,		/*!< in: the 'from' character set */
 	char*		to,		/*!< out: converted identifier */
 	const char*	from,		/*!< in: identifier to convert */
@@ -149,12 +140,11 @@ ib_utf8_convert_from_table_id(
 }
 
 
-/******************************************************************//**
+/**
 Converts an identifier to UTF-8. */
 IB_INTERN
 void
 ib_utf8_convert_from_id(
-/*=====================*/
 	const charset_t*cs,		/*!< in: the 'from' character set */
 	char*		to,		/*!< out: converted identifier */
 	const char*	from,		/*!< in: identifier to convert */
@@ -173,13 +163,12 @@ ib_utf8_convert_from_id(
 	strncpy(to, from, len);
 }
 
-/**********************************************************************//**
+/**
 Test whether a UTF-8 character is a space or not.
 @return	TRUE if isspace(c) */
 IB_INTERN
 int
 ib_utf8_isspace(
-/*============*/
 	const charset_t*cs,		/*!< in: charset */
 	char		c)		/*!< in: character to test */
 {
@@ -191,14 +180,13 @@ ib_utf8_isspace(
 	return(isspace(c));
 }
 
-/******************************************************************//**
+/**
 This function is used to find the storage length in bytes of the
 characters that will fit into prefix_len bytes.
 @return	number of bytes required to copy the characters that will fit into prefix_len bytes. */
 IB_INTERN
 ulint
 ib_ucode_get_storage_size(
-/*======================*/
 	const charset_t*cs,		/*!< in: character set */
 	ulint		prefix_len,	/*!< in: prefix length in bytes */
 	ulint		str_len,	/*!< in: length of the string in bytes */
