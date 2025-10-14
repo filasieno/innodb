@@ -110,7 +110,7 @@ IB_INTERN ibool	srv_lock_timeout_active = FALSE;
 IB_INTERN ibool	srv_monitor_active = FALSE;
 IB_INTERN ibool	srv_error_monitor_active = FALSE;
 
-IB_INTERN const char*	srv_main_thread_op_info = "";
+IB_INTERN const char* srv_main_thread_op_info = "";
 
 /* Server parameters which are read from the initfile */
 
@@ -297,16 +297,9 @@ IB_INTERN ulint	srv_conc_n_waiting_threads = 0;
 
 typedef struct srv_conc_slot_struct	srv_conc_slot_t;
 struct srv_conc_slot_struct{
-	os_event_t			event;		/*!< event to wait */
-	ibool				reserved;	/*!< TRUE if slot
-							reserved */
-	ibool				wait_ended;	/*!< TRUE when another
-							thread has already set
-							the event and the
-							thread in this slot is
-							free to proceed; but
-							reserved may still be
-							TRUE at that point */
+	os_event_t event; /*!< event to wait */
+	ibool reserved;   /*!< TRUE if slot reserved */
+	ibool wait_ended;	/*!< TRUE when another thread has already set the event and the thread in this slot is free to proceed; but reserved may still be TRUE at that point */
 	UT_LIST_NODE_T(srv_conc_slot_t)	srv_conc_queue;	/*!< queue node */
 };
 
@@ -316,31 +309,31 @@ static UT_LIST_BASE_NODE_T(srv_conc_slot_t)	srv_conc_queue;
 static srv_conc_slot_t* srv_conc_slots;
 
 /*-----------------------*/
-IB_INTERN ib_shutdown_t	srv_fast_shutdown	= IB_SHUTDOWN_NORMAL;
+IB_INTERN ib_shutdown_t	srv_fast_shutdown = IB_SHUTDOWN_NORMAL;
 
 /** Generate a innodb_status.<pid> file if this is TRUE. */
-IB_INTERN ibool	srv_innodb_status	= FALSE;
+IB_INTERN ibool	srv_innodb_status = FALSE;
 
 /* When estimating number of different key values in an index, sample
 this many index pages */
-IB_INTERN unsigned long long	srv_stats_sample_pages = 8;
+IB_INTERN unsigned long long srv_stats_sample_pages = 8;
 
 IB_INTERN ibool	srv_use_doublewrite_buf	= TRUE;
 IB_INTERN ibool	srv_use_checksums = TRUE;
 
 IB_INTERN ibool	srv_set_thread_priorities = TRUE;
-IB_INTERN int		srv_query_thread_priority = 0;
+IB_INTERN int srv_query_thread_priority = 0;
 
 /*-------------------------------------------*/
 IB_INTERN ulong	srv_n_spin_wait_rounds	= 30;
 IB_INTERN ulong	srv_spin_wait_delay	= 6;
 
 #ifdef IB_DEBUG
-IB_INTERN ibool	srv_print_thread_releases	= FALSE;
-IB_INTERN ibool	srv_print_lock_waits		= FALSE;
-IB_INTERN ibool	srv_print_buf_io		= FALSE;
-IB_INTERN ibool	srv_print_log_io		= FALSE;
-IB_INTERN ibool	srv_print_latch_waits		= FALSE;
+IB_INTERN ibool	srv_print_thread_releases = FALSE;
+IB_INTERN ibool	srv_print_lock_waits = FALSE;
+IB_INTERN ibool	srv_print_buf_io = FALSE;
+IB_INTERN ibool	srv_print_log_io = FALSE;
+IB_INTERN ibool	srv_print_latch_waits = FALSE;
 #endif /* IB_DEBUG */
 
 IB_INTERN ulint	srv_n_rows_inserted		= 0;
@@ -348,14 +341,14 @@ IB_INTERN ulint	srv_n_rows_updated		= 0;
 IB_INTERN ulint	srv_n_rows_deleted		= 0;
 IB_INTERN ulint	srv_n_rows_read			= 0;
 
-static ulint		srv_n_rows_inserted_old		= 0;
-static ulint		srv_n_rows_updated_old		= 0;
-static ulint		srv_n_rows_deleted_old		= 0;
-static ulint		srv_n_rows_read_old		= 0;
+static ulint srv_n_rows_inserted_old	= 0;
+static ulint srv_n_rows_updated_old		= 0;
+static ulint srv_n_rows_deleted_old		= 0;
+static ulint srv_n_rows_read_old		= 0;
 
 IB_INTERN ulint	srv_n_lock_wait_count		= 0;
 IB_INTERN ulint	srv_n_lock_wait_current_count	= 0;
-IB_INTERN ib_int64_t	srv_n_lock_wait_time		= 0;
+IB_INTERN ib_int64_t srv_n_lock_wait_time		= 0;
 IB_INTERN ulint	srv_n_lock_max_wait_time	= 0;
 
 
@@ -398,7 +391,7 @@ static ulint   srv_log_writes_and_flush		= 0;
 time when the last flush of log file has happened. The master
 thread ensures that we flush the log files at least once per
 second. */
-static time_t	srv_last_log_flush_time;
+static time_t srv_last_log_flush_time;
 
 /** The master thread performs various tasks based on the current
 state of IO activity and the level of IO utilization is past
@@ -416,16 +409,16 @@ server and an operating system kernel:
 
 DB concept			equivalent OS concept
 ----------			---------------------
-transaction		--	process;
+transaction         -- process;
 
-query thread		--	thread;
+query thread        --	thread;
 
-lock			--	semaphore;
+lock                -- semaphore;
 
 transaction set to
 the rollback state	--	kill signal delivered to a process;
 
-kernel			--	kernel;
+kernel              -- kernel;
 
 query thread execution:
 (a) without kernel mutex
@@ -577,45 +570,40 @@ Unix.*/
 
 /** Thread slot in the thread table */
 typedef struct srv_slot_struct {
-	os_thread_id_t	id;		/*!< thread id */
-	os_thread_t	handle;		/*!< thread handle */
-	unsigned	type:3;		/*!< thread type: user, utility etc. */
-	unsigned	in_use:1;	/*!< TRUE if this slot is in use */
-	unsigned	suspended:1;	/*!< TRUE if the thread is waiting
-					for the event of this slot */
-	ib_time_t	suspend_time;	/*!< time when the thread was
-					suspended */
-	os_event_t	event;		/*!< event used in suspending the
-					thread when it has nothing to do */
-	que_thr_t*	thr;		/*!< suspended query thread (only
-					used for client threads) */
+	os_thread_id_t id;		     /*!< thread id */
+	os_thread_t    handle;		 /*!< thread handle */
+	unsigned       type:3;		 /*!< thread type: user, utility etc. */
+	unsigned       in_use:1;	 /*!< TRUE if this slot is in use */
+	unsigned       suspended:1;  /*!< TRUE if the thread is waiting for the event of this slot */
+	ib_time_t      suspend_time; /*!< time when the thread was suspended */
+	os_event_t     event;		 /*!< event used in suspending the thread when it has nothing to do */
+	que_thr_t*     thr;		     /*!< suspended query thread (only used for client threads) */
 } srv_slot_t;
 
 /** Thread table is an array of slots */
-typedef srv_slot_t	srv_table_t;
+typedef srv_slot_t srv_table_t;
 
 /** The server system struct */
 typedef struct srv_sys_struct{
-	srv_table_t*	threads;	/*!< server thread table */
-	UT_LIST_BASE_NODE_T(que_thr_t)
-			tasks;		/*!< task queue */
+	srv_table_t*	threads;               /*!< server thread table */
+	UT_LIST_BASE_NODE_T(que_thr_t) tasks;  /*!< task queue */
 } srv_sys_t;
 
 /** Table for client threads where they will be suspended to wait for locks */
-static srv_slot_t*	srv_client_table = NULL;
+static srv_slot_t* srv_client_table = NULL;
 
-IB_INTERN os_event_t	srv_lock_timeout_thread_event;
+IB_INTERN os_event_t srv_lock_timeout_thread_event;
 
-static	srv_sys_t*	srv_sys	= NULL;
+static srv_sys_t* srv_sys = NULL;
 
 /* padding to prevent other memory update hotspots from residing on
 the same memory cache line */
-IB_INTERN byte	srv_pad1[64];
+IB_INTERN byte srv_pad1[64];
 /** Mutex protecting the server, trx structs, query threads, and lock table */
-IB_INTERN mutex_t*	kernel_mutex_temp;
+IB_INTERN mutex_t* kernel_mutex_temp;
 /* padding to prevent other memory update hotspots from residing on
 the same memory cache line */
-IB_INTERN byte	srv_pad2[64];
+IB_INTERN byte srv_pad2[64];
 
 /* The following values give info about the activity going on in
 the database. They are protected by the server mutex. The arrays
@@ -630,29 +618,17 @@ IB_INTERN int srv_panic_status = 0;
 IB_INTERN void* ib_panic_data = NULL;
 ib_panic_function_t ib_panic = NULL;
 
-/***********************************************************************
-Prints counters for work done by srv_master_thread. */
-static
-void
-srv_print_master_thread_info(
-/*=========================*/
-	ib_stream_t	stream)    /* in: output stream */
+
+/// \brief Prints counters for work done by srv_master_thread.
+/// \param stream Output stream.
+static void srv_print_master_thread_info(ib_stream_t stream)
 {
-	ib_logger(stream, "srv_master_thread loops: %lu 1_second, %lu sleeps, "
-		"%lu 10_second, %lu background, %lu flush\n",
-		srv_main_1_second_loops, srv_main_sleeps,
-		srv_main_10_second_loops, srv_main_background_loops,
-		srv_main_flush_loops);
-	ib_logger(stream, "srv_master_thread log flush and writes: %lu\n",
-		      srv_log_writes_and_flush);
+	ib_logger(stream, "srv_master_thread loops: %lu 1_second, %lu sleeps, %lu 10_second, %lu background, %lu flush\n", srv_main_1_second_loops, srv_main_sleeps, srv_main_10_second_loops, srv_main_background_loops, srv_main_flush_loops);
+	ib_logger(stream, "srv_master_thread log flush and writes: %lu\n", srv_log_writes_and_flush);
 }
 
-/*********************************************************************//**
-Reset variables. */
-IB_INTERN
-void
-srv_var_init(void)
-/*==============*/
+/// \brief Reset variables.
+IB_INTERN void srv_var_init(void)
 {
 #ifdef __NETWARE__
 	extern ibool panic_shutdown;
