@@ -23,89 +23,64 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/**************************************************//**
-@file include/sync0sync.ic
-Mutex, the basic synchronization primitive
 
-Created 9/5/1995 Heikki Tuuri
-*******************************************************/
+/// \file sync0sync.ic
+/// \brief Mutex, the basic synchronization primitive
+/// \details Originally created 9/5/1995 Heikki Tuuri
+/// Created 9/5/1995 Heikki Tuuri
 
-/******************************************************************//**
-Sets the waiters field in a mutex. */
-IB_INTERN
-void
-mutex_set_waiters(
-/*==============*/
-	mutex_t*	mutex,	/*!< in: mutex */
-	ulint		n);	/*!< in: value to set */
-/******************************************************************//**
-Reserves a mutex for the current thread. If the mutex is reserved, the
-function spins a preset time (controlled by SYNC_SPIN_ROUNDS) waiting
+/// Sets the waiters field in a mutex.
+/// \param [in,out] mutex Pointer to mutex
+/// \param [in] n Value to set
+IB_INTERN void mutex_set_waiters(mutex_t* mutex, ulint n);
+
+/** Reserves a mutex for the current thread. If the mutex is reserved, the
+function spins a preset time (controlled by state->srv.n_spin_wait_rounds) waiting
 for the mutex before suspending the thread. */
-IB_INTERN
-void
-mutex_spin_wait(
-/*============*/
+IB_INTERN void mutex_spin_wait(
 	mutex_t*	mutex,		/*!< in: pointer to mutex */
 	const char*	file_name,	/*!< in: file name where mutex
 					requested */
 	ulint		line);		/*!< in: line where requested */
-#ifdef IB_SYNC_DEBUG
-/******************************************************************//**
-Sets the debug information for a reserved mutex. */
-IB_INTERN
-void
-mutex_set_debug_info(
-/*=================*/
-	mutex_t*	mutex,		/*!< in: mutex */
-	const char*	file_name,	/*!< in: file where requested */
-	ulint		line);		/*!< in: line where requested */
-#endif /* IB_SYNC_DEBUG */
-/******************************************************************//**
-Releases the threads waiting in the primary wait array for this mutex. */
-IB_INTERN
-void
-mutex_signal_object(
-/*================*/
-	mutex_t*	mutex);	/*!< in: mutex */
 
-/******************************************************************//**
-Performs an atomic test-and-set instruction to the lock_word field of a
-mutex.
-@return	the previous value of lock_word: 0 or 1 */
-IB_INLINE
-byte
-mutex_test_and_set(
-/*===============*/
-	mutex_t*	mutex)	/*!< in: mutex */
+
+/// \brief Sets the debug information for a reserved mutex.
+/// \param [in,out] mutex Pointer to mutex
+/// \param [in] file_name File name where mutex requested
+/// \param [in] line Line where mutex requested
+IB_INTERN void mutex_set_debug_info(
+	mutex_t* mutex,
+	const char* file_name,
+	ulint line);
+
+
+/// \brief Releases the threads waiting in the primary wait array for this mutex.
+IB_INTERN void mutex_signal_object(
+	mutex_t* mutex);
+
+/// \brief Performs an atomic test-and-set instruction to the lock_word field of a mutex.
+/// \param [in, out] mutex Pointer to mutex
+/// \return the previous value of lock_word: 0 or 1
+IB_INLINE ibool mutex_test_and_set( mutex_t* mutex)
 {
-#if defined(IB_HAVE_ATOMIC_BUILTINS)
-	return(os_atomic_test_and_set_byte(&mutex->lock_word, 1));
-#else
-	ibool	ret;
+	if constexpr (IB_HAVE_ATOMIC_BUILTINS) {
+		return os_atomic_test_and_set_byte(&mutex->lock_word, 1);
+	}
 
-	ret = os_fast_mutex_trylock(&(mutex->os_fast_mutex));
-
+	ibool ret = os_fast_mutex_trylock(&(mutex->os_fast_mutex));
 	if (ret == 0) {
-		/* We check that os_fast_mutex_trylock does not leak
-		and allow race conditions */
+		// We check that os_fast_mutex_trylock does not leak and allow race conditions
 		ut_a(mutex->lock_word == 0);
-
 		mutex->lock_word = 1;
 	}
 
-	return((byte)ret);
-#endif
+	return (byte)ret;
 }
 
-/******************************************************************//**
-Performs a reset instruction to the lock_word field of a mutex. This
-instruction also serializes memory operations to the program order. */
-IB_INLINE
-void
-mutex_reset_lock_word(
-/*==================*/
-	mutex_t*	mutex)	/*!< in: mutex */
+/// Performs a reset instruction to the lock_word field of a mutex. This
+/// instruction also serializes memory operations to the program order. */
+/// \param [in, out] mutex Pointer to mutex
+IB_INLINE void mutex_reset_lock_word(mutex_t* mutex)
 {
 #if defined(IB_HAVE_ATOMIC_BUILTINS)
 	/* In theory __sync_lock_release should be used to release the lock.
@@ -119,97 +94,69 @@ mutex_reset_lock_word(
 #endif
 }
 
-/******************************************************************//**
-Gets the value of the lock word. */
-IB_INLINE
-lock_word_t
-mutex_get_lock_word(
-/*================*/
-	const mutex_t*	mutex)	/*!< in: mutex */
+/// \brief Gets the value of the lock word. 
+/// \param [in] mutex Pointer to mutex
+/// \return	value of the lock word
+IB_INLINE lock_word_t mutex_get_lock_word( const mutex_t* mutex)
 {
 	ut_ad(mutex);
-
-	return(mutex->lock_word);
+	return mutex->lock_word;
 }
 
-/******************************************************************//**
-Gets the waiters field in a mutex.
-@return	value to set */
-IB_INLINE
-ulint
-mutex_get_waiters(
-/*==============*/
-	const mutex_t*	mutex)	/*!< in: mutex */
+/// \brief Gets the waiters field in a mutex. 
+/// \param [in] mutex Pointer to mutex
+/// \return	value to set
+IB_INLINE ulint mutex_get_waiters(const mutex_t* mutex)
 {
-	const volatile ulint*	ptr;	/*!< declared volatile to ensure that
-					the value is read from memory */
 	ut_ad(mutex);
-
-	ptr = &(mutex->waiters);
-
-	return(*ptr);		/* Here we assume that the read of a single
-				word from memory is atomic */
+	const volatile ulint* ptr = &(mutex->waiters);
+	return *ptr; // Here we assume that the read of a single word from memory is atomic
 }
 
-/******************************************************************//**
-Unlocks a mutex owned by the current thread. */
-IB_INLINE
-void
-mutex_exit(
-/*=======*/
-	mutex_t*	mutex)	/*!< in: pointer to mutex */
+
+/// \brief Unlocks a mutex owned by the current thread.
+/// \param [in, out] mutex Pointer to mutex
+IB_INLINE void mutex_exit(mutex_t* mutex)
 {
 	ut_ad(mutex_own(mutex));
-
 	ut_d(mutex->thread_id = (os_thread_id_t) ULINT_UNDEFINED);
 
-#ifdef IB_SYNC_DEBUG
-	sync_thread_reset_level(mutex);
-#endif
+	if constexpr (IB_SYNC_DEBUG) {
+		sync_thread_reset_level(mutex);
+	}
+	
 	mutex_reset_lock_word(mutex);
 
-	/* A problem: we assume that mutex_reset_lock word
-	is a memory barrier, that is when we read the waiters
-	field next, the read must be serialized in memory
-	after the reset. A speculative processor might
-	perform the read first, which could leave a waiting
-	thread hanging indefinitely.
+	/// TODO: A problem: we assume that mutex_reset_lock word is a memory barrier, that is when we read the waiters
+	/// field next, the read must be serialized in memory after the reset. A speculative processor might
+	/// perform the read first, which could leave a waiting thread hanging indefinitely.
 
-	Our current solution call every second
-	sync_arr_wake_threads_if_sema_free()
-	to wake up possible hanging threads if
-	they are missed in mutex_signal_object. */
+	// Our current solution call every second sync_arr_wake_threads_if_sema_free() to wake up possible hanging threads if
+	// they are missed in mutex_signal_object.
 
 	if (mutex_get_waiters(mutex) != 0) {
-
 		mutex_signal_object(mutex);
 	}
 
-#ifdef IB_SYNC_PERF_STAT
-	mutex_exit_count++;
-#endif
+	if constexpr (IB_SYNC_PERF_STAT) {
+		mutex_exit_count++;
+	}
 }
 
-/******************************************************************//**
-Locks a mutex for the current thread. If the mutex is reserved, the function
-spins a preset time (controlled by SYNC_SPIN_ROUNDS), waiting for the mutex
-before suspending the thread. */
-IB_INLINE
-void
-mutex_enter_func(
-/*=============*/
-	mutex_t*	mutex,		/*!< in: pointer to mutex */
-	const char*	file_name,	/*!< in: file name where locked */
-	ulint		line)		/*!< in: line where locked */
+/// \brief Locks a mutex for the current thread. 
+/// \details If the mutex is reserved, the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), 
+/// waiting for the mutex before suspending the thread.
+/// \param [in, out] mutex Pointer to mutex
+/// \param [in] file_name File name where locked
+/// \param [in] line Line where locked
+IB_INLINE void mutex_enter_func( mutex_t* mutex, const char* file_name, ulint line)
 {
 	ut_ad(mutex_validate(mutex));
 	ut_ad(!mutex_own(mutex));
 
-	/* Note that we do not peek at the value of lock_word before trying
-	the atomic test_and_set; we could peek, and possibly save time. */
-
+	// Note that we do not peek at the value of lock_word before trying
+	// the atomic test_and_set; we could peek, and possibly save time.
 	ut_d(mutex->count_using++);
-
 	if (!mutex_test_and_set(mutex)) {
 		ut_d(mutex->thread_id = os_thread_get_curr_id());
 #ifdef IB_SYNC_DEBUG

@@ -170,109 +170,57 @@ thr_local_get_in_ibuf_field(void)
 	return(&(local->in_ibuf));
 }
 
-/*******************************************************************//**
-Creates a local storage struct for the calling new thread. */
-IB_INTERN
-void
-thr_local_create(void)
-/*==================*/
+IB_INTERN void thr_local_create(void) 
 {
-	thr_local_t*	local;
-
 	if (thr_local_hash == NULL) {
 		thr_local_init();
 	}
-
-	local = mem_alloc(sizeof(thr_local_t));
-
+	thr_local_t* local = mem_alloc(sizeof(thr_local_t));
 	local->id = os_thread_get_curr_id();
 	local->handle = os_thread_get_curr();
 	local->magic_n = THR_LOCAL_MAGIC_N;
-
 	local->in_ibuf = FALSE;
-
 	mutex_enter(&thr_local_mutex);
-
-	HASH_INSERT(thr_local_t, hash, thr_local_hash,
-		    os_thread_pf(os_thread_get_curr_id()),
-		    local);
-
+	HASH_INSERT(thr_local_t, hash, thr_local_hash, os_thread_pf(os_thread_get_curr_id()), local);
 	mutex_exit(&thr_local_mutex);
 }
 
-/*******************************************************************//**
-Frees the local storage struct for the specified thread. */
-IB_INTERN
-void
-thr_local_free(
-/*===========*/
-	os_thread_id_t	id)	/*!< in: thread id */
+IB_INTERN void thr_local_free(os_thread_id_t	id)	/*!< in: thread id */
 {
 	thr_local_t*	local;
-
 	mutex_enter(&thr_local_mutex);
-
 	/* Look for the local struct in the hash table */
-
-	HASH_SEARCH(hash, thr_local_hash, os_thread_pf(id),
-		    thr_local_t*, local,, os_thread_eq(local->id, id));
+	HASH_SEARCH(hash, thr_local_hash, os_thread_pf(id),thr_local_t*, local,, os_thread_eq(local->id, id));
 	if (local == NULL) {
 		mutex_exit(&thr_local_mutex);
-
 		return;
 	}
-
-	HASH_DELETE(thr_local_t, hash, thr_local_hash,
-		    os_thread_pf(id), local);
-
+	HASH_DELETE(thr_local_t, hash, thr_local_hash, os_thread_pf(id), local);
 	mutex_exit(&thr_local_mutex);
-
 	ut_a(local->magic_n == THR_LOCAL_MAGIC_N);
-
 	mem_free(local);
 }
 
-/****************************************************************//**
-Initializes the thread local storage module. */
-IB_INTERN
-void
-thr_local_init(void)
-/*================*/
+IB_INTERN void thr_local_init(void)
 {
 	ut_a(thr_local_hash == NULL);
-
 	thr_local_hash = hash_create(OS_THREAD_MAX_N + 100);
-
 	mutex_create(&thr_local_mutex, SYNC_THR_LOCAL);
 }
 
-/********************************************************************
-Close the thread local storage module. */
-IB_INTERN
-void
-thr_local_close(void)
-/*=================*/
+IB_INTERN void thr_local_close(void)
 {
-	ulint		i;
-
 	ut_a(thr_local_hash != NULL);
-
-	/* Free the hash elements. We don't remove them from the table
-	because we are going to destroy the table anyway. */
-	for (i = 0; i < hash_get_n_cells(thr_local_hash); i++) {
-		thr_local_t*	local;
-
-		local = HASH_GET_FIRST(thr_local_hash, i);
-
+	/* Free the hash elements. We don't remove them from the table because we are going to destroy the table anyway. */
+	for (ulint i = 0; i < hash_get_n_cells(thr_local_hash); i++) {
+		thr_local_t* local = HASH_GET_FIRST(thr_local_hash, i);
 		while (local) {
-			thr_local_t*	prev_local = local;
-
+			thr_local_t* prev_local = local;
 			local = HASH_GET_NEXT(hash, prev_local);
 			ut_a(prev_local->magic_n == THR_LOCAL_MAGIC_N);
 			mem_free(prev_local);
 		}
 	}
-
 	hash_table_free(thr_local_hash);
 	thr_local_hash = NULL;
 }

@@ -379,7 +379,7 @@ rw_lock_validate(
 /******************************************************************//**
 Lock an rw-lock in shared mode for the current thread. If the rw-lock is
 locked in exclusive mode, or there is an exclusive lock request waiting,
-the function spins a preset time (controlled by SYNC_SPIN_ROUNDS), waiting
+the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting
 for the lock, before suspending the thread. */
 IB_INTERN
 void
@@ -400,7 +400,7 @@ rw_lock_s_lock_spin(
 lock_loop:
 
 	/* Spin waiting for the writer field to become free */
-	while (i < SYNC_SPIN_ROUNDS && lock->lock_word <= 0) {
+	while (i < state->srv.n_spin_wait_rounds && lock->lock_word <= 0) {
 		if (srv_spin_wait_delay) {
 			ut_delay(ut_rnd_interval(0, srv_spin_wait_delay));
 		}
@@ -408,7 +408,7 @@ lock_loop:
 		i++;
 	}
 
-	if (i == SYNC_SPIN_ROUNDS) {
+	if (i == state->srv.n_spin_wait_rounds) {
 		os_thread_yield();
 	}
 
@@ -428,7 +428,7 @@ lock_loop:
 		return; /* Success */
 	} else {
 
-		if (i < SYNC_SPIN_ROUNDS) {
+		if (i < state->srv.n_spin_wait_rounds) {
 			goto lock_loop;
 		}
 
@@ -512,7 +512,7 @@ rw_lock_x_lock_wait(
 		if (srv_spin_wait_delay) {
 			ut_delay(ut_rnd_interval(0, srv_spin_wait_delay));
 		}
-		if(i < SYNC_SPIN_ROUNDS) {
+		if(i < state->srv.n_spin_wait_rounds) {
 			i++;
 			continue;
 		}
@@ -614,7 +614,7 @@ rw_lock_x_lock_low(
 NOTE! Use the corresponding macro, not directly this function! Lock an
 rw-lock in exclusive mode for the current thread. If the rw-lock is locked
 in shared or exclusive mode, or there is an exclusive lock request waiting,
-the function spins a preset time (controlled by SYNC_SPIN_ROUNDS), waiting
+the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting
 for the lock before suspending the thread. If the same thread has an x-lock
 on the rw-lock, locking succeed, with the following exception: if pass != 0,
 only a single x-lock may be taken on the lock. NOTE: If the same thread has
@@ -652,7 +652,7 @@ lock_loop:
 		}
 
 		/* Spin waiting for the lock_word to become free */
-		while (i < SYNC_SPIN_ROUNDS
+		while (i < state->srv.n_spin_wait_rounds
 		       && lock->lock_word <= 0) {
 			if (srv_spin_wait_delay) {
 				ut_delay(ut_rnd_interval(0,
@@ -661,7 +661,7 @@ lock_loop:
 
 			i++;
 		}
-		if (i == SYNC_SPIN_ROUNDS) {
+		if (i == state->srv.n_spin_wait_rounds) {
 			os_thread_yield();
 		} else {
 			goto lock_loop;

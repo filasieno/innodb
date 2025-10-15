@@ -1,91 +1,70 @@
 /*****************************************************************************
-
 Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
 Copyright (c) 2008, Google Inc.
-
 Portions of this file contain modifications contributed and copyrighted by
 Google, Inc. Those modifications are gratefully acknowledged and are described
 briefly in the InnoDB documentation. The contributions by Google are
 incorporated with their permission, and subject to the conditions contained in
 the file COPYING.Google.
-
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; version 2 of the License.
-
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 Place, Suite 330, Boston, MA 02111-1307 USA
-
 *****************************************************************************/
-
 /**************************************************//**
 @file sync/sync0sync.c
 Mutex, the basic synchronization primitive
-
 Created 9/5/1995 Heikki Tuuri
 *******************************************************/
-
 #include "sync_sync.hpp"
 #ifdef IB_DO_NOT_INLINE
 #include "sync0sync.inl"
 #endif
-
 #include "sync_rw.hpp"
 #include "buf_buf.hpp"
 #include "srv_srv.hpp"
 #include "buf_types.hpp"
 #include "os_sync.hpp" /* for IB_HAVE_ATOMIC_BUILTINS */
-
 /*
 	REASONS FOR IMPLEMENTING THE SPIN LOCK MUTEX
 	============================================
-
 Semaphore operations in operating systems are slow: Solaris on a 1993 Sparc
 takes 3 microseconds (us) for a lock-unlock pair and Windows NT on a 1995
 Pentium takes 20 microseconds for a lock-unlock pair. Therefore, we have to
 implement our own efficient spin lock mutex. Future operating systems may
 provide efficient spin locks, but we cannot count on that.
-
 Another reason for implementing a spin lock is that on multiprocessor systems
 it can be more efficient for a processor to run a loop waiting for the
 semaphore to be released than to switch to a different thread. A thread switch
 takes 25 us on both platforms mentioned above. See Gray and Reuter's book
 Transaction processing for background.
-
 How long should the spin loop last before suspending the thread? On a
 uniprocessor, spinning does not help at all, because if the thread owning the
 mutex is not executing, it cannot be released. Spinning actually wastes
 resources.
-
 On a multiprocessor, we do not know if the thread owning the mutex is
 executing or not. Thus it would make sense to spin as long as the operation
 guarded by the mutex would typically last assuming that the thread is
 executing. If the mutex is not released by that time, we may assume that the
 thread owning the mutex is not executing and suspend the waiting thread.
-
 A typical operation (where no i/o involved) guarded by a mutex or a read-write
 lock may last 1 - 20 us on the current Pentium platform. The longest
 operations are the binary searches on an index node.
-
 We conclude that the best choice is to set the spin time at 20 us. Then the
 system should work well on a multiprocessor. On a uniprocessor we have to
 make sure that thread swithches due to mutex collisions are not frequent,
 i.e., they do not happen every 100 us or so, because that wastes too much
 resources. If the thread switches are not frequent, the 20 us wasted in spin
 loop is not too much.
-
 Empirical studies on the effect of spin time should be done for different
 platforms.
-
-
 	IMPLEMENTATION OF THE MUTEX
 	===========================
-
 For background, see Curt Schimmel's book on Unix implementation on modern
 architectures. The key points in the implementation are atomicity and
 serialization of memory accesses. The test-and-set instruction (XCHG in
@@ -97,12 +76,10 @@ not have to worry about the memory model. On other processors there are
 special machine instructions called a fence, memory barrier, or storage
 barrier (STBAR in Sparc), which can be used to serialize the memory accesses
 to happen in program order relative to the fence instruction.
-
 Leslie Lamport has devised a "bakery algorithm" to implement a mutex without
 the atomic test-and-set, but his algorithm should be modified for weak memory
 models. We do not use Lamport's algorithm, because we guess it is slower than
 the atomic test-and-set.
-
 Our mutex implementation works as follows: After that we perform the atomic
 test-and-set instruction on the memory word. If the test returns zero, we
 know we got the lock first. If the test returns not zero, some other thread
@@ -111,7 +88,6 @@ waiting it to become zero. It is wise to just read the word in the loop, not
 perform numerous test-and-set instructions, because they generate memory
 traffic between the cache and the main memory. The read loop can just access
 the cache, saving bus bandwidth.
-
 If we cannot acquire the mutex lock in the specified time, we reserve a cell
 in the wait array, set the waiters byte in the mutex to 1. To avoid a race
 condition, after setting the waiters byte and before suspending the waiting
@@ -119,12 +95,10 @@ thread, we still have to check that the mutex is reserved, because it may
 have happened that the thread which was holding the mutex has just released
 it and did not see the waiters byte set to 1, a case which would lead the
 other thread to an infinite wait.
-
 LEMMA 1: After a thread resets the event of a mutex (or rw_lock), some
 =======
 thread will eventually call os_event_set() on that particular event.
 Thus no infinite wait is possible in this case.
-
 Proof:	After making the reservation the thread sets the waiters field in the
 mutex to 1. Then it checks that the mutex is still reserved by some thread,
 or it reserves the mutex for itself. In any case, some thread (which may be
@@ -132,14 +106,12 @@ also some earlier thread, not necessarily the one currently holding the mutex)
 will set the waiters field to 0 in mutex_exit, and then call
 os_event_set() with the mutex as an argument.
 Q.E.D.
-
 LEMMA 2: If an os_event_set() call is made after some thread has called
 =======
 the os_event_reset() and before it starts wait on that event, the call
 will not be lost to the second thread. This is true even if there is an
 intervening call to os_event_reset() by another thread.
 Thus no infinite wait is possible in this case.
-
 Proof (non-windows platforms): os_event_reset() returns a monotonically
 increasing value of signal_count. This value is increased at every
 call of os_event_set() If thread A has called os_event_reset() followed
@@ -149,7 +121,6 @@ but now if thread A calls os_event_wait_low() with the signal_count
 value returned from the earlier call of os_event_reset(), it will
 return immediately without waiting.
 Q.E.D.
-
 Proof (windows): If there is a writer thread which is forced to wait for
 the lock, it may be able to set the state of rw_lock to RW_LOCK_WAIT_EX
 The design of rw_lock ensures that there is one and only one thread
@@ -162,82 +133,53 @@ of this event getting reset before the writer starts wait on it.
 Therefore, this thread is guaranteed to catch the os_set_event()
 signalled unconditionally at the release of the lock.
 Q.E.D. */
-
 /* Number of spin waits on mutexes: for performance monitoring */
-
-/** The number of iterations in the mutex_spin_wait() spin loop.
-Intended for performance monitoring. */
-static ib_int64_t	mutex_spin_round_count		= 0;
-/** The number of mutex_spin_wait() calls.  Intended for
-performance monitoring. */
-static ib_int64_t	mutex_spin_wait_count		= 0;
-/** The number of OS waits in mutex_spin_wait().  Intended for
-performance monitoring. */
-static ib_int64_t	mutex_os_wait_count		= 0;
-/** The number of mutex_exit() calls. Intended for performance
-monitoring. */
-IB_INTERN ib_int64_t	mutex_exit_count		= 0;
-
-/** The global array of wait cells for implementation of the database's own
-mutexes and read-write locks */
-IB_INTERN sync_array_t*	sync_primary_wait_array;
-
-/** This variable is set to TRUE when sync_init is called */
-IB_INTERN ibool	sync_initialized	= FALSE;
-
 /** An acquired mutex or rw-lock and its level in the latching order */
 typedef struct sync_level_struct	sync_level_t;
 /** Mutexes or rw-locks held by a thread */
 typedef struct sync_thread_struct	sync_thread_t;
-
+/** The number of iterations in the mutex_spin_wait() spin loop. Intended for performance monitoring. */
+static ib_int64_t mutex_spin_round_count = 0;
+/** The number of mutex_spin_wait() calls. Intended for performance monitoring. */
+static ib_int64_t mutex_spin_wait_count = 0;
+/** The number of OS waits in mutex_spin_wait(). Intended for performance monitoring. */
+static ib_int64_t mutex_os_wait_count = 0;
+/** The number of mutex_exit() calls. Intended for performance monitoring. */
+IB_INTERN ib_int64_t mutex_exit_count = 0;
+/** The global array of wait cells for implementation of the database's own mutexes and read-write locks */
+IB_INTERN sync_array_t*	sync_primary_wait_array;
+/** This variable is set to TRUE when sync_init is called */
+IB_INTERN ibool	sync_initialized = FALSE;
 #ifdef IB_SYNC_DEBUG
-/** The latch levels currently owned by threads are stored in this data
-structure; the size of this array is OS_THREAD_MAX_N */
-
-IB_INTERN sync_thread_t*	sync_thread_level_arrays;
-
-/** Mutex protecting sync_thread_level_arrays */
-static mutex_t		sync_thread_mutex;
-#endif /* IB_SYNC_DEBUG */
-
+	/** The latch levels currently owned by threads are stored in this data
+	structure; the size of this array is OS_THREAD_MAX_N */
+	IB_INTERN sync_thread_t*	sync_thread_level_arrays;
+	/** Mutex protecting sync_thread_level_arrays */
+	static mutex_t		sync_thread_mutex;
+	/** Latching order checks start when this is set TRUE */
+	IB_INTERN ibool	sync_order_checks_on	= FALSE;
+#endif // IB_SYNC_DEBUG
 /** Global list of database mutexes (not OS mutexes) created. */
 IB_INTERN ut_list_base_node_t  mutex_list;
-
 /** Mutex protecting the mutex_list variable */
 IB_INTERN mutex_t mutex_list_mutex;
-
-#ifdef IB_SYNC_DEBUG
-/** Latching order checks start when this is set TRUE */
-IB_INTERN ibool	sync_order_checks_on	= FALSE;
-#endif /* IB_SYNC_DEBUG */
-
 #ifdef IB_DEBUG
 /* FIXME: How is this used in MySQL code ? */
 static ibool	timed_mutexes;
 #endif /* IB_DEBUG */
-
 struct sync_thread_struct{
-	os_thread_id_t	id;	/*!< OS thread id */
-	sync_level_t*	levels;	/*!< level array for this thread; if
-				this is NULL this slot is unused */
+	os_thread_id_t id;	/*!< OS thread id */
+	sync_level_t* levels;	/*!< level array for this thread; if this is NULL this slot is unused */
 };
-
 /** Number of slots reserved for each OS thread in the sync level array */
-#define SYNC_THREAD_N_LEVELS	10000
-
+#define SYNC_THREAD_N_LEVELS 10000
 /** An acquired mutex or rw-lock and its level in the latching order */
 struct sync_level_struct{
-	void*	latch;	/*!< pointer to a mutex or an rw-lock; NULL means that
-			the slot is empty */
+	void*	latch;	/*!< pointer to a mutex or an rw-lock; NULL means that the slot is empty */
 	ulint	level;	/*!< level of the latch in the latching order */
 };
-
-/******************************************************************//**
-* Reset variables. */
-IB_INTERN
-void
-sync_var_init(void)
-/*===============*/
+/// \brief Reset variables.
+IB_INTERN void sync_var_init(void)
 {
 	mutex_spin_round_count  = 0;
 	mutex_spin_wait_count = 0;
@@ -251,21 +193,16 @@ sync_var_init(void)
 #endif /* IB_SYNC_DEBUG */
 	memset(&mutex_list, 0x0, sizeof(mutex_list));
 	memset(&mutex_list_mutex, 0x0, sizeof(mutex_list_mutex));
-
 #ifdef IB_SYNC_DEBUG
 	sync_order_checks_on    = FALSE;
 #endif /* IB_SYNC_DEBUG */
 }
-
 /**********************************************************************
 Creates, or rather, initializes a mutex object in a specified memory
 location (which must be appropriately aligned). The mutex is initialized
 in the reset state. Explicit freeing of the mutex with mutex_free is
 necessary only if the memory block containing it is freed. */
-IB_INTERN
-void
-mutex_create_func(
-/*==============*/
+IB_INTERN void mutex_create_func(
 	mutex_t*	mutex,		/*!< in: pointer to memory */
 #ifdef IB_DEBUG
 	const char*	cmutex_name,	/*!< in: mutex name */
@@ -305,31 +242,22 @@ mutex_create_func(
 	mutex->count_spin_rounds=   0;
 	mutex->count_os_yield=  0;
 #endif /* IB_DEBUG */
-
 	/* Check that lock_word is aligned; this is important on Intel */
 	ut_ad(((ulint)(&(mutex->lock_word))) % 4 == 0);
-
 	/* NOTE! The very first mutexes are not put to the mutex list */
-
 	if ((mutex == &mutex_list_mutex)
 #ifdef IB_SYNC_DEBUG
 	    || (mutex == &sync_thread_mutex)
 #endif /* IB_SYNC_DEBUG */
 	    ) {
-
 		return;
 	}
-
 	mutex_enter(&mutex_list_mutex);
-
 	ut_ad(UT_LIST_GET_LEN(mutex_list) == 0
 	      || UT_LIST_GET_FIRST(mutex_list)->magic_n == MUTEX_MAGIC_N);
-
 	UT_LIST_ADD_FIRST(list, mutex_list, mutex);
-
 	mutex_exit(&mutex_list_mutex);
 }
-
 /******************************************************************//**
 Calling this function is obligatory only if the memory buffer containing
 the mutex is freed. Removes a mutex object from the mutex list. The mutex
@@ -343,7 +271,6 @@ mutex_free(
 	ut_ad(mutex_validate(mutex));
 	ut_a(mutex_get_lock_word(mutex) == 0);
 	ut_a(mutex_get_waiters(mutex) == 0);
-
 #ifdef IB_MEM_DEBUG
 	if (mutex == &mem_hash_mutex) {
 		ut_ad(UT_LIST_GET_LEN(mutex_list) == 1);
@@ -352,7 +279,6 @@ mutex_free(
 		goto func_exit;
 	}
 #endif /* IB_MEM_DEBUG */
-
 #ifdef IB_MEM_DEBUG
 	if (mutex == &mem_hash_mutex) {
 		ut_ad(UT_LIST_GET_LEN(mutex_list) == 1);
@@ -361,27 +287,21 @@ mutex_free(
 		goto func_exit;
 	}
 #endif /* IB_MEM_DEBUG */
-
 	if (mutex != &mutex_list_mutex
 #ifdef IB_SYNC_DEBUG
 	    && mutex != &sync_thread_mutex
 #endif /* IB_SYNC_DEBUG */
 	    ) {
-
 		mutex_enter(&mutex_list_mutex);
-
 		ut_ad(!UT_LIST_GET_PREV(list, mutex)
 		      || UT_LIST_GET_PREV(list, mutex)->magic_n
 		      == MUTEX_MAGIC_N);
 		ut_ad(!UT_LIST_GET_NEXT(list, mutex)
 		      || UT_LIST_GET_NEXT(list, mutex)->magic_n
 		      == MUTEX_MAGIC_N);
-
 		UT_LIST_REMOVE(list, mutex_list, mutex);
-
 		mutex_exit(&mutex_list_mutex);
 	}
-
 	os_event_free(mutex->event);
 #ifdef IB_MEM_DEBUG
 func_exit:
@@ -396,7 +316,6 @@ func_exit:
 	mutex->magic_n = 0;
 #endif /* IB_DEBUG */
 }
-
 /********************************************************************//**
 NOTE! Use the corresponding macro in the header file, not this function
 directly. Tries to lock the mutex for the current thread. If the lock is not
@@ -414,75 +333,53 @@ mutex_enter_nowait_func(
 					/*!< in: line where requested */
 {
 	ut_ad(mutex_validate(mutex));
-
 	if (!mutex_test_and_set(mutex)) {
-
 		ut_d(mutex->thread_id = os_thread_get_curr_id());
 #ifdef IB_SYNC_DEBUG
 		mutex_set_debug_info(mutex, file_name, line);
 #endif
-
 		return(0);	/* Succeeded! */
 	}
-
 	return(1);
 }
-
 #ifdef IB_DEBUG
-/******************************************************************//**
-Checks that the mutex has been initialized.
-@return	TRUE */
-IB_INTERN
-ibool
-mutex_validate(
-/*===========*/
-	const mutex_t*	mutex)	/*!< in: mutex */
-{
-	ut_a(mutex);
-	ut_a(mutex->magic_n == MUTEX_MAGIC_N);
-
-	return(TRUE);
-}
-
-/******************************************************************//**
-Checks that the current thread owns the mutex. Works only in the debug
-version.
-@return	TRUE if owns */
-IB_INTERN
-ibool
-mutex_own(
-/*======*/
-	const mutex_t*	mutex)	/*!< in: mutex */
-{
-	ut_ad(mutex_validate(mutex));
-
-	return(mutex_get_lock_word(mutex) == 1
-	       && os_thread_eq(mutex->thread_id, os_thread_get_curr_id()));
-}
+	/******************************************************************//**
+	Checks that the mutex has been initialized.
+	@return	TRUE */
+	IB_INTERN
+	ibool
+	mutex_validate(
+	/*===========*/
+		const mutex_t*	mutex)	/*!< in: mutex */
+	{
+		ut_a(mutex);
+		ut_a(mutex->magic_n == MUTEX_MAGIC_N);
+		return(TRUE);
+	}
+	/******************************************************************//**
+	Checks that the current thread owns the mutex. Works only in the debug
+	version.
+	@return	TRUE if owns */
+	IB_INTERN
+	ibool
+	mutex_own(
+	/*======*/
+		const mutex_t*	mutex)	/*!< in: mutex */
+	{
+		ut_ad(mutex_validate(mutex));
+		return(mutex_get_lock_word(mutex) == 1
+			&& os_thread_eq(mutex->thread_id, os_thread_get_curr_id()));
+	}
 #endif /* IB_DEBUG */
-
-/******************************************************************//**
-Sets the waiters field in a mutex. */
-IB_INTERN
-void
-mutex_set_waiters(
-/*==============*/
-	mutex_t*	mutex,	/*!< in: mutex */
-	ulint		n)	/*!< in: value to set */
+IB_INTERN void mutex_set_waiters(mutex_t* mutex, ulint n)
 {
-	volatile ulint*	ptr;		/* declared volatile to ensure that
-					the value is stored to memory */
 	ut_ad(mutex);
-
-	ptr = &(mutex->waiters);
-
-	*ptr = n;		/* Here we assume that the write of a single
-				word in memory is atomic */
+	volatile ulint*	ptr = &(mutex->waiters);
+	*ptr = n; // Here we assume that the write of a single word in memory is atomic
 }
-
 /******************************************************************//**
 Reserves a mutex for the current thread. If the mutex is reserved, the
-function spins a preset time (controlled by SYNC_SPIN_ROUNDS), waiting
+function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting
 for the mutex before suspending the thread. */
 IB_INTERN
 void
@@ -503,35 +400,27 @@ mutex_spin_wait(
 	ulint timer_started = 0;
 #endif /* IB_DEBUG */
 	ut_ad(mutex);
-
 	/* This update is not thread safe, but we don't mind if the count
 	isn't exact. Moved out of ifdef that follows because we are willing
 	to sacrifice the cost of counting this as the data is valuable.
 	Count the number of calls to mutex_spin_wait. */
 	mutex_spin_wait_count++;
-
 mutex_loop:
-
 	i = 0;
-
 	/* Spin waiting for the lock word to become zero. Note that we do
 	not have to assume that the read access to the lock word is atomic,
 	as the actual locking is always committed with atomic test-and-set.
 	In reality, however, all processors probably have an atomic read of
 	a memory word. */
-
 spin_loop:
 	ut_d(mutex->count_spin_loop++);
-
-	while (mutex_get_lock_word(mutex) != 0 && i < SYNC_SPIN_ROUNDS) {
+	while (mutex_get_lock_word(mutex) != 0 && i < state->srv.n_spin_wait_rounds) {
 		if (srv_spin_wait_delay) {
 			ut_delay(ut_rnd_interval(0, srv_spin_wait_delay));
 		}
-
 		i++;
 	}
-
-	if (i == SYNC_SPIN_ROUNDS) {
+	if (i == state->srv.n_spin_wait_rounds) {
 #ifdef IB_DEBUG
 		mutex->count_os_yield++;
 #ifndef IB_HOTBACKUP
@@ -544,7 +433,6 @@ spin_loop:
 #endif /* IB_DEBUG */
 		os_thread_yield();
 	}
-
 #ifdef IB_SRV_PRINT_LATCH_WAITS
 	ib_log(state,
 		"Thread %lu spin wait mutex at %p"
@@ -552,58 +440,43 @@ spin_loop:
 		(ulong) os_thread_pf(os_thread_get_curr_id()), (void*) mutex,
 		mutex->cfile_name, (ulong) mutex->cline, (ulong) i);
 #endif
-
 	mutex_spin_round_count += i;
-
 	ut_d(mutex->count_spin_rounds += i);
-
 	if (mutex_test_and_set(mutex) == 0) {
 		/* Succeeded! */
-
 		ut_d(mutex->thread_id = os_thread_get_curr_id());
 #ifdef IB_SYNC_DEBUG
 		mutex_set_debug_info(mutex, file_name, line);
 #endif
-
 		goto finish_timing;
 	}
-
 	/* We may end up with a situation where lock_word is 0 but the OS
 	fast mutex is still reserved. On FreeBSD the OS does not seem to
 	schedule a thread which is constantly calling pthread_mutex_trylock
 	(in mutex_test_and_set implementation). Then we could end up
 	spinning here indefinitely. The following 'i++' stops this infinite
 	spin. */
-
 	i++;
-
-	if (i < SYNC_SPIN_ROUNDS) {
+	if (i < state->srv.n_spin_wait_rounds) {
 		goto spin_loop;
 	}
-
 	sync_array_reserve_cell(sync_primary_wait_array, mutex,
 				SYNC_MUTEX, file_name, line, &index);
-
 	/* The memory order of the array reservation and the change in the
 	waiters field is important: when we suspend a thread, we first
 	reserve the cell and then set waiters field to 1. When threads are
 	released in mutex_exit, the waiters field is first set to zero and
 	then the event is set to the signaled state. */
-
 	mutex_set_waiters(mutex, 1);
-
 	/* Try to reserve still a few times */
 	for (i = 0; i < 4; i++) {
 		if (mutex_test_and_set(mutex) == 0) {
 			/* Succeeded! Free the reserved wait cell */
-
 			sync_array_free_cell(sync_primary_wait_array, index);
-
 			ut_d(mutex->thread_id = os_thread_get_curr_id());
 #ifdef IB_SYNC_DEBUG
 			mutex_set_debug_info(mutex, file_name, line);
 #endif
-
 #ifdef IB_SRV_PRINT_LATCH_WAITS
 			ib_log(state,
 				"Thread %lu spin wait succeeds at 2:"
@@ -611,28 +484,22 @@ spin_loop:
 				(ulong) os_thread_pf(os_thread_get_curr_id()),
 				(void*) mutex);
 #endif
-
 			goto finish_timing;
-
 			/* Note that in this case we leave the waiters field
 			set to 1. We cannot reset it to zero, as we do not
 			know if there are other waiters. */
 		}
 	}
-
 	/* Now we know that there has been some thread holding the mutex
 	after the change in the wait array and the waiters field was made.
 	Now there is no risk of infinite wait on the event. */
-
 #ifdef IB_SRV_PRINT_LATCH_WAITS
 	ib_log(state,
 		"Thread %lu OS wait mutex at %p cfile %s cline %lu rnds %lu\n",
 		(ulong) os_thread_pf(os_thread_get_curr_id()), (void*) mutex,
 		mutex->cfile_name, (ulong) mutex->cline, (ulong) i);
 #endif
-
 	mutex_os_wait_count++;
-
 	mutex->count_os_wait++;
 #ifdef IB_DEBUG
 	/* !!!!! Sometimes os_wait can be called without os_thread_yield */
@@ -644,19 +511,15 @@ spin_loop:
 	}
 #endif /* IB_HOTBACKUP */
 #endif /* IB_DEBUG */
-
 	sync_array_wait_event(sync_primary_wait_array, index);
 	goto mutex_loop;
-
 finish_timing:
 #ifdef IB_DEBUG
 	if (timed_mutexes == 1 && timer_started==1) {
 		ut_usectime(&sec, &ms);
 		lfinish_time= (ib_int64_t)sec * 1000000 + ms;
-
 		ltime_diff= (ulint) (lfinish_time - lstart_time);
 		mutex->lspent_time += ltime_diff;
-
 		if (mutex->lmax_spent_time < ltime_diff) {
 			mutex->lmax_spent_time= ltime_diff;
 		}
@@ -664,88 +527,56 @@ finish_timing:
 #endif /* IB_DEBUG */
 	return;
 }
-
 /******************************************************************//**
 Releases the threads waiting in the primary wait array for this mutex. */
-IB_INTERN
-void
-mutex_signal_object(
-/*================*/
-	mutex_t*	mutex)	/*!< in: mutex */
+IB_INTERN void mutex_signal_object(mutex_t* mutex)	/*!< in: mutex */
 {
 	mutex_set_waiters(mutex, 0);
-
-	/* The memory order of resetting the waiters field and
-	signaling the object is important. See LEMMA 1 above. */
+	/* The memory order of resetting the waiters field and signaling the object is important. See LEMMA 1 above. */
 	os_event_set(mutex->event);
 	sync_array_object_signalled(sync_primary_wait_array);
 }
-
 #ifdef IB_SYNC_DEBUG
-/******************************************************************//**
-Sets the debug information for a reserved mutex. */
-IB_INTERN
-void
-mutex_set_debug_info(
-/*=================*/
+/** Sets the debug information for a reserved mutex. */
+IB_INTERN void mutex_set_debug_info(
 	mutex_t*	mutex,		/*!< in: mutex */
 	const char*	file_name,	/*!< in: file where requested */
 	ulint		line)		/*!< in: line where requested */
 {
 	ut_ad(mutex);
 	ut_ad(file_name);
-
 	sync_thread_add_level(mutex, mutex->level);
-
 	mutex->file_name = file_name;
 	mutex->line	 = line;
 }
-
-/******************************************************************//**
-Gets the debug information for a reserved mutex. */
-IB_INTERN
-void
-mutex_get_debug_info(
-/*=================*/
-	mutex_t*	mutex,		/*!< in: mutex */
-	const char**	file_name,	/*!< out: file where requested */
-	ulint*		line,		/*!< out: line where requested */
-	os_thread_id_t* thread_id)	/*!< out: id of the thread which owns
-					the mutex */
+/** Gets the debug information for a reserved mutex. */
+IB_INTERN void mutex_get_debug_info(
+	mutex_t* mutex,		/*!< in: mutex */
+	const char** file_name,	/*!< out: file where requested */
+	ulint* line,		/*!< out: line where requested */
+	os_thread_id_t* thread_id)	/*!< out: id of the thread which owns the mutex */
 {
 	ut_ad(mutex);
-
 	*file_name = mutex->file_name;
 	*line	   = mutex->line;
 	*thread_id = mutex->thread_id;
 }
-
-/******************************************************************//**
-Prints debug info of currently reserved mutexes. */
-static
-void
-mutex_list_print_info(
-/*==================*/
-	ib_stream_t	state->stream)	/*!< in: stream where to print */
+/// Prints debug info of currently reserved mutexes.
+static void mutex_list_print_info(ib_state_t* state)	
 {
 	mutex_t*	mutex;
 	const char*	file_name;
 	ulint		line;
 	os_thread_id_t	thread_id;
 	ulint		count		= 0;
-
 	ib_log(state,
 		"----------\n"
 		"MUTEX INFO\n"
 		"----------\n");
-
 	mutex_enter(&mutex_list_mutex);
-
 	mutex = UT_LIST_GET_FIRST(mutex_list);
-
 	while (mutex != NULL) {
 		count++;
-
 		if (mutex_get_lock_word(mutex) != 0) {
 			mutex_get_debug_info(mutex, &file_name, &line,
 					     &thread_id);
@@ -755,101 +586,59 @@ mutex_list_print_info(
 				(void*) mutex, os_thread_pf(thread_id),
 				file_name, line);
 		}
-
 		mutex = UT_LIST_GET_NEXT(list, mutex);
 	}
-
 	ib_log(state, "Total number of mutexes %ld\n", count);
-
 	mutex_exit(&mutex_list_mutex);
 }
-
-/******************************************************************//**
-Counts currently reserved mutexes. Works only in the debug version.
-@return	number of reserved mutexes */
-IB_INTERN
-ulint
-mutex_n_reserved(void)
-/*==================*/
+/// \brief Counts currently reserved mutexes. Works only in the debug version. 
+/// \return number of reserved mutexes
+IB_INTERN ulint mutex_n_reserved(void) 
 {
-	mutex_t*	mutex;
-	ulint		count		= 0;
-
+	ulint count = 0;
 	mutex_enter(&mutex_list_mutex);
-
-	mutex = UT_LIST_GET_FIRST(mutex_list);
-
+	mutex_t* mutex = UT_LIST_GET_FIRST(mutex_list);
 	while (mutex != NULL) {
 		if (mutex_get_lock_word(mutex) != 0) {
-
 			count++;
 		}
-
 		mutex = UT_LIST_GET_NEXT(list, mutex);
 	}
-
 	mutex_exit(&mutex_list_mutex);
-
 	ut_a(count >= 1);
-
-	return(count - 1); /* Subtract one, because this function itself
-			   was holding one mutex (mutex_list_mutex) */
+	return count - 1 ; // Subtract one, because this function itself was holding one mutex (mutex_list_mutex)
 }
-
-/******************************************************************//**
-Returns TRUE if no mutex or rw-lock is currently locked. Works only in
-the debug version.
-@return	TRUE if no mutexes and rw-locks reserved */
-IB_INTERN
-ibool
-sync_all_freed(void)
-/*================*/
+/// \brief Returns TRUE if no mutex or rw-lock is currently locked. 
+/// \details Works only in the debug version.
+/// \return	TRUE if no mutexes and rw-locks reserved
+IB_INTERN ibool sync_all_freed(void)
 {
-	return(mutex_n_reserved() + rw_lock_n_locked() == 0);
+	return mutex_n_reserved() || rw_lock_n_locked() == 0;
 }
-
-/******************************************************************//**
-Gets the value in the nth slot in the thread level arrays.
-@return	pointer to thread slot */
-static
-sync_thread_t*
-sync_thread_level_arrays_get_nth(
-/*=============================*/
-	ulint	n)	/*!< in: slot number */
+/// \brief Gets the value in the nth slot in the thread level arrays. 
+/// \param [in] n Slot number
+/// \return	pointer to thread slot */
+static sync_thread_t* sync_thread_level_arrays_get_nth(ulint n)
 {
 	ut_ad(n < OS_THREAD_MAX_N);
-
-	return(sync_thread_level_arrays + n);
+	return sync_thread_level_arrays + n;
 }
-
-/******************************************************************//**
-Looks for the thread slot for the calling thread.
-@return	pointer to thread slot, NULL if not found */
-static
-sync_thread_t*
-sync_thread_level_arrays_find_slot(void)
-/*====================================*/
-
+/// \brief Looks for the thread slot for the calling thread.
+/// \return	pointer to thread slot, NULL if not found
+static sync_thread_t* sync_thread_level_arrays_find_slot()
 {
-	sync_thread_t*	slot;
-	os_thread_id_t	id;
-	ulint		i;
-
+	sync_thread_t* slot;
+	os_thread_id_t id;
+	ulint i;
 	id = os_thread_get_curr_id();
-
 	for (i = 0; i < OS_THREAD_MAX_N; i++) {
-
 		slot = sync_thread_level_arrays_get_nth(i);
-
 		if (slot->levels && os_thread_eq(slot->id, id)) {
-
 			return(slot);
 		}
 	}
-
 	return(NULL);
 }
-
 /******************************************************************//**
 Looks for an unused thread slot.
 @return	pointer to thread slot */
@@ -857,24 +646,17 @@ static
 sync_thread_t*
 sync_thread_level_arrays_find_free(void)
 /*====================================*/
-
 {
 	sync_thread_t*	slot;
 	ulint		i;
-
 	for (i = 0; i < OS_THREAD_MAX_N; i++) {
-
 		slot = sync_thread_level_arrays_get_nth(i);
-
 		if (slot->levels == NULL) {
-
 			return(slot);
 		}
 	}
-
 	return(NULL);
 }
-
 /******************************************************************//**
 Gets the value in the nth slot in the thread level array.
 @return	pointer to level slot */
@@ -887,10 +669,8 @@ sync_thread_levels_get_nth(
 	ulint		n)	/*!< in: slot number */
 {
 	ut_ad(n < SYNC_THREAD_N_LEVELS);
-
 	return(arr + n);
 }
-
 /******************************************************************//**
 Checks if all the level values stored in the level array are greater than
 the given limit.
@@ -908,42 +688,31 @@ sync_thread_levels_g(
 	rw_lock_t*	lock;
 	mutex_t*	mutex;
 	ulint		i;
-
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 		slot = sync_thread_levels_get_nth(arr, i);
-
 		if (slot->latch != NULL) {
 			if (slot->level <= limit) {
-
 				if (!warn) {
-
 					return(FALSE);
 				}
-
 				lock = slot->latch;
 				mutex = slot->latch;
-
 				ib_log(state,
 					"InnoDB: sync levels should be"
 					" > %lu but a level is %lu\n",
 					(ulong) limit, (ulong) slot->level);
-
 				if (mutex->magic_n == MUTEX_MAGIC_N) {
 					ib_log(state,
 						"Mutex created at %s %lu\n",
 						mutex->cfile_name,
 						(ulong) mutex->cline);
-
 					if (mutex_get_lock_word(mutex) != 0) {
 						const char*	file_name;
 						ulint		line;
 						os_thread_id_t	thread_id;
-
 						mutex_get_debug_info(
 							mutex, &file_name,
 							&line, &thread_id);
-
 						ib_log(state,
 							"InnoDB: Locked mutex:"
 							" addr %p thread %ld"
@@ -960,15 +729,12 @@ sync_thread_levels_g(
 				} else {
 					rw_lock_print(lock);
 				}
-
 				return(FALSE);
 			}
 		}
 	}
-
 	return(TRUE);
 }
-
 /******************************************************************//**
 Checks if the level value is stored in the level array.
 @return	TRUE if stored */
@@ -982,22 +748,16 @@ sync_thread_levels_contain(
 {
 	sync_level_t*	slot;
 	ulint		i;
-
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 		slot = sync_thread_levels_get_nth(arr, i);
-
 		if (slot->latch != NULL) {
 			if (slot->level == level) {
-
 				return(TRUE);
 			}
 		}
 	}
-
 	return(FALSE);
 }
-
 /******************************************************************//**
 Checks if the level array for the current thread contains a
 mutex or rw-latch at the specified level.
@@ -1013,41 +773,26 @@ sync_thread_levels_contains(
 	sync_thread_t*	thread_slot;
 	sync_level_t*	slot;
 	ulint		i;
-
 	if (!sync_order_checks_on) {
-
 		return(NULL);
 	}
-
 	mutex_enter(&sync_thread_mutex);
-
 	thread_slot = sync_thread_level_arrays_find_slot();
-
 	if (thread_slot == NULL) {
-
 		mutex_exit(&sync_thread_mutex);
-
 		return(NULL);
 	}
-
 	arr = thread_slot->levels;
-
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 		slot = sync_thread_levels_get_nth(arr, i);
-
 		if (slot->latch != NULL && slot->level == level) {
-
 			mutex_exit(&sync_thread_mutex);
 			return(slot->latch);
 		}
 	}
-
 	mutex_exit(&sync_thread_mutex);
-
 	return(NULL);
 }
-
 /******************************************************************//**
 Checks that the level array for the current thread is empty.
 @return	a latch, or NULL if empty except the exceptions specified below */
@@ -1064,46 +809,30 @@ sync_thread_levels_nonempty_gen(
 	sync_thread_t*	thread_slot;
 	sync_level_t*	slot;
 	ulint		i;
-
 	if (!sync_order_checks_on) {
-
 		return(NULL);
 	}
-
 	mutex_enter(&sync_thread_mutex);
-
 	thread_slot = sync_thread_level_arrays_find_slot();
-
 	if (thread_slot == NULL) {
-
 		mutex_exit(&sync_thread_mutex);
-
 		return(NULL);
 	}
-
 	arr = thread_slot->levels;
-
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 		slot = sync_thread_levels_get_nth(arr, i);
-
 		if (slot->latch != NULL
 		    && (!dict_mutex_allowed
 			|| (slot->level != SYNC_DICT
 			    && slot->level != SYNC_DICT_OPERATION))) {
-
 			mutex_exit(&sync_thread_mutex);
 			UT_ERROR;
-
 			return(slot->latch);
 		}
 	}
-
 	mutex_exit(&sync_thread_mutex);
-
 	return(NULL);
 }
-
 /******************************************************************//**
 Checks that the level array for the current thread is empty.
 @return	TRUE if empty */
@@ -1114,7 +843,6 @@ sync_thread_levels_empty(void)
 {
 	return(sync_thread_levels_empty_gen(FALSE));
 }
-
 /******************************************************************//**
 Adds a latch and its level in the thread level array. Allocates the memory
 for the array if called first time for this OS thread. Makes the checks
@@ -1131,53 +859,36 @@ sync_thread_add_level(
 	sync_level_t*	slot;
 	sync_thread_t*	thread_slot;
 	ulint		i;
-
 	if (!sync_order_checks_on) {
-
 		return;
 	}
-
 	if ((latch == (void*)&sync_thread_mutex)
 	    || (latch == (void*)&mutex_list_mutex)
 	    || (latch == (void*)&rw_lock_debug_mutex)
 	    || (latch == (void*)&rw_lock_list_mutex)) {
-
 		return;
 	}
-
 	if (level == SYNC_LEVEL_VARYING) {
-
 		return;
 	}
-
 	mutex_enter(&sync_thread_mutex);
-
 	thread_slot = sync_thread_level_arrays_find_slot();
-
 	if (thread_slot == NULL) {
 		/* We have to allocate the level array for a new thread */
 		array = ut_malloc(sizeof(sync_level_t) * SYNC_THREAD_N_LEVELS);
-
 		thread_slot = sync_thread_level_arrays_find_free();
-
 		thread_slot->id = os_thread_get_curr_id();
 		thread_slot->levels = array;
-
 		for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 			slot = sync_thread_levels_get_nth(array, i);
-
 			slot->latch = NULL;
 		}
 	}
-
 	array = thread_slot->levels;
-
 	/* NOTE that there is a problem with _NODE and _LEAF levels: if the
 	B-tree height changes, then a leaf can change to an internal node
 	or the other way around. We do not know at present if this can cause
 	unnecessary assertion failures below. */
-
 	switch (level) {
 	case SYNC_NO_ORDER_CHECK:
 	case SYNC_EXTERN_STORAGE:
@@ -1309,100 +1020,64 @@ sync_thread_add_level(
 	default:
 		UT_ERROR;
 	}
-
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 		slot = sync_thread_levels_get_nth(array, i);
-
 		if (slot->latch == NULL) {
 			slot->latch = latch;
 			slot->level = level;
-
 			break;
 		}
 	}
-
 	ut_a(i < SYNC_THREAD_N_LEVELS);
-
 	mutex_exit(&sync_thread_mutex);
 }
 
-/******************************************************************//**
-Removes a latch from the thread level array if it is found there.
-@return TRUE if found in the array; it is no error if the latch is
-not found, as we presently are not able to determine the level for
-every latch reservation the program does */
-IB_INTERN
-ibool
-sync_thread_reset_level(
-/*====================*/
-	void*	latch)	/*!< in: pointer to a mutex or an rw-lock */
+/// \brief Removes a latch from the thread level array if it is found there.
+/// \param [in] latch Pointer to a mutex or an rw-lock
+/// \return TRUE if found in the array; it is no error if the latch is not found, as we presently are not able to determine the level for every latch reservation the program does
+IB_INTERN ibool sync_thread_reset_level(void* latch)
 {
-	sync_level_t*	array;
-	sync_level_t*	slot;
-	sync_thread_t*	thread_slot;
-	ulint		i;
-
+	sync_level_t* array;
+	sync_level_t* slot;
+	sync_thread_t* thread_slot;
+	ulint i;
 	if (!sync_order_checks_on) {
-
-		return(FALSE);
+		return FALSE ;
 	}
-
-	if ((latch == (void*)&sync_thread_mutex)
-	    || (latch == (void*)&mutex_list_mutex)
-	    || (latch == (void*)&rw_lock_debug_mutex)
-	    || (latch == (void*)&rw_lock_list_mutex)) {
-
-		return(FALSE);
+	if ((latch == (void*)&sync_thread_mutex) || (latch == (void*)&mutex_list_mutex) || (latch == (void*)&rw_lock_debug_mutex) || (latch == (void*)&rw_lock_list_mutex)) {
+		return FALSE;
 	}
-
 	mutex_enter(&sync_thread_mutex);
-
 	thread_slot = sync_thread_level_arrays_find_slot();
-
 	if (thread_slot == NULL) {
-
 		UT_ERROR;
-
 		mutex_exit(&sync_thread_mutex);
-		return(FALSE);
+		return FALSE;
 	}
-
+	
 	array = thread_slot->levels;
-
 	for (i = 0; i < SYNC_THREAD_N_LEVELS; i++) {
-
 		slot = sync_thread_levels_get_nth(array, i);
-
 		if (slot->latch == latch) {
 			slot->latch = NULL;
-
 			mutex_exit(&sync_thread_mutex);
-
-			return(TRUE);
+			return TRUE;
 		}
 	}
 
 	if (((mutex_t*) latch)->magic_n != MUTEX_MAGIC_N) {
 		rw_lock_t*	rw_lock;
-
 		rw_lock = (rw_lock_t*) latch;
-
 		if (rw_lock->level == SYNC_LEVEL_VARYING) {
 			mutex_exit(&sync_thread_mutex);
-
-			return(TRUE);
+			return TRUE;
 		}
 	}
-
 	UT_ERROR;
-
 	mutex_exit(&sync_thread_mutex);
-
 	return(FALSE);
 }
 #endif /* IB_SYNC_DEBUG */
-
 /******************************************************************//**
 Initializes the synchronization data structures. */
 IB_INTERN
@@ -1414,49 +1089,37 @@ sync_init(void)
 	sync_thread_t*	thread_slot;
 	ulint		i;
 #endif /* IB_SYNC_DEBUG */
-
 	ut_a(sync_initialized == FALSE);
-
 	sync_initialized = TRUE;
-
 	/* Create the primary system wait array which is protected by an OS
 	mutex */
-
 	sync_primary_wait_array = sync_array_create(OS_THREAD_MAX_N,
 						    SYNC_ARRAY_OS_MUTEX);
 #ifdef IB_SYNC_DEBUG
 	/* Create the thread latch level array where the latch levels
 	are stored for each OS thread */
-
 	sync_thread_level_arrays = ut_malloc(OS_THREAD_MAX_N
 					     * sizeof(sync_thread_t));
 	for (i = 0; i < OS_THREAD_MAX_N; i++) {
-
 		thread_slot = sync_thread_level_arrays_get_nth(i);
 		thread_slot->levels = NULL;
 	}
 #endif /* IB_SYNC_DEBUG */
 	/* Init the mutex list and create the mutex to protect it. */
-
 	UT_LIST_INIT(mutex_list);
 	mutex_create(&mutex_list_mutex, SYNC_NO_ORDER_CHECK);
 #ifdef IB_SYNC_DEBUG
 	mutex_create(&sync_thread_mutex, SYNC_NO_ORDER_CHECK);
 #endif /* IB_SYNC_DEBUG */
-
 	/* Init the rw-lock list and create the mutex to protect it. */
-
 	UT_LIST_INIT(rw_lock_list);
 	mutex_create(&rw_lock_list_mutex, SYNC_NO_ORDER_CHECK);
-
 #ifdef IB_SYNC_DEBUG
 	mutex_create(&rw_lock_debug_mutex, SYNC_NO_ORDER_CHECK);
-
 	rw_lock_debug_event = os_event_create(NULL);
 	rw_lock_debug_waiters = FALSE;
 #endif /* IB_SYNC_DEBUG */
 }
-
 /******************************************************************//**
 Frees the resources in InnoDB's own synchronization data structures. Use
 os_sync_free() after calling this. */
@@ -1466,11 +1129,8 @@ sync_close(void)
 /*===========*/
 {
 	mutex_t*	mutex;
-
 	sync_array_free(sync_primary_wait_array);
-
 	mutex = UT_LIST_GET_FIRST(mutex_list);
-
 	while (mutex) {
 #ifdef IB_MEM_DEBUG
 		if (mutex == &mem_hash_mutex) {
@@ -1481,18 +1141,15 @@ sync_close(void)
 		mutex_free(mutex);
 		mutex = UT_LIST_GET_FIRST(mutex_list);
 	}
-
 	mutex_free(&mutex_list_mutex);
 #ifdef IB_SYNC_DEBUG
 	mutex_free(&sync_thread_mutex);
 	sync_order_checks_on = FALSE;
-
 	/* Switch latching order checks on in sync0sync.c */
 	sync_order_checks_on = FALSE;
 #endif /* IB_SYNC_DEBUG */
 	sync_initialized = FALSE;
 }
-
 /*******************************************************************//**
 Prints wait info of the sync system. */
 IB_INTERN
@@ -1506,7 +1163,6 @@ sync_print_wait_info(
 		"Mutex exits %llu, rws exits %llu, rwx exits %llu\n",
 		mutex_exit_count, rw_s_exit_count, rw_x_exit_count);
 #endif
-
 	ib_log(state,
 		"Mutex spin waits %llu, rounds %llu, OS waits %llu\n"
 		"RW-shared spins %llu, OS waits %llu;"
@@ -1518,7 +1174,6 @@ sync_print_wait_info(
 		rw_s_os_wait_count,
 		rw_x_spin_wait_count,
 		rw_x_os_wait_count);
-
 	ib_log(state,
 		"Spin rounds per wait: %.2f mutex, %.2f RW-shared, "
 		"%.2f RW-excl\n",
@@ -1529,7 +1184,6 @@ sync_print_wait_info(
 		(double) rw_x_spin_round_count /
 		(rw_x_spin_wait_count ? rw_x_spin_wait_count : 1));
 }
-
 /*******************************************************************//**
 Prints info of the sync system. */
 IB_INTERN
@@ -1540,11 +1194,8 @@ sync_print(
 {
 #ifdef IB_SYNC_DEBUG
 	mutex_list_print_info(state->stream);
-
 	rw_lock_list_print_info(state->stream);
 #endif /* IB_SYNC_DEBUG */
-
 	sync_array_print_info(state->stream, sync_primary_wait_array);
-
 	sync_print_wait_info(state->stream);
 }
