@@ -440,7 +440,7 @@ sync_array_wait_event(
 
 	if (TRUE == sync_array_detect_deadlock(arr, cell, cell, 0)) {
 
-		ib_logger(ib_stream, 
+		ib_log(state, 
 			"########################################\n");
 		UT_ERROR;
 	}
@@ -460,7 +460,7 @@ static
 void
 sync_array_cell_print(
 /*==================*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	sync_cell_t*	cell)		/*!< in: sync cell */
 {
 	mutex_t*	mutex;
@@ -470,7 +470,7 @@ sync_array_cell_print(
 
 	type = cell->request_type;
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"--Thread %lu has waited at %s line %lu"
 		" for %.2f seconds the semaphore:\n",
 		(ulong) os_thread_pf(cell->thread), cell->file,
@@ -482,7 +482,7 @@ sync_array_cell_print(
 		been freed meanwhile */
 		mutex = cell->old_wait_mutex;
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Mutex at %p created file %s line %lu, lock var %lu\n"
 #ifdef IB_SYNC_DEBUG
 			"Last time reserved in file %s line %lu, "
@@ -499,18 +499,18 @@ sync_array_cell_print(
 		   || type == RW_LOCK_WAIT_EX
 		   || type == RW_LOCK_SHARED) {
 
-		ib_logger(ib_stream, "%s",
+		ib_log(state, "%s",
 			type == RW_LOCK_EX ? "X-lock on" : "S-lock on");
 
 		rwlock = cell->old_wait_rw_lock;
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			" RW-latch at %p created in file %s line %lu\n",
 			(void*) rwlock, rwlock->cfile_name,
 			(ulong) rwlock->cline);
 		writer = rw_lock_get_writer(rwlock);
 		if (writer != RW_LOCK_NOT_LOCKED) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"a writer (thread id %lu) has"
 				" reserved it in mode %s",
 				(ulong) os_thread_pf(rwlock->writer_thread),
@@ -519,7 +519,7 @@ sync_array_cell_print(
 				: " wait exclusive\n");
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"number of readers %lu, waiters flag %lu, "
                         "lock_word: %lx\n"
 			"Last time read locked in file %s line %lu\n"
@@ -536,7 +536,7 @@ sync_array_cell_print(
 	}
 
 	if (!cell->waiting) {
-		ib_logger(ib_stream, "wait has ended\n");
+		ib_log(state, "wait has ended\n");
 	}
 }
 
@@ -604,7 +604,7 @@ sync_array_deadlock_step(
 		ut_dbg_stop_threads = TRUE;
 
 		/* Deadlock */
-		ib_logger(ib_stream,
+		ib_log(state,
 			"########################################\n"
 			"DEADLOCK of threads detected!\n");
 
@@ -673,13 +673,13 @@ sync_array_detect_deadlock(
 			ret = sync_array_deadlock_step(arr, start, thread, 0,
 						       depth);
 			if (ret) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"Mutex %p owned by thread %lu file %s "
 					"line %lu\n",
 					mutex,
 				       	(ulong) os_thread_pf(mutex->thread_id),
 					mutex->file_name, (ulong) mutex->line);
-				sync_array_cell_print(ib_stream, cell);
+				sync_array_cell_print(state->stream, cell);
 
 				return(TRUE);
 			}
@@ -715,9 +715,9 @@ sync_array_detect_deadlock(
 					depth);
 				if (ret) {
 print:
-					ib_logger(ib_stream, "rw-lock %p ",
+					ib_log(state, "rw-lock %p ",
 						(void*) lock);
-					sync_array_cell_print(ib_stream, cell);
+					sync_array_cell_print(state->stream, cell);
 					rw_lock_debug_print(debug);
 					return(TRUE);
 				}
@@ -913,7 +913,7 @@ sync_arr_wake_threads_if_sema_free(void)
 }
 
 /**********************************************************************//**
-Prints warnings of long semaphore waits to ib_stream.
+Prints warnings of long semaphore waits to state->stream.
 @return	TRUE if fatal semaphore wait threshold was exceeded */
 IB_INTERN
 ibool
@@ -933,9 +933,9 @@ sync_array_print_long_waits(void)
 
 		if (cell->wait_object != NULL && cell->waiting
 		    && difftime(time(NULL), cell->reservation_time) > 240) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Warning: a long semaphore wait:\n");
-			sync_array_cell_print(ib_stream, cell);
+			sync_array_cell_print(state->stream, cell);
 			noticed = TRUE;
 		}
 
@@ -947,7 +947,7 @@ sync_array_print_long_waits(void)
 	}
 
 	if (noticed) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: ###### Starts InnoDB Monitor"
 			" for 30 secs to print diagnostic info:\n");
 		old_val = srv_print_innodb_monitor;
@@ -958,7 +958,7 @@ sync_array_print_long_waits(void)
 		call hanging inside the operating system, let us print right
 		now the values of pending calls of these. */
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Pending preads %lu, pwrites %lu\n",
 			(ulong)os_file_n_pending_preads,
 			(ulong)os_file_n_pending_pwrites);
@@ -969,7 +969,7 @@ sync_array_print_long_waits(void)
 		os_thread_sleep(30000000);
 
 		srv_print_innodb_monitor = old_val;
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: ###### Diagnostic info printed"
 			" to the standard error stream\n");
 	}
@@ -983,7 +983,7 @@ static
 void
 sync_array_output_info(
 /*===================*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	sync_array_t*	arr)		/*!< in: wait array; NOTE! caller
 					must own the mutex */
 {
@@ -991,7 +991,7 @@ sync_array_output_info(
 	ulint		count;
 	ulint		i;
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"OS WAIT ARRAY INFO: reservation count %ld, signal count %ld\n",
 		(long) arr->res_count, (long) arr->sg_count);
 	i = 0;
@@ -1003,7 +1003,7 @@ sync_array_output_info(
 
 	if (cell->wait_object != NULL) {
 		count++;
-			sync_array_cell_print(ib_stream, cell);
+			sync_array_cell_print(state->stream, cell);
 		}
 
 		i++;
@@ -1016,12 +1016,12 @@ IB_INTERN
 void
 sync_array_print_info(
 /*==================*/
-	ib_stream_t	ib_stream,	/*!< in: file where to print */
+	ib_stream_t	state->stream,	/*!< in: file where to print */
 	sync_array_t*	arr)		/*!< in: wait array */
 {
 	sync_array_enter(arr);
 
-	sync_array_output_info(ib_stream, arr);
+	sync_array_output_info(state->stream, arr);
 
 	sync_array_exit(arr);
 }

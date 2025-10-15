@@ -141,7 +141,7 @@ static
 void
 row_merge_tuple_print(
 /*==================*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const dfield_t*	entry,		/*!< in: tuple to print */
 	ulint		n_fields)	/*!< in: number of fields in the tuple */
 {
@@ -151,23 +151,23 @@ row_merge_tuple_print(
 		const dfield_t*	field = &entry[j];
 
 		if (dfield_is_null(field)) {
-			ib_logger(ib_stream, "\n NULL;");
+			ib_log(state, "\n NULL;");
 		} else {
 			ulint	field_len	= dfield_get_len(field);
 			ulint	len		= ut_min(field_len, 20);
 			if (dfield_is_ext(field)) {
-				ib_logger(ib_stream, "\nE");
+				ib_log(state, "\nE");
 			} else {
-				ib_logger(ib_stream, "\n ");
+				ib_log(state, "\n ");
 			}
-			ut_print_buf(ib_stream, dfield_get_data(field), len);
+			ut_print_buf(state->stream, dfield_get_data(field), len);
 			if (len != field_len) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					" (total %lu bytes)", field_len);
 			}
 		}
 	}
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 }
 #endif /* IB_DEBUG */
 
@@ -613,11 +613,11 @@ row_merge_buf_write(
 
 #ifdef IB_DEBUG
 		if (row_merge_print_write) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"row_merge_buf_write %p,%d,%lu %lu",
 				(void*) b, of->fd, (ulong) of->offset,
 				(ulong) i);
-			row_merge_tuple_print(ib_stream, entry, n_fields);
+			row_merge_tuple_print(state->stream, entry, n_fields);
 		}
 #endif /* IB_DEBUG */
 	}
@@ -633,7 +633,7 @@ row_merge_buf_write(
 #endif /* IB_DEBUG_VALGRIND */
 #ifdef IB_DEBUG
 	if (row_merge_print_write) {
-		ib_logger(ib_stream, "row_merge_buf_write %p,%d,%lu EOF\n",
+		ib_log(state, "row_merge_buf_write %p,%d,%lu EOF\n",
 			(void*) b, of->fd, (ulong) of->offset);
 	}
 #endif /* IB_DEBUG */
@@ -708,7 +708,7 @@ row_merge_read(
 
 #ifdef IB_DEBUG
 	if (row_merge_print_block_read) {
-		ib_logger(ib_stream, "row_merge_read fd=%d ofs=%lu\n",
+		ib_log(state, "row_merge_read fd=%d ofs=%lu\n",
 			fd, (ulong) offset);
 	}
 #endif /* IB_DEBUG */
@@ -718,8 +718,8 @@ row_merge_read(
 						 (ulint) (ofs >> 32),
 						 sizeof *buf);
 	if (IB_UNLIKELY(!success)) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: failed to read merge block at %llu\n", ofs);
 	}
 
@@ -742,7 +742,7 @@ row_merge_write(
 
 #ifdef IB_DEBUG
 	if (row_merge_print_block_write) {
-		ib_logger(ib_stream, "row_merge_write fd=%d ofs=%lu\n",
+		ib_log(state, "row_merge_write fd=%d ofs=%lu\n",
 			fd, (ulong) offset);
 	}
 #endif /* IB_DEBUG */
@@ -794,7 +794,7 @@ row_merge_read_rec(
 		*mrec = NULL;
 #ifdef IB_DEBUG
 		if (row_merge_print_read) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"row_merge_read %p,%p,%d,%lu EOF\n",
 				(const void*) b, (const void*) block,
 				fd, (ulong) *foffs);
@@ -912,11 +912,11 @@ err_exit:
 func_exit:
 #ifdef IB_DEBUG
 	if (row_merge_print_read) {
-		ib_logger(ib_stream, "row_merge_read %p,%p,%d,%lu ",
+		ib_log(state, "row_merge_read %p,%p,%d,%lu ",
 			(const void*) b, (const void*) block,
 			fd, (ulong) *foffs);
-		rec_print_comp(ib_stream, *mrec, offsets);
-		ib_logger(ib_stream, "\n");
+		rec_print_comp(state->stream, *mrec, offsets);
+		ib_log(state, "\n");
 	}
 #endif /* IB_DEBUG */
 
@@ -948,10 +948,10 @@ row_merge_write_rec_low(
 	ut_ad(e == rec_offs_extra_size(offsets) + 1);
 
 	if (row_merge_print_write) {
-		ib_logger(ib_stream, "row_merge_write %p,%d,%lu ",
+		ib_log(state, "row_merge_write %p,%d,%lu ",
 			(void*) b, fd, (ulong) foffs);
-		rec_print_comp(ib_stream, mrec, offsets);
-		ib_logger(ib_stream, "\n");
+		rec_print_comp(state->stream, mrec, offsets);
+		ib_log(state, "\n");
 	}
 #endif /* IB_DEBUG */
 
@@ -1051,7 +1051,7 @@ row_merge_write_eof(
 	ut_ad(foffs);
 #ifdef IB_DEBUG
 	if (row_merge_print_write) {
-		ib_logger(ib_stream, "row_merge_write %p,%p,%d,%lu EOF\n",
+		ib_log(state, "row_merge_write %p,%p,%d,%lu EOF\n",
 			(void*) b, (void*) block, fd, (ulong) *foffs);
 	}
 #endif /* IB_DEBUG */
@@ -1094,11 +1094,11 @@ row_merge_cmp(
 
 #ifdef IB_DEBUG
 	if (row_merge_print_cmp) {
-		ib_logger(ib_stream, "row_merge_cmp1 ");
-		rec_print_comp(ib_stream, mrec1, offsets1);
-		ib_logger(ib_stream, "\nrow_merge_cmp2 ");
-		rec_print_comp(ib_stream, mrec2, offsets2);
-		ib_logger(ib_stream, "\nrow_merge_cmp=%d\n", cmp);
+		ib_log(state, "row_merge_cmp1 ");
+		rec_print_comp(state->stream, mrec1, offsets1);
+		ib_log(state, "\nrow_merge_cmp2 ");
+		rec_print_comp(state->stream, mrec2, offsets2);
+		ib_log(state, "\nrow_merge_cmp=%d\n", cmp);
 	}
 #endif /* IB_DEBUG */
 
@@ -1419,7 +1419,7 @@ row_merge_blocks(
 
 #ifdef IB_DEBUG
 	if (row_merge_print_block) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"row_merge_blocks fd=%d ofs=%lu + fd=%d ofs=%lu"
 			" = fd=%d ofs=%lu\n",
 			file->fd, (ulong) *foffs0,
@@ -1522,7 +1522,7 @@ row_merge_blocks_copy(
 
 #ifdef IB_DEBUG
 	if (row_merge_print_block) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"row_merge_blocks_copy fd=%d ofs=%lu"
 			" = fd=%d ofs=%lu\n",
 			file->fd, (ulong) foffs0,

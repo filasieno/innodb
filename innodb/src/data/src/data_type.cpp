@@ -217,51 +217,51 @@ dtype_print(
 
 	switch (mtype) {
 	case DATA_VARCHAR:
-		ib_logger(ib_stream, "DATA_VARCHAR");
+		ib_log(state, "DATA_VARCHAR");
 		break;
 
 	case DATA_CHAR:
-		ib_logger(ib_stream, "DATA_CHAR");
+		ib_log(state, "DATA_CHAR");
 		break;
 
 	case DATA_BINARY:
-		ib_logger(ib_stream, "DATA_BINARY");
+		ib_log(state, "DATA_BINARY");
 		break;
 
 	case DATA_FIXBINARY:
-		ib_logger(ib_stream, "DATA_FIXBINARY");
+		ib_log(state, "DATA_FIXBINARY");
 		break;
 
 	case DATA_BLOB:
-		ib_logger(ib_stream, "DATA_BLOB");
+		ib_log(state, "DATA_BLOB");
 		break;
 
 	case DATA_INT:
-		ib_logger(ib_stream, "DATA_INT");
+		ib_log(state, "DATA_INT");
 		break;
 
 	case DATA_CLIENT:
-		ib_logger(ib_stream, "DATA_CLIENT");
+		ib_log(state, "DATA_CLIENT");
 		break;
 
 	case DATA_SYS:
-		ib_logger(ib_stream, "DATA_SYS");
+		ib_log(state, "DATA_SYS");
 		break;
 
 	case DATA_FLOAT:
-		ib_logger(ib_stream, "DATA_FLOAT");
+		ib_log(state, "DATA_FLOAT");
 		break;
 
 	case DATA_DOUBLE:
-		ib_logger(ib_stream, "DATA_DOUBLE");
+		ib_log(state, "DATA_DOUBLE");
 		break;
 
 	case DATA_DECIMAL:
-		ib_logger(ib_stream, "DATA_DECIMAL");
+		ib_log(state, "DATA_DECIMAL");
 		break;
 
 	default:
-		ib_logger(ib_stream, "type %lu", (ulong) mtype);
+		ib_log(state, "type %lu", (ulong) mtype);
 		break;
 	}
 
@@ -270,35 +270,35 @@ dtype_print(
 	if ((type->mtype == DATA_SYS)
 	    || (type->mtype == DATA_VARCHAR)
 	    || (type->mtype == DATA_CHAR)) {
-		ib_logger(ib_stream, " ");
+		ib_log(state, " ");
 		if (prtype == DATA_ROW_ID) {
-			ib_logger(ib_stream, "DATA_ROW_ID");
+			ib_log(state, "DATA_ROW_ID");
 			len = DATA_ROW_ID_LEN;
 		} else if (prtype == DATA_ROLL_PTR) {
-			ib_logger(ib_stream, "DATA_ROLL_PTR");
+			ib_log(state, "DATA_ROLL_PTR");
 			len = DATA_ROLL_PTR_LEN;
 		} else if (prtype == DATA_TRX_ID) {
-			ib_logger(ib_stream, "DATA_TRX_ID");
+			ib_log(state, "DATA_TRX_ID");
 			len = DATA_TRX_ID_LEN;
 		} else if (prtype == DATA_ENGLISH) {
-			ib_logger(ib_stream, "DATA_ENGLISH");
+			ib_log(state, "DATA_ENGLISH");
 		} else {
-			ib_logger(ib_stream, "prtype %lu", (ulong) prtype);
+			ib_log(state, "prtype %lu", (ulong) prtype);
 		}
 	} else {
 		if (prtype & DATA_UNSIGNED) {
-			ib_logger(ib_stream, " DATA_UNSIGNED");
+			ib_log(state, " DATA_UNSIGNED");
 		}
 
 		if (prtype & DATA_BINARY_TYPE) {
-			ib_logger(ib_stream, " DATA_BINARY_TYPE");
+			ib_log(state, " DATA_BINARY_TYPE");
 		}
 
 		if (prtype & DATA_NOT_NULL) {
-			ib_logger(ib_stream, " DATA_NOT_NULL");
+			ib_log(state, " DATA_NOT_NULL");
 		}
 	}
 
-	ib_logger(ib_stream, " len %lu", (ulong) len);
+	ib_log(state, " len %lu", (ulong) len);
 }
 #endif /* !IB_HOTBACKUP */

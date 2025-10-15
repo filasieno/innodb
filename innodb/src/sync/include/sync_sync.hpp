@@ -177,14 +177,14 @@ IB_INTERN
 void
 sync_print_wait_info(
 /*=================*/
-	ib_stream_t	ib_stream);	/*!< in: stream where to print */
+	ib_stream_t	state->stream);	/*!< in: stream where to print */
 /*******************************************************************//**
 Prints info of the sync system. */
 IB_INTERN
 void
 sync_print(
 /*=======*/
-	ib_stream_t	ib_stream);	/*!< in: stream where to print */
+	ib_stream_t	state->stream);	/*!< in: stream where to print */
 #ifdef IB_DEBUG
 /******************************************************************//**
 Checks that the mutex has been initialized.

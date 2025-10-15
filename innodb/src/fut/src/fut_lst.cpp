@@ -521,7 +521,7 @@ flst_print(
 
 	len = flst_get_len(base, mtr);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"FILE-BASED LIST:\n"
 		"Base node in space %lu page %lu byte offset %lu; len %lu\n",
 		(ulong) page_get_space_id(frame),

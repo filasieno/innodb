@@ -75,7 +75,7 @@ que_thr_t *open_step(que_thr_t *thr)
 
     if (IB_EXPECT(err, DB_SUCCESS) != DB_SUCCESS) {
         // SQL error detected
-        ib_logger(ib_stream, "SQL error %lu\n", (ulong)err);
+        ib_log(state, "SQL error %lu\n", (ulong)err);
 
         UT_ERROR;
     }

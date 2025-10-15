@@ -467,17 +467,17 @@ row_undo_mod_del_unmark_sec_and_undo_update(
 
 	if (IB_UNLIKELY(!row_search_index_entry(index, entry,
 						  mode, &pcur, &mtr))) {
-		ib_logger(ib_stream,
+		ib_log(state,
 		      "InnoDB: error in sec index entry del undo in\n"
 		      "InnoDB: ");
-		dict_index_name_print(ib_stream, trx, index);
-		ib_logger(ib_stream, "\nInnoDB: tuple ");
-		dtuple_print(ib_stream, entry);
-		ib_logger(ib_stream, "\nInnoDB: record ");
-		rec_print(ib_stream, btr_pcur_get_rec(&pcur), index);
-		ib_logger(ib_stream,"\n", ib_stream);
-		trx_print(ib_stream, trx, 0);
-		ib_logger(ib_stream, "\n"
+		dict_index_name_print(state->stream, trx, index);
+		ib_log(state, "\nInnoDB: tuple ");
+		dtuple_print(state->stream, entry);
+		ib_log(state, "\nInnoDB: record ");
+		rec_print(state->stream, btr_pcur_get_rec(&pcur), index);
+		ib_log(state,"\n", state->stream);
+		trx_print(state->stream, trx, 0);
+		ib_log(state, "\n"
 		      "InnoDB: Submit a detailed bug report, check the "
 		      "InnoDB website for details");
 	} else {

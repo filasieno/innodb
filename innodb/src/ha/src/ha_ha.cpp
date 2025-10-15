@@ -377,8 +377,8 @@ ha_validate(
 
 		while (node) {
 			if (hash_calc_hash(node->fold, table) != i) {
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"InnoDB: Error: hash table node"
 					" fold value %lu does not\n"
 					"InnoDB: match the cell number %lu.\n",
@@ -400,7 +400,7 @@ IB_INTERN
 void
 ha_print_info(
 /*==========*/
-	ib_stream_t	ib_stream,	/*!< in: file where to print */
+	ib_stream_t	state->stream,	/*!< in: file where to print */
 	hash_table_t*	table)		/*!< in: hash table */
 {
 #ifdef PRINT_USED_CELLS
@@ -425,11 +425,11 @@ ha_print_info(
 	}
 #endif /* PRINT_USED_CELLS */
 
-	ib_logger(ib_stream, "Hash table size %lu",
+	ib_log(state, "Hash table size %lu",
 		(ulong) hash_get_n_cells(table));
 
 #ifdef PRINT_USED_CELLS
-	ib_logger(ib_stream, ", used cells %lu", (ulong) cells);
+	ib_log(state, ", used cells %lu", (ulong) cells);
 #endif /* PRINT_USED_CELLS */
 
 	if (table->heaps == NULL && table->heap != NULL) {
@@ -443,7 +443,7 @@ ha_print_info(
 			n_bufs++;
 		}
 
-		ib_logger(ib_stream, ", node heap has %lu buffer(s)\n",
+		ib_log(state, ", node heap has %lu buffer(s)\n",
 			(ulong) n_bufs);
 	}
 }

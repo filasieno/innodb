@@ -384,7 +384,7 @@ IB_INTERN
 void
 dtuple_print(
 /*=========*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const dtuple_t*	tuple);		/*!< in: tuple */
 /**************************************************************//**
 Moves parts of long fields in entry to the big record vector so that

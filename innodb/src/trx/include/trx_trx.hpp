@@ -308,7 +308,7 @@ IB_INTERN
 void
 trx_print(
 /*======*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	trx_t*		trx,		/*!< in: transaction */
 	ulint		max_query_len);	/*!< in: max query length to print, or
 					0 to use the default max length */

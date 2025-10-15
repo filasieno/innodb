@@ -131,7 +131,7 @@ IB_INTERN
 void
 sync_array_print_info(
 /*==================*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	sync_array_t*	arr);		/*!< in: wait array */
 
 

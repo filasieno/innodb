@@ -166,7 +166,7 @@ dfield_check_typed_no_assert(
 	if (dfield_get_type(field)->mtype > DATA_CLIENT
 	    || dfield_get_type(field)->mtype < DATA_VARCHAR) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: data field type %lu, len %lu\n",
 			(ulong) dfield_get_type(field)->mtype,
 			(ulong) dfield_get_len(field));
@@ -189,13 +189,13 @@ dtuple_check_typed_no_assert(
 	ulint		i;
 
 	if (dtuple_get_n_fields(tuple) > REC_MAX_N_FIELDS) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: index entry has %lu fields\n",
 			(ulong) dtuple_get_n_fields(tuple));
 dump:
-		ib_logger(ib_stream, "InnoDB: Tuple contents: ");
-		dtuple_print(ib_stream, tuple);
-		ib_logger(ib_stream,"\n");
+		ib_log(state, "InnoDB: Tuple contents: ");
+		dtuple_print(state->stream, tuple);
+		ib_log(state,"\n");
 
 		return(FALSE);
 	}
@@ -226,7 +226,7 @@ dfield_check_typed(
 	if (dfield_get_type(field)->mtype > DATA_CLIENT
 	    || dfield_get_type(field)->mtype < DATA_VARCHAR) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: data field type %lu, len %lu\n",
 			(ulong) dfield_get_type(field)->mtype,
 			(ulong) dfield_get_len(field));
@@ -328,7 +328,7 @@ dfield_print(
 	data = dfield_get_data(dfield);
 
 	if (dfield_is_null(dfield)) {
-		ib_logger(ib_stream, "NULL");
+		ib_log(state, "NULL");
 
 		return;
 	}
@@ -338,16 +338,16 @@ dfield_print(
 	case DATA_VARCHAR:
 		for (i = 0; i < len; i++) {
 			int	c = *data++;
-			ib_logger(ib_stream, "%c", isprint(c) ? c : ' ');
+			ib_log(state, "%c", isprint(c) ? c : ' ');
 		}
 
 		if (dfield_is_ext(dfield)) {
-			ib_logger(ib_stream, "(external)");
+			ib_log(state, "(external)");
 		}
 		break;
 	case DATA_INT:
 		ut_a(len == 4); /* only works for 32-bit integers */
-		ib_logger(ib_stream, "%d", (int)mach_read_from_4(data));
+		ib_log(state, "%d", (int)mach_read_from_4(data));
 		break;
 	default:
 		UT_ERROR;
@@ -373,7 +373,7 @@ dfield_print_also_hex(
 	data = dfield_get_data(dfield);
 
 	if (dfield_is_null(dfield)) {
-		ib_logger(ib_stream, "NULL");
+		ib_log(state, "NULL");
 
 		return;
 	}
@@ -390,9 +390,9 @@ dfield_print_also_hex(
 
 			if (!(prtype & DATA_UNSIGNED)) {
 				val &= ~0x80;
-				ib_logger(ib_stream, "%ld", (long) val);
+				ib_log(state, "%ld", (long) val);
 			} else {
-				ib_logger(ib_stream, "%lu", (ulong) val);
+				ib_log(state, "%lu", (ulong) val);
 			}
 			break;
 
@@ -401,9 +401,9 @@ dfield_print_also_hex(
 
 			if (!(prtype & DATA_UNSIGNED)) {
 				val &= ~0x8000;
-				ib_logger(ib_stream, "%ld", (long) val);
+				ib_log(state, "%ld", (long) val);
 			} else {
-				ib_logger(ib_stream, "%lu", (ulong) val);
+				ib_log(state, "%lu", (ulong) val);
 			}
 			break;
 
@@ -412,9 +412,9 @@ dfield_print_also_hex(
 
 			if (!(prtype & DATA_UNSIGNED)) {
 				val &= ~0x800000;
-				ib_logger(ib_stream, "%ld", (long) val);
+				ib_log(state, "%ld", (long) val);
 			} else {
-				ib_logger(ib_stream, "%lu", (ulong) val);
+				ib_log(state, "%lu", (ulong) val);
 			}
 			break;
 
@@ -423,28 +423,28 @@ dfield_print_also_hex(
 
 			if (!(prtype & DATA_UNSIGNED)) {
 				val &= ~0x80000000;
-				ib_logger(ib_stream, "%ld", (long) val);
+				ib_log(state, "%ld", (long) val);
 			} else {
-				ib_logger(ib_stream, "%lu", (ulong) val);
+				ib_log(state, "%lu", (ulong) val);
 			}
 			break;
 
 		case 6:
 			id = mach_read_from_6(data);
-			ib_logger(ib_stream, "{%lu %lu}",
+			ib_log(state, "{%lu %lu}",
 				ut_dulint_get_high(id),
 				ut_dulint_get_low(id));
 			break;
 
 		case 7:
 			id = mach_read_from_7(data);
-			ib_logger(ib_stream, "{%lu %lu}",
+			ib_log(state, "{%lu %lu}",
 				ut_dulint_get_high(id),
 				ut_dulint_get_low(id));
 			break;
 		case 8:
 			id = mach_read_from_8(data);
-			ib_logger(ib_stream, "{%lu %lu}",
+			ib_log(state, "{%lu %lu}",
 				ut_dulint_get_high(id),
 				ut_dulint_get_low(id));
 			break;
@@ -458,28 +458,28 @@ dfield_print_also_hex(
 		case DATA_TRX_ID:
 			id = mach_read_from_6(data);
 
-			ib_logger(ib_stream, "trx_id " TRX_ID_FMT,
+			ib_log(state, "trx_id " TRX_ID_FMT,
 				TRX_ID_PREP_PRINTF(id));
 			break;
 
 		case DATA_ROLL_PTR:
 			id = mach_read_from_7(data);
 
-			ib_logger(ib_stream, "roll_ptr {%lu %lu}",
+			ib_log(state, "roll_ptr {%lu %lu}",
 				ut_dulint_get_high(id), ut_dulint_get_low(id));
 			break;
 
 		case DATA_ROW_ID:
 			id = mach_read_from_6(data);
 
-			ib_logger(ib_stream, "row_id {%lu %lu}",
+			ib_log(state, "row_id {%lu %lu}",
 				ut_dulint_get_high(id), ut_dulint_get_low(id));
 			break;
 
 		default:
 			id = mach_dulint_read_compressed(data);
 
-			ib_logger(ib_stream, "mix_id {%lu %lu}",
+			ib_log(state, "mix_id {%lu %lu}",
 				ut_dulint_get_high(id), ut_dulint_get_low(id));
 		}
 		break;
@@ -494,15 +494,15 @@ dfield_print_also_hex(
 			if (!isprint(c)) {
 				print_also_hex = TRUE;
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"\\x%02x", (unsigned char) c);
 			} else {
-				ib_logger(ib_stream,"%c", c);
+				ib_log(state,"%c", c);
 			}
 		}
 
 		if (dfield_is_ext(dfield)) {
-			ib_logger(ib_stream, "(external)");
+			ib_log(state, "(external)");
 		}
 
 		if (!print_also_hex) {
@@ -515,14 +515,14 @@ dfield_print_also_hex(
 	case DATA_BINARY:
 	default:
 print_hex:
-		ib_logger(ib_stream, " Hex: ");
+		ib_log(state, " Hex: ");
 
 		for (i = 0; i < len; i++) {
-			ib_logger(ib_stream, "%02lx", (ulint) *data++);
+			ib_log(state, "%02lx", (ulint) *data++);
 		}
 
 		if (dfield_is_ext(dfield)) {
-			ib_logger(ib_stream, "(external)");
+			ib_log(state, "(external)");
 		}
 	}
 }
@@ -533,20 +533,20 @@ static
 void
 dfield_print_raw(
 /*=============*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const dfield_t*	dfield)		/*!< in: dfield */
 {
 	ulint	len	= dfield_get_len(dfield);
 	if (!dfield_is_null(dfield)) {
 		ulint	print_len = ut_min(len, 1000);
-		ut_print_buf(ib_stream, dfield_get_data(dfield), print_len);
+		ut_print_buf(state->stream, dfield_get_data(dfield), print_len);
 		if (len != print_len) {
-			ib_logger(ib_stream, "(total %lu bytes%s)",
+			ib_log(state, "(total %lu bytes%s)",
 				(ulong) len,
 				dfield_is_ext(dfield) ? ", external" : "");
 		}
 	} else {
-		ib_logger(ib_stream, " SQL NULL");
+		ib_log(state, " SQL NULL");
 	}
 }
 
@@ -556,7 +556,7 @@ IB_INTERN
 void
 dtuple_print(
 /*=========*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const dtuple_t*	tuple)		/*!< in: tuple */
 {
 	ulint		n_fields;
@@ -564,14 +564,14 @@ dtuple_print(
 
 	n_fields = dtuple_get_n_fields(tuple);
 
-	ib_logger(ib_stream, "DATA TUPLE: %lu fields;\n", (ulong) n_fields);
+	ib_log(state, "DATA TUPLE: %lu fields;\n", (ulong) n_fields);
 
 	for (i = 0; i < n_fields; i++) {
-		ib_logger(ib_stream, " %lu:", (ulong) i);
+		ib_log(state, " %lu:", (ulong) i);
 
-		dfield_print_raw(ib_stream, dtuple_get_nth_field(tuple, i));
+		dfield_print_raw(state->stream, dtuple_get_nth_field(tuple, i));
 
-		ib_logger(ib_stream, ";\n");
+		ib_log(state, ";\n");
 	}
 
 	ut_ad(dtuple_validate(tuple));
@@ -620,12 +620,12 @@ dtuple_convert_big_rec(
 	size = rec_get_converted_size(index, entry, *n_ext);
 
 	if (IB_UNLIKELY(size > 1000000000)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Warning: tuple size very big: %lu\n",
 			(ulong) size);
-		ib_logger(ib_stream, "InnoDB: Tuple contents: ");
-		dtuple_print(ib_stream, entry);
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "InnoDB: Tuple contents: ");
+		dtuple_print(state->stream, entry);
+		ib_log(state, "\n");
 	}
 
 	heap = mem_heap_create(size + dtuple_get_n_fields(entry)

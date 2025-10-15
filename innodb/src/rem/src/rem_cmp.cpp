@@ -251,8 +251,8 @@ cmp_whole_field(
 	case DATA_BLOB:
 		if (prtype & DATA_BINARY_TYPE) {
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Error: comparing a binary BLOB"
 				" with a character set sensitive\n"
 				"InnoDB: comparison!\n");
@@ -293,7 +293,7 @@ cmp_whole_field(
 			&ib_col_meta, a, a_length, b, b_length));
 	}
 	default:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: unknown type number %lu\n",
 			(ulong) mtype);
 		UT_ERROR;

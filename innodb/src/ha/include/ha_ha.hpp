@@ -202,7 +202,7 @@ IB_INTERN
 void
 ha_print_info(
 /*==========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	hash_table_t*	table);		/*!< in: hash table */
 #endif /* !IB_HOTBACKUP */
 

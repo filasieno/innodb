@@ -170,13 +170,13 @@ test_ha_storage()
 
 		if (p != stored[i]) {
 
-			ib_logger(ib_stream, "ha_storage_put() returned %p "
+			ib_log(state, "ha_storage_put() returned %p "
 				"instead of %p, i=%d\n", p, stored[i], i);
 			return;
 		}
 	}
 
-	ib_logger(ib_stream, "all ok\n");
+	ib_log(state, "all ok\n");
 
 	ha_storage_free(storage);
 }

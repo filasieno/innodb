@@ -484,7 +484,7 @@ IB_INTERN
 ibool
 srv_printf_innodb_monitor(
 /*======================*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	ibool		nowait,		/*!< in: whether to wait for
 					kernel mutex */
 	ulint*		trx_start,	/*!< out: file position of the start of

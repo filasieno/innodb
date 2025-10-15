@@ -1513,7 +1513,7 @@ rec_validate_old(
 	n_fields = rec_get_n_fields_old(rec);
 
 	if ((n_fields == 0) || (n_fields > REC_MAX_N_FIELDS)) {
-		ib_logger(ib_stream, "InnoDB: Error: record has %lu fields\n",
+		ib_log(state, "InnoDB: Error: record has %lu fields\n",
 			(ulong) n_fields);
 		return(FALSE);
 	}
@@ -1522,7 +1522,7 @@ rec_validate_old(
 		data = rec_get_nth_field_old(rec, i, &len);
 
 		if (!((len < IB_PAGE_SIZE) || (len == IB_SQL_NULL))) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: record field %lu len %lu\n",
 				(ulong) i,
 				(ulong) len);
@@ -1541,7 +1541,7 @@ rec_validate_old(
 	}
 
 	if (len_sum != rec_get_data_size_old(rec)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: record len should be %lu, len %lu\n",
 			(ulong) len_sum,
 			rec_get_data_size_old(rec));
@@ -1572,7 +1572,7 @@ rec_validate(
 	n_fields = rec_offs_n_fields(offsets);
 
 	if ((n_fields == 0) || (n_fields > REC_MAX_N_FIELDS)) {
-		ib_logger(ib_stream, "InnoDB: Error: record has %lu fields\n",
+		ib_log(state, "InnoDB: Error: record has %lu fields\n",
 			(ulong) n_fields);
 		return(FALSE);
 	}
@@ -1583,7 +1583,7 @@ rec_validate(
 		data = rec_get_nth_field(rec, offsets, i, &len);
 
 		if (!((len < IB_PAGE_SIZE) || (len == IB_SQL_NULL))) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: record field %lu len %lu\n",
 				(ulong) i,
 				(ulong) len);
@@ -1602,7 +1602,7 @@ rec_validate(
 	}
 
 	if (len_sum != rec_offs_data_size(offsets)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: record len should be %lu, len %lu\n",
 			(ulong) len_sum,
 			(ulong) rec_offs_data_size(offsets));
@@ -1622,7 +1622,7 @@ IB_INTERN
 void
 rec_print_old(
 /*==========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec)		/*!< in: physical record */
 {
 	const byte*	data;
@@ -1634,7 +1634,7 @@ rec_print_old(
 
 	n = rec_get_n_fields_old(rec);
 
-	ib_logger(ib_stream, "PHYSICAL RECORD: n_fields %lu;"
+	ib_log(state, "PHYSICAL RECORD: n_fields %lu;"
 		" %u-byte offsets; info bits %lu\n",
 		(ulong) n,
 		rec_get_1byte_offs_flag(rec) ? 1 : 2,
@@ -1644,24 +1644,24 @@ rec_print_old(
 
 		data = rec_get_nth_field_old(rec, i, &len);
 
-		ib_logger(ib_stream, " %lu:", (ulong) i);
+		ib_log(state, " %lu:", (ulong) i);
 
 		if (len != IB_SQL_NULL) {
 			if (len <= 30) {
 
-				ut_print_buf(ib_stream, data, len);
+				ut_print_buf(state->stream, data, len);
 			} else {
-				ut_print_buf(ib_stream, data, 30);
+				ut_print_buf(state->stream, data, 30);
 
-				ib_logger(ib_stream, " (total %lu bytes)",
+				ib_log(state, " (total %lu bytes)",
 					(ulong) len);
 			}
 		} else {
-			ib_logger(ib_stream, " SQL NULL, size %lu ",
+			ib_log(state, " SQL NULL, size %lu ",
 				rec_get_nth_field_size(rec, i));
 		}
 
-		ib_logger(ib_stream, ";\n");
+		ib_log(state, ";\n");
 	}
 
 	rec_validate_old(rec);
@@ -1675,7 +1675,7 @@ IB_INTERN
 void
 rec_print_comp(
 /*===========*/
-	ib_stream_t	ib_stream,	/*!< in: streamwhere to print */
+	ib_stream_t	state->stream,	/*!< in: streamwhere to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	const ulint*	offsets)	/*!< in: array returned by
 					rec_get_offsets() */
@@ -1688,22 +1688,22 @@ rec_print_comp(
 
 		data = rec_get_nth_field(rec, offsets, i, &len);
 
-		ib_logger(ib_stream, " %lu:", (ulong) i);
+		ib_log(state, " %lu:", (ulong) i);
 
 		if (len != IB_SQL_NULL) {
 			if (len <= 30) {
 
-				ut_print_buf(ib_stream, data, len);
+				ut_print_buf(state->stream, data, len);
 			} else {
-				ut_print_buf(ib_stream, data, 30);
+				ut_print_buf(state->stream, data, 30);
 
-				ib_logger(ib_stream, " (total %lu bytes)",
+				ib_log(state, " (total %lu bytes)",
 					(ulong) len);
 			}
 		} else {
-			ib_logger(ib_stream, " SQL NULL");
+			ib_log(state, " SQL NULL");
 		}
-		ib_logger(ib_stream, ";\n");
+		ib_log(state, ";\n");
 	}
 }
 
@@ -1713,7 +1713,7 @@ IB_INTERN
 void
 rec_print_new(
 /*==========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	const ulint*	offsets)	/*!< in: array returned by
 					rec_get_offsets() */
@@ -1723,16 +1723,16 @@ rec_print_new(
 	ut_ad(rec_offs_validate(rec, NULL, offsets));
 
 	if (!rec_offs_comp(offsets)) {
-		rec_print_old(ib_stream, rec);
+		rec_print_old(state->stream, rec);
 		return;
 	}
 
-	ib_logger(ib_stream, "PHYSICAL RECORD: n_fields %lu;"
+	ib_log(state, "PHYSICAL RECORD: n_fields %lu;"
 		" compact format; info bits %lu\n",
 		(ulong) rec_offs_n_fields(offsets),
 		(ulong) rec_get_info_bits(rec, TRUE));
 
-	rec_print_comp(ib_stream, rec, offsets);
+	rec_print_comp(state->stream, rec, offsets);
 	rec_validate(rec, offsets);
 }
 
@@ -1742,21 +1742,21 @@ IB_INTERN
 void
 rec_print(
 /*======*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	dict_index_t*	index)		/*!< in: record descriptor */
 {
 	ut_ad(index);
 
 	if (!dict_table_is_comp(index->table)) {
-		rec_print_old(ib_stream, rec);
+		rec_print_old(state->stream, rec);
 		return;
 	} else {
 		mem_heap_t*	heap	= NULL;
 		ulint		offsets_[REC_OFFS_NORMAL_SIZE];
 		rec_offs_init(offsets_);
 
-		rec_print_new(ib_stream, rec,
+		rec_print_new(state->stream, rec,
 			      rec_get_offsets(rec, index, offsets_,
 					      ULINT_UNDEFINED, &heap));
 		if (IB_LIKELY_NULL(heap)) {

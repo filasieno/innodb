@@ -31,8 +31,6 @@ IB_INTERN const dulint ut_dulint_zero = { 0, 0 };
 ///
 IB_INTERN const dulint ut_dulint_max = { 0xFFFFFFFFUL, 0xFFFFFFFFUL };
 
-
-
 #ifdef notdefined /* unused code */
 
 #include "ut_sort.hpp"

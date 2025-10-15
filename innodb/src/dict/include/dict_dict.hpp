@@ -471,7 +471,7 @@ dict_print_info_on_foreign_keys(
 					a format suitable to be inserted into
 					a CREATE TABLE, otherwise in the format
 					of SHOW TABLE STATUS */
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	trx_t*		trx,		/*!< in: transaction */
 	dict_table_t*	table);		/*!< in: table */
 /**********************************************************************//**

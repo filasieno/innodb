@@ -157,7 +157,7 @@ mlog_write_initial_log_record_fast(
 			anything for the doublewrite buffer pages. */
 			return(log_ptr);
 		} else {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Error: trying to redo log a record of type "
 				"%d on page %lu of space %lu in the "
 				"doublewrite buffer, continuing anyway.\n"
@@ -175,7 +175,7 @@ mlog_write_initial_log_record_fast(
 	mtr->n_log_recs++;
 
 #ifdef IB_LOG_DEBUG
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Adding to mtr log record type %lu space %lu page no %lu\n",
 		(ulong) type, space, offset);
 #endif

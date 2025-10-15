@@ -330,8 +330,8 @@ ibool mtr_memo_contains_page(mtr_t *mtr, const byte *ptr, ulint type)
 IB_INTERN
 void mtr_print(mtr_t *mtr)
 {
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"Mini-transaction handle: memo size %lu bytes"
 		" log size %lu bytes\n",
 		(ulong)dyn_array_get_data_size(&(mtr->memo)),

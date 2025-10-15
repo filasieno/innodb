@@ -1126,7 +1126,7 @@ Set to true if it's a simple select.
 @ingroup sql
 @param[in, out] ib_crsr is the cursor to update */
 
-HAILDB_API void ib_cursor_set_simple_select(ib_crsr_t	ib_crsr);
+HAILDB_API void ib_cursor_set_simple_select(ib_crsr_t ib_crsr);
 
 /*****************************************************************//**
 Set index as a unique index.

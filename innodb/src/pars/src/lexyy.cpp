@@ -1981,7 +1981,7 @@ case 118:
 YY_RULE_SETUP
 #line 672 "pars0lex.l"
 {
-			ib_logger(ib_stream,"Unrecognized character: %02x\n",
+			ib_log(state,"Unrecognized character: %02x\n",
 				*yytext);
 
 			UT_ERROR;
@@ -2670,7 +2670,7 @@ static void yyensure_buffer_stack (void)
 
 static void yy_fatal_error (yyconst char* msg )
 {
-    	(void) ib_logger(ib_stream, "%s\n", msg );
+    	(void) ib_log(state, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 

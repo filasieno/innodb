@@ -553,7 +553,7 @@ IB_INTERN
 void
 log_print(
 /*======*/
-	ib_stream_t	ib_stream);	/*!< in: stream where to print */
+	ib_stream_t	state->stream);	/*!< in: stream where to print */
 /******************************************************//**
 Peeks the current lsn.
 @return	TRUE if success, FALSE if could not get the log system mutex */

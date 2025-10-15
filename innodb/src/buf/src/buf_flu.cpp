@@ -334,13 +334,13 @@ buf_flush_ready_for_replace(
 		       && bpage->buf_fix_count == 0);
 	}
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: Error: buffer block state %lu"
 		" in the LRU list!\n",
 		(ulong) buf_page_get_state(bpage));
-	ut_print_buf(ib_stream, bpage, sizeof(buf_page_t));
-	ib_logger(ib_stream, "\n");
+	ut_print_buf(state->stream, bpage, sizeof(buf_page_t));
+	ib_log(state, "\n");
 
 	return(FALSE);
 }
@@ -512,7 +512,7 @@ buf_flush_write_complete(
 		buf_pool->LRU_flush_ended++;
 	}
 
-	/* ib_logger(ib_stream, "n pending flush %lu\n",
+	/* ib_log(state, "n pending flush %lu\n",
 	buf_pool->n_flush[flush_type]); */
 
 	if ((buf_pool->n_flush[flush_type] == 0)
@@ -599,8 +599,8 @@ buf_flush_buffered_writes(void)
 			    block->frame + (IB_PAGE_SIZE
 					    - FIL_PAGE_END_LSN_OLD_CHKSUM + 4),
 			    4))) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: ERROR: The page to be written"
 				" seems corrupt!\n"
 				"InnoDB: The lsn fields do not match!"
@@ -616,8 +616,8 @@ buf_flush_buffered_writes(void)
 corrupted_page:
 				buf_page_print(block->frame, 0);
 
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"  InnoDB: Apparent corruption of an"
 					" index page n:o %lu in space %lu\n"
 					"InnoDB: to be written to data file."
@@ -665,8 +665,8 @@ corrupted_page:
 			    write_buf + len2
 			    + (IB_PAGE_SIZE
 			       - FIL_PAGE_END_LSN_OLD_CHKSUM + 4), 4))) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: ERROR: The page to be written"
 				" seems corrupt!\n"
 				"InnoDB: The lsn fields do not match!"
@@ -703,8 +703,8 @@ corrupted_page:
 			    write_buf + len2
 			    + (IB_PAGE_SIZE
 			       - FIL_PAGE_END_LSN_OLD_CHKSUM + 4), 4))) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: ERROR: The page to be"
 				" written seems corrupt!\n"
 				"InnoDB: The lsn fields do not match!"
@@ -750,8 +750,8 @@ flush:
 					 + (IB_PAGE_SIZE
 					    - FIL_PAGE_END_LSN_OLD_CHKSUM + 4),
 					 4))) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: ERROR: The page to be written"
 				" seems corrupt!\n"
 				"InnoDB: The lsn fields do not match!"
@@ -889,15 +889,15 @@ buf_flush_init_for_writing(
 			return;
 		}
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: ERROR: The compressed page to be written"
 			" seems corrupt:");
-		ut_print_buf(ib_stream, page, zip_size);
-		ib_logger(ib_stream,
+		ut_print_buf(state->stream, page, zip_size);
+		ib_log(state,
 			"\nInnoDB: Possibly older version of the page:");
-		ut_print_buf(ib_stream, page_zip->data, zip_size);
-		ib_logger(ib_stream, "\n");
+		ut_print_buf(state->stream, page_zip->data, zip_size);
+		ib_log(state, "\n");
 		UT_ERROR;
 	}
 
@@ -962,7 +962,7 @@ buf_flush_write_block_low(
 #ifdef IB_LOG_DEBUG
 	if (!univ_log_debug_warned) {
 		univ_log_debug_warned = TRUE;
-		ib_logger(ib_stream, "Warning: cannot force log to disk if"
+		ib_log(state, "Warning: cannot force log to disk if"
 		      " IB_LOG_DEBUG is defined!\n"
 		      "Crash recovery will not work!\n");
 	}
@@ -1118,7 +1118,7 @@ buf_flush_page(
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Flushing %u space %u page %u\n",
 			flush_type, bpage->space, bpage->offset);
 	}
@@ -1162,7 +1162,7 @@ buf_flush_try_neighbors(
 		high = (offset / buf_flush_area + 1) * buf_flush_area;
 	}
 
-	/* ib_logger(ib_stream, "Flush area: low %lu high %lu\n", low, high); */
+	/* ib_log(state, "Flush area: low %lu high %lu\n", low, high); */
 
 	if (high > fil_space_get_size(space)) {
 		high = fil_space_get_size(space);
@@ -1321,7 +1321,7 @@ flush_next:
 				/* Try to flush also all the neighbors */
 				page_count += buf_flush_try_neighbors(
 					space, offset, flush_type);
-				/* ib_logger(ib_stream,
+				/* ib_log(state,
 				"Flush type %lu, page no %lu, neighb %lu\n",
 				flush_type, offset,
 				page_count - old_page_count); */
@@ -1361,7 +1361,7 @@ flush_next:
 	if (buf_debug_prints && page_count > 0) {
 		ut_a(flush_type == BUF_FLUSH_LRU
 		     || flush_type == BUF_FLUSH_LIST);
-		ib_logger(ib_stream, flush_type == BUF_FLUSH_LRU
+		ib_log(state, flush_type == BUF_FLUSH_LRU
 			? "Flushed %lu pages in LRU flush\n"
 			: "Flushed %lu pages in flush list flush\n",
 			(ulong) page_count);

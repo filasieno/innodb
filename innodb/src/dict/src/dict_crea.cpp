@@ -763,8 +763,8 @@ dict_truncate_index_tree(
 	if (drop && root_page_no == FIL_NULL) {
 		/* The tree has been freed. */
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Trying to TRUNCATE"
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Trying to TRUNCATE"
 			" a missing index of table %s!\n", table->name);
 		drop = FALSE;
 	}
@@ -784,8 +784,8 @@ dict_truncate_index_tree(
 		/* It is a single table tablespace and the .ibd file is
 		missing: do nothing */
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Trying to TRUNCATE"
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Trying to TRUNCATE"
 			" a missing .ibd file of table %s!\n", table->name);
 		return(FIL_NULL);
 	}
@@ -846,8 +846,8 @@ create:
 		}
 	}
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: Index %lu %lu of table %s is missing\n"
 		"InnoDB: from the data dictionary during TRUNCATE!\n",
 		ut_dulint_get_high(index_id),
@@ -1229,7 +1229,7 @@ dict_create_or_check_foreign_constraint_tables(void)
 	dict_lock_data_dictionary(trx);
 
 	if (table1) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: dropping incompletely created"
 			" SYS_FOREIGN table\n");
 		ddl_drop_table("SYS_FOREIGN", trx, TRUE);
@@ -1237,7 +1237,7 @@ dict_create_or_check_foreign_constraint_tables(void)
 	}
 
 	if (table2) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: dropping incompletely created"
 			" SYS_FOREIGN_COLS table\n");
 		ddl_drop_table("SYS_FOREIGN_COLS", trx, TRUE);
@@ -1247,7 +1247,7 @@ dict_create_or_check_foreign_constraint_tables(void)
 
 	trx_start_if_not_started(trx);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"InnoDB: Creating foreign key constraint system tables\n");
 
 	/* NOTE: in dict_load_foreigns we use the fact that
@@ -1281,13 +1281,13 @@ dict_create_or_check_foreign_constraint_tables(void)
 			     , FALSE, trx);
 
 	if (error != DB_SUCCESS) {
-		ib_logger(ib_stream, "InnoDB: error %lu in creation\n",
+		ib_log(state, "InnoDB: error %lu in creation\n",
 			(ulong) error);
 
 		ut_a(error == DB_OUT_OF_FILE_SPACE
 		     || error == DB_TOO_MANY_CONCURRENT_TRXS);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: creation failed\n"
 			"InnoDB: tablespace is full\n"
 			"InnoDB: dropping incompletely created"
@@ -1308,7 +1308,7 @@ dict_create_or_check_foreign_constraint_tables(void)
 	trx_free_for_client(trx);
 
 	if (error == DB_SUCCESS) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Foreign key constraint system tables"
 			" created\n");
 	}
@@ -1337,13 +1337,13 @@ dict_foreign_eval_sql(
 
 	if (error == DB_DUPLICATE_KEY) {
 		mutex_enter(&dict_foreign_err_mutex);
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			" Error in foreign key constraint creation for table ");
-		ut_print_name(ib_stream, trx, TRUE, table->name);
-		ib_logger(ib_stream, ".\nA foreign key constraint of name ");
-		ut_print_name(ib_stream, trx, TRUE, foreign->id);
-		ib_logger(ib_stream,
+		ut_print_name(state->stream, trx, TRUE, table->name);
+		ib_log(state, ".\nA foreign key constraint of name ");
+		ut_print_name(state->stream, trx, TRUE, foreign->id);
+		ib_log(state,
 		      "\nalready exists."
 		      " (Note that internally InnoDB adds 'databasename'\n"
 		      "in front of the user-defined constraint name.)\n"
@@ -1361,17 +1361,17 @@ dict_foreign_eval_sql(
 	}
 
 	if (error != DB_SUCCESS) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Foreign key constraint creation failed:\n"
 			"InnoDB: internal error number %lu\n", (ulong) error);
 
 		mutex_enter(&dict_foreign_err_mutex);
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			" Internal error in foreign key constraint creation"
 			" for table ");
-		ut_print_name(ib_stream, trx, TRUE, table->name);
-		ib_logger(ib_stream, ".\n"
+		ut_print_name(state->stream, trx, TRUE, table->name);
+		ib_log(state, ".\n"
 		      "See the .err log in the datadir for more "
 		      "information.\n");
 		mutex_exit(&dict_foreign_err_mutex);
@@ -1517,7 +1517,7 @@ dict_create_add_foreigns_to_dictionary(
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
 	if (NULL == dict_table_get_low("SYS_FOREIGN")) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: table SYS_FOREIGN not found"
 			" in internal data dictionary\n");
 

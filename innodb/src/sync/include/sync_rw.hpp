@@ -452,7 +452,7 @@ IB_INTERN
 void
 rw_lock_list_print_info(
 /*====================*/
-	ib_stream_t	ib_stream);	/*!< in: stream where to print */
+	ib_stream_t	state->stream);	/*!< in: stream where to print */
 /***************************************************************//**
 Returns the number of currently locked rw-locks.
 Works only in the debug version.

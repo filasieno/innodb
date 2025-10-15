@@ -198,7 +198,7 @@ ibuf_count_check(
 		return;
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"InnoDB: IB_IBUF_COUNT_DEBUG limits space_id and page_no\n"
 		"InnoDB: and breaks crash recovery.\n"
 		"InnoDB: space_id=%lu, should be 0<=space_id<%lu\n"
@@ -816,7 +816,7 @@ ibuf_set_free_bits_low(
 	bitmap_page = ibuf_bitmap_get_map_page(space, page_no, zip_size, mtr);
 #ifdef IB_IBUF_DEBUG
 # if 0
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Setting space %lu page %lu free bits to %lu should be %lu\n",
 		space, page_no, val,
 		ibuf_index_page_calc_free(zip_size, block));
@@ -876,7 +876,7 @@ ibuf_set_free_bits_func(
 			IBUF_BITMAP_FREE, &mtr);
 # if 0
 		if (old_val != max_val) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Ibuf: page %lu old val %lu max val %lu\n",
 				page_get_page_no(page),
 				old_val, max_val);
@@ -886,7 +886,7 @@ ibuf_set_free_bits_func(
 		ut_a(old_val <= max_val);
 	}
 # if 0
-	ib_logger(ib_stream, "Setting page no %lu free bits to %lu should be %lu\n",
+	ib_log(state, "Setting page no %lu free bits to %lu should be %lu\n",
 		page_get_page_no(page), val,
 		ibuf_index_page_calc_free(zip_size, block));
 # endif
@@ -2165,7 +2165,7 @@ ibuf_get_merge_page_nos(
 	ut_a(*n_stored <= IBUF_MAX_N_PAGES_MERGED);
 #endif
 #if 0
-	ib_logger(ib_stream, "Ibuf merge batch %lu pages %lu volume\n",
+	ib_log(state, "Ibuf merge batch %lu pages %lu volume\n",
 		*n_stored, sum_volumes);
 #endif
 	return(sum_volumes);
@@ -2237,7 +2237,7 @@ ibuf_is_empty:
 					    space_ids, space_versions,
 					    page_nos, &n_stored);
 #if 0 /* defined IB_IBUF_DEBUG */
-	ib_logger(ib_stream, "Ibuf contract sync %lu pages %lu volume %lu\n",
+	ib_log(state, "Ibuf contract sync %lu pages %lu volume %lu\n",
 		sync, n_stored, sum_sizes);
 #endif
 	ibuf_exit();
@@ -2633,7 +2633,7 @@ ibuf_insert_low(
 		mutex_exit(&ibuf_mutex);
 
 #ifdef IB_IBUF_DEBUG
-		ib_logger(ib_stream, "Ibuf too big\n");
+		ib_log(state, "Ibuf too big\n");
 #endif
 		/* Use synchronous contract (== TRUE) */
 		ibuf_contract(TRUE);
@@ -2785,7 +2785,7 @@ ibuf_insert_low(
 function_exit:
 #ifdef IB_IBUF_COUNT_DEBUG
 	if (err == DB_SUCCESS) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Incrementing ibuf count of space %lu page %lu\n"
 			"from %lu by 1\n", space, page_no,
 			ibuf_count_get(space, page_no));
@@ -2884,7 +2884,7 @@ do_insert:
 
 	if (err == DB_SUCCESS) {
 #ifdef IB_IBUF_DEBUG
-		/* ib_logger(ib_stream,
+		/* ib_log(state,
 			"Ibuf insert for page no %lu of index %s\n",
 			page_no, index->name); */
 #endif
@@ -2922,7 +2922,7 @@ ibuf_insert_to_index_page(
 
 	if (IB_UNLIKELY(dict_table_is_comp(index->table)
 			  != (ibool)!!page_is_comp(page))) {
-		ib_logger(ib_stream, "InnoDB: Trying to insert a record from"
+		ib_log(state, "InnoDB: Trying to insert a record from"
 		      " the insert buffer to an index page\n"
 		      "InnoDB: but the 'compact' flag does not match!\n");
 		goto dump;
@@ -2932,15 +2932,15 @@ ibuf_insert_to_index_page(
 
 	if (IB_UNLIKELY(rec_get_n_fields(rec, index)
 			  != dtuple_get_n_fields(entry))) {
-		ib_logger(ib_stream, "InnoDB: Trying to insert a record from"
+		ib_log(state, "InnoDB: Trying to insert a record from"
 		      " the insert buffer to an index page\n"
 		      "InnoDB: but the number of fields does not match!\n");
 dump:
 		buf_page_print(page, 0);
 
-		dtuple_print(ib_stream, entry);
+		dtuple_print(state->stream, entry);
 
-		ib_logger(ib_stream, "InnoDB: The table where where"
+		ib_log(state, "InnoDB: The table where where"
 		      " this index record belongs\n"
 		      "InnoDB: is now probably corrupt."
 		      " Please run CHECK TABLE on\n"
@@ -2981,9 +2981,9 @@ dump:
 			ulint	page_no;
 			ulint	zip_size;
 
-			ut_print_timestamp(ib_stream);
+			ut_print_timestamp(state->stream);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"  InnoDB: Error: Insert buffer insert"
 				" fails; page free %lu,"
 				" dtuple size %lu\n",
@@ -2991,10 +2991,10 @@ dump:
 					page, 1),
 				(ulong) rec_get_converted_size(
 					index, entry, 0));
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Cannot insert index record ");
-			dtuple_print(ib_stream, entry);
-			ib_logger(ib_stream, "\nInnoDB: The table where"
+			dtuple_print(state->stream, entry);
+			ib_log(state, "\nInnoDB: The table where"
 			      " this index record belongs\n"
 			      "InnoDB: is now probably corrupt."
 			      " Please run CHECK TABLE on\n"
@@ -3010,13 +3010,13 @@ dump:
 				bitmap_page, page_no, zip_size,
 				IBUF_BITMAP_FREE, mtr);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: space %lu, page %lu,"
 				" zip_size %lu, bitmap bits %lu\n",
 				(ulong) space, (ulong) page_no,
 				(ulong) zip_size, (ulong) old_bits);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Submit a detailed bug report, check"
 				"the InnoDB website for details");
 		}
@@ -3054,7 +3054,7 @@ ibuf_delete_rec(
 
 	if (success) {
 #ifdef IB_IBUF_COUNT_DEBUG
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Decrementing ibuf count of space %lu page %lu\n"
 			"from %lu by 1\n", space, page_no,
 			ibuf_count_get(space, page_no));
@@ -3087,29 +3087,29 @@ ibuf_delete_rec(
 			goto commit_and_exit;
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: ERROR: Submit the output to InnoDB."
 			"Check the InnoDB website for details.\n"
 			"InnoDB: ibuf cursor restoration fails!\n"
 			"InnoDB: ibuf record inserted to page %lu\n",
 			(ulong) page_no);
 
-		rec_print_old(ib_stream, btr_pcur_get_rec(pcur));
-		rec_print_old(ib_stream, pcur->old_rec);
-		dtuple_print(ib_stream, search_tuple);
+		rec_print_old(state->stream, btr_pcur_get_rec(pcur));
+		rec_print_old(state->stream, pcur->old_rec);
+		dtuple_print(state->stream, search_tuple);
 
-		rec_print_old(ib_stream,
+		rec_print_old(state->stream,
 			      page_rec_get_next(btr_pcur_get_rec(pcur)));
 
 		btr_pcur_commit_specify_mtr(pcur, mtr);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Validating insert buffer tree:\n");
 		if (!btr_validate_index(ibuf->index, NULL)) {
 			UT_ERROR;
 		}
 
-		ib_logger(ib_stream, "InnoDB: ibuf tree ok\n");
+		ib_log(state, "InnoDB: ibuf tree ok\n");
 
 		goto func_exit;
 	}
@@ -3276,11 +3276,11 @@ ibuf_merge_or_delete_for_page(
 
 			corruption_noticed = TRUE;
 
-			ut_print_timestamp(ib_stream);
+			ut_print_timestamp(state->stream);
 
 			mtr_start(&mtr);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"  InnoDB: Dump of the ibuf bitmap page:\n");
 
 			bitmap_page = ibuf_bitmap_get_map_page(space, page_no,
@@ -3289,11 +3289,11 @@ ibuf_merge_or_delete_for_page(
 
 			mtr_commit(&mtr);
 
-			ib_logger(ib_stream, "\nInnoDB: Dump of the page:\n");
+			ib_log(state, "\nInnoDB: Dump of the page:\n");
 
 			buf_page_print(block->frame, 0);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: corruption in the tablespace."
 				" Bitmap shows insert\n"
 				"InnoDB: buffer records to page n:o %lu"
@@ -3365,9 +3365,9 @@ loop:
 		}
 
 		if (IB_UNLIKELY(corruption_noticed)) {
-			ib_logger(ib_stream, "InnoDB: Discarding record\n ");
-			rec_print_old(ib_stream, rec);
-			ib_logger(ib_stream,
+			ib_log(state, "InnoDB: Discarding record\n ");
+			rec_print_old(state->stream, rec);
+			ib_log(state,
 				"\nInnoDB: from the insert buffer!\n\n");
 		} else if (block) {
 			/* Now we have at pcur a record which should be
@@ -3594,7 +3594,7 @@ ibuf_is_empty(void)
 		is_empty = TRUE;
 
 		if (ibuf->empty == FALSE) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Warning: insert buffer tree is empty"
 				" but the data struct does not\n"
 				"InnoDB: know it. This condition is legal"
@@ -3622,7 +3622,7 @@ IB_INTERN
 void
 ibuf_print(
 /*=======*/
-	ib_stream_t	ib_stream)	/*!< in: stream where to print */
+	ib_stream_t	state->stream)	/*!< in: stream where to print */
 {
 #ifdef IB_IBUF_COUNT_DEBUG
 	ulint		i;
@@ -3631,7 +3631,7 @@ ibuf_print(
 
 	mutex_enter(&ibuf_mutex);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Ibuf: size %lu, free list len %lu, seg size %lu,\n"
 		"%lu inserts, %lu merged recs, %lu merges\n",
 		(ulong) ibuf->size,
@@ -3646,7 +3646,7 @@ ibuf_print(
 			ulint	count = ibuf_count_get(i, j);
 
 			if (count > 0) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"Ibuf count for space/page %lu/%lu"
 					" is %lu\n",
 					(ulong) i, (ulong) j, (ulong) count);

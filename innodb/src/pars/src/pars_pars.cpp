@@ -465,7 +465,7 @@ pars_resolve_exp_variables_and_types(
 	}
 
 	if (!node) {
-		ib_logger(ib_stream, "PARSER ERROR: Unresolved identifier %s\n",
+		ib_log(state, "PARSER ERROR: Unresolved identifier %s\n",
 			sym_node->name);
 	}
 
@@ -1845,7 +1845,7 @@ pars_get_lex_chars(
 		- pars_sym_tab_global->next_char_pos;
 	if (len == 0) {
 #ifdef YYDEBUG
-		/* ib_logger(ib_stream, "SQL string ends\n"); */
+		/* ib_log(state, "SQL string ends\n"); */
 #endif
 		*result = 0;
 
@@ -1865,7 +1865,7 @@ pars_get_lex_chars(
 
 		fwrite(pars_sym_tab_global->sql_string
 		       + pars_sym_tab_global->next_char_pos,
-		       1, len, ib_stream);
+		       1, len, state->stream);
 	}
 #endif /* IB_SQL_DEBUG */
 
@@ -1887,7 +1887,7 @@ yyerror(
 {
 	ut_ad(s);
 
-	ib_logger(ib_stream, "PARSER ERROR: Syntax error in SQL string\n");
+	ib_log(state, "PARSER ERROR: Syntax error in SQL string\n");
 
 	UT_ERROR;
 }
@@ -1936,7 +1936,7 @@ pars_sql(
 	graph->sym_tab = pars_sym_tab_global;
 	graph->info = info;
 
-	/* ib_logger(ib_stream,
+	/* ib_log(state,
 	  	 "SQL graph size %lu\n", mem_heap_get_size(heap)); */
 
 	return(graph);

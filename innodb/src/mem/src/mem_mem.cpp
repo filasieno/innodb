@@ -498,7 +498,7 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 	}
 
 	if (print) {
-		ib_logger(ib_stream, "Memory heap:");
+		ib_log(state, "Memory heap:");
 	}
 
 	while (block != NULL) {
@@ -506,8 +506,8 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 
 		if ((block->type == MEM_HEAP_BUFFER) && (mem_block_get_len(block) > IB_PAGE_SIZE)) {
 
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Error: mem block %p"
 				" length %lu > IB_PAGE_SIZE\n",
 				(void *)block,
@@ -522,7 +522,7 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 		// We can trace the fields of the block only in the debug
 		// version
 		if (print) {
-			ib_logger(ib_stream, " Block %ld:", block_count);
+			ib_log(state, " Block %ld:", block_count);
 		}
 
 		field = (byte *)block + mem_block_get_start(block);
@@ -542,7 +542,7 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 			len = mem_field_header_get_len(user_field);
 
 			if (print) {
-				ut_print_buf(ib_stream, user_field, len);
+				ut_print_buf(state->stream, user_field, len);
 			}
 
 			total_len += len;
@@ -551,8 +551,8 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 			if (check_field != mem_field_trailer_get_check(user_field)) {
 				// error
 
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Error: block %lx mem"
 					" field %lx len %lu\n"
 					"InnoDB: header check field is"
@@ -582,8 +582,8 @@ void mem_heap_validate_or_print(mem_heap_t *heap, byte *top __attribute__((unuse
 		if (field != (byte *)block + mem_block_get_free(block)) {
 			// error
 
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Error: block %lx end of"
 				" mem fields %lx\n"
 				"InnoDB: but block free at %lx\n",
@@ -627,8 +627,8 @@ static void mem_heap_print(mem_heap_t *heap)
 	ut_ad(mem_heap_check(heap));
 
 	mem_heap_validate_or_print(heap, NULL, TRUE, &error, &us_size, &phys_size, &n_blocks);
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"\nheap type: %lu; size: user size %lu;"
 		" physical size %lu; blocks %lu.\n",
 		(ulong)heap->type,

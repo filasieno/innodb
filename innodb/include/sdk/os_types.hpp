@@ -26,3 +26,17 @@
 /// \date 2025-10-13
 
 #pragma once
+
+/// \brief OS state
+/// \field sync_mutex       Mutex protecting counts and the event and OS 'slow' mutex lists
+/// \field thread_count     This is incremented by 1 in os_thread_create and decremented by 1 in os_thread_exit
+/// \field event_count      Number of events created
+/// \field mutex_count      Number of OS 'slow' mutexes created
+/// \field fast_mutex_count Number of OS fast mutexes created
+struct os_state {
+    os_mutex_t sync_mutex;
+    ulint      thread_count;
+    ulint      event_count;
+    ulint      mutex_count;
+    ulint      fast_mutex_count;
+};

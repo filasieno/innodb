@@ -213,9 +213,9 @@ loop:
 		mem_free(table_name);
 
 		if (table == NULL) {
-			ib_logger(ib_stream, "InnoDB: Failed to load table ");
-			ut_print_namel(ib_stream, (char*) field, len);
-			ib_logger(ib_stream, "\n");
+			ib_log(state, "InnoDB: Failed to load table ");
+			ut_print_namel(state->stream, (char*) field, len);
+			ib_log(state, "\n");
 		} else {
 			/* The table definition was corrupt if there
 			is no index */
@@ -369,9 +369,9 @@ loop:
 			field = rec_get_nth_field_old(rec, 5, &len);
 			flags = mach_read_from_4(field);
 
-			ib_logger(ib_stream, "InnoDB: Error: Table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream,
+			ib_log(state, "InnoDB: Error: Table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state,
 				" in InnoDB data dictionary is a compressed\n"
 				"InnoDB: table (%lx). But InnoDB not compiled "
 				"with support for compressed tables.\n",
@@ -383,10 +383,10 @@ loop:
 			field = rec_get_nth_field_old(rec, 5, &len);
 			flags = mach_read_from_4(field);
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: Error: table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream, "\n"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: Error: table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state, "\n"
 				"InnoDB: in InnoDB data dictionary"
 				" has unknown type %lx.\n",
 				(ulong) flags);
@@ -764,7 +764,7 @@ dict_load_indexes(
 		subsequent checks are relevant for the supported types. */
 		if (type & ~(DICT_CLUSTERED | DICT_UNIQUE)) {
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: unknown type %lu"
 				" of index %s of table %s\n",
 				(ulong) type, name_buf, table->name);
@@ -773,7 +773,7 @@ dict_load_indexes(
 			goto func_exit;
 		} else if (page_no == FIL_NULL) {
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: trying to load index %s"
 				" for table %s\n"
 				"InnoDB: but the index tree has been freed!\n",
@@ -784,12 +784,12 @@ dict_load_indexes(
 		} else if ((type & DICT_CLUSTERED) == 0
 			    && NULL == dict_table_get_first_index(table)) {
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: trying to load index ");
-			ut_print_name(ib_stream, NULL, FALSE, name_buf);
-			ib_logger(ib_stream, " for table ");
-			ut_print_name(ib_stream, NULL, TRUE, table->name);
-			ib_logger(ib_stream, "\nInnoDB: but the first index"
+			ut_print_name(state->stream, NULL, FALSE, name_buf);
+			ib_log(state, " for table ");
+			ut_print_name(state->stream, NULL, TRUE, table->name);
+			ib_log(state, "\nInnoDB: but the first index"
 			      " is not clustered!\n");
 
 			error = DB_CORRUPTION;
@@ -920,9 +920,9 @@ err_exit:
 			field = rec_get_nth_field_old(rec, 5, &len);
 			flags = mach_read_from_4(field);
 
-			ib_logger(ib_stream, "InnoDB: Error: Table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream,
+			ib_log(state, "InnoDB: Error: Table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state,
 				" in InnoDB data dictionary is a compressed\n"
 				"InnoDB: table (%lx). But InnoDB not compiled "
 				"with support for compressed tables.\n",
@@ -935,10 +935,10 @@ err_exit:
 			field = rec_get_nth_field_old(rec, 5, &len);
 			flags = mach_read_from_4(field);
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: Error: table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream, "\n"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: Error: table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state, "\n"
 				"InnoDB: in InnoDB data dictionary"
 				" has unknown type %lx.\n",
 				(ulong) flags);
@@ -968,9 +968,9 @@ err_exit:
 
 		if (flags2 & (~0 << (DICT_TF2_BITS - DICT_TF2_SHIFT))) {
 			ut_print_timestamp(ib_logger);
-			ib_logger(ib_stream, "  InnoDB: Warning: table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream, "\n"
+			ib_log(state, "  InnoDB: Warning: table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state, "\n"
 				"InnoDB: in InnoDB data dictionary"
 				" has unknown flags %lx.\n",
 				(ulong) flags2);
@@ -993,11 +993,11 @@ err_exit:
 			/* Do not bother to retry opening temporary tables. */
 			ibd_file_missing = TRUE;
 		} else {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: error: space object of table");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream, ",\n"
+			ut_print_filename(state->stream, name);
+			ib_log(state, ",\n"
 				"InnoDB: space id %lu did not exist in memory."
 				" Retrying an open.\n",
 				(ulong) space);
@@ -1049,9 +1049,9 @@ err_exit:
 
 		mutex_enter(&dict_foreign_err_mutex);
 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"  InnoDB: Error: could not make a foreign key"
 			" definition to match\n"
 			"InnoDB: the foreign key table"
@@ -1308,7 +1308,7 @@ dict_load_foreign(
 	    || rec_get_deleted_flag(rec, 0)) {
 		/* Not found */
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error A: cannot load foreign constraint %s\n",
 			id);
 
@@ -1324,7 +1324,7 @@ dict_load_foreign(
 	/* Check if the id in record is the searched one */
 	if (len != ut_strlen(id) || ut_memcmp(id, field, len) != 0) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error B: cannot load foreign constraint %s\n",
 			id);
 
@@ -1419,7 +1419,7 @@ dict_load_foreigns(
 	if (sys_foreign == NULL) {
 		/* No foreign keys defined yet in this database */
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: no foreign key system tables"
 			" in the database\n");
 

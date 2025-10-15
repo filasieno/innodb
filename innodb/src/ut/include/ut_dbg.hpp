@@ -32,20 +32,19 @@ IB_INTERN bool ut_dbg_fail(bool expr)
 
 #define UT_DBG_PRINT_FUNC	printf("%s\n", __func__)
 
-/* you must #define UT_DBG_ENTER_FUNC_ENABLED to something before
-using this macro */
-#define UT_DBG_ENTER_FUNC				\
-	do {						\
-		if (UT_DBG_ENTER_FUNC_ENABLED) {	\
-			UT_DBG_PRINT_FUNC;		\
-		}					\
+/// you must #define UT_DBG_ENTER_FUNC_ENABLED to something before using this macro
+#define UT_DBG_ENTER_FUNC \
+	do { \
+		if (UT_DBG_ENTER_FUNC_ENABLED) { \
+			UT_DBG_PRINT_FUNC; \
+		} \
 	} while (0)
 
 
 /// \brief Report a failed assertion.
-/// \param expr in: the failed assertion
-/// \param file in: source file containing the assertion
-/// \param line in: line number of the assertion
+/// \param [in] expr the failed assertion
+/// \param [in] file source file containing the assertion
+/// \param [in] line line number of the assertion
 IB_INTERN void ut_dbg_assertion_failed(const char* expr, const char* file, ulint line);
 
 /// \brief Abort execution if EXPR does not evaluate to nonzero.

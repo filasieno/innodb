@@ -86,7 +86,7 @@ trx_rsegf_get_nth_undo(
 	mtr_t*		mtr)	/*!< in: mtr */
 {
 	if (IB_UNLIKELY(n >= TRX_RSEG_N_SLOTS)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to get slot %lu of rseg\n",
 			(ulong) n);
 		UT_ERROR;
@@ -108,7 +108,7 @@ trx_rsegf_set_nth_undo(
 	mtr_t*		mtr)	/*!< in: mtr */
 {
 	if (IB_UNLIKELY(n >= TRX_RSEG_N_SLOTS)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to set slot %lu of rseg\n",
 			(ulong) n);
 		UT_ERROR;

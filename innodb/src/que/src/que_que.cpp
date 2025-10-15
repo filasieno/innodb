@@ -544,7 +544,7 @@ que_graph_free_recursive(
 		thr = node;
 
 		if (thr->magic_n != QUE_THR_MAGIC_N) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"que_thr struct appears corrupt;"
 				" magic n %lu\n",
 				(unsigned long) thr->magic_n);
@@ -664,7 +664,7 @@ que_graph_free_recursive(
 
 		break;
 	default:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"que_node struct appears corrupt; type %lu\n",
 			(unsigned long) que_node_get_type(node));
 		UT_ERROR;
@@ -814,7 +814,7 @@ que_thr_dec_refer_count(
 			already canceled before we came here: continue
 			running the thread */
 
-			/* ib_logger(ib_stream,
+			/* ib_log(state,
 			   	"!!!!!!!! Wait already ended: continue thr\n");
 			*/
 
@@ -962,7 +962,7 @@ que_thr_stop_for_client_no_error(
 	ut_ad(thr->graph->n_active_thrs == 1);
 
 	if (thr->magic_n != QUE_THR_MAGIC_N) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"que_thr struct appears corrupt; magic n %lu\n",
 			(unsigned long) thr->magic_n);
 
@@ -989,7 +989,7 @@ que_thr_move_to_run_state_for_client(
 	trx_t*		trx)	/*!< in: transaction */
 {
 	if (thr->magic_n != QUE_THR_MAGIC_N) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"que_thr struct appears corrupt; magic n %lu\n",
 			(unsigned long) thr->magic_n);
 
@@ -1141,7 +1141,7 @@ que_node_print_info(
 		str = "UNKNOWN NODE TYPE";
 	}
 
-	ib_logger(ib_stream, "Node type %lu: %s, address %p\n",
+	ib_log(state, "Node type %lu: %s, address %p\n",
 		(ulong) type, str, (void*) node);
 }
 
@@ -1174,7 +1174,7 @@ que_thr_step(
 
 #ifdef IB_DEBUG
 	if (que_trace_on) {
-		ib_logger(ib_stream, "To execute: ");
+		ib_log(state, "To execute: ");
 		que_node_print_info(node);
 	}
 #endif

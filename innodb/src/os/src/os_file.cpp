@@ -392,25 +392,25 @@ os_file_get_last_error(
 	if (report_all_errors
 	    || (err != ERROR_DISK_FULL && err != ERROR_FILE_EXISTS)) {
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Operating system error number %lu"
 			" in a file operation.\n", (ulong) err);
 
 		if (err == ERROR_PATH_NOT_FOUND) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means the system"
 				" cannot find the path specified.\n");
 
 			if (srv_is_being_started) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: If you are installing InnoDB,"
 					" remember that you must create\n"
 					"InnoDB: directories yourself, InnoDB"
 					" does not create them.\n");
 			}
 		} else if (err == ERROR_ACCESS_DENIED) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means your application "
 				"does not have the access rights to\n"
 				"InnoDB: the directory. It may also be"
@@ -418,7 +418,7 @@ os_file_get_last_error(
 				"InnoDB: of the same name as a data file.\n");
 		} else if (err == ERROR_SHARING_VIOLATION
 			   || err == ERROR_LOCK_VIOLATION) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means that another program"
 				" is using InnoDB's files.\n"
 				"InnoDB: This might be a backup or antivirus"
@@ -427,19 +427,19 @@ os_file_get_last_error(
 				" Please close it to get rid of this error.\n");
 		} else if (err == ERROR_WORKING_SET_QUOTA
 			   || err == ERROR_NO_SYSTEM_RESOURCES) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means that there are no"
 				" sufficient system resources or quota to"
 				" complete the operation.\n");
 		} else if (err == ERROR_OPERATION_ABORTED) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means that the I/O"
 				" operation has been aborted\n"
 				"InnoDB: because of either a thread exit"
 				" or an application request.\n"
 				"InnoDB: Retry attempt is made.\n");
 		} else {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Some operating system error numbers"
 				" are described at\n"
 				"InnoDB: "
@@ -470,37 +470,37 @@ os_file_get_last_error(
 	if (report_all_errors
 	    || (err != ENOSPC && err != EEXIST)) {
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Operating system error number %lu"
 			" in a file operation.\n", (ulong) err);
 
 		if (err == ENOENT) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means the system"
 				" cannot find the path specified.\n");
 
 			if (srv_is_being_started) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: If you are installing InnoDB,"
 					" remember that you must create\n"
 					"InnoDB: directories yourself, InnoDB"
 					" does not create them.\n");
 			}
 		} else if (err == EACCES) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: The error means your application "
 				"does not have the access rights to\n"
 				"InnoDB: the directory.\n");
 		} else {
 			if (strerror((int)err) != NULL) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Error number %lu"
 					" means '%s'.\n",
 					err, strerror((int)err));
 			}
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: "
 				"Check InnoDB website for details\n");
 		}
@@ -547,14 +547,14 @@ os_file_handle_error_cond_exit(
 		}
 
 		if (name) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Encountered a problem with"
 				" file %s\n", name);
 		}
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Disk is full. Try to clean the disk"
 			" to free space.\n");
 
@@ -582,10 +582,10 @@ os_file_handle_error_cond_exit(
 		return(TRUE);
 	} else {
 		if (name) {
-			ib_logger(ib_stream, "InnoDB: File name %s\n", name);
+			ib_log(state, "InnoDB: File name %s\n", name);
 		}
 
-		ib_logger(ib_stream, "InnoDB: File operation call: '%s'.\n",
+		ib_log(state, "InnoDB: File operation call: '%s'.\n",
 			operation);
 
 		if (should_exit) {
@@ -650,11 +650,11 @@ os_file_lock(
 	lk.l_whence = SEEK_SET;
 	lk.l_start = lk.l_len = 0;
 	if (fcntl(fd, F_SETLK, &lk) == -1) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Unable to lock %s, error: %d\n", name, errno);
 
 		if (errno == EAGAIN || errno == EACCES) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Check that you do not already have"
 				" another instance of your application is\n"
 				"InnoDB: using the same InnoDB data"
@@ -711,8 +711,8 @@ os_file_create_tmpfile(void)
 #endif /* __NETWARE__ */
 
 	if (!file) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: unable to create temporary file;"
 			" errno: %d\n", errno);
 #ifndef __NETWARE__
@@ -915,7 +915,7 @@ next_file:
 	    && ent != NULL
 #endif
 	   ) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: cannot read directory %s, error %lu\n",
 			dirname, (ulong)ret);
 
@@ -1312,8 +1312,8 @@ os_file_set_nocache(
 	if (directio(fd, DIRECTIO_ON) == -1) {
 		int	errno_save;
 		errno_save = (int)errno;
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Failed to set DIRECTIO_ON "
 			"on file %s: %s: %s, continuing anyway\n",
 			file_name, operation_name, strerror(errno_save));
@@ -1322,14 +1322,14 @@ os_file_set_nocache(
 	if (fcntl(fd, F_SETFL, O_DIRECT) == -1) {
 		int	errno_save;
 		errno_save = (int)errno;
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Failed to set O_DIRECT "
 			"on file %s: %s: %s, continuing anyway\n",
 			file_name, operation_name, strerror(errno_save));
 		if (errno_save == EINVAL) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: O_DIRECT is known to result in "
 				"'Invalid argument' on Linux on tmpfs.");
 		}
@@ -1519,7 +1519,7 @@ try_again:
 	}
 
 #if 0
-	ib_logger(ib_stream, "Opening file %s, mode %s, type %s, purpose %s\n",
+	ib_log(state, "Opening file %s, mode %s, type %s, purpose %s\n",
 		name, mode_str, type_str, purpose_str);
 #endif
 #ifdef O_SYNC
@@ -1530,7 +1530,7 @@ try_again:
 	    && srv_unix_file_flush_method == SRV_UNIX_O_DSYNC) {
 
 # if 0
-		ib_logger(ib_stream, "Using O_SYNC for file %s\n", name);
+		ib_log(state, "Using O_SYNC for file %s\n", name);
 # endif
 
 		create_flag = create_flag | O_SYNC;
@@ -1577,8 +1577,8 @@ try_again:
 
 		if (create_mode == OS_FILE_OPEN_RETRY) {
 			int i;
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: Retrying to lock"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: Retrying to lock"
 			      " the first data file\n");
 			for (i = 0; i < 100; i++) {
 				os_thread_sleep(1000000);
@@ -1587,8 +1587,8 @@ try_again:
 					return(file);
 				}
 			}
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Unable to open the first "
 				"data file\n");
 		}
@@ -1634,7 +1634,7 @@ loop:
 	count++;
 
 	if (count > 100 && 0 == (count % 10)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Warning: cannot delete file %s\n"
 			"InnoDB: Are you running ibbackup"
 			" to back up the file?\n", name);
@@ -1697,7 +1697,7 @@ loop:
 	count++;
 
 	if (count > 100 && 0 == (count % 10)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Warning: cannot delete file %s\n"
 			"InnoDB: Are you running ibbackup"
 			" to back up the file?\n", name);
@@ -1953,7 +1953,7 @@ os_file_set_size(
 
 	if (desired_size >= (ib_int64_t)(100 * 1024 * 1024)) {
 
-		ib_logger(ib_stream, "InnoDB: Progress in MB:");
+		ib_log(state, "InnoDB: Progress in MB:");
 	}
 
 	while (current_size < desired_size) {
@@ -1978,7 +1978,7 @@ os_file_set_size(
 		if ((ib_int64_t) (current_size + n_bytes) / (ib_int64_t)(100 * 1024 * 1024)
 		    != current_size / (ib_int64_t)(100 * 1024 * 1024)) {
 
-			ib_logger(ib_stream, " %lu00",
+			ib_log(state, " %lu00",
 				(ulong) ((current_size + n_bytes)
 					 / (ib_int64_t)(100 * 1024 * 1024)));
 		}
@@ -1988,7 +1988,7 @@ os_file_set_size(
 
 	if (desired_size >= (ib_int64_t)(100 * 1024 * 1024)) {
 
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 	}
 
 	ut_free(buf2);
@@ -2050,8 +2050,8 @@ os_file_fsync(
 
 			if (failures % 100 == 0) {
 
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"  InnoDB: fsync(): "
 					"No locks available; retrying\n");
 			}
@@ -2154,9 +2154,9 @@ os_file_flush(
 		return(TRUE);
 	}
 
-	ut_print_timestamp(ib_stream);
+	ut_print_timestamp(state->stream);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"  InnoDB: Error: the OS said file flush did not succeed\n");
 
 	os_file_handle_error(NULL, "flush");
@@ -2202,7 +2202,7 @@ os_file_pread(
 		offs = (off_t)offset;
 
 		if (offset_high > 0) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: file read at offset > 4 GB\n");
 		}
 	}
@@ -2292,7 +2292,7 @@ os_file_pwrite(
 		offs = (off_t)offset;
 
 		if (offset_high > 0) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: file write"
 				" at offset > 4 GB\n");
 		}
@@ -2475,7 +2475,7 @@ try_again:
 		return(TRUE);
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"InnoDB: Error: tried to read %lu bytes at offset %lu %lu.\n"
 		"InnoDB: Was only able to read %ld.\n",
 		(ulong)n, (ulong)offset_high,
@@ -2490,7 +2490,7 @@ error_handling:
 		goto try_again;
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"InnoDB: Fatal error: cannot read from file."
 		" OS error number %lu.\n",
 #ifdef __WIN__
@@ -2696,9 +2696,9 @@ retry:
 		os_n_pending_writes--;
 		os_mutex_exit(os_file_count_mutex);
 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"  InnoDB: Error: File pointer positioning to"
 			" file %s failed at\n"
 			"InnoDB: offset %lu %lu. Operating system"
@@ -2752,9 +2752,9 @@ retry:
 
 		err = (ulint)GetLastError();
 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"  InnoDB: Error: Write to file %s failed"
 			" at offset %lu %lu.\n"
 			"InnoDB: %lu bytes should have been written,"
@@ -2768,12 +2768,12 @@ retry:
 			(ulong) n, (ulong) len, (ulong) err);
 
 		if (strerror((int)err) != NULL) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error number %lu means '%s'.\n",
 				(ulong) err, strerror((int)err));
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: "
 			"Check InnoDB website for details\n");
 
@@ -2793,9 +2793,9 @@ retry:
 
 	if (!os_has_said_disk_full) {
 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"  InnoDB: Error: Write to file %s failed"
 			" at offset %lu %lu.\n"
 			"InnoDB: %lu bytes should have been written,"
@@ -2808,12 +2808,12 @@ retry:
 			name, offset_high, offset, n, (long int)ret,
 			(ulint)errno);
 		if (strerror(errno) != NULL) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error number %lu means '%s'.\n",
 				(ulint)errno, strerror(errno));
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: "
 			"Check InnoDB website for details\n");
 
@@ -3154,7 +3154,7 @@ os_aio_init(
 	}
 
 
-	/* ib_logger(ib_stream, "Array n per seg %lu\n", n_per_seg); */
+	/* ib_log(state, "Array n per seg %lu\n", n_per_seg); */
 
 	os_aio_ibuf_array = os_aio_array_create(n_per_seg, 1);
 
@@ -3994,7 +3994,7 @@ restart:
 		if (slot->reserved && slot->io_already_done) {
 
 			if (os_aio_print_debug) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: i/o for slot %lu"
 					" already done, returning\n",
 					(ulong) i);
@@ -4145,7 +4145,7 @@ consecutive_loop:
 	os_set_io_thread_op_info(global_segment, "doing file i/o");
 
 	if (os_aio_print_debug) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: doing i/o of type %lu at offset %lu %lu,"
 			" length %lu\n",
 			(ulong) slot->type, (ulong) slot->offset_high,
@@ -4166,7 +4166,7 @@ consecutive_loop:
 	os_set_io_thread_op_info(global_segment, "file i/o done");
 
 #if 0
-	ib_logger(ib_stream,
+	ib_log(state,
 		"aio: %lu consecutive %lu:th segment, first offs %lu blocks\n",
 		n_consecutive, global_segment, slot->offset / IB_PAGE_SIZE);
 #endif
@@ -4230,7 +4230,7 @@ recommended_sleep:
 	os_event_wait(os_aio_segment_wait_events[global_segment]);
 
 	if (os_aio_print_debug) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: i/o handler thread for i/o"
 			" segment %lu wakes up\n",
 			(ulong) global_segment);
@@ -4298,7 +4298,7 @@ IB_INTERN
 void
 os_aio_print(
 /*=========*/
-	ib_stream_t	ib_stream)	/*!< in: stream where to print */
+	ib_stream_t	state->stream)	/*!< in: stream where to print */
 {
 	os_aio_array_t*	array;
 	os_aio_slot_t*	slot;
@@ -4309,20 +4309,20 @@ os_aio_print(
 	ulint		i;
 
 	for (i = 0; i < srv_n_file_io_threads; i++) {
-		ib_logger(ib_stream, "I/O thread %lu state: %s (%s)", (ulong) i,
+		ib_log(state, "I/O thread %lu state: %s (%s)", (ulong) i,
 			srv_io_thread_op_info[i],
 			srv_io_thread_function[i]);
 
 #ifndef __WIN__
 		if (os_aio_segment_wait_events[i]->is_set) {
-			ib_logger(ib_stream, " ev set");
+			ib_log(state, " ev set");
 		}
 #endif
 
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 	}
 
-	ib_logger(ib_stream, "Pending normal aio reads:");
+	ib_log(state, "Pending normal aio reads:");
 
 	array = os_aio_read_array;
 loop:
@@ -4341,7 +4341,7 @@ loop:
 		if (slot->reserved) {
 			n_reserved++;
 #if 0
-			ib_logger(ib_stream, "Reserved slot, messages %p %p\n",
+			ib_log(state, "Reserved slot, messages %p %p\n",
 				(void*) slot->message1,
 				(void*) slot->message2);
 #endif
@@ -4351,12 +4351,12 @@ loop:
 
 	ut_a(array->n_reserved == n_reserved);
 
-	ib_logger(ib_stream, " %lu", (ulong) n_reserved);
+	ib_log(state, " %lu", (ulong) n_reserved);
 
 	os_mutex_exit(array->mutex);
 
 	if (array == os_aio_read_array) {
-		ib_logger(ib_stream, ", aio writes:");
+		ib_log(state, ", aio writes:");
 
 		array = os_aio_write_array;
 
@@ -4364,31 +4364,31 @@ loop:
 	}
 
 	if (array == os_aio_write_array) {
-		ib_logger(ib_stream, ",\n ibuf aio reads:");
+		ib_log(state, ",\n ibuf aio reads:");
 		array = os_aio_ibuf_array;
 
 		goto loop;
 	}
 
 	if (array == os_aio_ibuf_array) {
-		ib_logger(ib_stream, ", log i/o's:");
+		ib_log(state, ", log i/o's:");
 		array = os_aio_log_array;
 
 		goto loop;
 	}
 
 	if (array == os_aio_log_array) {
-		ib_logger(ib_stream, ", sync i/o's:");
+		ib_log(state, ", sync i/o's:");
 		array = os_aio_sync_array;
 
 		goto loop;
 	}
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 	current_time = time(NULL);
 	time_elapsed = 0.001 + difftime(current_time, os_last_printout);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Pending flushes (fsync) log: %lu; buffer pool: %lu\n"
 		"%lu OS file reads, %lu OS file writes, %lu OS fsyncs\n",
 		(ulong) fil_n_pending_log_flushes,
@@ -4397,7 +4397,7 @@ loop:
 		(ulong) os_n_fsyncs);
 
 	if (os_file_n_pending_preads != 0 || os_file_n_pending_pwrites != 0) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"%lu pending preads, %lu pending pwrites\n",
 			(ulong) os_file_n_pending_preads,
 			(ulong) os_file_n_pending_pwrites);
@@ -4410,7 +4410,7 @@ loop:
 			/ (os_n_file_reads - os_n_file_reads_old);
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"%.2f reads/s, %lu avg bytes/read,"
 		" %.2f writes/s, %.2f fsyncs/s\n",
 		(os_n_file_reads - os_n_file_reads_old)

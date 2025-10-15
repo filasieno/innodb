@@ -356,7 +356,7 @@ read_view_close_for_read_committed(
 }
 
 /*********************************************************************//**
-Prints a read view to ib_stream. */
+Prints a read view to state->stream. */
 IB_INTERN
 void
 read_view_print(
@@ -367,30 +367,30 @@ read_view_print(
 	ulint	i;
 
 	if (view->type == VIEW_HIGH_GRANULARITY) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"High-granularity read view undo_n:o %lu %lu\n",
 			(ulong) ut_dulint_get_high(view->undo_no),
 			(ulong) ut_dulint_get_low(view->undo_no));
 	} else {
-		ib_logger(ib_stream, "Normal read view\n");
+		ib_log(state, "Normal read view\n");
 	}
 
-	ib_logger(ib_stream, "Read view low limit trx n:o %lu %lu\n",
+	ib_log(state, "Read view low limit trx n:o %lu %lu\n",
 		(ulong) ut_dulint_get_high(view->low_limit_no),
 		(ulong) ut_dulint_get_low(view->low_limit_no));
 
-	ib_logger(ib_stream, "Read view up limit trx id " TRX_ID_FMT "\n",
+	ib_log(state, "Read view up limit trx id " TRX_ID_FMT "\n",
 		TRX_ID_PREP_PRINTF(view->up_limit_id));
 
-	ib_logger(ib_stream, "Read view low limit trx id " TRX_ID_FMT "\n",
+	ib_log(state, "Read view low limit trx id " TRX_ID_FMT "\n",
 		TRX_ID_PREP_PRINTF(view->low_limit_id));
 
-	ib_logger(ib_stream, "Read view individually stored trx ids:\n");
+	ib_log(state, "Read view individually stored trx ids:\n");
 
 	n_ids = view->n_trx_ids;
 
 	for (i = 0; i < n_ids; i++) {
-		ib_logger(ib_stream, "Read view trx id " TRX_ID_FMT "\n",
+		ib_log(state, "Read view trx id " TRX_ID_FMT "\n",
 			TRX_ID_PREP_PRINTF(
 				read_view_get_nth_trx_id(view, i)));
 	}

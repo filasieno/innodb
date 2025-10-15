@@ -191,7 +191,7 @@ handle_new_error:
 		break;
 
 	case DB_CORRUPTION:
-		ib_logger(ib_stream,
+		ib_log(state,
 		      "InnoDB: We detected index corruption in an InnoDB type table.\n"
 		      "InnoDB: You have to dump + drop + reimport the table or, in\n"
 		      "InnoDB: a case of widespread corruption, dump all InnoDB\n"
@@ -201,7 +201,7 @@ handle_new_error:
 		      "InnoDB: InnoDB website for help.\n");
 		break;
 	default:
-		ib_logger(ib_stream, "InnoDB: unknown error code %lu\n", (ulong) err);
+		ib_log(state, "InnoDB: unknown error code %lu\n", (ulong) err);
 		UT_ERROR;
 	}
 	if (trx->error_state != DB_SUCCESS) {

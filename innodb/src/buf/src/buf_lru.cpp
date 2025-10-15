@@ -403,7 +403,7 @@ scan_again:
 
 #ifdef IB_DEBUG
 			if (buf_debug_prints) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"Dropping space %lu page %lu\n",
 					(ulong) buf_page_get_space(bpage),
 					(ulong) buf_page_get_page_no(bpage));
@@ -828,9 +828,9 @@ loop:
 
 	if (!recv_recovery_on && UT_LIST_GET_LEN(buf_pool->free)
 	    + UT_LIST_GET_LEN(buf_pool->LRU) < buf_pool->curr_size / 20) {
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"  InnoDB: ERROR: over 95 percent of the buffer pool"
 			" is occupied by\n"
 			"InnoDB: lock heaps or the adaptive hash index!"
@@ -858,8 +858,8 @@ loop:
 			heaps or the adaptive hash index. This may be a memory
 			leak! */
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: WARNING: over 67 percent of"
 				" the buffer pool is occupied by\n"
 				"InnoDB: lock heaps or the adaptive"
@@ -932,8 +932,8 @@ loop:
 	}
 
 	if (n_iterations > 30) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Warning: difficult to find free blocks in\n"
 			"InnoDB: the buffer pool (%lu search iterations)!"
 			" Consider\n"
@@ -1455,7 +1455,7 @@ alloc:
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Putting space %lu page %lu to free list\n",
 			(ulong) buf_page_get_space(bpage),
 			(ulong) buf_page_get_page_no(bpage));
@@ -1749,17 +1749,17 @@ buf_LRU_block_remove_hashed_page(
 #endif /* IB_ZIP_DEBUG */
 				break;
 			default:
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"  InnoDB: ERROR: The compressed page"
 					" to be evicted seems corrupt:");
-				ut_print_buf(ib_stream, page, zip_size);
-				ib_logger(ib_stream,
+				ut_print_buf(state->stream, page, zip_size);
+				ib_log(state,
 					"\nInnoDB: Possibly older version"
 					" of the page:");
-				ut_print_buf(ib_stream, bpage->zip.data,
+				ut_print_buf(state->stream, bpage->zip.data,
 					     zip_size);
-				ib_logger(ib_stream, "\n");
+				ib_log(state, "\n");
 				UT_ERROR;
 			}
 
@@ -1784,13 +1784,13 @@ buf_LRU_block_remove_hashed_page(
 	hashed_bpage = buf_page_hash_get(bpage->space, bpage->offset);
 
 	if (IB_UNLIKELY(bpage != hashed_bpage)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: page %lu %lu not found"
 			" in the hash table\n",
 			(ulong) bpage->space,
 			(ulong) bpage->offset);
 		if (hashed_bpage) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: In hash table we find block"
 				" %p of %lu %lu which is not %p\n",
 				(const void*) hashed_bpage,
@@ -2092,33 +2092,33 @@ buf_LRU_print(void)
 
 	while (bpage != NULL) {
 
-		ib_logger(ib_stream, "BLOCK space %lu page %lu ",
+		ib_log(state, "BLOCK space %lu page %lu ",
 			(ulong) buf_page_get_space(bpage),
 			(ulong) buf_page_get_page_no(bpage));
 
 		if (buf_page_is_old(bpage)) {
-			ib_logger(ib_stream, "old ");
+			ib_log(state, "old ");
 		}
 
 		if (bpage->buf_fix_count) {
-			ib_logger(ib_stream, "buffix count %lu ",
+			ib_log(state, "buffix count %lu ",
 				(ulong) bpage->buf_fix_count);
 		}
 
 		if (buf_page_get_io_fix(bpage)) {
-			ib_logger(ib_stream, "io_fix %lu ",
+			ib_log(state, "io_fix %lu ",
 				(ulong) buf_page_get_io_fix(bpage));
 		}
 
 		if (bpage->oldest_modification) {
-			ib_logger(ib_stream, "modif. ");
+			ib_log(state, "modif. ");
 		}
 
 		switch (buf_page_get_state(bpage)) {
 			const byte*	frame;
 		case BUF_BLOCK_FILE_PAGE:
 			frame = buf_block_get_frame((buf_block_t*) bpage);
-			ib_logger(ib_stream, "\ntype %lu"
+			ib_log(state, "\ntype %lu"
 				" index id %lu\n",
 				(ulong) fil_page_get_type(frame),
 				(ulong) ut_dulint_get_low(
@@ -2126,7 +2126,7 @@ buf_LRU_print(void)
 			break;
 		case BUF_BLOCK_ZIP_PAGE:
 			frame = bpage->zip.data;
-			ib_logger(ib_stream, "\ntype %lu size %lu"
+			ib_log(state, "\ntype %lu size %lu"
 				" index id %lu\n",
 				(ulong) fil_page_get_type(frame),
 				(ulong) buf_page_get_zip_size(bpage),
@@ -2135,7 +2135,7 @@ buf_LRU_print(void)
 			break;
 
 		default:
-			ib_logger(ib_stream, "\n!state %lu!\n",
+			ib_log(state, "\n!state %lu!\n",
 				(ulong) buf_page_get_state(bpage));
 			break;
 		}

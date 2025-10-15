@@ -92,8 +92,8 @@ buf_read_page_low(
 		   || (offset >= trx_doublewrite->block2
 		       && offset < trx_doublewrite->block2
 		       + TRX_SYS_DOUBLEWRITE_BLOCK_SIZE))) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Warning: trying to read"
 			" doublewrite buffer page %lu\n",
 			(ulong) offset);
@@ -126,7 +126,7 @@ buf_read_page_low(
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Posting read request for page %lu, sync %lu\n",
 			(ulong) offset,
 			(ulong) sync);
@@ -186,8 +186,8 @@ buf_read_page(
 				  tablespace_version, offset);
 	srv_buf_pool_reads += count;
 	if (err == DB_TABLESPACE_DELETED) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: trying to access"
 			" tablespace %lu page no. %lu,\n"
 			"InnoDB: but the tablespace does not exist"
@@ -448,8 +448,8 @@ buf_read_ahead_linear(
 				ibuf_mode | OS_AIO_SIMULATED_WAKE_LATER,
 				space, zip_size, FALSE, tablespace_version, i);
 			if (err == DB_TABLESPACE_DELETED) {
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"  InnoDB: Warning: in"
 					" linear readahead trying to access\n"
 					"InnoDB: tablespace %lu page %lu,\n"
@@ -471,7 +471,7 @@ buf_read_ahead_linear(
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints && (count > 0)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"LINEAR read-ahead space %lu offset %lu pages %lu\n",
 			(ulong) space, (ulong) offset, (ulong) count);
 	}
@@ -556,7 +556,7 @@ tablespace_deleted:
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Ibuf merge read-ahead space %lu pages %lu\n",
 			(ulong) space_ids[0], (ulong) n_stored);
 	}
@@ -614,7 +614,7 @@ buf_read_recv_pages(
 			count++;
 
 			if (count > 1000) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Error: InnoDB has waited for"
 					" 10 seconds for pending\n"
 					"InnoDB: reads to the buffer pool to"
@@ -649,7 +649,7 @@ buf_read_recv_pages(
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Recovery applies read-ahead pages %lu\n",
 			(ulong) n_stored);
 	}

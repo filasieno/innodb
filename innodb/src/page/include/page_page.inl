@@ -712,7 +712,7 @@ page_rec_get_next_low(
 	offs = rec_get_next_offs(rec, comp);
 
 	if (IB_UNLIKELY(offs >= IB_PAGE_SIZE)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Next record offset is nonsensical %lu"
 			" in record at offset %lu\n"
 			"InnoDB: rec address %p, space id %lu, page %lu\n",

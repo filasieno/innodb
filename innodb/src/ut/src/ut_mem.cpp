@@ -132,9 +132,9 @@ retry:
 
 	if (ret == NULL && retry_count < 60) {
 		if (retry_count == 0) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(
-				ib_stream,
+			ut_print_timestamp(state->stream);
+			state->log(
+				state->stream,
 				"  InnoDB: Error: cannot allocate"
 				" %lu bytes of\n"
 				"InnoDB: memory with malloc!"
@@ -178,9 +178,9 @@ retry:
 		by graceful exit handling in ut_a(). */
 #if (!defined __NETWARE__)
 		if (assert_on_error) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(
-				ib_stream,
+			ut_print_timestamp(state->stream);
+			state->log(
+				state->stream,
 				"  InnoDB: We now intentionally"
 				" generate a seg fault so that\n"
 				"InnoDB: on Linux we get a stack trace.\n"
@@ -239,7 +239,7 @@ void *ut_malloc(ulint n)
 
 #ifndef IB_HOTBACKUP
 /// \brief Tests if malloc of n bytes would succeed.
-/// \details ut_malloc() asserts if memory runs out. It cannot be used if we want to return an error message. Prints to ib_stream a message if fails.
+/// \details ut_malloc() asserts if memory runs out. It cannot be used if we want to return an error message. Prints to state->stream a message if fails.
 /// \param n Try to allocate this many bytes.
 /// \return TRUE if succeeded.
 IB_INTERN
@@ -249,9 +249,9 @@ ibool ut_test_malloc(ulint n)
 	ret = malloc(n);
 
 	if (ret == NULL) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(
-			ib_stream,
+		ut_print_timestamp(state->stream);
+		state->log(
+			state->stream,
 			"  InnoDB: Error: cannot allocate"
 			" %lu bytes of memory for\n"
 			"InnoDB: a BLOB with malloc! Total allocated memory\n"
@@ -374,7 +374,7 @@ IB_INTERN void ut_free_all_mem(void)
 	}
 
 	if (ut_total_allocated_memory != 0) {
-		ib_logger(ib_stream, "InnoDB: Warning: after shutdown total allocated memory is %lu\n", (ulong)ut_total_allocated_memory);
+		ib_log(state, "InnoDB: Warning: after shutdown total allocated memory is %lu\n", (ulong)ut_total_allocated_memory);
 	}
 
 	ut_mem_block_list_inited = FALSE;
@@ -547,18 +547,18 @@ void test_ut_str_sql_format()
 		ibool ok = TRUE;                                                                          \
 		memset(buf, 'x', 10);                                                                     \
 		buf[10] = '\0';                                                                           \
-		ib_logger(ib_stream, "TESTING \"%s\", %lu, %lu\n", str, (ulint)str_len, (ulint)buf_size); \
+		ib_log(state, "TESTING \"%s\", %lu, %lu\n", str, (ulint)str_len, (ulint)buf_size); \
 		ret = ut_str_sql_format(str, str_len, buf, buf_size);                                     \
 		if (ret != ret_expected) {                                                                \
-			ib_logger(ib_stream, "expected ret %lu, got %lu\n", (ulint)ret_expected, ret);        \
+			ib_log(state, "expected ret %lu, got %lu\n", (ulint)ret_expected, ret);        \
 			ok = FALSE;                                                                           \
 		}                                                                                         \
 		if (strcmp((char *)buf, buf_expected) != 0) {                                             \
-			ib_logger(ib_stream, "expected buf \"%s\", got \"%s\"\n", buf_expected, buf);         \
+			ib_log(state, "expected buf \"%s\", got \"%s\"\n", buf_expected, buf);         \
 			ok = FALSE;                                                                           \
 		}                                                                                         \
 		if (ok) {                                                                                 \
-			ib_logger(ib_stream, "OK: %lu, \"%s\"\n\n", (ulint)ret, buf);                         \
+			ib_log(state, "OK: %lu, \"%s\"\n\n", (ulint)ret, buf);                         \
 		} else {                                                                                  \
 			return;                                                                               \
 		}                                                                                         \

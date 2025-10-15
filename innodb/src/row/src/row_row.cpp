@@ -574,19 +574,19 @@ row_build_row_ref_in_tuple(
 	ut_ad(!dict_index_is_clust(index));
 
 	if (IB_UNLIKELY(!index->table)) {
-		ib_logger(ib_stream, "InnoDB: table ");
+		ib_log(state, "InnoDB: table ");
 notfound:
-		ut_print_name(ib_stream, trx, TRUE, index->table_name);
-		ib_logger(ib_stream, " for index ");
-		ut_print_name(ib_stream, trx, FALSE, index->name);
-		ib_logger(ib_stream, " not found\n");
+		ut_print_name(state->stream, trx, TRUE, index->table_name);
+		ib_log(state, " for index ");
+		ut_print_name(state->stream, trx, FALSE, index->name);
+		ib_log(state, " not found\n");
 		UT_ERROR;
 	}
 
 	clust_index = dict_table_get_first_index(index->table);
 
 	if (IB_UNLIKELY(!clust_index)) {
-		ib_logger(ib_stream, "InnoDB: clust index for table ");
+		ib_log(state, "InnoDB: clust index for table ");
 		goto notfound;
 	}
 

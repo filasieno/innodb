@@ -106,11 +106,11 @@ upd_field_set_field_no(
 	upd_field->orig_len = 0;
 
 	if (IB_UNLIKELY(field_no >= dict_index_get_n_fields(dict_index))) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to access field %lu in ",
 			(ulong) field_no);
-		dict_index_name_print(ib_stream, trx, dict_index);
-		ib_logger(ib_stream, "\n"
+		dict_index_name_print(state->stream, trx, dict_index);
+		ib_log(state, "\n"
 			"InnoDB: but index only has %lu fields\n",
 			(ulong) dict_index_get_n_fields(dict_index));
 	}

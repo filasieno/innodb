@@ -325,8 +325,8 @@ static void recv_sys_empty_hash(void)
 	ut_ad(mutex_own(&(recv_sys->mutex)));
 
 	if (recv_sys->n_addrs != 0) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Error: %lu pages with log records"
 			" were left unprocessed!\n"
 			"InnoDB: Maximum page number with"
@@ -632,8 +632,8 @@ static ulint recv_find_max_checkpoint(
 			if (!recv_check_cp_is_consistent(buf)) {
 #ifdef IB_DEBUG
 				if (log_debug_writes) {
-					ib_logger(
-						ib_stream,
+					state->log(
+						state->stream,
 						"InnoDB: Checkpoint in group"
 						" %lu at %lu invalid, %lu\n",
 						(ulong)group->id,
@@ -653,8 +653,8 @@ static ulint recv_find_max_checkpoint(
 
 #ifdef IB_DEBUG
 			if (log_debug_writes) {
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Checkpoint number %lu"
 					" found in group %lu\n",
 					(ulong)checkpoint_no,
@@ -677,8 +677,8 @@ static ulint recv_find_max_checkpoint(
 
 	if (*max_group == NULL) {
 
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: No valid checkpoint found.\n"
 			"InnoDB: If this error appears when you are"
 			" creating an InnoDB database,\n"
@@ -755,7 +755,7 @@ ibool recv_read_cp_info_for_backup(
 		*fsp_limit = 1000000000;
 	}
 
-	/* ib_logger(ib_stream, "fsp limit %lu MB\n", *fsp_limit); */
+	/* ib_log(state, "fsp limit %lu MB\n", *fsp_limit); */
 
 	*cp_no = mach_read_ull(cp_buf + LOG_CHECKPOINT_NO);
 
@@ -789,7 +789,7 @@ static ibool log_block_checksum_is_ok_or_old_format(
 		/* We assume the log block is in the format of
 		InnoDB version < 3.23.52 and the block is ok */
 #if 0
-		ib_logger(ib_stream,
+		ib_log(state,
 			  "InnoDB: Scanned old format < InnoDB-3.23.52"
 			  " log block number %lu\n",
 			  log_block_get_hdr_no(block));
@@ -831,12 +831,12 @@ void recv_scan_log_seg_for_backup(
 		no = log_block_get_hdr_no(log_block);
 
 #if 0
-		ib_logger(ib_stream, "Log block header no %lu\n", no);
+		ib_log(state, "Log block header no %lu\n", no);
 #endif
 
 		if (no != log_block_convert_lsn_to_no(*scanned_lsn) || !log_block_checksum_is_ok_or_old_format(log_block)) {
 #if 0
-			ib_logger(ib_stream,
+			ib_log(state,
 				  "Log block n:o %lu, scanned lsn n:o %lu\n",
 				  no,
 				  log_block_convert_lsn_to_no(*scanned_lsn));
@@ -845,7 +845,7 @@ void recv_scan_log_seg_for_backup(
 
 			log_block += OS_FILE_LOG_BLOCK_SIZE;
 #if 0
-			ib_logger(ib_stream,
+			ib_log(state,
 				  "Next log block n:o %lu\n",
 				  log_block_get_hdr_no(log_block));
 #endif
@@ -857,7 +857,7 @@ void recv_scan_log_seg_for_backup(
 			/* Garbage from a log buffer flush which was made
 			before the most recent database recovery */
 #if 0
-			ib_logger(ib_stream,
+			ib_log(state,
 				  "Scanned cp n:o %lu, block cp n:o %lu\n",
 				  *scanned_checkpoint_no,
 				  log_block_get_checkpoint_no(log_block));
@@ -876,7 +876,7 @@ void recv_scan_log_seg_for_backup(
 			// Log data ends here
 
 #if 0
-			ib_logger(ib_stream, "Log block data len %lu\n",
+			ib_log(state, "Log block data len %lu\n",
 				  data_len);
 #endif
 			break;
@@ -1271,7 +1271,7 @@ static void recv_add_to_hash_table(
 		HASH_INSERT(recv_addr_t, addr_hash, recv_sys->addr_hash, recv_fold(space, page_no), recv_addr);
 		recv_sys->n_addrs++;
 #if 0
-		ib_logger(ib_stream, "Inserting log rec for space %lu, page %lu\n",
+		ib_log(state, "Inserting log rec for space %lu, page %lu\n",
 			  space, page_no);
 #endif
 	}
@@ -1386,7 +1386,7 @@ void recv_recover_page_func(
 	}
 
 #if 0
-	ib_logger(ib_stream, "Recovering space %lu, page %lu\n",
+	ib_log(state, "Recovering space %lu, page %lu\n",
 		  buf_block_get_space(block), buf_block_get_page_no(block));
 #endif
 
@@ -1476,8 +1476,8 @@ void recv_recover_page_func(
 
 #ifdef IB_DEBUG
 			if (log_debug_writes) {
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Applying log rec"
 					" type %lu len %lu"
 					" to space %lu page no %lu\n",
@@ -1588,7 +1588,7 @@ static ulint recv_read_in_area(
 
 	buf_read_recv_pages(FALSE, space, zip_size, page_nos, n);
 	/*
-	ib_logger(ib_stream, "Recv pages at %lu n %lu\n", page_nos[0], n);
+	ib_log(state, "Recv pages at %lu n %lu\n", page_nos[0], n);
 	*/
 	return (n);
 }
@@ -1647,9 +1647,9 @@ loop:
 
 			if (recv_addr->state == RECV_NOT_PROCESSED) {
 				if (!has_printed) {
-					ut_print_timestamp(ib_stream);
-					ib_logger(
-						ib_stream,
+					ut_print_timestamp(state->stream);
+					state->log(
+						state->stream,
 						" InnoDB: Starting an apply "
 						"batch of log records to the "
 						"database...\n"
@@ -1682,7 +1682,7 @@ loop:
 
 		if (has_printed && (i * 100) / hash_get_n_cells(recv_sys->addr_hash) != ((i + 1) * 100) / hash_get_n_cells(recv_sys->addr_hash)) {
 
-			ib_logger(ib_stream, "%lu ", (ulong)((i * 100) / hash_get_n_cells(recv_sys->addr_hash)));
+			ib_log(state, "%lu ", (ulong)((i * 100) / hash_get_n_cells(recv_sys->addr_hash)));
 		}
 	}
 
@@ -1698,7 +1698,7 @@ loop:
 	}
 
 	if (has_printed) {
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 	}
 
 	if (!allow_ibuf) {
@@ -1729,7 +1729,7 @@ loop:
 	recv_sys_empty_hash();
 
 	if (has_printed) {
-		ib_logger(ib_stream, "InnoDB: Apply batch completed\n");
+		ib_log(state, "InnoDB: Apply batch completed\n");
 	}
 
 	mutex_exit(&(recv_sys->mutex));
@@ -1754,8 +1754,8 @@ void recv_apply_log_recs_for_backup(void)
 
 	block = back_block1;
 
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"InnoDB: Starting an apply batch of log records "
 		"to the database...\n"
 		"InnoDB: Progress in percents: "
@@ -1773,7 +1773,7 @@ void recv_apply_log_recs_for_backup(void)
 
 			if (zip_size == ULINT_UNDEFINED) {
 #if 0
-				ib_logger(ib_stream,
+				ib_log(state,
 					  "InnoDB: Warning: cannot apply"
 					  " log record to"
 					  " tablespace %lu page %lu,\n"
@@ -1852,7 +1852,7 @@ void recv_apply_log_recs_for_backup(void)
 		}
 
 		if ((100 * i) / n_hash_cells != (100 * (i + 1)) / n_hash_cells) {
-			ib_logger(ib_stream, "%lu ", (ulong)((100 * i) / n_hash_cells));
+			ib_log(state, "%lu ", (ulong)((100 * i) / n_hash_cells));
 		}
 	}
 
@@ -1981,8 +1981,8 @@ static void recv_report_corrupt_log(
 	ulint page_no
 )	 // !< in: page number, this may also be garbage
 {
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"InnoDB: ############### CORRUPT LOG RECORD FOUND\n"
 		"InnoDB: Log record type %lu, space id %lu, page number %lu\n"
 		"InnoDB: Log parsing proceeded successfully up to %llu\n"
@@ -1999,8 +1999,8 @@ static void recv_report_corrupt_log(
 	);
 
 	if ((ulint)(ptr - recv_sys->buf + 100) > recv_previous_parsed_rec_offset && (ulint)(ptr - recv_sys->buf + 100 - recv_previous_parsed_rec_offset) < 200000) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Hex dump of corrupt log starting"
 			" 100 bytes before the start\n"
 			"InnoDB: of the previous log rec,\n"
@@ -2008,14 +2008,14 @@ static void recv_report_corrupt_log(
 			" of the corrupt rec:\n"
 		);
 
-		ut_print_buf(ib_stream, recv_sys->buf + recv_previous_parsed_rec_offset - 100, ptr - recv_sys->buf + 200 - recv_previous_parsed_rec_offset);
-		ib_logger(ib_stream, "\n");
+		ut_print_buf(state->stream, recv_sys->buf + recv_previous_parsed_rec_offset - 100, ptr - recv_sys->buf + 200 - recv_previous_parsed_rec_offset);
+		ib_log(state, "\n");
 	}
 
 #ifndef IB_HOTBACKUP
 	if (!srv_force_recovery) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Set innodb_force_recovery"
 			" to ignore this error.\n"
 		);
@@ -2023,8 +2023,8 @@ static void recv_report_corrupt_log(
 	}
 #endif	  // !IB_HOTBACKUP
 
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"InnoDB: WARNING: the log file may have been corrupt and it\n"
 		"InnoDB: is possible that the log scan did not proceed\n"
 		"InnoDB: far enough in recovery! Please run CHECK TABLE\n"
@@ -2111,8 +2111,8 @@ loop:
 
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Parsed a single log rec "
 				"type %lu len %lu space %lu page no %lu\n",
 				(ulong)type,
@@ -2179,8 +2179,8 @@ loop:
 
 #ifdef IB_DEBUG
 			if (log_debug_writes) {
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Parsed a multi log rec "
 					"type %lu len %lu "
 					"space %lu page no %lu\n",
@@ -2388,16 +2388,16 @@ ibool recv_scan_log_recs(
 	do {
 		no = log_block_get_hdr_no(log_block);
 		/*
-		ib_logger(ib_stream, "Log block header no %lu\n", no);
+		ib_log(state, "Log block header no %lu\n", no);
 
-		ib_logger(ib_stream, "Scanned lsn no %lu\n",
+		ib_log(state, "Scanned lsn no %lu\n",
 		log_block_convert_lsn_to_no(scanned_lsn));
 		*/
 		if (no != log_block_convert_lsn_to_no(scanned_lsn) || !log_block_checksum_is_ok_or_old_format(log_block)) {
 
 			if (no == log_block_convert_lsn_to_no(scanned_lsn) && !log_block_checksum_is_ok_or_old_format(log_block)) {
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Log block no %lu at "
 					"lsn %llu has\n"
 					"InnoDB: ok header, but checksum "
@@ -2468,8 +2468,8 @@ ibool recv_scan_log_recs(
 #ifndef IB_HOTBACKUP
 			if (recv_log_scan_is_startup_type && !recv_needed_recovery) {
 
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Log scan progressed"
 					" past the checkpoint lsn %llu\n",
 					recv_sys->scanned_lsn
@@ -2483,8 +2483,8 @@ ibool recv_scan_log_recs(
 			non-zero */
 
 			if (recv_sys->len + 4 * OS_FILE_LOG_BLOCK_SIZE >= RECV_PARSING_BUF_SIZE) {
-				ib_logger(
-					ib_stream,
+				state->log(
+					state->stream,
 					"InnoDB: Error: log parsing"
 					" buffer overflow."
 					" Recovery may have failed!\n"
@@ -2494,8 +2494,8 @@ ibool recv_scan_log_recs(
 
 #ifndef IB_HOTBACKUP
 				if (!srv_force_recovery) {
-					ib_logger(
-						ib_stream,
+					state->log(
+						state->stream,
 						"InnoDB: Set"
 						" innodb_force_recovery"
 						" to ignore this error.\n"
@@ -2529,8 +2529,8 @@ ibool recv_scan_log_recs(
 
 		if (finished || (recv_scan_print_counter % 80 == 0)) {
 
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Doing recovery: scanned up to"
 				" log sequence number %llu\n",
 				*group_scanned_lsn
@@ -2600,8 +2600,8 @@ static void recv_group_scan_log_recs(
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Scanned group %lu up to"
 			" log sequence number %llu\n",
 			(ulong)group->id,
@@ -2623,16 +2623,16 @@ static void recv_start_crash_recovery(
 
 	recv_needed_recovery = TRUE;
 
-	ut_print_timestamp(ib_stream);
+	ut_print_timestamp(state->stream);
 
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		" InnoDB: Database was not shut down normally!\n"
 		"InnoDB: Starting crash recovery.\n"
 	);
 
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"InnoDB: Reading tablespace information"
 		" from the .ibd files...\n"
 	);
@@ -2646,8 +2646,8 @@ static void recv_start_crash_recovery(
 
 	if (recovery < IB_RECOVERY_NO_LOG_REDO) {
 
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Restoring possible half-written data "
 			"pages from the doublewrite\n"
 			"InnoDB: buffer...\n"
@@ -2675,15 +2675,15 @@ static void recv_recover_from_ibbackup(
 		/* This log file was created by ibbackup --restore: print
 		a note to the user about it */
 
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: The log file was created by"
 			" ibbackup --apply-log at\n"
 			"InnoDB: %s\n",
 			log_hdr_buf + LOG_FILE_WAS_CREATED_BY_HOT_BACKUP
 		);
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: NOTE: the following crash recovery"
 			" is part of a normal restore.\n"
 		);
@@ -2716,8 +2716,8 @@ static void recv_init_crash_recovery(
 	if (checkpoint_lsn != max_flushed_lsn || checkpoint_lsn != min_flushed_lsn) {
 
 		if (checkpoint_lsn < max_flushed_lsn) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: #########################"
 				"#################################\n"
 				"InnoDB:                          "
@@ -2743,8 +2743,8 @@ static void recv_init_crash_recovery(
 		}
 
 		if (!recv_needed_recovery) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: The log sequence number"
 				" in ibdata files does not match\n"
 				"InnoDB: the log sequence number"
@@ -2815,12 +2815,12 @@ ulint recv_recovery_from_checkpoint_start_func(
 	}
 
 	if (recovery >= IB_RECOVERY_NO_LOG_REDO) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: The user has set "
 			"IB_RECOVERY_NO_LOG_REDO on\n"
 		);
-		ib_logger(ib_stream, "InnoDB: Skipping log redo\n");
+		ib_log(state, "InnoDB: Skipping log redo\n");
 
 		return (DB_SUCCESS);
 	}
@@ -2957,9 +2957,9 @@ ulint recv_recovery_from_checkpoint_start_func(
 
 	// We currently have only one log group
 	if (group_scanned_lsn < checkpoint_lsn) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(
-			ib_stream,
+		ut_print_timestamp(state->stream);
+		state->log(
+			state->stream,
 			" InnoDB: ERROR: We were only able to scan the log"
 			" up to\n"
 			"InnoDB: %llu, but a checkpoint was at %llu.\n"
@@ -2971,9 +2971,9 @@ ulint recv_recovery_from_checkpoint_start_func(
 	}
 
 	if (group_scanned_lsn < recv_max_page_lsn) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(
-			ib_stream,
+		ut_print_timestamp(state->stream);
+		state->log(
+			state->stream,
 			" InnoDB: ERROR: We were only able to scan the log"
 			" up to %llu\n"
 			"InnoDB: but a database page a had an lsn %llu."
@@ -3073,14 +3073,14 @@ void recv_recovery_from_checkpoint_finish(
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(ib_stream, "InnoDB: Log records applied to the database\n");
+		ib_log(state, "InnoDB: Log records applied to the database\n");
 	}
 #endif	  // IB_DEBUG
 
 	if (recv_sys->found_corrupt_log) {
 
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: WARNING: the log file may have been"
 			" corrupt and it\n"
 			"InnoDB: is possible that the log scan or parsing"
@@ -3257,7 +3257,7 @@ void recv_reset_log_files_for_backup(
 			);
 		}
 
-		ib_logger(ib_stream, "Setting log file size to %lu %lu\n", (ulong)ut_get_high32(log_file_size), (ulong)log_file_size & 0xFFFFFFFFUL);
+		ib_log(state, "Setting log file size to %lu %lu\n", (ulong)ut_get_high32(log_file_size), (ulong)log_file_size & 0xFFFFFFFFUL);
 
 		success = os_file_set_size(name, log_file, log_file_size & 0xFFFFFFFFUL, ut_get_high32(log_file_size));
 
@@ -3328,18 +3328,18 @@ try_open_again:
 
 	if (ret == FALSE) {
 	ask_again:
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Do you want to copy additional"
 			" archived log files\n"
 			"InnoDB: to the directory\n"
 		);
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: or were these all the files needed"
 			" in recovery?\n"
 		);
-		ib_logger(ib_stream, "InnoDB: (Y == copy more files; N == this is all)?");
+		ib_log(state, "InnoDB: (Y == copy more files; N == this is all)?");
 
 		input_char = getchar();
 
@@ -3359,12 +3359,12 @@ try_open_again:
 
 	ut_a(file_size_high == 0);
 
-	ib_logger(ib_stream, "InnoDB: Opened archived log file %s\n", name);
+	ib_log(state, "InnoDB: Opened archived log file %s\n", name);
 
 	ret = os_file_close(file_handle);
 
 	if (file_size < LOG_FILE_HDR_SIZE) {
-		ib_logger(ib_stream, "InnoDB: Archive file header incomplete %s\n", name);
+		ib_log(state, "InnoDB: Archive file header incomplete %s\n", name);
 
 		return (TRUE);
 	}
@@ -3394,13 +3394,13 @@ try_open_again:
 	// Check if the archive file header is consistent
 
 	if (mach_read_from_4(buf + LOG_GROUP_ID) != group->id || mach_read_from_4(buf + LOG_FILE_NO) != group->archived_file_no) {
-		ib_logger(ib_stream, "InnoDB: Archive file header inconsistent %s\n", name);
+		ib_log(state, "InnoDB: Archive file header inconsistent %s\n", name);
 
 		return (TRUE);
 	}
 
 	if (!mach_read_from_4(buf + LOG_FILE_ARCH_COMPLETED)) {
-		ib_logger(ib_stream, "InnoDB: Archive file not completely written %s\n", name);
+		ib_log(state, "InnoDB: Archive file not completely written %s\n", name);
 
 		return (TRUE);
 	}
@@ -3411,8 +3411,8 @@ try_open_again:
 	if (!recv_sys->scanned_lsn) {
 
 		if (recv_sys->parse_start_lsn < start_lsn) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Archive log file %s"
 				" starts from too big a lsn\n",
 				name
@@ -3425,8 +3425,8 @@ try_open_again:
 
 	if (recv_sys->scanned_lsn != start_lsn) {
 
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Archive log file %s starts from"
 			" a wrong lsn\n",
 			name
@@ -3450,8 +3450,8 @@ try_open_again:
 
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Archive read starting at"
 				" lsn %llu, len %lu from file %s\n",
 				start_lsn,
@@ -3491,8 +3491,8 @@ try_open_again:
 		}
 
 		if (ret) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"InnoDB: Archive log file %s"
 				" does not scan right\n",
 				name
@@ -3556,7 +3556,7 @@ ulint recv_recovery_from_archive_start(
 	}
 
 	if (!group) {
-		ib_logger(ib_stream, "InnoDB: There is no log group defined with id %lu!\n", (ulong)group_id);
+		ib_log(state, "InnoDB: There is no log group defined with id %lu!\n", (ulong)group_id);
 		return (DB_ERROR);
 	}
 

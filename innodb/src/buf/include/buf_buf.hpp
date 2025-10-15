@@ -594,7 +594,7 @@ IB_INTERN
 void
 buf_print_io(
 /*=========*/
-	ib_stream_t	ib_stream);	/*!< in: file where to print */
+	ib_stream_t	state->stream);	/*!< in: file where to print */
 /*********************************************************************//**
 Returns the ratio in percents of modified pages in the buffer pool /
 database pages in the buffer pool.

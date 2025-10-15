@@ -680,7 +680,7 @@ buddy_nonfree:
 			if ((b->state == BUF_BLOCK_ZIP_PAGE
 			     || b->state == BUF_BLOCK_ZIP_DIRTY)
 			    && b->space > 0 && b->space < 1000) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"buddy dirty %p %u (%u,%u) %p,%lu\n",
 					(void*) b,
 					b->state, b->space, b->offset,

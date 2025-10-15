@@ -2072,7 +2072,7 @@ fetch_step(
 	sel_node->common.parent = node;
 
 	if (sel_node->state == SEL_NODE_CLOSED) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: fetch called on a closed cursor\n");
 
 		thr_get_trx(thr)->error_state = DB_ERROR;
@@ -2101,7 +2101,7 @@ row_fetch_print(
 
 	UT_NOT_USED(user_arg);
 
-	ib_logger(ib_stream, "row_fetch_print: row %p\n", row);
+	ib_log(state, "row_fetch_print: row %p\n", row);
 
 	exp = node->select_list;
 
@@ -2109,17 +2109,17 @@ row_fetch_print(
 		dfield_t*	dfield = que_node_get_val(exp);
 		const dtype_t*	type = dfield_get_type(dfield);
 
-		ib_logger(ib_stream, " column %lu:\n", (ulong) i);
+		ib_log(state, " column %lu:\n", (ulong) i);
 
 		dtype_print(type);
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 
 		if (dfield_get_len(dfield) != IB_SQL_NULL) {
-			ut_print_buf(ib_stream, dfield_get_data(dfield),
+			ut_print_buf(state->stream, dfield_get_data(dfield),
 				     dfield_get_len(dfield));
-			ib_logger(ib_stream, "\n");
+			ib_log(state, "\n");
 		} else {
-			ib_logger(ib_stream, " <NULL>;\n");
+			ib_log(state, " <NULL>;\n");
 		}
 
 		exp = que_node_get_next(exp);
@@ -2208,12 +2208,12 @@ row_printf_step(
 	while (arg) {
 		dfield_print_also_hex(que_node_get_val(arg));
 
-		ib_logger(ib_stream, " ::: ");
+		ib_log(state, " ::: ");
 
 		arg = que_node_get_next(arg);
 	}
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 
 	/* Fetch next row to print */
 
@@ -2315,23 +2315,23 @@ row_sel_get_clust_rec_with_prebuilt(
 		if (!rec_get_deleted_flag(rec,
 					  dict_table_is_comp(sec_index->table))
 		    || prebuilt->select_lock_type != LOCK_NONE) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: error clustered record"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: error clustered record"
 			      " for sec rec not found\n"
 			      "InnoDB: ");
-			dict_index_name_print(ib_stream, trx, sec_index);
-			ib_logger(ib_stream,
+			dict_index_name_print(state->stream, trx, sec_index);
+			ib_log(state,
 			      "\n"
 			      "InnoDB: sec index record ");
-			rec_print(ib_stream, rec, sec_index);
-			ib_logger(ib_stream,
+			rec_print(state->stream, rec, sec_index);
+			ib_log(state,
 			      "\n"
 			      "InnoDB: clust index record ");
-			rec_print(ib_stream, clust_rec, clust_index);
-			ib_logger(ib_stream, "\n");
-			trx_print(ib_stream, trx, 600);
+			rec_print(state->stream, clust_rec, clust_index);
+			ib_log(state, "\n");
+			trx_print(state->stream, trx, 600);
 
-			ib_logger(ib_stream, 
+			ib_log(state, 
 			      "\n"
 			      "InnoDB: Submit a detailed bug report, check the"
 			      "InnoDB website for details");
@@ -2750,7 +2750,7 @@ row_unlock_for_client(
 
 	if (IB_UNLIKELY(trx->isolation_level != TRX_ISO_READ_COMMITTED)) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: row_unlock_for_client called though\n"
 			"InnoDB: this session is not using"
 			" READ COMMITTED isolation level.\n");
@@ -2885,8 +2885,8 @@ row_search_for_client(
 	ut_ad(trx->client_thread_id == os_thread_get_curr_id());
 
 	if (IB_UNLIKELY(prebuilt->table->ibd_file_missing)) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Error:\n"
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Error:\n"
 			"InnoDB: The client is trying to use a table handle"
 			" but the .ibd file for\n"
 			"InnoDB: table %s does not exist.\n"
@@ -2907,12 +2907,12 @@ row_search_for_client(
 	}
 
 	if (IB_UNLIKELY(prebuilt->magic_n != ROW_PREBUILT_ALLOCATED)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to free a corrupt\n"
 			"InnoDB: table handle. Magic n %lu, table name ",
 			(ulong) prebuilt->magic_n);
-		ut_print_name(ib_stream, trx, TRUE, prebuilt->table->name);
-		ib_logger(ib_stream, "\n");
+		ut_print_name(state->stream, trx, TRUE, prebuilt->table->name);
+		ib_log(state, "\n");
 
 		UT_ERROR;
 	}
@@ -2929,20 +2929,20 @@ row_search_for_client(
 		be zero; in that case select_lock_type is set to LOCK_X in
 		::start_stmt. */
 
-		ib_logger(ib_stram,
+		state->log(ib_stram,
 		      "InnoDB: Error: Client is trying to perform a read\n"
 		      "InnoDB: but it has not locked"
 		      " any tables.\n");
-		trx_print(ib_stream, trx, 600);
-		ib_logger(ib_stream, "\n");
+		trx_print(state->stream, trx, 600);
+		ib_log(state, "\n");
 	}
 #endif
 
 #if 0
-	ib_logger(ib_stream, "Match mode %lu\n search tuple ",
+	ib_log(state, "Match mode %lu\n search tuple ",
 		(ulong) match_mode);
 	dtuple_print(search_tuple);
-	ib_logger(ib_stream, "N tables locked %lu\n",
+	ib_log(state, "N tables locked %lu\n",
 		(ulong) trx->client_n_tables_locked);
 #endif
 	/*-------------------------------------------------------------*/
@@ -3111,8 +3111,8 @@ row_search_for_client(
 
 				mtr_commit(&mtr);
 
-				/* ut_print_name(ib_stream, index->name);
-				ib_logger(ib_stream, " shortcut\n"); */
+				/* ut_print_name(state->stream, index->name);
+				ib_log(state, " shortcut\n"); */
 
 				srv_n_rows_read++;
 
@@ -3123,8 +3123,8 @@ row_search_for_client(
 			case SEL_EXHAUSTED:
 				mtr_commit(&mtr);
 
-				/* ut_print_name(ib_stream, index->name);
-				ib_logger(ib_stream, " record not found 2\n");
+				/* ut_print_name(state->stream, index->name);
+				ib_log(state, " record not found 2\n");
 				*/
 
 				err = DB_RECORD_NOT_FOUND;
@@ -3246,12 +3246,12 @@ release_search_latch_if_needed:
 		if (trx->read_view == NULL
 		    && prebuilt->select_lock_type == LOCK_NONE) {
 
-			ib_logger(ib_stream,
+			ib_log(state,
 			      "InnoDB: Error: The client is trying to"
 			      " perform a consistent read\n"
 			      "InnoDB: but the read view is not assigned!\n");
-			trx_print(ib_stream, trx, 600);
-			ib_logger(ib_stream, "\n");
+			trx_print(state->stream, trx, 600);
+			ib_log(state, "\n");
 			ut_a(0);
 		}
 	} else if (prebuilt->select_lock_type == LOCK_NONE) {
@@ -3284,9 +3284,9 @@ rec_loop:
 	ut_ad(!!page_rec_is_comp(rec) == comp);
 #ifdef IB_SEARCH_DEBUG
 	/*
-	ib_logger(ib_stream, "Using ");
-	dict_index_name_print(ib_stream, index);
-	ib_logger(ib_stream, " cnt %lu ; Page no %lu\n", cnt,
+	ib_log(state, "Using ");
+	dict_index_name_print(state->stream, index);
+	ib_log(state, " cnt %lu ; Page no %lu\n", cnt,
 	page_get_page_no(page_align(rec)));
 	rec_print(rec);
 	*/
@@ -3354,23 +3354,23 @@ rec_loop:
 wrong_offs:
 		if (recovery == IB_RECOVERY_DEFAULT || moves_up == FALSE) {
 
-			ut_print_timestamp(ib_stream);
+			ut_print_timestamp(state->stream);
 			buf_page_print(page_align(rec), 0);
-			ib_logger(ib_stream,
+			ib_log(state,
 				"\nInnoDB: rec address %p,"
 				" buf block fix count %lu\n",
 				(void*) rec, (ulong)
 				btr_cur_get_block(btr_pcur_get_btr_cur(pcur))
 				->page.buf_fix_count);
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Index corruption: rec offs %lu"
 				" next offs %lu, page no %lu,\n"
 				"InnoDB: ",
 				(ulong) page_offset(rec),
 				(ulong) next_offs,
 				(ulong) page_get_page_no(page_align(rec)));
-			dict_index_name_print(ib_stream, trx, index);
-			ib_logger(ib_stream,
+			dict_index_name_print(state->stream, trx, index);
+			ib_log(state,
 			      ". Run CHECK TABLE. You may need to\n"
 			      "InnoDB: restore from a backup, or"
 			      " dump + drop + reimport the table.\n");
@@ -3382,15 +3382,15 @@ wrong_offs:
 			/* The user may be dumping a corrupt table. Jump
 			over the corruption to recover as much as possible. */
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Index corruption: rec offs %lu"
 				" next offs %lu, page no %lu,\n"
 				"InnoDB: ",
 				(ulong) page_offset(rec),
 				(ulong) next_offs,
 				(ulong) page_get_page_no(page_align(rec)));
-			dict_index_name_print(ib_stream, trx, index);
-			ib_logger(ib_stream,
+			dict_index_name_print(state->stream, trx, index);
+			ib_log(state,
 				". We try to skip the rest of the page.\n");
 
 			btr_pcur_move_to_last_on_page(pcur, &mtr);
@@ -3407,15 +3407,15 @@ wrong_offs:
 	if (IB_UNLIKELY(recovery != IB_RECOVERY_DEFAULT)) {
 		if (!rec_validate(rec, offsets)
 		    || !btr_index_rec_validate(rec, index, FALSE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Index corruption: rec offs %lu"
 				" next offs %lu, page no %lu,\n"
 				"InnoDB: ",
 				(ulong) page_offset(rec),
 				(ulong) next_offs,
 				(ulong) page_get_page_no(page_align(rec)));
-			dict_index_name_print(ib_stream, trx, index);
-			ib_logger(ib_stream, ". We try to skip the record.\n");
+			dict_index_name_print(state->stream, trx, index);
+			ib_log(state, ". We try to skip the record.\n");
 
 			goto next_rec;
 		}
@@ -3432,7 +3432,7 @@ wrong_offs:
 		/* Test if the index record matches completely to search_tuple
 		in prebuilt: if not, then we return with DB_RECORD_NOT_FOUND */
 
-		/* ib_logger(ib_stream, "Comparing rec and search tuple\n"); */
+		/* ib_log(state, "Comparing rec and search tuple\n"); */
 
 		result = cmp_dtuple_rec(cmp_ctx, search_tuple, rec, offsets);
 
@@ -3475,8 +3475,8 @@ not_found:
 			btr_pcur_store_position(pcur, &mtr);
 
 			err = DB_RECORD_NOT_FOUND;
-			/* ut_print_name(ib_stream, index->name);
-			ib_logger(ib_stream, " record not found 4\n"); */
+			/* ut_print_name(state->stream, index->name);
+			ib_log(state, " record not found 4\n"); */
 
 			goto normal_return;
 		}
@@ -3906,9 +3906,9 @@ lock_wait_or_error:
 	thr->lock_state = QUE_THR_LOCK_NOLOCK;
 
 #ifdef IB_SEARCH_DEBUG
-	/*	ib_logger(ib_stream, "Using ");
-	dict_index_name_print(ib_stream, index);
-	ib_logger(ib_stream, " cnt %lu ret value %lu err\n", cnt, err); */
+	/*	ib_log(state, "Using ");
+	dict_index_name_print(state->stream, index);
+	ib_log(state, " cnt %lu ret value %lu err\n", cnt, err); */
 #endif /* IB_SEARCH_DEBUG */
 	goto func_exit;
 
@@ -3922,9 +3922,9 @@ normal_return:
 	}
 
 #ifdef IB_SEARCH_DEBUG
-	/*	ib_logger(ib_strean, "Using ");
-	dict_index_name_print(ib_stream, index);
-	ib_logger(ib_stream, " cnt %lu ret value %lu err\n", cnt, err); */
+	/*	state->log(ib_strean, "Using ");
+	dict_index_name_print(state->stream, index);
+	ib_log(state, " cnt %lu ret value %lu err\n", cnt, err); */
 #endif /* IB_SEARCH_DEBUG */
 	if (err == DB_SUCCESS) {
 		srv_n_rows_read++;

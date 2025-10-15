@@ -546,7 +546,7 @@ spin_loop:
 	}
 
 #ifdef IB_SRV_PRINT_LATCH_WAITS
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Thread %lu spin wait mutex at %p"
 		" cfile %s cline %lu rnds %lu\n",
 		(ulong) os_thread_pf(os_thread_get_curr_id()), (void*) mutex,
@@ -605,7 +605,7 @@ spin_loop:
 #endif
 
 #ifdef IB_SRV_PRINT_LATCH_WAITS
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Thread %lu spin wait succeeds at 2:"
 				" mutex at %p\n",
 				(ulong) os_thread_pf(os_thread_get_curr_id()),
@@ -625,7 +625,7 @@ spin_loop:
 	Now there is no risk of infinite wait on the event. */
 
 #ifdef IB_SRV_PRINT_LATCH_WAITS
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Thread %lu OS wait mutex at %p cfile %s cline %lu rnds %lu\n",
 		(ulong) os_thread_pf(os_thread_get_curr_id()), (void*) mutex,
 		mutex->cfile_name, (ulong) mutex->cline, (ulong) i);
@@ -726,7 +726,7 @@ static
 void
 mutex_list_print_info(
 /*==================*/
-	ib_stream_t	ib_stream)	/*!< in: stream where to print */
+	ib_stream_t	state->stream)	/*!< in: stream where to print */
 {
 	mutex_t*	mutex;
 	const char*	file_name;
@@ -734,7 +734,7 @@ mutex_list_print_info(
 	os_thread_id_t	thread_id;
 	ulint		count		= 0;
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"----------\n"
 		"MUTEX INFO\n"
 		"----------\n");
@@ -749,7 +749,7 @@ mutex_list_print_info(
 		if (mutex_get_lock_word(mutex) != 0) {
 			mutex_get_debug_info(mutex, &file_name, &line,
 					     &thread_id);
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Locked mutex: addr %p thread %ld"
 				" file %s line %ld\n",
 				(void*) mutex, os_thread_pf(thread_id),
@@ -759,7 +759,7 @@ mutex_list_print_info(
 		mutex = UT_LIST_GET_NEXT(list, mutex);
 	}
 
-	ib_logger(ib_stream, "Total number of mutexes %ld\n", count);
+	ib_log(state, "Total number of mutexes %ld\n", count);
 
 	mutex_exit(&mutex_list_mutex);
 }
@@ -924,13 +924,13 @@ sync_thread_levels_g(
 				lock = slot->latch;
 				mutex = slot->latch;
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: sync levels should be"
 					" > %lu but a level is %lu\n",
 					(ulong) limit, (ulong) slot->level);
 
 				if (mutex->magic_n == MUTEX_MAGIC_N) {
-					ib_logger(ib_stream,
+					ib_log(state,
 						"Mutex created at %s %lu\n",
 						mutex->cfile_name,
 						(ulong) mutex->cline);
@@ -944,7 +944,7 @@ sync_thread_levels_g(
 							mutex, &file_name,
 							&line, &thread_id);
 
-						ib_logger(ib_stream,
+						ib_log(state,
 							"InnoDB: Locked mutex:"
 							" addr %p thread %ld"
 							" file %s line %ld\n",
@@ -954,7 +954,7 @@ sync_thread_levels_g(
 							file_name,
 							(ulong) line);
 					} else {
-						ib_logger(ib_stream,
+						ib_log(state,
 							"Not locked\n");
 					}
 				} else {
@@ -1210,7 +1210,7 @@ sync_thread_add_level(
 	case SYNC_TRX_I_S_RWLOCK:
 	case SYNC_TRX_I_S_LAST_READ:
 		if (!sync_thread_levels_g(array, level, TRUE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: sync_thread_levels_g(array, %lu)"
 				" does not hold!\n", level);
 			UT_ERROR;
@@ -1499,15 +1499,15 @@ IB_INTERN
 void
 sync_print_wait_info(
 /*=================*/
-	ib_stream_t	ib_stream)	/*!< in: stream where to print */
+	ib_stream_t	state->stream)	/*!< in: stream where to print */
 {
 #ifdef IB_SYNC_DEBUG
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Mutex exits %llu, rws exits %llu, rwx exits %llu\n",
 		mutex_exit_count, rw_s_exit_count, rw_x_exit_count);
 #endif
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Mutex spin waits %llu, rounds %llu, OS waits %llu\n"
 		"RW-shared spins %llu, OS waits %llu;"
 		" RW-excl spins %llu, OS waits %llu\n",
@@ -1519,7 +1519,7 @@ sync_print_wait_info(
 		rw_x_spin_wait_count,
 		rw_x_os_wait_count);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Spin rounds per wait: %.2f mutex, %.2f RW-shared, "
 		"%.2f RW-excl\n",
 		(double) mutex_spin_round_count /
@@ -1536,15 +1536,15 @@ IB_INTERN
 void
 sync_print(
 /*=======*/
-	ib_stream_t	ib_stream)	/*!< in: stream where to print */
+	ib_stream_t	state->stream)	/*!< in: stream where to print */
 {
 #ifdef IB_SYNC_DEBUG
-	mutex_list_print_info(ib_stream);
+	mutex_list_print_info(state->stream);
 
-	rw_lock_list_print_info(ib_stream);
+	rw_lock_list_print_info(state->stream);
 #endif /* IB_SYNC_DEBUG */
 
-	sync_array_print_info(ib_stream, sync_primary_wait_array);
+	sync_array_print_info(state->stream, sync_primary_wait_array);
 
-	sync_print_wait_info(ib_stream);
+	sync_print_wait_info(state->stream);
 }

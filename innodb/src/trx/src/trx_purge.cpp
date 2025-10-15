@@ -301,7 +301,7 @@ void trx_purge_add_update_undo_to_history(
 		/* The undo log segment will not be reused */
 
 		if (undo->id >= TRX_RSEG_N_SLOTS) {
-			ib_logger(ib_stream, "InnoDB: Error: undo->id is %lu\n", (ulong)undo->id);
+			ib_log(state, "InnoDB: Error: undo->id is %lu\n", (ulong)undo->id);
 			UT_ERROR;
 		}
 
@@ -355,7 +355,7 @@ static void trx_purge_free_segment(trx_rseg_t *rseg, fil_addr_t hdr_addr, ulint 
 	ibool marked = FALSE;
 	mtr_t mtr;
 
-	/*	ib_logger("Freeing an update undo log segment\n", ib_stream); */
+	/*	state->log("Freeing an update undo log segment\n", state->stream); */
 
 	ut_ad(mutex_own(&(purge_sys->mutex)));
 loop:
@@ -637,9 +637,9 @@ static void trx_purge_rseg_get_next_history_log(
 		list cannot be longer than 20 000 undo logs now. */
 
 		if (trx_sys->rseg_history_len > 20000) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(
-				ib_stream,
+			ut_print_timestamp(state->stream);
+			state->log(
+				state->stream,
 				"  InnoDB: Warning: purge reached the"
 				" head of the history list,\n"
 				"InnoDB: but its length is still"
@@ -920,7 +920,7 @@ trx_undo_rec_t *trx_purge_fetch_next_rec(
 			purge_sys->state = TRX_STOP_PURGE;
 			trx_purge_truncate_if_arr_empty();
 			if (srv_print_thread_releases) {
-				ib_logger(ib_stream, "Purge: No logs left in the history list; pages handled %lu\n", (ulong)purge_sys->n_pages_handled);
+				ib_log(state, "Purge: No logs left in the history list; pages handled %lu\n", (ulong)purge_sys->n_pages_handled);
 			}
 			mutex_exit(&(purge_sys->mutex));
 			return NULL;
@@ -945,7 +945,7 @@ trx_undo_rec_t *trx_purge_fetch_next_rec(
 		return NULL;
 	}
 
-	/*	ib_logger(ib_stream, "Thread %lu purging trx %lu undo record %lu\n",
+	/*	ib_log(state, "Thread %lu purging trx %lu undo record %lu\n",
 	os_thread_get_curr_id(),
 	ut_dulint_get_low(purge_sys->purge_trx_no),
 	ut_dulint_get_low(purge_sys->purge_undo_no)); */
@@ -1028,27 +1028,27 @@ IB_INTERN ulint trx_purge(void)
 	mutex_exit(&kernel_mutex);
 	/*	srv_que_task_enqueue(thr2); */
 	if (srv_print_thread_releases) {
-		ib_logger("Starting purge\n", ib_stream);
+		state->log("Starting purge\n", state->stream);
 	}
 	que_run_threads(thr);
 	if (srv_print_thread_releases) {
-		ib_logger(ib_stream, "Purge ends; pages handled %lu\n", (ulong)purge_sys->n_pages_handled);
+		ib_log(state, "Purge ends; pages handled %lu\n", (ulong)purge_sys->n_pages_handled);
 	}
 	return (purge_sys->n_pages_handled - old_pages_handled);
 }
 
 /******************************************************************/ /**
-Prints information of the purge system to ib_stream. */
+Prints information of the purge system to state->stream. */
 IB_INTERN
 void trx_purge_sys_print(void)
 /*=====================*/
 {
-	ib_logger(ib_stream, "InnoDB: Purge system view:\n");
+	ib_log(state, "InnoDB: Purge system view:\n");
 	read_view_print(purge_sys->view);
 
-	ib_logger(ib_stream, "InnoDB: Purge trx n:o " TRX_ID_FMT ", undo n:o " TRX_ID_FMT "\n", TRX_ID_PREP_PRINTF(purge_sys->purge_trx_no), TRX_ID_PREP_PRINTF(purge_sys->purge_undo_no));
-	ib_logger(
-		ib_stream,
+	ib_log(state, "InnoDB: Purge trx n:o " TRX_ID_FMT ", undo n:o " TRX_ID_FMT "\n", TRX_ID_PREP_PRINTF(purge_sys->purge_trx_no), TRX_ID_PREP_PRINTF(purge_sys->purge_undo_no));
+	state->log(
+		state->stream,
 		"InnoDB: Purge next stored %lu, page_no %lu, offset %lu,\n"
 		"InnoDB: Purge hdr_page_no %lu, hdr_offset %lu\n",
 		(ulong)purge_sys->next_stored,

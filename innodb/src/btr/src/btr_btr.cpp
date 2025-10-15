@@ -583,15 +583,15 @@ btr_page_get_father_node_ptr_func(
 
 	if (IB_UNLIKELY(btr_node_ptr_get_child_page_no(node_ptr, offsets) != page_no)) {
 		rec_t *print_rec;
-		ib_logger(ib_stream, "InnoDB: Dump of the child page:\n");
+		ib_log(state, "InnoDB: Dump of the child page:\n");
 		buf_page_print(page_align(user_rec), 0);
-		ib_logger(ib_stream, "InnoDB: Dump of the parent page:\n");
+		ib_log(state, "InnoDB: Dump of the parent page:\n");
 		buf_page_print(page_align(node_ptr), 0);
-		ib_logger(ib_stream, "InnoDB: Corruption of an index tree: table ");
-		ut_print_name(ib_stream, NULL, TRUE, dict_index->table_name);
-		ib_logger(", index ", ib_stream);
-		ut_print_name(ib_stream, NULL, FALSE, dict_index->name);
-		ib_logger(ib_stream,
+		ib_log(state, "InnoDB: Corruption of an index tree: table ");
+		ut_print_name(state->stream, NULL, TRUE, dict_index->table_name);
+		state->log(", index ", state->stream);
+		ut_print_name(state->stream, NULL, FALSE, dict_index->name);
+		ib_log(state,
 				  ",\n"
 				  "InnoDB: father ptr page no %lu, child page no %lu\n",
 				  (ulong)btr_node_ptr_get_child_page_no(node_ptr, offsets),
@@ -604,7 +604,7 @@ btr_page_get_father_node_ptr_func(
 		offsets = rec_get_offsets(node_ptr, dict_index, offsets, ULINT_UNDEFINED, &heap);
 		page_rec_print(node_ptr, offsets);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 				  "InnoDB: You should dump + drop + reimport the table"
 				  " to fix the\n"
 				  "InnoDB: corruption. If the crash happens at "
@@ -983,7 +983,7 @@ btr_page_reorganize_low(
 	if (IB_UNLIKELY(data_size1 != data_size2) || IB_UNLIKELY(max_ins_size1 != max_ins_size2)) {
 		buf_page_print(page, 0);
 		buf_page_print(temp_page, 0);
-		ib_logger(ib_stream,
+		ib_log(state,
 				  "InnoDB: Error: page old data size %lu"
 				  " new data size %lu\n"
 				  "InnoDB: Error: page old max ins size %lu"
@@ -1237,7 +1237,7 @@ btr_root_raise_and_insert(
 	/* We play safe and reset the free bits for the new page */
 
 #if 0
-	ib_logger(ib_stream, "Root raise new page no %lu\n", new_page_no);
+	ib_log(state, "Root raise new page no %lu\n", new_page_no);
 #endif
 
 	if (!dict_index_is_clust(dict_index)) {
@@ -1927,7 +1927,7 @@ func_start:
 	} else if (direction == FSP_DOWN
 #endif /* IB_BTR_AVOID_COPY */
 	) {
-		/*		ib_logger(ib_stream, "Split left\n"); */
+		/*		ib_log(state, "Split left\n"); */
 
 		// FIXME: The code below has become very confusing :-(
 		if (0
@@ -1973,7 +1973,7 @@ func_start:
 		right_block = block;
 #endif /* IB_BTR_AVOID_COPY */
 	} else {
-		/*		ib_logger(ib_stream, "Split right\n"); */
+		/*		ib_log(state, "Split right\n"); */
 
 		if (0
 #ifdef IB_ZIP_COPY
@@ -2067,7 +2067,7 @@ func_start:
 			ibuf_reset_free_bits(new_block);
 		}
 
-		/* ib_logger(ib_stream, "Split second round %lu\n",
+		/* ib_log(state, "Split second round %lu\n",
 		page_get_page_no(page)); */
 		n_iterations++;
 		ut_ad(n_iterations < 2 || buf_block_get_page_zip(insert_block));
@@ -2090,7 +2090,7 @@ func_exit:
 	}
 
 #if 0
-	ib_logger(ib_stream, "Split and insert done %lu %lu\n",
+	ib_log(state, "Split and insert done %lu %lu\n",
 		buf_block_get_page_no(left_block),
 		buf_block_get_page_no(right_block));
 #endif
@@ -2424,7 +2424,7 @@ ibool btr_compress(
 	right_page_no = btr_page_get_next(page, mtr);
 
 #if 0
-	ib_logger(ib_stream, "Merge left page %lu right %lu \n",
+	ib_log(state, "Merge left page %lu right %lu \n",
 		left_page_no, right_page_no);
 #endif
 
@@ -2831,7 +2831,7 @@ void btr_print_size(
 	mtr_t mtr;
 
 	if (dict_index_is_ibuf(index)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 				  "Sorry, cannot print info of an ibuf tree:"
 				  " use ibuf functions\n");
 
@@ -2844,14 +2844,14 @@ void btr_print_size(
 
 	seg = root + PAGE_HEADER + PAGE_BTR_SEG_TOP;
 
-	ib_logger(ib_stream, "INFO OF THE NON-LEAF PAGE SEGMENT\n");
+	ib_log(state, "INFO OF THE NON-LEAF PAGE SEGMENT\n");
 	fseg_print(seg, &mtr);
 
 	if (!(index->type & DICT_UNIVERSAL)) {
 
 		seg = root + PAGE_HEADER + PAGE_BTR_SEG_LEAF;
 
-		ib_logger(ib_stream, "INFO OF THE LEAF PAGE SEGMENT\n");
+		ib_log(state, "INFO OF THE LEAF PAGE SEGMENT\n");
 		fseg_print(seg, &mtr);
 	}
 
@@ -2879,7 +2879,7 @@ btr_print_recursive(
 	mtr_t mtr2;
 
 	ut_ad(mtr_memo_contains(mtr, block, MTR_MEMO_PAGE_X_FIX));
-	ib_logger(ib_stream, "NODE ON LEVEL %lu page number %lu\n", (ulong)btr_page_get_level(page, mtr), (ulong)buf_block_get_page_no(block));
+	ib_log(state, "NODE ON LEVEL %lu page number %lu\n", (ulong)btr_page_get_level(page, mtr), (ulong)buf_block_get_page_no(block));
 
 	page_print(block, index, width, width);
 
@@ -2929,7 +2929,7 @@ void btr_print_index(
 	ulint *offsets = offsets_;
 	rec_offs_init(offsets_);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 			  "--------------------------\n"
 			  "INDEX TREE PRINT\n");
 
@@ -3007,9 +3007,9 @@ btr_index_rec_validate_report(
 	const dict_index_t *dict_index
 ) /*!< in: index */
 {
-	ib_logger(ib_stream, "InnoDB: Record in ");
-	dict_index_name_print(ib_stream, NULL, dict_index);
-	ib_logger(ib_stream, ", page %lu, at offset %lu\n", page_get_page_no(page), (ulint)page_offset(rec));
+	ib_log(state, "InnoDB: Record in ");
+	dict_index_name_print(state->stream, NULL, dict_index);
+	ib_log(state, ", page %lu, at offset %lu\n", page_get_page_no(page), (ulint)page_offset(rec));
 }
 
 /************************************************************/ /**
@@ -3047,7 +3047,7 @@ ibool btr_index_rec_validate(
 
 	if (IB_UNLIKELY((ibool) !!page_is_comp(page) != dict_table_is_comp(dict_index->table))) {
 		btr_index_rec_validate_report(page, rec, dict_index);
-		ib_logger(ib_stream, "InnoDB: compact flag=%lu, should be %lu\n", (ulong) !!page_is_comp(page), (ulong)dict_table_is_comp(dict_index->table));
+		ib_log(state, "InnoDB: compact flag=%lu, should be %lu\n", (ulong) !!page_is_comp(page), (ulong)dict_table_is_comp(dict_index->table));
 
 		return (FALSE);
 	}
@@ -3056,14 +3056,14 @@ ibool btr_index_rec_validate(
 
 	if (!page_is_comp(page) && IB_UNLIKELY(rec_get_n_fields_old(rec) != n)) {
 		btr_index_rec_validate_report(page, rec, dict_index);
-		ib_logger(ib_stream, "InnoDB: has %lu fields, should have %lu\n", (ulong)rec_get_n_fields_old(rec), (ulong)n);
+		ib_log(state, "InnoDB: has %lu fields, should have %lu\n", (ulong)rec_get_n_fields_old(rec), (ulong)n);
 
 		if (dump_on_error) {
 			buf_page_print(page, 0);
 
-			ib_logger(ib_stream, "InnoDB: corrupt record ");
-			rec_print_old(ib_stream, rec);
-			ib_logger(ib_stream, "\n");
+			ib_log(state, "InnoDB: corrupt record ");
+			rec_print_old(state->stream, rec);
+			ib_log(state, "\n");
 		}
 		return (FALSE);
 	}
@@ -3087,7 +3087,7 @@ ibool btr_index_rec_validate(
 		if ((dict_index_get_nth_field(dict_index, i)->prefix_len == 0 && len != IB_SQL_NULL && fixed_size && len != fixed_size) || (dict_index_get_nth_field(dict_index, i)->prefix_len > 0 && len != IB_SQL_NULL && len > dict_index_get_nth_field(dict_index, i)->prefix_len)) {
 
 			btr_index_rec_validate_report(page, rec, dict_index);
-			ib_logger(ib_stream,
+			ib_log(state,
 					  "InnoDB: field %lu len is %lu,"
 					  " should be %lu\n",
 					  (ulong)i,
@@ -3097,9 +3097,9 @@ ibool btr_index_rec_validate(
 			if (dump_on_error) {
 				buf_page_print(page, 0);
 
-				ib_logger("InnoDB: corrupt record ", ib_stream);
-				rec_print_new(ib_stream, rec, offsets);
-				ib_logger(ib_stream, "\n");
+				state->log("InnoDB: corrupt record ", state->stream);
+				rec_print_new(state->stream, rec, offsets);
+				ib_log(state, "\n");
 			}
 			if (IB_LIKELY_NULL(heap)) {
 				mem_heap_free(heap);
@@ -3158,12 +3158,12 @@ btr_validate_report1(
 	const buf_block_t *block
 ) /*!< in: index page */
 {
-	ib_logger(ib_stream, "InnoDB: Error in page %lu of ", buf_block_get_page_no(block));
-	dict_index_name_print(ib_stream, NULL, dict_index);
+	ib_log(state, "InnoDB: Error in page %lu of ", buf_block_get_page_no(block));
+	dict_index_name_print(state->stream, NULL, dict_index);
 	if (level) {
-		ib_logger(ib_stream, ", index tree level %lu", level);
+		ib_log(state, ", index tree level %lu", level);
 	}
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 }
 
 /************************************************************/ /**
@@ -3177,12 +3177,12 @@ btr_validate_report2(
 	const buf_block_t *block2
 ) /*!< in: second index page */
 {
-	ib_logger(ib_stream, "InnoDB: Error in pages %lu and %lu of ", buf_block_get_page_no(block1), buf_block_get_page_no(block2));
-	dict_index_name_print(ib_stream, NULL, dict_index);
+	ib_log(state, "InnoDB: Error in pages %lu and %lu of ", buf_block_get_page_no(block1), buf_block_get_page_no(block2));
+	dict_index_name_print(state->stream, NULL, dict_index);
 	if (level) {
-		ib_logger(ib_stream, ", index tree level %lu", level);
+		ib_log(state, ", index tree level %lu", level);
 	}
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 }
 
 /************************************************************/ /**
@@ -3295,10 +3295,10 @@ loop:
 		right_page = buf_block_get_frame(right_block);
 		if (IB_UNLIKELY(btr_page_get_prev(right_page, &mtr) != page_get_page_no(page))) {
 			btr_validate_report2(dict_index, level, block, right_block);
-			ib_logger(
+			state->log(
 				"InnoDB: broken FIL_PAGE_NEXT"
 				" or FIL_PAGE_PREV links\n",
-				ib_stream
+				state->stream
 			);
 			buf_page_print(page, 0);
 			buf_page_print(right_page, 0);
@@ -3308,7 +3308,7 @@ loop:
 
 		if (IB_UNLIKELY(page_is_comp(right_page) != page_is_comp(page))) {
 			btr_validate_report2(dict_index, level, block, right_block);
-			ib_logger("InnoDB: 'compact' flag mismatch\n", ib_stream);
+			state->log("InnoDB: 'compact' flag mismatch\n", state->stream);
 			buf_page_print(page, 0);
 			buf_page_print(right_page, 0);
 
@@ -3327,25 +3327,25 @@ loop:
 
 			btr_validate_report2(dict_index, level, block, right_block);
 
-			ib_logger(
+			state->log(
 				"InnoDB: records in wrong order"
 				" on adjacent pages\n",
-				ib_stream
+				state->stream
 			);
 
 			buf_page_print(page, 0);
 			buf_page_print(right_page, 0);
 
-			ib_logger("InnoDB: record ", ib_stream);
+			state->log("InnoDB: record ", state->stream);
 			rec = page_rec_get_prev(page_get_supremum_rec(page));
-			rec_print(ib_stream, rec, dict_index);
-			ib_logger(ib_stream, "\n");
-			ib_logger(ib_stream, "InnoDB: record ");
+			rec_print(state->stream, rec, dict_index);
+			ib_log(state, "\n");
+			ib_log(state, "InnoDB: record ");
 			rec = page_rec_get_next(
 				page_get_infimum_rec(right_page)
 			);
-			rec_print(ib_stream, rec, dict_index);
-			ib_logger(ib_stream, "\n");
+			rec_print(state->stream, rec, dict_index);
+			ib_log(state, "\n");
 
 			ret = FALSE;
 		}
@@ -3372,23 +3372,23 @@ loop:
 
 			btr_validate_report1(dict_index, level, block);
 
-			ib_logger(ib_stream, "InnoDB: node pointer to the page is wrong\n");
+			ib_log(state, "InnoDB: node pointer to the page is wrong\n");
 
 			buf_page_print(father_page, 0);
 			buf_page_print(page, 0);
 
-			ib_logger(ib_stream, "InnoDB: node ptr ");
-			rec_print(ib_stream, node_ptr, dict_index);
+			ib_log(state, "InnoDB: node ptr ");
+			rec_print(state->stream, node_ptr, dict_index);
 
 			rec = btr_cur_get_rec(&node_cur);
-			ib_logger(ib_stream,
+			ib_log(state,
 					  "\n"
 					  "InnoDB: node ptr child page n:o %lu\n",
 					  (ulong)btr_node_ptr_get_child_page_no(rec, offsets));
 
-			ib_logger(ib_stream, "InnoDB: record on page ");
-			rec_print_new(ib_stream, rec, offsets);
-			ib_logger(ib_stream, "\n");
+			ib_log(state, "InnoDB: record on page ");
+			rec_print_new(state->stream, rec, offsets);
+			ib_log(state, "\n");
 			ret = FALSE;
 
 			goto node_ptr_fails;
@@ -3413,14 +3413,14 @@ loop:
 				buf_page_print(father_page, 0);
 				buf_page_print(page, 0);
 
-				ib_logger(ib_stream,
+				ib_log(state,
 						  "InnoDB: Error: node ptrs differ"
 						  " on levels > 0\n"
 						  "InnoDB: node ptr ");
-				rec_print_new(ib_stream, node_ptr, offsets);
-				ib_logger(ib_stream, "InnoDB: first rec ");
-				rec_print(ib_stream, first_rec, dict_index);
-				ib_logger(ib_stream, "\n");
+				rec_print_new(state->stream, node_ptr, offsets);
+				ib_log(state, "InnoDB: first rec ");
+				rec_print(state->stream, first_rec, dict_index);
+				ib_log(state, "\n");
 				ret = FALSE;
 
 				goto node_ptr_fails;
@@ -3445,7 +3445,7 @@ loop:
 
 				if (btr_cur_get_rec(&right_node_cur) != right_node_ptr) {
 					ret = FALSE;
-					ib_logger(ib_stream,
+					ib_log(state,
 							  "InnoDB: node pointer to"
 							  " the right page is wrong\n");
 
@@ -3464,7 +3464,7 @@ loop:
 															)
 														)) {
 					ret = FALSE;
-					ib_logger(ib_stream,
+					ib_log(state,
 							  "InnoDB: node pointer 2 to"
 							  " the right page is wrong\n");
 
@@ -3479,7 +3479,7 @@ loop:
 				if (page_get_page_no(right_father_page) != btr_page_get_next(father_page, &mtr)) {
 
 					ret = FALSE;
-					ib_logger(ib_stream,
+					ib_log(state,
 							  "InnoDB: node pointer 3 to"
 							  " the right page is wrong\n");
 

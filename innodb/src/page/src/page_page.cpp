@@ -122,28 +122,28 @@ page_dir_find_owner_slot(
 	while (IB_LIKELY(*(ib_uint16_t*) slot != rec_offs_bytes)) {
 
 		if (IB_UNLIKELY(slot == first_slot)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Probable data corruption on"
 				" page %lu\n"
 				"InnoDB: Original record ",
 				(ulong) page_get_page_no(page));
 
 			if (page_is_comp(page)) {
-				ib_logger(ib_stream, "(compact record)");
+				ib_log(state, "(compact record)");
 			} else {
-				rec_print_old(ib_stream, rec);
+				rec_print_old(state->stream, rec);
 			}
 
-			ib_logger(ib_stream, "\n"
+			ib_log(state, "\n"
 			      "InnoDB: on that page.\n"
 			      "InnoDB: Cannot find the dir slot for record ");
 			if (page_is_comp(page)) {
-				ib_logger(ib_stream, "(compact record)");
+				ib_log(state, "(compact record)");
 			} else {
-				rec_print_old(ib_stream, page
+				rec_print_old(state->stream, page
 					      + mach_decode_2(rec_offs_bytes));
 			}
-			ib_logger(ib_stream, "\n"
+			ib_log(state, "\n"
 			      "InnoDB: on that page!\n");
 
 			buf_page_print(page, 0);
@@ -577,9 +577,9 @@ page_copy_rec_list_end_no_locks(
 
 			buf_page_print(new_page, 0);
 			buf_page_print(page_align(rec), 0);
-			ut_print_timestamp(ib_stream);
+			ut_print_timestamp(state->stream);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: rec offset %lu, cur1 offset %lu,"
 				" cur2 offset %lu\n",
 				(ulong) page_offset(rec),
@@ -1595,15 +1595,15 @@ page_rec_print(
 	const ulint*	offsets)/*!< in: record descriptor */
 {
 	ut_a(!page_rec_is_comp(rec) == !rec_offs_comp(offsets));
-	rec_print_new(ib_stream, rec, offsets);
+	rec_print_new(state->stream, rec, offsets);
 	if (page_rec_is_comp(rec)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			" n_owned: %lu; heap_no: %lu; next rec: %lu\n",
 			(ulong) rec_get_n_owned_new(rec),
 			(ulong) rec_get_heap_no_new(rec),
 			(ulong) rec_get_next_offs(rec, TRUE));
 	} else {
-		ib_logger(ib_stream,
+		ib_log(state,
 			" n_owned: %lu; heap_no: %lu; next rec: %lu\n",
 			(ulong) rec_get_n_owned_old(rec),
 			(ulong) rec_get_heap_no_old(rec),
@@ -1630,7 +1630,7 @@ page_dir_print(
 
 	n = page_dir_get_n_slots(page);
 
-	ib_logger(ib_stream, "--------------------------------\n"
+	ib_log(state, "--------------------------------\n"
 		"PAGE DIRECTORY\n"
 		"Page address %p\n"
 		"Directory stack top at offs: %lu; number of slots: %lu\n",
@@ -1639,10 +1639,10 @@ page_dir_print(
 	for (i = 0; i < n; i++) {
 		slot = page_dir_get_nth_slot(page, i);
 		if ((i == pr_n) && (i < n - pr_n)) {
-			ib_logger(ib_stream, "    ...   \n");
+			ib_log(state, "    ...   \n");
 		}
 		if ((i < pr_n) || (i >= n - pr_n)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Contents of slot: %lu: n_owned: %lu,"
 				" rec offs: %lu\n",
 				(ulong) i,
@@ -1651,7 +1651,7 @@ page_dir_print(
 				page_offset(page_dir_slot_get_rec(slot)));
 		}
 	}
-	ib_logger(ib_stream, "Total of %lu records\n"
+	ib_log(state, "Total of %lu records\n"
 		"--------------------------------\n",
 		(ulong) (PAGE_HEAP_NO_USER_LOW + page_get_n_recs(page)));
 }
@@ -1678,7 +1678,7 @@ page_print_list(
 
 	ut_a((ibool)!!page_is_comp(page) == dict_table_is_comp(index->table));
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"--------------------------------\n"
 		"PAGE RECORD LIST\n"
 		"Page address %p\n", page);
@@ -1703,7 +1703,7 @@ page_print_list(
 	}
 
 	if (n_recs > 2 * pr_n) {
-		ib_logger(ib_stream, " ... \n");
+		ib_log(state, " ... \n");
 	}
 
 	while (!page_cur_is_after_last(&cur)) {
@@ -1717,7 +1717,7 @@ page_print_list(
 		count++;
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Total of %lu records \n"
 		"--------------------------------\n",
 		(ulong) (count + 1));
@@ -1735,7 +1735,7 @@ page_header_print(
 /*==============*/
 	const page_t*	page)
 {
-	ib_logger(ib_stream,
+	ib_log(state,
 		"--------------------------------\n"
 		"PAGE HEADER INFO\n"
 		"Page address %p, n records %lu (%s)\n"
@@ -1807,14 +1807,14 @@ page_rec_validate(
 	}
 
 	if (IB_UNLIKELY(!(n_owned <= PAGE_DIR_SLOT_MAX_N_OWNED))) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Dir slot of rec %lu, n owned too big %lu\n",
 			(ulong) page_offset(rec), (ulong) n_owned);
 		return(FALSE);
 	}
 
 	if (IB_UNLIKELY(!(heap_no < page_dir_get_n_heap(page)))) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Heap no of rec %lu too big %lu %lu\n",
 			(ulong) page_offset(rec), (ulong) heap_no,
 			(ulong) page_dir_get_n_heap(page));
@@ -1846,7 +1846,7 @@ page_check_dir(
 
 	if (IB_UNLIKELY(!page_rec_is_infimum_low(infimum_offs))) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page directory corruption:"
 			" infimum not pointed to\n");
 		buf_page_print(page, 0);
@@ -1854,7 +1854,7 @@ page_check_dir(
 
 	if (IB_UNLIKELY(!page_rec_is_supremum_low(supremum_offs))) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page directory corruption:"
 			" supremum not pointed to\n");
 		buf_page_print(page, 0);
@@ -1890,7 +1890,7 @@ page_simple_validate_old(
 	n_slots = page_dir_get_n_slots(page);
 
 	if (IB_UNLIKELY(n_slots > IB_PAGE_SIZE / 4)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Nonsensical number %lu of page dir slots\n",
 			(ulong) n_slots);
 
@@ -1902,7 +1902,7 @@ page_simple_validate_old(
 	if (IB_UNLIKELY(rec_heap_top
 			  > page_dir_get_nth_slot(page, n_slots - 1))) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Record heap and dir overlap on a page,"
 			" heap top %lu, dir %lu\n",
 			(ulong) page_header_get_field(page, PAGE_HEAP_TOP),
@@ -1924,7 +1924,7 @@ page_simple_validate_old(
 
 	for (;;) {
 		if (IB_UNLIKELY(rec > rec_heap_top)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Record %lu is above"
 				" rec heap top %lu\n",
 				(ulong)(rec - page),
@@ -1938,7 +1938,7 @@ page_simple_validate_old(
 			if (IB_UNLIKELY(rec_get_n_owned_old(rec)
 					  != own_count)) {
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Wrong owned count %lu, %lu,"
 					" rec %lu\n",
 					(ulong) rec_get_n_owned_old(rec),
@@ -1950,7 +1950,7 @@ page_simple_validate_old(
 
 			if (IB_UNLIKELY
 			    (page_dir_slot_get_rec(slot) != rec)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Dir slot does not point"
 					" to right rec %lu\n",
 					(ulong)(rec - page));
@@ -1974,7 +1974,7 @@ page_simple_validate_old(
 		if (IB_UNLIKELY
 		    (rec_get_next_offs(rec, FALSE) < FIL_PAGE_DATA
 		     || rec_get_next_offs(rec, FALSE) >= IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Next record offset"
 				" nonsensical %lu for rec %lu\n",
 				(ulong) rec_get_next_offs(rec, FALSE),
@@ -1986,7 +1986,7 @@ page_simple_validate_old(
 		count++;
 
 		if (IB_UNLIKELY(count > IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Page record list appears"
 				" to be circular %lu\n",
 				(ulong) count);
@@ -1998,14 +1998,14 @@ page_simple_validate_old(
 	}
 
 	if (IB_UNLIKELY(rec_get_n_owned_old(rec) == 0)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: n owned is zero in a supremum rec\n");
 
 		goto func_exit;
 	}
 
 	if (IB_UNLIKELY(slot_no != n_slots - 1)) {
-		ib_logger(ib_stream, "InnoDB: n slots wrong %lu, %lu\n",
+		ib_log(state, "InnoDB: n slots wrong %lu, %lu\n",
 			(ulong) slot_no, (ulong) (n_slots - 1));
 		goto func_exit;
 	}
@@ -2013,7 +2013,7 @@ page_simple_validate_old(
 	if (IB_UNLIKELY(page_header_get_field(page, PAGE_N_RECS)
 			  + PAGE_HEAP_NO_USER_LOW
 			  != count + 1)) {
-		ib_logger(ib_stream, "InnoDB: n recs wrong %lu %lu\n",
+		ib_log(state, "InnoDB: n recs wrong %lu %lu\n",
 			(ulong) page_header_get_field(page, PAGE_N_RECS)
 			+ PAGE_HEAP_NO_USER_LOW,
 			(ulong) (count + 1));
@@ -2027,7 +2027,7 @@ page_simple_validate_old(
 	while (rec != NULL) {
 		if (IB_UNLIKELY(rec < page + FIL_PAGE_DATA
 				  || rec >= page + IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Free list record has"
 				" a nonsensical offset %lu\n",
 				(ulong) (rec - page));
@@ -2036,7 +2036,7 @@ page_simple_validate_old(
 		}
 
 		if (IB_UNLIKELY(rec > rec_heap_top)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Free list record %lu"
 				" is above rec heap top %lu\n",
 				(ulong) (rec - page),
@@ -2048,7 +2048,7 @@ page_simple_validate_old(
 		count++;
 
 		if (IB_UNLIKELY(count > IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Page free list appears"
 				" to be circular %lu\n",
 				(ulong) count);
@@ -2060,7 +2060,7 @@ page_simple_validate_old(
 
 	if (IB_UNLIKELY(page_dir_get_n_heap(page) != count + 1)) {
 
-		ib_logger(ib_stream, "InnoDB: N heap is wrong %lu, %lu\n",
+		ib_log(state, "InnoDB: N heap is wrong %lu, %lu\n",
 			(ulong) page_dir_get_n_heap(page),
 			(ulong) (count + 1));
 
@@ -2101,7 +2101,7 @@ page_simple_validate_new(
 	n_slots = page_dir_get_n_slots(page);
 
 	if (IB_UNLIKELY(n_slots > IB_PAGE_SIZE / 4)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Nonsensical number %lu"
 			" of page dir slots\n", (ulong) n_slots);
 
@@ -2113,7 +2113,7 @@ page_simple_validate_new(
 	if (IB_UNLIKELY(rec_heap_top
 			  > page_dir_get_nth_slot(page, n_slots - 1))) {
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Record heap and dir overlap on a page,"
 			" heap top %lu, dir %lu\n",
 			(ulong) page_header_get_field(page, PAGE_HEAP_TOP),
@@ -2135,7 +2135,7 @@ page_simple_validate_new(
 
 	for (;;) {
 		if (IB_UNLIKELY(rec > rec_heap_top)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Record %lu is above rec"
 				" heap top %lu\n",
 				(ulong) page_offset(rec),
@@ -2149,7 +2149,7 @@ page_simple_validate_new(
 			if (IB_UNLIKELY(rec_get_n_owned_new(rec)
 					  != own_count)) {
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Wrong owned count %lu, %lu,"
 					" rec %lu\n",
 					(ulong) rec_get_n_owned_new(rec),
@@ -2161,7 +2161,7 @@ page_simple_validate_new(
 
 			if (IB_UNLIKELY
 			    (page_dir_slot_get_rec(slot) != rec)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Dir slot does not point"
 					" to right rec %lu\n",
 					(ulong) page_offset(rec));
@@ -2185,7 +2185,7 @@ page_simple_validate_new(
 		if (IB_UNLIKELY
 		    (rec_get_next_offs(rec, TRUE) < FIL_PAGE_DATA
 		     || rec_get_next_offs(rec, TRUE) >= IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Next record offset nonsensical %lu"
 				" for rec %lu\n",
 				(ulong) rec_get_next_offs(rec, TRUE),
@@ -2197,7 +2197,7 @@ page_simple_validate_new(
 		count++;
 
 		if (IB_UNLIKELY(count > IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Page record list appears"
 				" to be circular %lu\n",
 				(ulong) count);
@@ -2209,14 +2209,14 @@ page_simple_validate_new(
 	}
 
 	if (IB_UNLIKELY(rec_get_n_owned_new(rec) == 0)) {
-		ib_logger(ib_stream, "InnoDB: n owned is zero"
+		ib_log(state, "InnoDB: n owned is zero"
 			" in a supremum rec\n");
 
 		goto func_exit;
 	}
 
 	if (IB_UNLIKELY(slot_no != n_slots - 1)) {
-		ib_logger(ib_stream, "InnoDB: n slots wrong %lu, %lu\n",
+		ib_log(state, "InnoDB: n slots wrong %lu, %lu\n",
 			(ulong) slot_no, (ulong) (n_slots - 1));
 		goto func_exit;
 	}
@@ -2224,7 +2224,7 @@ page_simple_validate_new(
 	if (IB_UNLIKELY(page_header_get_field(page, PAGE_N_RECS)
 			  + PAGE_HEAP_NO_USER_LOW
 			  != count + 1)) {
-		ib_logger(ib_stream, "InnoDB: n recs wrong %lu %lu\n",
+		ib_log(state, "InnoDB: n recs wrong %lu %lu\n",
 			(ulong) page_header_get_field(page, PAGE_N_RECS)
 			+ PAGE_HEAP_NO_USER_LOW,
 			(ulong) (count + 1));
@@ -2238,7 +2238,7 @@ page_simple_validate_new(
 	while (rec != NULL) {
 		if (IB_UNLIKELY(rec < page + FIL_PAGE_DATA
 				  || rec >= page + IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Free list record has"
 				" a nonsensical offset %lu\n",
 				(ulong) page_offset(rec));
@@ -2247,7 +2247,7 @@ page_simple_validate_new(
 		}
 
 		if (IB_UNLIKELY(rec > rec_heap_top)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Free list record %lu"
 				" is above rec heap top %lu\n",
 				(ulong) page_offset(rec),
@@ -2259,7 +2259,7 @@ page_simple_validate_new(
 		count++;
 
 		if (IB_UNLIKELY(count > IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Page free list appears"
 				" to be circular %lu\n",
 				(ulong) count);
@@ -2271,7 +2271,7 @@ page_simple_validate_new(
 
 	if (IB_UNLIKELY(page_dir_get_n_heap(page) != count + 1)) {
 
-		ib_logger(ib_stream, "InnoDB: N heap is wrong %lu, %lu\n",
+		ib_log(state, "InnoDB: N heap is wrong %lu, %lu\n",
 			(ulong) page_dir_get_n_heap(page),
 			(ulong) (count + 1));
 
@@ -2314,8 +2314,8 @@ page_validate(
 
 	if (IB_UNLIKELY((ibool) !!page_is_comp(page)
 			  != dict_table_is_comp(index->table))) {
-		ib_logger("InnoDB: 'compact format' flag mismatch\n",
-			ib_stream);
+		state->log("InnoDB: 'compact format' flag mismatch\n",
+			state->stream);
 		goto func_exit2;
 	}
 	if (page_is_comp(page)) {
@@ -2343,7 +2343,7 @@ page_validate(
 	if (IB_UNLIKELY(!(page_header_get_ptr(page, PAGE_HEAP_TOP)
 			    <= page_dir_get_nth_slot(page, n_slots - 1)))) {
 
-		ib_logger(ib_stream, 
+		ib_log(state, 
 			"InnoDB: Record heap and dir overlap"
 			" on space %lu page %lu index %s, %p, %p\n",
 			(ulong) page_get_space_id(page),
@@ -2371,7 +2371,7 @@ page_validate(
 		if (page_is_comp(page) && page_rec_is_user_rec(rec)
 		    && IB_UNLIKELY(rec_get_node_ptr_flag(rec)
 				     == page_is_leaf(page))) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: node_ptr flag mismatch\n");
 			goto func_exit;
 		}
@@ -2387,18 +2387,18 @@ page_validate(
 			if (IB_UNLIKELY
 			    (1 != cmp_rec_rec(rec, old_rec,
 					      offsets, old_offsets, index))) {
-				ib_logger(ib_stream, 
+				ib_log(state, 
 					"InnoDB: Records in wrong order"
 					" on space %lu page %lu index %s\n",
 					(ulong) page_get_space_id(page),
 					(ulong) page_get_page_no(page),
 					index->name);
-				ib_logger(ib_stream,
+				ib_log(state,
 					"\nInnoDB: previous record ");
-				rec_print_new(ib_stream, old_rec, old_offsets);
-				ib_logger(ib_stream, "\nInnoDB: record ");
-				rec_print_new(ib_stream, rec, offsets);
-				ib_logger(ib_stream, "\n");
+				rec_print_new(state->stream, old_rec, old_offsets);
+				ib_log(state, "\nInnoDB: record ");
+				rec_print_new(state->stream, rec, offsets);
+				ib_log(state, "\n");
 
 				goto func_exit;
 			}
@@ -2413,7 +2413,7 @@ page_validate(
 		offs = page_offset(rec_get_start(rec, offsets));
 		i = rec_offs_size(offsets);
 		if (IB_UNLIKELY(offs + i >= IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: record offset out of bounds\n");
 			goto func_exit;
 		}
@@ -2422,7 +2422,7 @@ page_validate(
 			if (IB_UNLIKELY(buf[offs + i])) {
 				/* No other record may overlap this */
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Record overlaps another\n");
 				goto func_exit;
 			}
@@ -2439,7 +2439,7 @@ page_validate(
 		if (IB_UNLIKELY(rec_own_count)) {
 			/* This is a record pointed to by a dir slot */
 			if (IB_UNLIKELY(rec_own_count != own_count)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Wrong owned count %lu, %lu\n",
 					(ulong) rec_own_count,
 					(ulong) own_count);
@@ -2447,7 +2447,7 @@ page_validate(
 			}
 
 			if (page_dir_slot_get_rec(slot) != rec) {
-				ib_logger(ib_stream, "InnoDB: Dir slot does not"
+				ib_log(state, "InnoDB: Dir slot does not"
 				      " point to right rec\n");
 				goto func_exit;
 			}
@@ -2485,12 +2485,12 @@ page_validate(
 		}
 	} else if (IB_UNLIKELY(rec_get_n_owned_old(rec) == 0)) {
 n_owned_zero:
-		ib_logger(ib_stream, "InnoDB: n owned is zero\n");
+		ib_log(state, "InnoDB: n owned is zero\n");
 		goto func_exit;
 	}
 
 	if (IB_UNLIKELY(slot_no != n_slots - 1)) {
-		ib_logger(ib_stream, "InnoDB: n slots wrong %lu %lu\n",
+		ib_log(state, "InnoDB: n slots wrong %lu %lu\n",
 			(ulong) slot_no, (ulong) (n_slots - 1));
 		goto func_exit;
 	}
@@ -2498,7 +2498,7 @@ n_owned_zero:
 	if (IB_UNLIKELY(page_header_get_field(page, PAGE_N_RECS)
 			  + PAGE_HEAP_NO_USER_LOW
 			  != count + 1)) {
-		ib_logger(ib_stream, "InnoDB: n recs wrong %lu %lu\n",
+		ib_log(state, "InnoDB: n recs wrong %lu %lu\n",
 			(ulong) page_header_get_field(page, PAGE_N_RECS)
 			+ PAGE_HEAP_NO_USER_LOW,
 			(ulong) (count + 1));
@@ -2506,7 +2506,7 @@ n_owned_zero:
 	}
 
 	if (IB_UNLIKELY(data_size != page_get_data_size(page))) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Summed data size %lu, returned by func %lu\n",
 			(ulong) data_size, (ulong) page_get_data_size(page));
 		goto func_exit;
@@ -2527,7 +2527,7 @@ n_owned_zero:
 		offs = page_offset(rec_get_start(rec, offsets));
 		i = rec_offs_size(offsets);
 		if (IB_UNLIKELY(offs + i >= IB_PAGE_SIZE)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: record offset out of bounds\n");
 			goto func_exit;
 		}
@@ -2535,7 +2535,7 @@ n_owned_zero:
 		while (i--) {
 
 			if (IB_UNLIKELY(buf[offs + i])) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Record overlaps another"
 					" in free list\n");
 				goto func_exit;
@@ -2548,7 +2548,7 @@ n_owned_zero:
 	}
 
 	if (IB_UNLIKELY(page_dir_get_n_heap(page) != count + 1)) {
-		ib_logger(ib_stream, "InnoDB: N heap is wrong %lu %lu\n",
+		ib_log(state, "InnoDB: N heap is wrong %lu %lu\n",
 			(ulong) page_dir_get_n_heap(page),
 			(ulong) count + 1);
 		goto func_exit;
@@ -2561,7 +2561,7 @@ func_exit:
 
 	if (IB_UNLIKELY(ret == FALSE)) {
 func_exit2:
-		ib_logger(ib_stream, 
+		ib_log(state, 
 			"InnoDB: Apparent corruption"
 			" in space %lu page %lu index %s\n",
 			(ulong) page_get_space_id(page),

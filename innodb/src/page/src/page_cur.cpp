@@ -899,7 +899,7 @@ page_cur_parse_insert_rec(
 	/* Build the inserted record to buf */
 
         if (IB_UNLIKELY(mismatch_index >= IB_PAGE_SIZE)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Is short %lu, info_and_status_bits %lu, offset %lu, "
 			"o_offset %lu\n"
 			"mismatch index %lu, end_seg_len %lu\n"
@@ -910,9 +910,9 @@ page_cur_parse_insert_rec(
 			(ulong) mismatch_index, (ulong) end_seg_len,
 			(ulong) (ptr - ptr2));
 
-		ib_logger(ib_stream, "Dump of 300 bytes of log:\n");
-		ut_print_buf(ib_stream, ptr2, 300);
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "Dump of 300 bytes of log:\n");
+		ut_print_buf(state->stream, ptr2, 300);
+		ib_log(state, "\n");
 
 		buf_page_print(page, 0);
 

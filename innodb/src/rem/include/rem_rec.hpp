@@ -773,7 +773,7 @@ IB_INTERN
 void
 rec_print_old(
 /*==========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec);		/*!< in: physical record */
 #ifndef IB_HOTBACKUP
 /***************************************************************//**
@@ -783,7 +783,7 @@ IB_INTERN
 void
 rec_print_comp(
 /*===========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	const ulint*	offsets);	/*!< in: array returned by
 					rec_get_offsets() */
@@ -793,7 +793,7 @@ IB_INTERN
 void
 rec_print_new(
 /*==========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	const ulint*	offsets);	/*!< in: array returned by
 					rec_get_offsets() */
@@ -803,7 +803,7 @@ IB_INTERN
 void
 rec_print(
 /*======*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const rec_t*	rec,		/*!< in: physical record */
 	dict_index_t*	index);		/*!< in: record descriptor */
 #endif /* IB_HOTBACKUP */

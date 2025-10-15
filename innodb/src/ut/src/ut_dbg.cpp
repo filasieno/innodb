@@ -49,19 +49,19 @@ IB_INTERN ulint *ut_dbg_null_ptr = NULL;
 /// \param line in: line number of the assertion
 IB_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint line)
 {
-	ut_print_timestamp(ib_stream);
+	ut_print_timestamp(state->stream);
 
 #ifdef IB_HOTBACKUP
-	ib_logger(ib_stream, "  InnoDB: Assertion failure in file %s line %lu\n", file, line);
+	ib_log(state, "  InnoDB: Assertion failure in file %s line %lu\n", file, line);
 #else  /* IB_HOTBACKUP */
-	ib_logger(ib_stream, "  InnoDB: Assertion failure in thread %lu in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
+	ib_log(state, "  InnoDB: Assertion failure in thread %lu in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
 #endif /* IB_HOTBACKUP */
 	if (expr) {
-		ib_logger(ib_stream, "InnoDB: Failing assertion: %s\n", expr);
+		ib_log(state, "InnoDB: Failing assertion: %s\n", expr);
 	}
 
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"InnoDB: We intentionally generate a memory trap.\n"
 		"InnoDB: Submit a detailed bug report, check the InnoDB website for details\n"
 		"InnoDB: If you get repeated assertion failures or crashes, even\n"
@@ -96,7 +96,7 @@ IB_INTERN void ut_dbg_assertion_failed(const char *expr, const char *file, ulint
 	void ut_dbg_stop_thread(const char *file, ulint line)
 	{
 	#ifndef IB_HOTBACKUP
-		ib_logger(ib_stream, "InnoDB: Thread %lu stopped in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
+		ib_log(state, "InnoDB: Thread %lu stopped in file %s line %lu\n", os_thread_pf(os_thread_get_curr_id()), file, line);
 		os_thread_sleep(1000000000);
 	#endif /* !IB_HOTBACKUP */
 	}
@@ -146,7 +146,7 @@ IB_INTERN void speedo_show(const speedo_t *speedo)
 	getrusage(RUSAGE_SELF, &ru_now);
 	gettimeofday(&tv_now, NULL);
 
-#define PRINT_TIMEVAL(prefix, tvp) ib_logger(ib_stream, "%s% 5ld.%06ld sec\n", prefix, (tvp)->tv_sec, (tvp)->tv_usec)
+#define PRINT_TIMEVAL(prefix, tvp) ib_log(state, "%s% 5ld.%06ld sec\n", prefix, (tvp)->tv_sec, (tvp)->tv_usec)
 
 	timersub(&tv_now, &speedo->tv, &tv_diff);
 	PRINT_TIMEVAL("real", &tv_diff);

@@ -386,9 +386,9 @@ buf_page_is_corrupted(
 
 		if (log_peek_lsn(&current_lsn)
 		    && current_lsn < mach_read_ull(read_buf + FIL_PAGE_LSN)) {
-			ut_print_timestamp(ib_stream);
+			ut_print_timestamp(state->stream);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"  InnoDB: Error: page %lu log sequence number"
 				" %llu\n"
 				"InnoDB: is in the future! Current system "
@@ -459,7 +459,7 @@ buf_page_is_corrupted(
 }
 
 /********************************************************************//**
-Prints a page to ib_stream. */
+Prints a page to state->stream. */
 IB_INTERN
 void
 buf_page_print(
@@ -479,12 +479,12 @@ buf_page_print(
 		size = IB_PAGE_SIZE;
 	}
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: Page dump in ascii and hex (%lu bytes):\n",
 		(ulong) size);
-	ut_print_buf(ib_stream, read_buf, size);
-	ib_logger(ib_stream, "\nInnoDB: End of page dump\n");
+	ut_print_buf(state->stream, read_buf, size);
+	ib_log(state, "\nInnoDB: End of page dump\n");
 
 	if (zip_size) {
 		/* Print compressed page. */
@@ -495,8 +495,8 @@ buf_page_print(
 			checksum = srv_use_checksums
 				? page_zip_calc_checksum(read_buf, zip_size)
 				: BUF_NO_CHECKSUM_MAGIC;
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Compressed BLOB page"
 				" checksum %lu, stored %lu\n"
 				"InnoDB: Page lsn %lu %lu\n"
@@ -518,8 +518,8 @@ buf_page_print(
 					+ FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID));
 			return;
 		default:
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: unknown page type %lu,"
 				" assuming FIL_PAGE_INDEX\n",
 				fil_page_get_type(read_buf));
@@ -529,8 +529,8 @@ buf_page_print(
 				? page_zip_calc_checksum(read_buf, zip_size)
 				: BUF_NO_CHECKSUM_MAGIC;
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Compressed page checksum %lu,"
 				" stored %lu\n"
 				"InnoDB: Page lsn %lu %lu\n"
@@ -562,8 +562,8 @@ buf_page_print(
 	old_checksum = srv_use_checksums
 		? buf_calc_page_old_checksum(read_buf) : BUF_NO_CHECKSUM_MAGIC;
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: Page checksum %lu, prior-to-4.0.14-form"
 		" checksum %lu\n"
 		"InnoDB: stored checksum %lu, prior-to-4.0.14-form"
@@ -588,19 +588,19 @@ buf_page_print(
 #ifndef IB_HOTBACKUP
 	if (mach_read_from_2(read_buf + TRX_UNDO_PAGE_HDR + TRX_UNDO_PAGE_TYPE)
 	    == TRX_UNDO_INSERT) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an insert undo log page\n");
 	} else if (mach_read_from_2(read_buf + TRX_UNDO_PAGE_HDR
 				    + TRX_UNDO_PAGE_TYPE)
 		   == TRX_UNDO_UPDATE) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an update undo log page\n");
 	}
 #endif /* !IB_HOTBACKUP */
 
 	switch (fil_page_get_type(read_buf)) {
 	case FIL_PAGE_INDEX:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an index page where"
 			" index id is %lu %lu\n",
 			(ulong) ut_dulint_get_high(
@@ -611,51 +611,51 @@ buf_page_print(
 		index = dict_index_find_on_id_low(
 			btr_page_get_index_id(read_buf));
 		if (index) {
-			ib_logger(ib_stream, "InnoDB: (");
-			dict_index_name_print(ib_stream, NULL, index);
-			ib_logger(ib_stream, ")\n");
+			ib_log(state, "InnoDB: (");
+			dict_index_name_print(state->stream, NULL, index);
+			ib_log(state, ")\n");
 		}
 #endif /* !IB_HOTBACKUP */
 		break;
 	case FIL_PAGE_INODE:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an 'inode' page\n");
 		break;
 	case FIL_PAGE_IBUF_FREE_LIST:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an insert buffer free "
 			"list page\n");
 		break;
 	case FIL_PAGE_TYPE_ALLOCATED:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be a freshly allocated page\n");
 		break;
 	case FIL_PAGE_IBUF_BITMAP:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an insert buffer bitmap page\n");
 		break;
 	case FIL_PAGE_TYPE_SYS:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be a system page\n");
 		break;
 	case FIL_PAGE_TYPE_TRX_SYS:
-		ib_logger(ib_stream, 
+		ib_log(state, 
 			"InnoDB: Page may be a transaction system page\n");
 		break;
 	case FIL_PAGE_TYPE_FSP_HDR:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be a file space header page\n");
 		break;
 	case FIL_PAGE_TYPE_XDES:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be an extent descriptor page\n");
 		break;
 	case FIL_PAGE_TYPE_BLOB:
-		ib_logger(ib_stream, "InnoDB: Page may be a BLOB page\n");
+		ib_log(state, "InnoDB: Page may be a BLOB page\n");
 		break;
 	case FIL_PAGE_TYPE_ZBLOB:
 	case FIL_PAGE_TYPE_ZBLOB2:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Page may be a compressed BLOB page\n");
 		break;
 	}
@@ -1891,8 +1891,8 @@ buf_zip_decompress(
 			frame, page_zip_get_size(&block->page.zip));
 
 		if (IB_UNLIKELY(stamp_checksum != calc_checksum)) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: compressed page checksum mismatch"
 				" (space %u page %u): %lu != %lu\n",
 				block->page.space, block->page.offset,
@@ -1908,7 +1908,7 @@ buf_zip_decompress(
 			return(TRUE);
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: unable to decompress space %lu page %lu\n",
 			(ulong) block->page.space,
 			(ulong) block->page.offset);
@@ -1927,8 +1927,8 @@ buf_zip_decompress(
 		return(TRUE);
 	}
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: unknown compressed page"
 		" type %lu\n",
 		fil_page_get_type(frame));
@@ -2158,7 +2158,7 @@ loop2:
 		} else if (retries < BUF_PAGE_READ_MAX_RETRIES) {
 			++retries;
 		} else {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: Unable"
 				" to read tablespace %lu page no"
 				" %lu into the buffer pool after"
@@ -2785,7 +2785,7 @@ buf_page_init(
 	hash_page = buf_page_hash_get(space, offset);
 
 	if (IB_LIKELY_NULL(hash_page)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: page %lu %lu already found"
 			" in the hash table: %p, %p\n",
 			(ulong) space,
@@ -3069,7 +3069,7 @@ buf_page_create(
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream, "Creating space %lu page %lu to buffer\n",
+		ib_log(state, "Creating space %lu page %lu to buffer\n",
 			(ulong) space, (ulong) offset);
 	}
 #endif /* IB_DEBUG */
@@ -3217,8 +3217,8 @@ buf_page_io_complete(
 		if (bpage->space == TRX_SYS_SPACE
 		    && trx_doublewrite_page_inside(bpage->offset)) {
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Error: reading page %lu\n"
 				"InnoDB: which is in the"
 				" doublewrite buffer!\n",
@@ -3233,8 +3233,8 @@ buf_page_io_complete(
 			page may contain garbage in version < 4.1.1,
 			which only supported bpage->space == 0. */
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Error: space id and page n:o"
 				" stored in the page\n"
 				"InnoDB: read in are %lu:%lu,"
@@ -3250,7 +3250,7 @@ buf_page_io_complete(
 		if (buf_page_is_corrupted(frame,
 					  buf_page_get_zip_size(bpage))) {
 corrupt:
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Database page corruption on disk"
 				" or a failed\n"
 				"InnoDB: file read of page %lu.\n"
@@ -3258,14 +3258,14 @@ corrupt:
 				" from a backup.\n",
 				(ulong) bpage->offset);
 			buf_page_print(frame, buf_page_get_zip_size(bpage));
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Database page corruption on disk"
 				" or a failed\n"
 				"InnoDB: file read of page %lu.\n"
 				"InnoDB: You may have to recover"
 				" from a backup.\n",
 				(ulong) bpage->offset);
-			ib_logger(ib_stream,
+			ib_log(state,
 			      "InnoDB: It is also possible that"
 			      " your operating\n"
 			      "InnoDB: system has corrupted its"
@@ -3363,7 +3363,7 @@ corrupt:
 
 #ifdef IB_DEBUG
 	if (buf_debug_prints) {
-		ib_logger(ib_stream, "Has %s page space %lu page no %lu\n",
+		ib_log(state, "Has %s page space %lu page no %lu\n",
 			io_type == BUF_IO_READ ? "read" : "written",
 			(ulong) buf_page_get_space(bpage),
 			(ulong) buf_page_get_page_no(bpage));
@@ -3630,7 +3630,7 @@ buf_validate(void)
 	mutex_exit(&buf_pool_zip_mutex);
 
 	if (n_lru + n_free > buf_pool->curr_size + n_zip) {
-		ib_logger(ib_stream, "n LRU %lu, n free %lu, pool %lu zip %lu\n",
+		ib_log(state, "n LRU %lu, n free %lu, pool %lu zip %lu\n",
 			(ulong) n_lru, (ulong) n_free,
 			(ulong) buf_pool->curr_size, (ulong) n_zip);
 		UT_ERROR;
@@ -3638,7 +3638,7 @@ buf_validate(void)
 
 	ut_a(UT_LIST_GET_LEN(buf_pool->LRU) == n_lru);
 	if (UT_LIST_GET_LEN(buf_pool->free) != n_free) {
-		ib_logger(ib_stream, "Free list len %lu, free blocks %lu\n",
+		ib_log(state, "Free list len %lu, free blocks %lu\n",
 			(ulong) UT_LIST_GET_LEN(buf_pool->free),
 			(ulong) n_free);
 		UT_ERROR;
@@ -3685,7 +3685,7 @@ buf_print(void)
 
 	buf_pool_mutex_enter();
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"buf_pool size %lu\n"
 		"database pages %lu\n"
 		"free pages %lu\n"
@@ -3755,17 +3755,17 @@ buf_print(void)
 	for (i = 0; i < n_found; i++) {
 		index = dict_index_get_if_in_cache(index_ids[i]);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Block count for index %lu in buffer is about %lu",
 			(ulong) ut_dulint_get_low(index_ids[i]),
 			(ulong) counts[i]);
 
 		if (index) {
-			ib_logger(ib_stream, " ");
-			dict_index_name_print(ib_stream, NULL, index);
+			ib_log(state, " ");
+			dict_index_name_print(state->stream, NULL, index);
 		}
 
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 	}
 
 	mem_free(index_ids);
@@ -3909,7 +3909,7 @@ IB_INTERN
 void
 buf_print_io(
 /*=========*/
-	ib_stream_t	ib_stream)	/*!< in/out: buffer where to print */
+	ib_stream_t	state->stream)	/*!< in/out: buffer where to print */
 {
 	time_t	current_time;
 	double	time_elapsed;
@@ -3919,7 +3919,7 @@ buf_print_io(
 
 	buf_pool_mutex_enter();
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Buffer pool size   %lu\n"
 		"Free buffers       %lu\n"
 		"Database pages     %lu\n"
@@ -3943,7 +3943,7 @@ buf_print_io(
 	time_elapsed = 0.001 + difftime(current_time,
 					buf_pool->last_printout_time);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Pages made young %lu, not young %lu\n"
 		"%.2f youngs/s, %.2f non-youngs/s\n"
 		"Pages read %lu, created %lu, written %lu\n"
@@ -3973,7 +3973,7 @@ buf_print_io(
 	       	    - buf_pool->old_stat.n_page_gets;
 
 	if (n_gets_diff) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Buffer pool hit rate %lu / 1000,"
 			" young-making rate %lu / 1000 not %lu / 1000\n",
 			(ulong)
@@ -3990,12 +3990,12 @@ buf_print_io(
 				 - buf_pool->old_stat.n_pages_not_made_young)
 			 / n_gets_diff));
 	} else {
-		ib_logger(ib_stream,
+		ib_log(state,
 			  "No buffer pool page gets since the last printout\n");
 	}
 
 	/* Statistics about read ahead algorithm */
-	ib_logger(ib_stream, "Pages read ahead %.2f/s,"
+	ib_log(state, "Pages read ahead %.2f/s,"
 		" evicted without access %.2f/s\n",
 		(buf_pool->stat.n_ra_pages_read
 		- buf_pool->old_stat.n_ra_pages_read)
@@ -4006,7 +4006,7 @@ buf_print_io(
 
 	/* Print some values to help us with visualizing what is
 	happening with LRU eviction. */
-	ib_logger(ib_stream,
+	ib_log(state,
 		"LRU len: %lu, unzip_LRU len: %lu\n"
 		"I/O sum[%lu]:cur[%lu], unzip sum[%lu]:cur[%lu]\n",
 		UT_LIST_GET_LEN(buf_pool->LRU),
@@ -4051,7 +4051,7 @@ buf_all_freed(void)
 		const buf_block_t* block = buf_chunk_not_freed(chunk);
 
 		if (IB_LIKELY_NULL(block)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Page %lu %lu still fixed or dirty\n",
 				(ulong) block->page.space,
 				(ulong) block->page.offset);

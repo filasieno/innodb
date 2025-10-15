@@ -270,18 +270,18 @@ trx_free(
 	if (trx->n_client_tables_in_use != 0
 	    || trx->client_n_tables_locked != 0) {
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: Client is freeing a trx instance\n"
 			"InnoDB: though trx->n_client_tables_in_use is %lu\n"
 			"InnoDB: and trx->client_n_tables_locked is %lu.\n",
 			(ulong)trx->n_client_tables_in_use,
 			(ulong)trx->client_n_tables_locked);
 
-		trx_print(ib_stream, trx, 600);
+		trx_print(state->stream, trx, 600);
 
-		ut_print_buf(ib_stream, trx, sizeof(trx_t));
-		ib_logger(ib_stream, "\n");
+		ut_print_buf(state->stream, trx, sizeof(trx_t));
+		ib_log(state, "\n");
 	}
 
 	ut_a(trx->magic_n == TRX_MAGIC_N);
@@ -449,7 +449,7 @@ trx_lists_init_at_db_start(
 
 				if (undo->state == TRX_UNDO_PREPARED) {
 
-					ib_logger(ib_stream,
+					ib_log(state,
 						"InnoDB: Transaction "
 						TRX_ID_FMT
 						" was in the"
@@ -460,7 +460,7 @@ trx_lists_init_at_db_start(
 
 						trx->conc_state = TRX_PREPARED;
 					} else {
-						ib_logger(ib_stream,
+						ib_log(state,
 							"InnoDB: Since"
 							" force_recovery"
 							" > 0, we will do a"
@@ -528,7 +528,7 @@ trx_lists_init_at_db_start(
 					the client. */
 
 					if (undo->state == TRX_UNDO_PREPARED) {
-						ib_logger(ib_stream,
+						ib_log(state,
 							"InnoDB: Transaction "
 							TRX_ID_FMT " was in the"
 							" XA prepared state.\n",
@@ -541,7 +541,7 @@ trx_lists_init_at_db_start(
 							trx->conc_state
 								= TRX_PREPARED;
 						} else {
-							ib_logger(ib_stream,
+							ib_log(state,
 								"InnoDB: Since"
 								" force_recovery"
 								" > 0, we will"
@@ -1635,59 +1635,59 @@ IB_INTERN
 void
 trx_print(
 /*======*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	trx_t*		trx,		/*!< in: transaction */
 	ulint		max_query_len)	/*!< in: max query length to print, or
 					0 to use the default max length */
 {
 	ibool	newline;
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"TRANSACTION " TRX_ID_FMT, TRX_ID_PREP_PRINTF(trx->id));
 
 	switch (trx->conc_state) {
 	case TRX_NOT_STARTED:
-		ib_logger(ib_stream, ", not started");
+		ib_log(state, ", not started");
 		break;
 	case TRX_ACTIVE:
-		ib_logger(ib_stream, ", ACTIVE %lu sec",
+		ib_log(state, ", ACTIVE %lu sec",
 			(ulong)difftime(time(NULL), trx->start_time));
 		break;
 	case TRX_PREPARED:
-		ib_logger(ib_stream, ", ACTIVE (PREPARED) %lu sec",
+		ib_log(state, ", ACTIVE (PREPARED) %lu sec",
 			(ulong)difftime(time(NULL), trx->start_time));
 		break;
 	case TRX_COMMITTED_IN_MEMORY:
-		ib_logger(ib_stream, ", COMMITTED IN MEMORY");
+		ib_log(state, ", COMMITTED IN MEMORY");
 		break;
 	default:
-		ib_logger(ib_stream, " state %lu", (ulong) trx->conc_state);
+		ib_log(state, " state %lu", (ulong) trx->conc_state);
 	}
 
 #ifdef IB_LINUX
-	ib_logger(ib_stream, ", process no %lu", trx->client_process_no);
+	ib_log(state, ", process no %lu", trx->client_process_no);
 #endif
-	ib_logger(ib_stream, ", OS thread id %lu",
+	ib_log(state, ", OS thread id %lu",
 		(ulong) os_thread_pf(trx->client_thread_id));
 
 	if (*trx->op_info) {
-		ib_logger(ib_stream, " %s", trx->op_info);
+		ib_log(state, " %s", trx->op_info);
 	}
 
 	if (trx->is_recovered) {
-		ib_logger(ib_stream, " recovered trx");
+		ib_log(state, " recovered trx");
 	}
 
 	if (trx->is_purge) {
-		ib_logger(ib_stream, " purge trx");
+		ib_log(state, " purge trx");
 	}
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 
 	if (trx->n_client_tables_in_use > 0
 	    || trx->client_n_tables_locked > 0) {
 
-		ib_logger(ib_stream, "Client tables in use %lu, locked %lu\n",
+		ib_log(state, "Client tables in use %lu, locked %lu\n",
 			(ulong) trx->n_client_tables_in_use,
 			(ulong) trx->client_n_tables_locked);
 	}
@@ -1698,20 +1698,20 @@ trx_print(
 	case TRX_QUE_RUNNING:
 		newline = FALSE; break;
 	case TRX_QUE_LOCK_WAIT:
-		ib_logger(ib_stream, "LOCK WAIT "); break;
+		ib_log(state, "LOCK WAIT "); break;
 	case TRX_QUE_ROLLING_BACK:
-		ib_logger(ib_stream, "ROLLING BACK "); break;
+		ib_log(state, "ROLLING BACK "); break;
 	case TRX_QUE_COMMITTING:
-		ib_logger(ib_stream, "COMMITTING "); break;
+		ib_log(state, "COMMITTING "); break;
 	default:
-		ib_logger(ib_stream, "que state %lu ", (ulong) trx->que_state);
+		ib_log(state, "que state %lu ", (ulong) trx->que_state);
 	}
 
 	if (0 < UT_LIST_GET_LEN(trx->trx_locks)
 	    || mem_heap_get_size(trx->lock_heap) > 400) {
 		newline = TRUE;
 
-		ib_logger(ib_stream, "%lu lock struct(s), heap size %lu,"
+		ib_log(state, "%lu lock struct(s), heap size %lu,"
 			" %lu row lock(s)",
 			(ulong) UT_LIST_GET_LEN(trx->trx_locks),
 			(ulong) mem_heap_get_size(trx->lock_heap),
@@ -1720,17 +1720,17 @@ trx_print(
 
 	if (trx->has_search_latch) {
 		newline = TRUE;
-		ib_logger(ib_stream, ", holds adaptive hash latch");
+		ib_log(state, ", holds adaptive hash latch");
 	}
 
 	if (!ut_dulint_is_zero(trx->undo_no)) {
 		newline = TRUE;
-		ib_logger(ib_stream, ", undo log entries %lu",
+		ib_log(state, ", undo log entries %lu",
 			(ulong) ut_dulint_get_low(trx->undo_no));
 	}
 
 	if (newline) {
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 	}
 }
 
@@ -1747,7 +1747,7 @@ trx_weight_cmp(
 	/* We compare the number of altered/locked rows. */
 
 #if 0
-	ib_logger(ib_stream,
+	ib_log(state,
 		"%s TRX_WEIGHT(a): %lld+%lu, TRX_WEIGHT(b): %lld+%lu\n",
 		__func__,
 		ut_conv_dulint_to_longlong(a->undo_no),
@@ -1926,20 +1926,20 @@ trx_recover(
 #endif /* WITH_XOPEN */
 
 			if (count == 0) {
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"  InnoDB: Starting recovery for"
 					" XA transactions...\n");
 			}
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Transaction " TRX_ID_FMT " in"
 				" prepared state after recovery\n",
 				TRX_ID_PREP_PRINTF(trx->id));
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Transaction contains changes"
 				" to %lu rows\n",
 				(ulong) ut_conv_dulint_to_longlong(
@@ -1958,8 +1958,8 @@ trx_recover(
 	mutex_exit(&kernel_mutex);
 
 	if (count > 0){
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: %lu transactions in prepared state"
 			" after recovery\n",
 			(ulong) count);

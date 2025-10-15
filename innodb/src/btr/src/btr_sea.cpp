@@ -1180,8 +1180,8 @@ cleanup:
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
 	if (IB_UNLIKELY(block->n_pointers)) {
 		/* Corruption */
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Corruption of adaptive hash index."
 			" After dropping\n"
 			"InnoDB: the hash index to a page of %s,"
@@ -1743,9 +1743,9 @@ check_next_rec:
 
 			ha_insert_for_fold(table, ins_fold, block, ins_rec);
 			/*
-			ib_logger(ib_stream, "Hash insert for ");
-			dict_index_name_print(ib_stream, cursor->index);
-			ib_logger(ib_stream, " fold %lu\n", ins_fold);
+			ib_log(state, "Hash insert for ");
+			dict_index_name_print(state->stream, cursor->index);
+			ib_log(state, " fold %lu\n", ins_fold);
 			*/
 		} else {
 			ha_insert_for_fold(table, next_fold, block, next_rec);
@@ -1856,9 +1856,9 @@ btr_search_validate(void)
 				const page_t*	page = block->frame;
 
 				ok = FALSE;
-				ut_print_timestamp(ib_stream);
+				ut_print_timestamp(state->stream);
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"  InnoDB: Error in an adaptive hash"
 					" index pointer to page %lu\n"
 					"InnoDB: ptr mem address %p"
@@ -1878,10 +1878,10 @@ btr_search_validate(void)
 							 btr_page_get_index_id(
 								 page)));
 
-				ib_logger(ib_stream, "InnoDB: Record ");
-				rec_print_new(ib_stream, (rec_t*)node->data,
+				ib_log(state, "InnoDB: Record ");
+				rec_print_new(state->stream, (rec_t*)node->data,
 					      offsets);
-				ib_logger(ib_stream, "\nInnoDB: on that page."
+				ib_log(state, "\nInnoDB: on that page."
 					" Page mem address %p, is hashed %lu,"
 					" n fields %lu, n bytes %lu\n"
 					"InnoDB: side %lu\n",

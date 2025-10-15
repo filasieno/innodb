@@ -1035,11 +1035,11 @@ btr_cur_trx_report(
 	const dict_index_t*	index,	/*!< in: index */
 	const char*		op)	/*!< in: operation */
 {
-	ib_logger(ib_stream, "Trx with id " TRX_ID_FMT " going to ",
+	ib_log(state, "Trx with id " TRX_ID_FMT " going to ",
 		TRX_ID_PREP_PRINTF(trx->id));
-	ib_logger(ib_stream, op);
-	dict_index_name_print(ib_stream, trx, index);
-	ib_logger(ib_stream, "\n");
+	ib_log(state, op);
+	dict_index_name_print(state->stream, trx, index);
+	ib_log(state, "\n");
 }
 #endif /* IB_DEBUG */
 
@@ -1101,14 +1101,14 @@ btr_cur_optimistic_insert(
 #endif /* IB_DEBUG_VALGRIND */
 
 	if (!dtuple_check_typed_no_assert(entry)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error in a tuple to insert into ");
-		dict_index_name_print(ib_stream, thr_get_trx(thr), dict_index);
+		dict_index_name_print(state->stream, thr_get_trx(thr), dict_index);
 	}
 #ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), dict_index, "insert into ");
-		dtuple_print(ib_stream, entry);
+		dtuple_print(state->stream, entry);
 	}
 #endif /* IB_DEBUG */
 
@@ -1249,13 +1249,13 @@ fail_err:
 				goto fail;
 			}
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: cannot insert tuple ");
-			dtuple_print(ib_stream, entry);
-			ib_logger(ib_stream, " into ");
-			dict_index_name_print(ib_stream, thr_get_trx(thr),
+			dtuple_print(state->stream, entry);
+			ib_log(state, " into ");
+			dict_index_name_print(state->stream, thr_get_trx(thr),
 					      dict_index);
-			ib_logger(ib_stream, "\nInnoDB: max insert size %lu\n",
+			ib_log(state, "\nInnoDB: max insert size %lu\n",
 				(ulong) max_size);
 			UT_ERROR;
 		}
@@ -1275,7 +1275,7 @@ fail_err:
 	}
 
 #if 0
-	ib_logger(ib_stream, "Insert into page %lu, max ins size %lu,"
+	ib_log(state, "Insert into page %lu, max ins size %lu,"
 		" rec %lu ind type %lu\n",
 		buf_block_get_page_no(block), max_size,
 		rec_size + PAGE_DIR_SLOT_SIZE, dict_index->type);
@@ -1756,7 +1756,7 @@ btr_cur_update_in_place(
 #ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(trx, dict_index, "update ");
-		rec_print_new(ib_stream, rec, offsets);
+		rec_print_new(state->stream, rec, offsets);
 	}
 #endif /* IB_DEBUG */
 
@@ -1895,7 +1895,7 @@ btr_cur_optimistic_update(
 #ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), index, "update ");
-		rec_print_new(ib_stream, rec, offsets);
+		rec_print_new(state->stream, rec, offsets);
 	}
 #endif /* IB_DEBUG */
 
@@ -2567,7 +2567,7 @@ btr_cur_del_mark_set_clust_rec(
 #ifdef IB_DEBUG
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), index, "del mark ");
-		rec_print_new(ib_stream, rec, offsets);
+		rec_print_new(state->stream, rec, offsets);
 	}
 #endif /* IB_DEBUG */
 
@@ -2724,7 +2724,7 @@ btr_cur_del_mark_set_sec_rec(
 	if (btr_cur_print_record_ops && thr) {
 		btr_cur_trx_report(thr_get_trx(thr), cursor->index,
 				   "del mark ");
-		rec_print(ib_stream, rec, cursor->index);
+		rec_print(state->stream, rec, cursor->index);
 	}
 #endif /* IB_DEBUG */
 
@@ -4218,8 +4218,8 @@ btr_check_blob_fil_page_type(
 			return;
 		}
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: FIL_PAGE_TYPE=%lu"
 			" on BLOB %s space %lu page %lu flags %lx\n",
 			(ulong) type, read ? "read" : "purge",
@@ -4590,8 +4590,8 @@ btr_copy_zblob_prefix(
 		bpage = buf_page_get_zip(space_id, zip_size, page_no);
 
 		if (IB_UNLIKELY(!bpage)) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Cannot load"
 				" compressed BLOB"
 				" page %lu space %lu\n",
@@ -4601,8 +4601,8 @@ btr_copy_zblob_prefix(
 
 		if (IB_UNLIKELY
 		    (fil_page_get_type(bpage->zip.data) != page_type)) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: Unexpected type %lu of"
 				" compressed BLOB"
 				" page %lu space %lu\n",
@@ -4639,8 +4639,8 @@ btr_copy_zblob_prefix(
 			/* fall through */
 		default:
 inflate_error:
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 				"  InnoDB: inflate() of"
 				" compressed BLOB"
 				" page %lu space %lu returned %d (%s)\n",
@@ -4652,8 +4652,8 @@ inflate_error:
 
 		if (next_page_no == FIL_NULL) {
 			if (!d_stream->avail_in) {
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 					"  InnoDB: unexpected end of"
 					" compressed BLOB"
 					" page %lu space %lu\n",

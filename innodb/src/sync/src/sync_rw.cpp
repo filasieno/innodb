@@ -413,7 +413,7 @@ lock_loop:
 	}
 
 	if (srv_print_latch_waits) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Thread %lu spin wait rw-s-lock at %p"
 			" cfile %s cline %lu rnds %lu\n",
 			(ulong) os_thread_pf(os_thread_get_curr_id()),
@@ -449,7 +449,7 @@ lock_loop:
 		}
 
 		if (srv_print_latch_waits) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Thread %lu OS wait rw-s-lock at %p"
 				" cfile %s cline %lu\n",
 				os_thread_pf(os_thread_get_curr_id()),
@@ -671,7 +671,7 @@ lock_loop:
 	rw_x_spin_round_count += i;
 
 	if (srv_print_latch_waits) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Thread %lu spin wait rw-x-lock at %p"
 			" cfile %s cline %lu rnds %lu\n",
 			os_thread_pf(os_thread_get_curr_id()), (void*) lock,
@@ -694,7 +694,7 @@ lock_loop:
 	}
 
 	if (srv_print_latch_waits) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"Thread %lu OS wait for rw-x-lock at %p"
 			" cfile %s cline %lu\n",
 			os_thread_pf(os_thread_get_curr_id()), (void*) lock,
@@ -917,7 +917,7 @@ IB_INTERN
 void
 rw_lock_list_print_info(
 /*====================*/
-	ib_stream_t	ib_stream)	/*!< in: stream where to print */
+	ib_stream_t	state->stream)	/*!< in: stream where to print */
 {
 	rw_lock_t*	lock;
 	ulint		count		= 0;
@@ -925,7 +925,7 @@ rw_lock_list_print_info(
 
 	mutex_enter(&rw_lock_list_mutex);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		  "-------------\n"
 		  "RW-LATCH INFO\n"
 		  "-------------\n");
@@ -941,13 +941,13 @@ rw_lock_list_print_info(
 #endif
 		if (lock->lock_word != X_LOCK_DECR) {
 
-			ib_logger(ib_stream, "RW-LOCK: %p ", (void*) lock);
+			ib_log(state, "RW-LOCK: %p ", (void*) lock);
 
 			if (rw_lock_get_waiters(lock)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					" Waiters for the lock exist\n");
 			} else {
-				ib_logger(ib_stream, "\n");
+				ib_log(state, "\n");
 			}
 
 			info = UT_LIST_GET_FIRST(lock->debug_list);
@@ -963,7 +963,7 @@ rw_lock_list_print_info(
 		lock = UT_LIST_GET_NEXT(list, lock);
 	}
 
-	ib_logger(ib_stream, "Total number of rw-locks %ld\n", count);
+	ib_log(state, "Total number of rw-locks %ld\n", count);
 	mutex_exit(&rw_lock_list_mutex);
 }
 
@@ -977,7 +977,7 @@ rw_lock_print(
 {
 	rw_lock_debug_t* info;
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"-------------\n"
 		"RW-LATCH INFO\n"
 		"RW-LATCH: %p ", (void*) lock);
@@ -993,9 +993,9 @@ rw_lock_print(
 	if (lock->lock_word != X_LOCK_DECR) {
 
 		if (rw_lock_get_waiters(lock)) {
-			ib_logger(ib_stream, " Waiters for the lock exist\n");
+			ib_log(state, " Waiters for the lock exist\n");
 		} else {
-			ib_logger(ib_stream, "\n");
+			ib_log(state, "\n");
 		}
 
 		info = UT_LIST_GET_FIRST(lock->debug_list);
@@ -1018,22 +1018,22 @@ rw_lock_debug_print(
 
 	rwt	  = info->lock_type;
 
-	ib_logger(ib_stream, "Locked: thread %ld file %s line %ld  ",
+	ib_log(state, "Locked: thread %ld file %s line %ld  ",
 		(ulong) os_thread_pf(info->thread_id), info->file_name,
 		(ulong) info->line);
 	if (rwt == RW_LOCK_SHARED) {
-		ib_logger(ib_stream, "S-LOCK");
+		ib_log(state, "S-LOCK");
 	} else if (rwt == RW_LOCK_EX) {
-		ib_logger(ib_stream, "X-LOCK");
+		ib_log(state, "X-LOCK");
 	} else if (rwt == RW_LOCK_WAIT_EX) {
-		ib_logger(ib_stream, "WAIT X-LOCK");
+		ib_log(state, "WAIT X-LOCK");
 	} else {
 		UT_ERROR;
 	}
 	if (info->pass != 0) {
-		ib_logger(ib_stream, " pass value %lu", (ulong) info->pass);
+		ib_log(state, " pass value %lu", (ulong) info->pass);
 	}
-	ib_logger(ib_stream, "\n", ib_stream);
+	ib_log(state, "\n", state->stream);
 }
 
 /***************************************************************//**

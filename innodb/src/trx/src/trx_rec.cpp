@@ -967,19 +967,19 @@ trx_undo_update_rec_get_update(
 		ptr = trx_undo_update_rec_get_field_no(ptr, &field_no);
 
 		if (field_no >= dict_index_get_n_fields(index)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: trying to access"
 				" update undo rec field %lu in ",
 				(ulong) field_no);
-			dict_index_name_print(ib_stream, trx, index);
-			ib_logger(ib_stream, "\n"
+			dict_index_name_print(state->stream, trx, index);
+			ib_log(state, "\n"
 				"InnoDB: but index has only %lu fields\n"
 				"InnoDB: Submit a detailed bug report, "
 				"check the InnoDB website for details\n"
 				"InnoDB: Run also CHECK TABLE ",
 				(ulong) dict_index_get_n_fields(index));
-			ut_print_name(ib_stream, trx, TRUE, index->table_name);
-			ib_logger(ib_stream, "\n"
+			ut_print_name(state->stream, trx, TRUE, index->table_name);
+			ib_log(state, "\n"
 				"InnoDB: n_fields = %lu, i = %lu, ptr %p\n",
 				(ulong) n_fields, (ulong) i, ptr);
 			return(NULL);
@@ -1452,15 +1452,15 @@ trx_undo_prev_version_build(
 	ut_ad(rec_offs_validate(rec, index, offsets));
 
 	if (!dict_index_is_clust(index)) {
-		ib_logger(ib_stream, "InnoDB: Error: trying to access"
+		ib_log(state, "InnoDB: Error: trying to access"
 			" update undo rec for non-clustered index %s\n"
 			"InnoDB: Submit a detailed bug report, "
 			"check the InnoDB website for details\n"
 			"InnoDB: index record ", index->name);
-		rec_print(ib_stream, index_rec, index);
-		ib_logger(ib_stream, "\nInnoDB: record version ");
-		rec_print_new(ib_stream, rec, offsets);
-		ib_logger(ib_stream, "\n");
+		rec_print(state->stream, index_rec, index);
+		ib_log(state, "\nInnoDB: record version ");
+		rec_print_new(state->stream, rec, offsets);
+		ib_log(state, "\n");
 		return(DB_ERROR);
 	}
 
@@ -1524,7 +1524,7 @@ trx_undo_prev_version_build(
 	if (ut_dulint_cmp(table_id, index->table->id) != 0) {
 		ptr = NULL;
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to access update undo rec"
 			" for table %s\n"
 			"InnoDB: but the table id in the"
@@ -1539,7 +1539,7 @@ trx_undo_prev_version_build(
 		/* The record was corrupted, return an error; these printfs
 		should catch an elusive bug in row_vers_old_has_index_entry */
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: table %s, index %s, n_uniq %lu\n"
 			"InnoDB: undo rec address %p, type %lu cmpl_info %lu\n"
 			"InnoDB: undo rec table id %lu %lu,"
@@ -1552,12 +1552,12 @@ trx_undo_prev_version_build(
 			(ulong) ut_dulint_get_low(table_id),
 			(ulong) ut_dulint_get_high(index->table->id),
 			(ulong) ut_dulint_get_low(index->table->id));
-		ut_print_buf(ib_stream, undo_rec, 150);
-		ib_logger(ib_stream, "\nInnoDB: index record ");
-		rec_print(ib_stream, index_rec, index);
-		ib_logger(ib_stream, "\nInnoDB: record version ");
-		rec_print_new(ib_stream, rec, offsets);
-		ib_logger(ib_stream, "\n"
+		ut_print_buf(state->stream, undo_rec, 150);
+		ib_log(state, "\nInnoDB: index record ");
+		rec_print(state->stream, index_rec, index);
+		ib_log(state, "\nInnoDB: record version ");
+		rec_print_new(state->stream, rec, offsets);
+		ib_log(state, "\n"
 			"InnoDB: Record trx id " TRX_ID_FMT
 			", update rec trx id " TRX_ID_FMT "\n"
 			"InnoDB: Roll ptr in rec %lu %lu, in update rec"

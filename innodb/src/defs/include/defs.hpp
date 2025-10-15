@@ -340,7 +340,9 @@ typedef unsigned long ulong;
 #if __SUNPRO_C >= 0x550
 #undef IB_INTERN
 #define IB_INTERN __hidden
-#endif	  // __SUNPRO_C >= 0x550
+#endif	  
+// __SUNPRO_C >= 0x550
+
 // Use sun_prefetch when compile with Sun Studio
 #define IB_EXPECT(expr, value) (expr)
 #define IB_LIKELY_NULL(expr)   (expr)

@@ -378,9 +378,9 @@ ib_uint64_t log_close(
 			log_has_printed_chkp_warning = TRUE;
 			log_last_warning_time = time(NULL);
 
-			ut_print_timestamp(ib_stream);
-			ib_logger(
-				ib_stream,
+			ut_print_timestamp(state->stream);
+			state->log(
+				state->stream,
 				"  InnoDB: ERROR: the age of the last"
 				" checkpoint is %lu,\n"
 				"InnoDB: which exceeds the log group"
@@ -539,7 +539,7 @@ static ulint log_group_calc_lsn_offset(
 
 	ut_a(offset < (((ib_int64_t)1) << 32));	   // offset must be < 4 GB
 
-	/* ib_logger(ib_stream,
+	/* ib_log(state,
 	"Offset is %lu gr_lsn_offset is %lu difference is %lu\n",
 	(ulint)offset,(ulint)gr_lsn_size_offset, (ulint)difference);
 	*/
@@ -946,7 +946,7 @@ ulint log_group_check_flush_completion(
 	if (!log_sys->one_flushed && group->n_pending_writes == 0) {
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger(ib_stream, "Log flushed first to group %lu\n", (ulong)group->id);
+			ib_log(state, "Log flushed first to group %lu\n", (ulong)group->id);
 		}
 #endif	  // IB_DEBUG
 		log_sys->written_to_some_lsn = log_sys->write_lsn;
@@ -958,7 +958,7 @@ ulint log_group_check_flush_completion(
 #ifdef IB_DEBUG
 	if (log_debug_writes && (group->n_pending_writes == 0)) {
 
-		ib_logger(ib_stream, "Log flushed to group %lu\n", (ulong)group->id);
+		ib_log(state, "Log flushed to group %lu\n", (ulong)group->id);
 	}
 #endif	  // IB_DEBUG
 	return (0);
@@ -1030,7 +1030,7 @@ void log_io_complete(
 
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger(ib_stream, "Checkpoint info written to group %lu\n", group->id);
+			ib_log(state, "Checkpoint info written to group %lu\n", group->id);
 		}
 #endif	  // IB_DEBUG
 		log_io_complete_checkpoint();
@@ -1093,7 +1093,7 @@ static void log_group_file_header_flush(
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(ib_stream, "Writing log file header to group %lu file %lu\n", (ulong)group->id, (ulong)nth_file);
+		ib_log(state, "Writing log file header to group %lu file %lu\n", (ulong)group->id, (ulong)nth_file);
 	}
 #endif	  // IB_DEBUG
 	if (log_do_write) {
@@ -1188,8 +1188,8 @@ loop:
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
 
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"Writing log file segment to group %lu"
 			" offset %lu len %lu\n"
 			"start lsn %llu\n"
@@ -1283,7 +1283,7 @@ loop:
 
 #if 0
 	if (loop_count > 2) {
-		ib_logger(ib_stream, "Log loop count %lu\n", loop_count);
+		ib_log(state, "Log loop count %lu\n", loop_count);
 	}
 #endif
 #endif
@@ -1342,7 +1342,7 @@ loop:
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(ib_stream, "Writing log from %llu up to lsn %llu\n", log_sys->written_to_all_lsn, log_sys->lsn);
+		ib_log(state, "Writing log from %llu up to lsn %llu\n", log_sys->written_to_all_lsn, log_sys->lsn);
 	}
 #endif	  // IB_DEBUG
 	log_sys->n_pending_writes++;
@@ -1900,7 +1900,7 @@ ibool log_checkpoint(
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(ib_stream, "Making checkpoint no %lu at lsn %llu\n", (ulong)log_sys->next_checkpoint_no, oldest_lsn);
+		ib_log(state, "Making checkpoint no %lu at lsn %llu\n", (ulong)log_sys->next_checkpoint_no, oldest_lsn);
 	}
 #endif	  // IB_DEBUG
 
@@ -2263,7 +2263,7 @@ loop:
 
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger(ib_stream, "Created archive file %s\n", name);
+			ib_log(state, "Created archive file %s\n", name);
 		}
 #endif	  // IB_DEBUG
 
@@ -2291,8 +2291,8 @@ loop:
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"Archiving starting at lsn %llu, len %lu"
 			" to group %lu\n",
 			start_lsn,
@@ -2390,7 +2390,7 @@ static void log_archive_write_complete_groups(void)
 
 #ifdef IB_DEBUG
 	if (log_debug_writes && trunc_files) {
-		ib_logger(ib_stream, "Complete file(s) archived to group %lu\n", (ulong)group->id);
+		ib_log(state, "Complete file(s) archived to group %lu\n", (ulong)group->id);
 	}
 #endif	  // IB_DEBUG
 
@@ -2412,7 +2412,7 @@ static void log_archive_write_complete_groups(void)
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger("Archiving writes completed\n", ib_stream);
+		state->log("Archiving writes completed\n", state->stream);
 	}
 #endif	  // IB_DEBUG
 }
@@ -2428,7 +2428,7 @@ static void log_archive_check_completion_low(void)
 
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger("Archiving read completed\n", ib_stream);
+			state->log("Archiving read completed\n", state->stream);
 		}
 #endif	  // IB_DEBUG
 
@@ -2564,7 +2564,7 @@ loop:
 
 #ifdef IB_DEBUG
 	if (log_debug_writes) {
-		ib_logger(ib_stream, "Archiving from lsn %llu to lsn %llu\n", log_sys->archived_lsn, limit_lsn);
+		ib_log(state, "Archiving from lsn %llu to lsn %llu\n", log_sys->archived_lsn, limit_lsn);
 	}
 #endif	  // IB_DEBUG
 
@@ -2664,8 +2664,8 @@ static void log_archive_close_groups(
 
 #ifdef IB_DEBUG
 		if (log_debug_writes) {
-			ib_logger(
-				ib_stream,
+			state->log(
+				state->stream,
 				"Incrementing arch file no to %lu"
 				" in log group %lu\n",
 				(ulong)group->archived_file_no + 2,
@@ -2931,8 +2931,8 @@ void logs_empty_and_mark_files_at_shutdown(
 	}
 
 	if (srv_print_verbose_log) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Starting shutdown...\n");
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Starting shutdown...\n");
 	}
 	/* Wait until the master thread and all other operations are idle: our
 	algorithm only works if the server is idle at shutdown */
@@ -3052,8 +3052,8 @@ loop:
 	mutex_enter(&kernel_mutex);
 	// Check that the master thread has stayed suspended
 	if (srv_n_threads_active[SRV_MASTER] != 0) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Warning: the master thread woke up"
 			" during shutdown\n"
 		);
@@ -3085,8 +3085,8 @@ loop:
 	ut_a(lsn == log_sys->lsn);
 
 	if (lsn < srv_start_lsn) {
-		ib_logger(
-			ib_stream,
+		state->log(
+			state->stream,
 			"InnoDB: Error: log sequence number"
 			" at shutdown %llu\n"
 			"InnoDB: is lower than at startup %llu!\n",
@@ -3181,7 +3181,7 @@ Prints info of the log. */
 IB_INTERN
 void log_print(
 	// ======
-	ib_stream_t ib_stream
+	ib_stream_t state->stream
 )	 // !< in: file where to print
 {
 	double time_elapsed;
@@ -3189,8 +3189,8 @@ void log_print(
 
 	log_acquire();
 
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"Log sequence number %llu\n"
 		"Log flushed up to   %llu\n"
 		"Last checkpoint at  %llu\n",
@@ -3202,8 +3202,8 @@ void log_print(
 	current_time = time(NULL);
 
 	time_elapsed = 0.001 + difftime(current_time, log_sys->last_printout_time);
-	ib_logger(
-		ib_stream,
+	state->log(
+		state->stream,
 		"%lu pending log writes, %lu pending chkp writes\n"
 		"%lu log i/o's done, %.2f log i/o's/second\n",
 		(ulong)log_sys->n_pending_writes,

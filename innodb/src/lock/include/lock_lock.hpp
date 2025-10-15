@@ -602,7 +602,7 @@ IB_INTERN
 void
 lock_table_print(
 /*=============*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const lock_t*	lock);		/*!< in: table type lock */
 /*********************************************************************//**
 Prints info of a record lock. */
@@ -610,7 +610,7 @@ IB_INTERN
 void
 lock_rec_print(
 /*===========*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	const lock_t*	lock);		/*!< in: record type lock */
 /*********************************************************************//**
 Prints info of locks for all transactions.
@@ -620,7 +620,7 @@ IB_INTERN
 ibool
 lock_print_info_summary(
 /*====================*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	ibool   	nowait);	/*!< in: whether to wait for the
 					kernel mutex */
 /*************************************************************************
@@ -630,7 +630,7 @@ IB_INTERN
 void
 lock_print_info_all_transactions(
 /*=============================*/
-	ib_stream_t	ib_stream);	/*!< in: stream where to print */
+	ib_stream_t	state->stream);	/*!< in: stream where to print */
 /*********************************************************************//**
 Return approximate number or record locks (bits set in the bitmap) for
 this transaction. Since delete-marked records may be removed, the

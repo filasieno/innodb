@@ -652,12 +652,12 @@ fil_node_create(
 	space = fil_space_get_by_id(id);
 
 	if (!space) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: Could not find tablespace %lu for\n"
 			"InnoDB: file ", (ulong) id);
-		ut_print_filename(ib_stream, name);
-		ib_logger(ib_stream, " in the tablespace memory cache.\n");
+		ut_print_filename(state->stream, name);
+		ib_log(state, " in the tablespace memory cache.\n");
 		mem_free(node->name);
 
 		mem_free(node);
@@ -721,9 +721,9 @@ fil_node_open_file(
 			/* The following call prints an error message */
 			os_file_get_last_error(TRUE);
 
-			ut_print_timestamp(ib_stream);
+			ut_print_timestamp(state->stream);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"  InnoDB: Fatal error: cannot open %s\n."
 				"InnoDB: Have you deleted .ibd files"
 				" under a running server?\n",
@@ -746,7 +746,7 @@ fil_node_open_file(
 		ut_a(space->id != 0);
 
 		if (size_bytes < FIL_IBD_FILE_INITIAL_SIZE * IB_PAGE_SIZE) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: the size of single-table"
 				" tablespace file %s\n"
 				"InnoDB: is only %lu %lu,"
@@ -779,7 +779,7 @@ fil_node_open_file(
 		os_file_close(node->handle);
 
 		if (IB_UNLIKELY(space_id != space->id)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: tablespace id is %lu"
 				" in the data dictionary\n"
 				"InnoDB: but in file %s it is %lu!\n",
@@ -790,7 +790,7 @@ fil_node_open_file(
 
 		if (IB_UNLIKELY(space_id == ULINT_UNDEFINED
 				  || space_id == 0)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: tablespace id %lu"
 				" in file %s is not sensible\n",
 				(ulong) space_id, node->name);
@@ -799,7 +799,7 @@ fil_node_open_file(
 		}
 
 		if (IB_UNLIKELY(space->flags != flags)) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error: table flags are %lx"
 				" in the data dictionary\n"
 				"InnoDB: but the flags in file %s are %lx!\n",
@@ -914,7 +914,7 @@ fil_try_to_close_file_in_LRU(
 	node = UT_LIST_GET_LAST(fil_system->LRU);
 
 	if (print_info) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: fil_sys open file LRU len %lu\n",
 			(ulong) UT_LIST_GET_LEN(fil_system->LRU));
 	}
@@ -929,17 +929,17 @@ fil_try_to_close_file_in_LRU(
 		}
 
 		if (print_info && node->n_pending_flushes > 0) {
-			ib_logger(ib_stream, "InnoDB: cannot close file ");
-			ut_print_filename(ib_stream, node->name);
-			ib_logger(ib_stream, ", because n_pending_flushes %lu\n",
+			ib_log(state, "InnoDB: cannot close file ");
+			ut_print_filename(state->stream, node->name);
+			ib_log(state, ", because n_pending_flushes %lu\n",
 				(ulong) node->n_pending_flushes);
 		}
 
 		if (print_info
 		    && node->modification_counter != node->flush_counter) {
-			ib_logger(ib_stream, "InnoDB: cannot close file ");
-			ut_print_filename(ib_stream, node->name);
-			ib_logger(ib_stream,
+			ib_log(state, "InnoDB: cannot close file ");
+			ut_print_filename(state->stream, node->name);
+			ib_log(state,
 				", because mod_count %ld != fl_count %ld\n",
 				(long) node->modification_counter,
 				(long) node->flush_counter);
@@ -992,9 +992,9 @@ retry:
 		for a while */
 
 		if (count2 > 20000) {
-			ib_logger(ib_stream, "InnoDB: Warning: tablespace ");
-			ut_print_filename(ib_stream, space->name);
-			ib_logger(ib_stream,
+			ib_log(state, "InnoDB: Warning: tablespace ");
+			ut_print_filename(state->stream, space->name);
+			ib_log(state,
 				" has i/o ops stopped for a long time %lu\n",
 				(ulong) count2);
 		}
@@ -1037,8 +1037,8 @@ close_more:
 	}
 
 	if (count >= 2) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Warning: too many (%lu) files stay open"
 			" while the maximum\n"
 			"InnoDB: allowed value would be %lu.\n"
@@ -1187,13 +1187,13 @@ try_again:
 	if (IB_LIKELY_NULL(space)) {
 		ulint	namesake_id;
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Warning: trying to init to the"
 			" tablespace memory cache\n"
 			"InnoDB: a tablespace %lu of name ", (ulong) id);
-		ut_print_filename(ib_stream, name);
-		ib_logger(ib_stream, ",\n"
+		ut_print_filename(state->stream, name);
+		ib_log(state, ",\n"
 			"InnoDB: but a tablespace %lu of the same name\n"
 			"InnoDB: already exists in the"
 			" tablespace memory cache!\n",
@@ -1206,7 +1206,7 @@ try_again:
 			return(FALSE);
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: We assume that InnoDB did a crash recovery,"
 			" and you had\n"
 			"InnoDB: an .ibd file for which the table"
@@ -1233,16 +1233,16 @@ try_again:
 	space = fil_space_get_by_id(id);
 
 	if (IB_LIKELY_NULL(space)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to add tablespace %lu"
 			" of name ", (ulong) id);
-		ut_print_filename(ib_stream, name);
-		ib_logger(ib_stream, "\n"
+		ut_print_filename(state->stream, name);
+		ib_log(state, "\n"
 			"InnoDB: to the tablespace memory cache,"
 			" but tablespace\n"
 			"InnoDB: %lu of name ", (ulong) space->id);
-		ut_print_filename(ib_stream, space->name);
-		ib_logger(ib_stream, " already exists in the tablespace\n"
+		ut_print_filename(state->stream, space->name);
+		ib_log(state, " already exists in the tablespace\n"
 		      "InnoDB: memory cache!\n");
 
 		mutex_exit(&fil_system->mutex);
@@ -1312,8 +1312,8 @@ fil_assign_new_space_id(void)
 	id = fil_system->max_assigned_id;
 
 	if (id > (SRV_LOG_SPACE_FIRST_ID / 2) && (id % 1000000UL == 0)) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"InnoDB: Warning: you are running out of new"
 			" single-table tablespace id's.\n"
 			"InnoDB: Current counter is %lu and it"
@@ -1326,8 +1326,8 @@ fil_assign_new_space_id(void)
 	}
 
 	if (id >= SRV_LOG_SPACE_FIRST_ID) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"InnoDB: You have run out of single-table"
 			" tablespace id's!\n"
 			"InnoDB: Current counter is %lu.\n"
@@ -1369,8 +1369,8 @@ fil_space_free(
 	space = fil_space_get_by_id(id);
 
 	if (!space) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: trying to remove tablespace %lu"
 			" from the cache but\n"
 			"InnoDB: it is not there.\n", (ulong) id);
@@ -1628,7 +1628,7 @@ fil_open_log_and_system_tablespace_files(void)
 				}
 				if (fil_system->max_n_open
 				    < 10 + fil_system->n_open) {
-					ib_logger(ib_stream,
+					ib_log(state,
 						"InnoDB: Warning: you must"
 						" raise the value of"
 						" max_open_files!\n"
@@ -1706,7 +1706,7 @@ fil_set_max_space_id_if_bigger(
 	ulint	max_id)	/*!< in: maximum known id */
 {
 	if (max_id >= SRV_LOG_SPACE_FIRST_ID) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Fatal error: max tablespace id"
 			" is too high, %lu\n", (ulong) max_id);
 		UT_ERROR;
@@ -1899,7 +1899,7 @@ fil_inc_pending_ibuf_merges(
 	space = fil_space_get_by_id(id);
 
 	if (space == NULL) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: trying to do ibuf merge to a"
 			" dropped tablespace %lu\n",
 			(ulong) id);
@@ -1933,7 +1933,7 @@ fil_decr_pending_ibuf_merges(
 	space = fil_space_get_by_id(id);
 
 	if (space == NULL) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: decrementing ibuf merge of a"
 			" dropped tablespace %lu\n",
 			(ulong) id);
@@ -2248,12 +2248,12 @@ stop_ibuf_merges:
 			goto try_again;
 		} else {
 			if (count > 5000) {
-				ut_print_timestamp(ib_stream);
-				ib_logger(ib_stream,
+				ut_print_timestamp(state->stream);
+				ib_log(state,
 				      "  InnoDB: Warning: trying to"
 				      " delete tablespace ");
-				ut_print_filename(ib_stream, space->name);
-				ib_logger(ib_stream, ",\n"
+				ut_print_filename(state->stream, space->name);
+				ib_log(state, ",\n"
 					"InnoDB: but there are %lu pending"
 					" ibuf merges on it.\n"
 					"InnoDB: Loop %lu.\n",
@@ -2279,8 +2279,8 @@ try_again:
 	space = fil_space_get_by_id(id);
 
 	if (space == NULL) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: cannot delete tablespace %lu\n"
 			"InnoDB: because it is not found in the"
 			" tablespace memory cache.\n",
@@ -2301,11 +2301,11 @@ try_again:
 
 	if (space->n_pending_flushes > 0 || node->n_pending > 0) {
 		if (count > 1000) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: Warning: trying to"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: Warning: trying to"
 			      " delete tablespace ");
-			ut_print_filename(ib_stream, space->name);
-			ib_logger(ib_stream, ",\n"
+			ut_print_filename(state->stream, space->name);
+			ib_log(state, ",\n"
 				"InnoDB: but there are %lu flushes"
 				" and %lu pending i/o's on it\n"
 				"InnoDB: Loop %lu.\n",
@@ -2392,7 +2392,7 @@ fil_discard_tablespace(
 	success = fil_delete_tablespace(id);
 
 	if (!success) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Warning: cannot delete tablespace %lu"
 			" in DISCARD TABLESPACE.\n"
 			"InnoDB: But let us remove the"
@@ -2426,18 +2426,18 @@ fil_rename_tablespace_in_mem(
 
 	space2 = fil_space_get_by_name(old_name);
 	if (space != space2) {
-		ib_logger(ib_stream, "InnoDB: Error: cannot find ");
-		ut_print_filename(ib_stream, old_name);
-		ib_logger(ib_stream, " in tablespace memory cache\n");
+		ib_log(state, "InnoDB: Error: cannot find ");
+		ut_print_filename(state->stream, old_name);
+		ib_log(state, " in tablespace memory cache\n");
 
 		return(FALSE);
 	}
 
 	space2 = fil_space_get_by_name(path);
 	if (space2 != NULL) {
-		ib_logger(ib_stream, "InnoDB: Error: ");
-		ut_print_filename(ib_stream, path);
-		ib_logger(ib_stream, 
+		ib_log(state, "InnoDB: Error: ");
+		ut_print_filename(state->stream, path);
+		ib_log(state, 
 			" is already in tablespace memory cache\n");
 
 		return(FALSE);
@@ -2520,12 +2520,12 @@ retry:
 	count++;
 
 	if (count > 1000) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Warning: problems renaming ");
-		ut_print_filename(ib_stream, old_name);
-		ib_logger(ib_stream, " to ");
-		ut_print_filename(ib_stream, new_name);
-		ib_logger(ib_stream, ", %lu iterations\n", (ulong) count);
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Warning: problems renaming ");
+		ut_print_filename(state->stream, old_name);
+		ib_log(state, " to ");
+		ut_print_filename(state->stream, new_name);
+		ib_log(state, ", %lu iterations\n", (ulong) count);
 	}
 
 	mutex_enter(&fil_system->mutex);
@@ -2533,12 +2533,12 @@ retry:
 	space = fil_space_get_by_id(id);
 
 	if (space == NULL) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: cannot find space id %lu"
 			" in the tablespace memory cache\n"
 			"InnoDB: though the table ", (ulong) id);
-		ut_print_filename(ib_stream, old_name);
-		ib_logger(ib_stream,
+		ut_print_filename(state->stream, old_name);
+		ib_log(state,
 			" in a rename operation should have that id\n");
 		mutex_exit(&fil_system->mutex);
 
@@ -2684,17 +2684,17 @@ fil_create_new_single_table_tablespace(
 	file = os_file_create(path, OS_FILE_CREATE, OS_FILE_NORMAL,
 			      OS_DATA_FILE, &ret);
 	if (ret == FALSE) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Error creating file ");
-		ut_print_filename(ib_stream, path);
-		ib_logger(ib_stream, ".\n");
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Error creating file ");
+		ut_print_filename(state->stream, path);
+		ib_log(state, ".\n");
 
 		/* The following call will print an error message */
 
 		err = os_file_get_last_error(TRUE);
 
 		if (err == OS_FILE_ALREADY_EXISTS) {
-			ib_logger(ib_stream,
+			ib_log(state,
 			      "InnoDB: The file already exists though"
 			      " the corresponding table did not\n"
 			      "InnoDB: exist in the InnoDB data dictionary."
@@ -2707,8 +2707,8 @@ fil_create_new_single_table_tablespace(
 			      " CREATE TABLE? You can\n"
 			      "InnoDB: resolve the problem by"
 			      " removing the file ");
-			ut_print_filename(ib_stream, path);
-			ib_logger(ib_stream, "\n"
+			ut_print_filename(state->stream, path);
+			ib_log(state, "\n"
 			      "InnoDB: under the 'datadir' of the server.\n");
 
 			mem_free(path);
@@ -2797,21 +2797,21 @@ error_exit2:
 	ut_free(buf2);
 
 	if (!ret) {
-		ib_logger(ib_stream, 
+		ib_log(state, 
 			"InnoDB: Error: could not write the first page"
 			" to tablespace ");
-		ut_print_filename(ib_stream, path);
-		ib_logger(ib_stream, "\n");
+		ut_print_filename(state->stream, path);
+		ib_log(state, "\n");
 		goto error_exit;
 	}
 
 	ret = os_file_flush(file);
 
 	if (!ret) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: file flush of tablespace ");
-		ut_print_filename(ib_stream, path);
-		ib_logger(ib_stream, " failed\n");
+		ut_print_filename(state->stream, path);
+		ib_log(state, " failed\n");
 		goto error_exit;
 	}
 
@@ -2891,13 +2891,13 @@ fil_reset_too_high_lsns(
 		/* The following call prints an error message */
 		os_file_get_last_error(TRUE);
 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream, "  InnoDB: Error: trying to open a table,"
+		ib_log(state, "  InnoDB: Error: trying to open a table,"
 		      " but could not\n"
 		      "InnoDB: open the tablespace file ");
-		ut_print_filename(ib_stream, filepath);
-		ib_logger(ib_stream, "!\n");
+		ut_print_filename(state->stream, filepath);
+		ib_log(state, "!\n");
 		mem_free(filepath);
 
 		return(FALSE);
@@ -2935,8 +2935,8 @@ fil_reset_too_high_lsns(
 		page_zip.data = page + IB_PAGE_SIZE;
 	}
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: Flush lsn in the tablespace file %lu"
 		" to be imported\n"
 		"InnoDB: is %llu, which exceeds current"
@@ -2944,8 +2944,8 @@ fil_reset_too_high_lsns(
 		"InnoDB: We reset the lsn's in the file ",
 		(ulong) space_id,
 		flush_lsn, current_lsn);
-	ut_print_filename(ib_stream, filepath);
-	ib_logger(ib_stream, ".\n");
+	ut_print_filename(state->stream, filepath);
+	ib_log(state, ".\n");
 
 	ut_a(ut_is_2pow(zip_size));
 	ut_a(zip_size <= IB_PAGE_SIZE);
@@ -3075,13 +3075,13 @@ fil_open_single_table_tablespace(
 		/* The following call prints an error message */
 		os_file_get_last_error(TRUE);
 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream, "  InnoDB: Error: trying to open a table,"
+		ib_log(state, "  InnoDB: Error: trying to open a table,"
 		      " but could not\n"
 		      "InnoDB: open the tablespace file ");
-		ut_print_filename(ib_stream, filepath);
-		ib_logger(ib_stream, "!\n"
+		ut_print_filename(state->stream, filepath);
+		ib_log(state, "!\n"
 		      "InnoDB: Have you moved InnoDB .ibd files around"
 		      " without using the\n"
 		      "InnoDB: commands DISCARD TABLESPACE and"
@@ -3121,12 +3121,12 @@ fil_open_single_table_tablespace(
 
 	if (IB_UNLIKELY(space_id != id
 			  || space_flags != (flags & ~(~0 << DICT_TF_BITS)))) {
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"  InnoDB: Error: tablespace id and flags in file ");
-		ut_print_filename(ib_stream, filepath);
-		ib_logger(ib_stream, " are %lu and %lu, but in the InnoDB\n"
+		ut_print_filename(state->stream, filepath);
+		ib_log(state, " are %lu and %lu, but in the InnoDB\n"
 			"InnoDB: data dictionary they are %lu and %lu.\n"
 			"InnoDB: Have you moved InnoDB .ibd files"
 			" around without using the\n"
@@ -3253,7 +3253,7 @@ fil_load_single_table_tablespace(
 		/* The following call prints an error message */
 		os_file_get_last_error(TRUE);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: could not open single-table tablespace"
 			" file\n"
 			"InnoDB: %s!\n"
@@ -3281,7 +3281,7 @@ fil_load_single_table_tablespace(
 		mem_free(filepath);
 
 		if (recovery != IB_RECOVERY_DEFAULT) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: force_recovery"
 				" was set to %lu. Continuing crash recovery\n"
 				"InnoDB: even though we cannot access"
@@ -3300,7 +3300,7 @@ fil_load_single_table_tablespace(
 		/* The following call prints an error message */
 		os_file_get_last_error(TRUE);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: could not measure the size"
 			" of single-table tablespace file\n"
 			"InnoDB: %s!\n"
@@ -3329,7 +3329,7 @@ fil_load_single_table_tablespace(
 		mem_free(filepath);
 
 		if (recovery != IB_RECOVERY_DEFAULT) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: force_recovery"
 				" was set to %lu. Continuing crash recovery\n"
 				"InnoDB: even though we cannot access"
@@ -3351,7 +3351,7 @@ fil_load_single_table_tablespace(
 	size = (((ib_int64_t)size_high) << 32) + (ib_int64_t)size_low;
 #ifndef IB_HOTBACKUP
 	if (size < FIL_IBD_FILE_INITIAL_SIZE * IB_PAGE_SIZE) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: the size of single-table tablespace"
 			" file %s\n"
 			"InnoDB: is only %lu %lu, should be at least %lu!",
@@ -3384,7 +3384,7 @@ fil_load_single_table_tablespace(
 
 #ifndef IB_HOTBACKUP
 	if (space_id == ULINT_UNDEFINED || space_id == 0) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: tablespace id %lu in file %s"
 			" is not sensible\n",
 			(ulong) space_id,
@@ -3395,7 +3395,7 @@ fil_load_single_table_tablespace(
 	if (space_id == ULINT_UNDEFINED || space_id == 0) {
 		char*	new_path;
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Renaming tablespace %s of id %lu,\n"
 			"InnoDB: to %s_ibbackup_old_vers_<timestamp>\n"
 			"InnoDB: because its size %" PRId64 " is too small"
@@ -3431,7 +3431,7 @@ fil_load_single_table_tablespace(
 	if (space) {
 		char*	new_path;
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Renaming tablespace %s of id %lu,\n"
 			"InnoDB: to %s_ibbackup_old_vers_<timestamp>\n"
 			"InnoDB: because space %s with the same id\n"
@@ -3461,7 +3461,7 @@ fil_load_single_table_tablespace(
 	if (!success) {
 
 		if (srv_force_recovery > 0) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: innodb_force_recovery"
 				" was set to %lu. Continuing crash recovery\n"
 				"InnoDB: even though the tablespace creation"
@@ -3511,7 +3511,7 @@ fil_file_readdir_next_file(
 			return(ret);
 		}
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: os_file_readdir_next_file()"
 			" returned -1 in\n"
 			"InnoDB: directory %s\n"
@@ -3635,11 +3635,11 @@ next_file_item:
 			}
 
 			if (0 != os_file_closedir(dbdir)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"InnoDB: Warning: could not"
 					" close database directory ");
-				ut_print_filename(ib_stream, dbpath);
-				ib_logger(ib_stream, "\n");
+				ut_print_filename(state->stream, dbpath);
+				ib_log(state, "\n");
 
 				err = DB_ERROR;
 			}
@@ -3652,7 +3652,7 @@ next_datadir_item:
 	mem_free(dbpath);
 
 	if (0 != os_file_closedir(dir)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: could not close datadir\n");
 
 		return(DB_ERROR);
@@ -3681,9 +3681,9 @@ fil_print_orphaned_tablespaces(void)
 	while (space) {
 		if (space->purpose == FIL_TABLESPACE && space->id != 0
 		    && !space->mark) {
-			ib_logger(ib_stream, "InnoDB: Warning: tablespace ");
-			ut_print_filename(ib_stream, space->name);
-			ib_logger(ib_stream,
+			ib_log(state, "InnoDB: Warning: tablespace ");
+			ut_print_filename(state->stream, space->name);
+			ib_log(state,
 				" of id %lu has no matching table in\n"
 				"InnoDB: the InnoDB data dictionary.\n",
 				(ulong) space->id);
@@ -3824,10 +3824,10 @@ fil_space_for_table_exists_in_mem(
 
 	if (space == NULL) {
 		if (namespace == NULL) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: Error: table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream, "\n"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: Error: table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state, "\n"
 				"InnoDB: in InnoDB data dictionary"
 				" has tablespace id %lu,\n"
 				"InnoDB: but tablespace with that id"
@@ -3835,10 +3835,10 @@ fil_space_for_table_exists_in_mem(
 				"InnoDB: you deleted or moved .ibd files?\n",
 				(ulong) id);
 		} else {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream, "  InnoDB: Error: table ");
-			ut_print_filename(ib_stream, name);
-			ib_logger(ib_stream, "\n"
+			ut_print_timestamp(state->stream);
+			ib_log(state, "  InnoDB: Error: table ");
+			ut_print_filename(state->stream, name);
+			ib_log(state, "\n"
 				"InnoDB: in InnoDB data dictionary has"
 				" tablespace id %lu,\n"
 				"InnoDB: but a tablespace with that id"
@@ -3850,7 +3850,7 @@ fil_space_for_table_exists_in_mem(
 				(ulong) namespace->id);
 		}
 error_exit:
-		ib_logger(ib_stream,
+		ib_log(state,
 		      "InnoDB: Please refer to\n"
 		      "InnoDB: the InnoDB website for details\n"
 		      "InnoDB: for how to resolve the issue.\n");
@@ -3862,10 +3862,10 @@ error_exit:
 	}
 
 	if (0 != fil_tablename_compare(space->name, path)) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream, "  InnoDB: Error: table ");
-		ut_print_filename(ib_stream, name);
-		ib_logger(ib_stream, "\n"
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: Error: table ");
+		ut_print_filename(state->stream, name);
+		ib_log(state, "\n"
 			"InnoDB: in InnoDB data dictionary has"
 			" tablespace id %lu,\n"
 			"InnoDB: but the tablespace with that id"
@@ -3874,12 +3874,12 @@ error_exit:
 			(ulong) id, space->name);
 
 		if (namespace != NULL) {
-			ib_logger(ib_stream,
+			ib_log(state,
 			      "InnoDB: There is a tablespace"
 			      " with the right name\n"
 			      "InnoDB: ");
-			ut_print_filename(ib_stream, namespace->name);
-			ib_logger(ib_stream, ", but its id is %lu.\n",
+			ut_print_filename(state->stream, namespace->name);
+			ib_log(state, ", but its id is %lu.\n",
 				(ulong) namespace->id);
 		}
 
@@ -4234,8 +4234,8 @@ fil_node_prepare_for_io(
 	ut_ad(mutex_own(&(system->mutex)));
 
 	if (system->n_open > system->max_n_open + 5) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Warning: open files %lu"
 			" exceeds the limit %lu\n",
 			(ulong) system->n_open,
@@ -4315,7 +4315,7 @@ fil_report_invalid_page_access(
 	ulint		len,		/*!< in: I/O length */
 	ulint		type)		/*!< in: I/O type */
 {
-	ib_logger(ib_stream,
+	ib_log(state,
 		"InnoDB: Error: trying to access page number %lu"
 		" in space %lu,\n"
 		"InnoDB: space name %s,\n"
@@ -4429,8 +4429,8 @@ fil_io(
 	if (!space) {
 		mutex_exit(&fil_system->mutex);
 
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: trying to do i/o"
 			" to a tablespace which does not exist.\n"
 			"InnoDB: i/o type %lu, space id %lu,"
@@ -4692,7 +4692,7 @@ retry:
 
 			mutex_exit(&fil_system->mutex);
 
-			/* ib_logger(ib_stream, "Flushing to file %s\n",
+			/* ib_log(state, "Flushing to file %s\n",
 			node->name); */
 
 			os_file_flush(file);
@@ -4979,7 +4979,7 @@ fil_rmdir(
 
 #ifdef IB_HAVE_UNISTD_H
 	if (rmdir(dbname) != 0) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error removing directory: %s\n",
 			dbname);
 	} else {
@@ -4987,7 +4987,7 @@ fil_rmdir(
 	}
 #elif defined(__WIN__)
 	if (RemoveDirectory(dbname) == 0) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error removing directory: %s\n",
 			dbname);
 	} else {

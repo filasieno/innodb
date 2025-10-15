@@ -193,7 +193,7 @@ row_undo_search_clust_to_pcur(
 		is to make sure that some thread will eventually undo the
 		modification corresponding to node->roll_ptr. */
 
-		/* ib_logger(ib_stream,
+		/* ib_log(state,
 			"--------------------undoing a previous version\n"); */
 
 		ret = FALSE;
@@ -356,7 +356,7 @@ row_undo_step(
 	if (err != DB_SUCCESS) {
 		/* SQL error detected */
 
-		ib_logger(ib_stream, "InnoDB: Fatal error %lu in rollback.\n",
+		ib_log(state, "InnoDB: Fatal error %lu in rollback.\n",
 			(ulong) err);
 
 		if (err == DB_OUT_OF_FILE_SPACE) {

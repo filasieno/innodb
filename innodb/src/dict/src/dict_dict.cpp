@@ -932,15 +932,15 @@ dict_table_rename_in_cache(
 			    dict_table_t*, table2, ut_ad(table2->cached),
 			    (ut_strcmp(table2->name, new_name) == 0));
 		if (IB_LIKELY_NULL(table2)) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 			      "  InnoDB: Error: dictionary cache"
 			      " already contains a table ");
-			ut_print_name(ib_stream, NULL, TRUE, new_name);
-			ib_logger(ib_stream, "\n"
+			ut_print_name(state->stream, NULL, TRUE, new_name);
+			ib_log(state, "\n"
 			      "InnoDB: cannot rename table ");
-			ut_print_name(ib_stream, NULL, TRUE, old_name);
-			ib_logger(ib_stream, "\n");
+			ut_print_name(state->stream, NULL, TRUE, old_name);
+			ib_log(state, "\n");
 			return(FALSE);
 		}
 	}
@@ -950,15 +950,15 @@ dict_table_rename_in_cache(
 
 	if (table->space != 0) {
 		if (table->dir_path_of_temp_table != NULL) {
-			ut_print_timestamp(ib_stream);
-			ib_logger(ib_stream,
+			ut_print_timestamp(state->stream);
+			ib_log(state,
 			      "  InnoDB: Error: trying to rename a"
 			      " TEMPORARY TABLE ");
-			ut_print_name(ib_stream, NULL, TRUE, old_name);
-			ib_logger(ib_stream, " (");
-			ut_print_filename(ib_stream,
+			ut_print_name(state->stream, NULL, TRUE, old_name);
+			ib_log(state, " (");
+			ut_print_filename(state->stream,
 					  table->dir_path_of_temp_table);
-			ib_logger(ib_stream, " )\n");
+			ib_log(state, " )\n");
 			return(FALSE);
 		} else if (!fil_rename_tablespace(old_name, table->space,
 						  new_name)) {
@@ -1158,9 +1158,9 @@ dict_table_remove_from_cache(
 	ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
 
 #if 0
-	ib_logger(ib_stream, "Removing table ");
-	ut_print_name(ib_stream, NULL, TRUE, table->name);
-	ib_logger(ib_stream,
+	ib_log(state, "Removing table ");
+	ut_print_name(state->stream, NULL, TRUE, table->name);
+	ib_log(state,
 		" (%lu) from dictionary cache\n", (ulint) table->id.low);
 #endif
 
@@ -1698,7 +1698,7 @@ dict_index_remove_from_cache(
 
 		if (retries % 500 == 0) {
 			/* No luck after 5 seconds of wait. */
-			ib_logger(ib_stream, "InnoDB: Error: Waited for"
+			ib_log(state, "InnoDB: Error: Waited for"
 					" %lu secs for hash index"
 					" ref_count (%lu) to drop"
 					" to 0.\n"
@@ -1763,11 +1763,11 @@ dict_index_find_cols(
 
 #ifdef IB_DEBUG
 		/* It is an error not to find a matching column. */
-		ib_logger(ib_stream, "InnoDB: Error: no matching column for ");
-		ut_print_name(ib_stream, NULL, FALSE, field->name);
-		ib_logger(ib_stream, " in ");
-		dict_index_name_print(ib_stream, NULL, index);
-		ib_logger(ib_stream, "!\n");
+		ib_log(state, "InnoDB: Error: no matching column for ");
+		ut_print_name(state->stream, NULL, FALSE, field->name);
+		ib_log(state, " in ");
+		dict_index_name_print(state->stream, NULL, index);
+		ib_log(state, "!\n");
 #endif /* IB_DEBUG */
 		return(FALSE);
 
@@ -2477,11 +2477,11 @@ static
 void
 dict_foreign_error_report_low(
 /*==========================*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const char*	name)		/*!< in: table name */
 {
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream, " Error in foreign key constraint of table %s:\n",
+	ut_print_timestamp(state->stream);
+	ib_log(state, " Error in foreign key constraint of table %s:\n",
 		name);
 }
 
@@ -2491,24 +2491,24 @@ static
 void
 dict_foreign_error_report(
 /*======================*/
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	dict_foreign_t*	fk,		/*!< in: foreign key constraint */
 	const char*	msg)		/*!< in: the error message */
 {
 	mutex_enter(&dict_foreign_err_mutex);
-	dict_foreign_error_report_low(ib_stream, fk->foreign_table_name);
-	ib_logger(ib_stream, "%s", msg);
-	ib_logger(ib_stream, "%s Constraint:\n", msg);
+	dict_foreign_error_report_low(state->stream, fk->foreign_table_name);
+	ib_log(state, "%s", msg);
+	ib_log(state, "%s Constraint:\n", msg);
 
 	dict_print_info_on_foreign_key_in_create_format(
-		ib_stream, NULL, fk, TRUE);
+		state->stream, NULL, fk, TRUE);
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 	if (fk->foreign_index) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			  "The index in the foreign key in table is ");
-		ut_print_name(ib_stream, NULL, FALSE, fk->foreign_index->name);
-		ib_logger(ib_stream,
+		ut_print_name(state->stream, NULL, FALSE, fk->foreign_index->name);
+		ib_log(state,
 			"\n"
 			"See InnoDB website for details\n"
 			"for correct foreign key definition.\n");
@@ -2569,7 +2569,7 @@ dict_foreign_add_to_cache(
 
 		if (index == NULL) {
 			dict_foreign_error_report(
-				ib_stream, for_in_cache,
+				state->stream, for_in_cache,
 				"there is no index in referenced table"
 				" which would contain\n"
 				"the columns as the first columns,"
@@ -2604,7 +2604,7 @@ dict_foreign_add_to_cache(
 
 		if (index == NULL) {
 			dict_foreign_error_report(
-				ib_stream, for_in_cache,
+				state->stream, for_in_cache,
 				"there is no index in the table"
 				" which would contain\n"
 				"the columns as the first columns,"
@@ -3151,8 +3151,8 @@ dict_foreign_report_syntax_err(
 {
 
 	mutex_enter(&dict_foreign_err_mutex);
-	dict_foreign_error_report_low(ib_stream, name);
-	ib_logger(ib_stream, "%s:\nSyntax error close to:\n%s\n",
+	dict_foreign_error_report_low(state->stream, name);
+	ib_log(state, "%s:\nSyntax error close to:\n%s\n",
 		start_of_latest_foreign, ptr);
 	mutex_exit(&dict_foreign_err_mutex);
 }
@@ -3213,8 +3213,8 @@ dict_create_foreign_constraints_low(
 
 	if (table == NULL) {
 		mutex_enter(&dict_foreign_err_mutex);
-		dict_foreign_error_report_low(ib_stream, name);
-		ib_logger(ib_stream,
+		dict_foreign_error_report_low(state->stream, name);
+		ib_log(state,
 			"Cannot find the table in the internal"
 			" data dictionary of InnoDB.\n"
 			"Create table statement:\n%s\n", sql_string);
@@ -3245,7 +3245,7 @@ dict_create_foreign_constraints_low(
 	ptr = dict_scan_table_name(cs, ptr, &table_to_alter, name,
 				   &success, heap, &referenced_table_name);
 	if (!success) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Error: could not find"
 			" the table being ALTERED in:\n%s\n",
 			sql_string);
@@ -3379,8 +3379,8 @@ col_loop1:
 			    heap, column_names + i);
 	if (!success) {
 		mutex_enter(&dict_foreign_err_mutex);
-		dict_foreign_error_report_low(ib_stream, name);
-		ib_logger(ib_stream,
+		dict_foreign_error_report_low(state->stream, name);
+		ib_log(state,
 			"%s:\nCannot resolve column name close to:\n%s\n",
 			start_of_latest_foreign, ptr);
 		mutex_exit(&dict_foreign_err_mutex);
@@ -3412,10 +3412,10 @@ col_loop1:
 
 	if (!index) {
 		mutex_enter(&dict_foreign_err_mutex);
-		dict_foreign_error_report_low(ib_stream, name);
-		ib_logger(ib_stream, "There is no index in table ");
-		ut_print_name(ib_stream, NULL, TRUE, name);
-		ib_logger(ib_stream, " where the columns appear\n"
+		dict_foreign_error_report_low(state->stream, name);
+		ib_log(state, "There is no index in table ");
+		ut_print_name(state->stream, NULL, TRUE, name);
+		ib_log(state, " where the columns appear\n"
 			"as the first columns. Constraint:\n%s\n"
 			"See InnoDB website for details"
 			"for correct foreign key definition.\n",
@@ -3478,8 +3478,8 @@ col_loop1:
 		dict_foreign_free(foreign);
 
 		mutex_enter(&dict_foreign_err_mutex);
-		dict_foreign_error_report_low(ib_stream, name);
-		ib_logger(ib_stream,
+		dict_foreign_error_report_low(state->stream, name);
+		ib_log(state,
 			"%s:\nCannot resolve table name close to:\n"
 			"%s\n",
 		       	start_of_latest_foreign, ptr);
@@ -3509,8 +3509,8 @@ col_loop2:
 		dict_foreign_free(foreign);
 
 		mutex_enter(&dict_foreign_err_mutex);
-		dict_foreign_error_report_low(ib_stream, name);
-		ib_logger(ib_stream,
+		dict_foreign_error_report_low(state->stream, name);
+		ib_log(state,
 			"%s:\nCannot resolve column name close to:\n"
 			"%s\n",
 			start_of_latest_foreign, ptr);
@@ -3636,8 +3636,8 @@ scan_on_conditions:
 			dict_foreign_free(foreign);
 
 			mutex_enter(&dict_foreign_err_mutex);
-			dict_foreign_error_report_low(ib_stream, name);
-			ib_logger(ib_stream, "%s:\n"
+			dict_foreign_error_report_low(state->stream, name);
+			ib_log(state, "%s:\n"
 				"You have defined a SET NULL condition"
 				" though some of the\n"
 				"columns are defined as NOT NULL.\n",
@@ -3663,8 +3663,8 @@ try_find_index:
 		dict_foreign_free(foreign);
 
 		mutex_enter(&dict_foreign_err_mutex);
-		dict_foreign_error_report_low(ib_stream, name);
-		ib_logger(ib_stream, "%s:\n"
+		dict_foreign_error_report_low(state->stream, name);
+		ib_log(state, "%s:\n"
 			"You have twice an ON DELETE clause"
 			" or twice an ON UPDATE clause.\n",
 			start_of_latest_foreign);
@@ -3685,8 +3685,8 @@ try_find_index:
 		if (!index) {
 			dict_foreign_free(foreign);
 			mutex_enter(&dict_foreign_err_mutex);
-			dict_foreign_error_report_low(ib_stream, name);
-			ib_logger(ib_stream, "%s:\n"
+			dict_foreign_error_report_low(state->stream, name);
+			ib_log(state, "%s:\n"
 				"Cannot find an index in the"
 				" referenced table where the\n"
 				"referenced columns appear as the"
@@ -3880,16 +3880,16 @@ loop:
 
 	if (foreign == NULL) {
 		mutex_enter(&dict_foreign_err_mutex);
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			" Error in dropping of a foreign key constraint"
 		      	" of table ");
-		ut_print_name(ib_stream, NULL, TRUE, table->name);
-		ib_logger(ib_stream, ",\nin SQL command\n%s", str);
-		ib_logger(ib_stream,
+		ut_print_name(state->stream, NULL, TRUE, table->name);
+		ib_log(state, ",\nin SQL command\n%s", str);
+		ib_log(state,
 			"\nCannot find a constraint with the given id ");
-		ut_print_name(ib_stream, NULL, FALSE, id);
-		ib_logger(ib_stream, ".\n");
+		ut_print_name(state->stream, NULL, FALSE, id);
+		ib_log(state, ".\n");
 		mutex_exit(&dict_foreign_err_mutex);
 
 		mem_free(str);
@@ -3901,11 +3901,11 @@ loop:
 
 syntax_error:
 	mutex_enter(&dict_foreign_err_mutex);
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream," Syntax error in dropping of a"
+	ut_print_timestamp(state->stream);
+	ib_log(state," Syntax error in dropping of a"
 	      " foreign key constraint of table ");
-	ut_print_name(ib_stream, NULL, TRUE, table->name);
-	ib_logger(ib_stream, ",\n"
+	ut_print_name(state->stream, NULL, TRUE, table->name);
+	ib_log(state, ",\n"
 		"close to:\n%s\n in SQL command\n%s\n", ptr, str);
 	mutex_exit(&dict_foreign_err_mutex);
 
@@ -4172,8 +4172,8 @@ dict_update_statistics_low(
 	ulint		sum_of_index_sizes	= 0;
 
 	if (table->ibd_file_missing) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: cannot calculate statistics for table %s\n"
 			"InnoDB: because the .ibd file is missing.  For help,"
 			" please refer to\n"
@@ -4266,22 +4266,22 @@ dict_foreign_print_low(
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
-	ib_logger(ib_stream, "  FOREIGN KEY CONSTRAINT %s: %s (",
+	ib_log(state, "  FOREIGN KEY CONSTRAINT %s: %s (",
 		foreign->id, foreign->foreign_table_name);
 
 	for (i = 0; i < foreign->n_fields; i++) {
-		ib_logger(ib_stream, " %s", foreign->foreign_col_names[i]);
+		ib_log(state, " %s", foreign->foreign_col_names[i]);
 	}
 
-	ib_logger(ib_stream, " )\n"
+	ib_log(state, " )\n"
 		"             REFERENCES %s (",
 		foreign->referenced_table_name);
 
 	for (i = 0; i < foreign->n_fields; i++) {
-		ib_logger(ib_stream, " %s", foreign->referenced_col_names[i]);
+		ib_log(state, " %s", foreign->referenced_col_names[i]);
 	}
 
-	ib_logger(ib_stream, " )\n");
+	ib_log(state, " )\n");
 }
 
 /**********************************************************************//**
@@ -4333,7 +4333,7 @@ dict_table_print_low(
 
 	dict_update_statistics_low(table, TRUE);
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"--------------------------------------\n"
 		"TABLE: name %s, id %lu %lu, flags %lx, columns %lu,"
 		" indexes %lu, appr.rows %lu\n"
@@ -4348,10 +4348,10 @@ dict_table_print_low(
 
 	for (i = 0; i < (ulint) table->n_cols; i++) {
 		dict_col_print_low(table, dict_table_get_nth_col(table, i));
-		ib_logger("; ", ib_stream);
+		state->log("; ", state->stream);
 	}
 
-	ib_logger(ib_stream,"\n");
+	ib_log(state,"\n");
 
 	index = UT_LIST_GET_FIRST(table->indexes);
 
@@ -4390,7 +4390,7 @@ dict_col_print_low(
 
 	dict_col_copy_type(col, &type);
 
-	ib_logger(ib_stream, "%s: ",
+	ib_log(state, "%s: ",
 		dict_table_get_col_name(table, dict_col_get_no(col)));
 
 	dtype_print(&type);
@@ -4429,7 +4429,7 @@ dict_index_print_low(
 		type_string = "secondary index";
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"  INDEX: name %s, id %lu %lu, fields %lu/%lu,"
 		" uniq %lu, type %lu\n"
 		"   root page %lu, appr.key vals %lu,"
@@ -4451,7 +4451,7 @@ dict_index_print_low(
 		dict_field_print_low(dict_index_get_nth_field(index, i));
 	}
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 
 #ifdef IB_BTR_PRINT
 	btr_print_size(index);
@@ -4470,10 +4470,10 @@ dict_field_print_low(
 {
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
-	ib_logger(ib_stream, " %s", field->name);
+	ib_log(state, " %s", field->name);
 
 	if (field->prefix_len != 0) {
-		ib_logger(ib_stream, "(%lu)", (ulong) field->prefix_len);
+		ib_log(state, "(%lu)", (ulong) field->prefix_len);
 	}
 }
 
@@ -4484,7 +4484,7 @@ IB_INTERN
 void
 dict_print_info_on_foreign_key_in_create_format(
 /*============================================*/
-	ib_stream_t	ib_stream,	/*!< in: stream where to print */
+	ib_stream_t	state->stream,	/*!< in: stream where to print */
 	trx_t*		trx,		/*!< in: transaction */
 	dict_foreign_t*	foreign,	/*!< in: foreign key constraint */
 	ibool		add_newline)	/*!< in: whether to add a newline */
@@ -4500,78 +4500,78 @@ dict_print_info_on_foreign_key_in_create_format(
 		stripped_id = foreign->id;
 	}
 
-	ib_logger(ib_stream, ",");
+	ib_log(state, ",");
 
 	if (add_newline) {
 		/* SHOW CREATE TABLE wants constraints each printed nicely
 		on its own line, while error messages want no newlines
 		inserted. */
-		ib_logger(ib_stream, "\n ");
+		ib_log(state, "\n ");
 	}
 
-	ib_logger(ib_stream, " CONSTRAINT ");
-	ut_print_name(ib_stream, trx, FALSE, stripped_id);
-	ib_logger(ib_stream, " FOREIGN KEY (");
+	ib_log(state, " CONSTRAINT ");
+	ut_print_name(state->stream, trx, FALSE, stripped_id);
+	ib_log(state, " FOREIGN KEY (");
 
 	for (i = 0;;) {
 		ut_print_name(
-			ib_stream, trx, FALSE, foreign->foreign_col_names[i]);
+			state->stream, trx, FALSE, foreign->foreign_col_names[i]);
 		if (++i < foreign->n_fields) {
-			ib_logger(ib_stream, ", ");
+			ib_log(state, ", ");
 		} else {
 			break;
 		}
 	}
 
-	ib_logger(ib_stream, ") REFERENCES ");
+	ib_log(state, ") REFERENCES ");
 
 	if (dict_tables_IB_HAVE_same_db(foreign->foreign_table_name,
 				     foreign->referenced_table_name)) {
 		/* Do not print the database name of the referenced table */
-		ut_print_name(ib_stream, trx, TRUE,
+		ut_print_name(state->stream, trx, TRUE,
 			      dict_remove_db_name(
 				      foreign->referenced_table_name));
 	} else {
-		ut_print_name(ib_stream, trx, TRUE,
+		ut_print_name(state->stream, trx, TRUE,
 			      foreign->referenced_table_name);
 	}
 
-	ib_logger(ib_stream, " (");
+	ib_log(state, " (");
 
 	for (i = 0;;) {
-		ut_print_name(ib_stream, trx, FALSE,
+		ut_print_name(state->stream, trx, FALSE,
 			      foreign->referenced_col_names[i]);
 		if (++i < foreign->n_fields) {
-			ib_logger(ib_stream, ", ");
+			ib_log(state, ", ");
 		} else {
 			break;
 		}
 	}
 
-	ib_logger(ib_stream, ")");
+	ib_log(state, ")");
 
 	if (foreign->type & DICT_FOREIGN_ON_DELETE_CASCADE) {
-		ib_logger(ib_stream, " ON DELETE CASCADE");
+		ib_log(state, " ON DELETE CASCADE");
 	}
 
 	if (foreign->type & DICT_FOREIGN_ON_DELETE_SET_NULL) {
-		ib_logger(ib_stream, " ON DELETE SET NULL");
+		ib_log(state, " ON DELETE SET NULL");
 	}
 
 	if (foreign->type & DICT_FOREIGN_ON_DELETE_NO_ACTION) {
-		ib_logger(ib_stream, " ON DELETE NO ACTION");
+		ib_log(state, " ON DELETE NO ACTION");
 	}
 
 	if (foreign->type & DICT_FOREIGN_ON_UPDATE_CASCADE) {
-		ib_logger(ib_stream, " ON UPDATE CASCADE");
+		ib_log(state, " ON UPDATE CASCADE");
 	}
 
 	if (foreign->type & DICT_FOREIGN_ON_UPDATE_SET_NULL) {
-		ib_logger(ib_stream, " ON UPDATE SET NULL");
+		ib_log(state, " ON UPDATE SET NULL");
 	}
 
 	if (foreign->type & DICT_FOREIGN_ON_UPDATE_NO_ACTION) {
-		ib_logger(ib_stream, " ON UPDATE NO ACTION");
+		ib_log(state, " ON UPDATE NO ACTION");
 	}
 }
 
@@ -4585,7 +4585,7 @@ dict_print_info_on_foreign_keys(
 				a format suitable to be inserted into
 				a CREATE TABLE, otherwise in the format
 				of SHOW TABLE STATUS */
-	ib_stream_t	ib_stream,/*!< in: stream where to print */
+	ib_stream_t	state->stream,/*!< in: stream where to print */
 	trx_t*		trx,	/*!< in: transaction */
 	dict_table_t*	table)	/*!< in: table */
 {
@@ -4604,58 +4604,58 @@ dict_print_info_on_foreign_keys(
 	while (foreign != NULL) {
 		if (create_table_format) {
 			dict_print_info_on_foreign_key_in_create_format(
-				ib_stream, trx, foreign, TRUE);
+				state->stream, trx, foreign, TRUE);
 		} else {
 			ulint	i;
-			ib_logger(ib_stream, "; (");
+			ib_log(state, "; (");
 
 			for (i = 0; i < foreign->n_fields; i++) {
 				if (i) {
-					ib_logger(ib_stream, " ");
+					ib_log(state, " ");
 				}
 
-				ut_print_name(ib_stream, trx, FALSE,
+				ut_print_name(state->stream, trx, FALSE,
 					      foreign->foreign_col_names[i]);
 			}
 
-			ib_logger(ib_stream, ") REFER ");
-			ut_print_name(ib_stream, trx, TRUE,
+			ib_log(state, ") REFER ");
+			ut_print_name(state->stream, trx, TRUE,
 				      foreign->referenced_table_name);
-			ib_logger(ib_stream, "(");
+			ib_log(state, "(");
 
 			for (i = 0; i < foreign->n_fields; i++) {
 				if (i) {
-					ib_logger(ib_stream, " ");
+					ib_log(state, " ");
 				}
 				ut_print_name(
-					ib_stream, trx, FALSE,
+					state->stream, trx, FALSE,
 					foreign->referenced_col_names[i]);
 			}
 
-			ib_logger(ib_stream, ")");
+			ib_log(state, ")");
 
 			if (foreign->type == DICT_FOREIGN_ON_DELETE_CASCADE) {
-				ib_logger(ib_stream, " ON DELETE CASCADE");
+				ib_log(state, " ON DELETE CASCADE");
 			}
 
 			if (foreign->type == DICT_FOREIGN_ON_DELETE_SET_NULL) {
-				ib_logger(ib_stream, " ON DELETE SET NULL");
+				ib_log(state, " ON DELETE SET NULL");
 			}
 
 			if (foreign->type & DICT_FOREIGN_ON_DELETE_NO_ACTION) {
-				ib_logger(ib_stream, " ON DELETE NO ACTION");
+				ib_log(state, " ON DELETE NO ACTION");
 			}
 
 			if (foreign->type & DICT_FOREIGN_ON_UPDATE_CASCADE) {
-				ib_logger(ib_stream, " ON UPDATE CASCADE");
+				ib_log(state, " ON UPDATE CASCADE");
 			}
 
 			if (foreign->type & DICT_FOREIGN_ON_UPDATE_SET_NULL) {
-				ib_logger(ib_stream, " ON UPDATE SET NULL");
+				ib_log(state, " ON UPDATE SET NULL");
 			}
 
 			if (foreign->type & DICT_FOREIGN_ON_UPDATE_NO_ACTION) {
-				ib_logger(ib_stream, " ON UPDATE NO ACTION");
+				ib_log(state, " ON UPDATE NO ACTION");
 			}
 		}
 
@@ -4671,14 +4671,14 @@ IB_INTERN
 void
 dict_index_name_print(
 /*==================*/
-	ib_stream_t		ib_stream,	/*!< in: output stream */
+	ib_stream_t		state->stream,	/*!< in: output stream */
 	trx_t*			trx,		/*!< in: transaction */
 	const dict_index_t*	index)		/*!< in: index to print */
 {
-	ib_logger(ib_stream, "index ");
-	ut_print_name(ib_stream, trx, FALSE, index->name);
-	ib_logger(ib_stream, " of table ");
-	ut_print_name(ib_stream, trx, TRUE, index->table_name);
+	ib_log(state, "index ");
+	ut_print_name(state->stream, trx, FALSE, index->name);
+	ib_log(state, " of table ");
+	ut_print_name(state->stream, trx, TRUE, index->table_name);
 }
 #endif /* !IB_HOTBACKUP */
 

@@ -95,14 +95,14 @@ void* os_mem_alloc_large(ulint* n)
 
 	shmid = shmget(IPC_PRIVATE, (size_t)size, SHM_HUGETLB | SHM_R | SHM_W);
 	if (shmid < 0) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: HugeTLB: Warning: Failed to allocate"
 			" %lu bytes. errno %d\n", size, errno);
 		ptr = NULL;
 	} else {
 		ptr = shmat(shmid, NULL, 0);
 		if (ptr == (void *)-1) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: HugeTLB: Warning: Failed to"
 				" attach shared memory segment, errno %d\n",
 				errno);
@@ -127,7 +127,7 @@ void* os_mem_alloc_large(ulint* n)
 		return(ptr);
 	}
 
-	ib_logger(ib_stream, "InnoDB HugeTLB: Warning: Using conventional"
+	ib_log(state, "InnoDB HugeTLB: Warning: Using conventional"
 		" memory pool\n");
 skip:
 #endif /* IB_HAVE_LARGE_PAGES && IB_LINUX */
@@ -145,7 +145,7 @@ skip:
 	ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE,
 			   PAGE_READWRITE);
 	if (!ptr) {
-		ib_logger(ib_stream, "InnoDB: VirtualAlloc(%lu bytes) failed;"
+		ib_log(state, "InnoDB: VirtualAlloc(%lu bytes) failed;"
 			" Windows error %lu\n",
 			(ulong) size, (ulong) GetLastError());
 	} else {
@@ -169,7 +169,7 @@ skip:
 	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE,
 		   MAP_PRIVATE | OS_MAP_ANON, -1, 0);
 	if (IB_UNLIKELY(ptr == (void*) -1)) {
-		ib_logger(ib_stream, "InnoDB: mmap(%lu bytes) failed;"
+		ib_log(state, "InnoDB: mmap(%lu bytes) failed;"
 			" errno %lu\n",
 			(ulong) size, (ulong) errno);
 		ptr = NULL;
@@ -207,7 +207,7 @@ void os_mem_free_large(void *ptr, ulint size)
 	/* When RELEASE memory, the size parameter must be 0.
 	Do not use MEM_RELEASE with MEM_DECOMMIT. */
 	if (!VirtualFree(ptr, 0, MEM_RELEASE)) {
-		ib_logger(ib_stream, "InnoDB: VirtualFree(%p, %lu) failed;"
+		ib_log(state, "InnoDB: VirtualFree(%p, %lu) failed;"
 			" Windows error %lu\n",
 			ptr, (ulong) size, (ulong) GetLastError());
 	} else {
@@ -221,7 +221,7 @@ void os_mem_free_large(void *ptr, ulint size)
 	ut_free(ptr);
 #else
 	if (munmap(ptr, size)) {
-		ib_logger(ib_stream, "InnoDB: munmap(%p, %lu) failed;"
+		ib_log(state, "InnoDB: munmap(%p, %lu) failed;"
 			" errno %lu\n",
 			ptr, (ulong) size, (ulong) errno);
 	} else {

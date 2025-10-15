@@ -24,13 +24,6 @@
 #ifndef IB_HOTBACKUP
 	#include "os_sync.h"
 
-	/// \brief The total amount of memory currently allocated from the operating
-	//. system with os_mem_alloc_large() or malloc().  Does not count malloc()
-	/// if srv_use_sys_malloc is set.  Protected by ut_list_mutex.
-	extern ulint ut_total_allocated_memory;
-
-	/// \brief Mutex protecting ut_total_allocated_memory and ut_mem_block_list
-	extern os_fast_mutex_t	ut_list_mutex;
 #endif // !IB_HOTBACKUP
 
 /// \brief Wrapper for memcpy(3).  

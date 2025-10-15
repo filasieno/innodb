@@ -53,7 +53,7 @@ static const char* GEN_CLUST_INDEX = "GEN_CLUST_INDEX";
 
 // All InnoDB error messages are written to this stream.
 ib_logger_t ib_logger;
-ib_stream_t ib_stream;
+ib_stream_t state->stream;
 extern ib_panic_function_t ib_panic;
 extern ib_trx_is_interrupted_handler_t ib_trx_is_interrupted;
 
@@ -239,7 +239,7 @@ static dict_table_t* ib_open_table_by_id(ib_id_t tid, ib_bool_t locked)
 	}
 	dict_table_t* table = dict_table_get_using_id(srv_force_recovery, table_id, TRUE);
 	if (table != NULL && table->ibd_file_missing) {
-		ib_logger(ib_stream, "The .ibd file for table %s is missing.\n", table->name);
+		ib_log(state, "The .ibd file for table %s is missing.\n", table->name);
 		dict_table_decrement_handle_count(table, TRUE);
 		table = NULL;
 	}
@@ -257,7 +257,7 @@ static dict_table_t* ib_open_table_by_name(const char* name)
 	UT_DBG_ENTER_FUNC;
 	dict_table_t* table = dict_table_get(name, TRUE);
 	if (table != NULL && table->ibd_file_missing) {
-		ib_logger(ib_stream, "The .ibd file for table %s is missing.\n", name);
+		ib_log(state, "The .ibd file for table %s is missing.\n", name);
 		dict_table_decrement_handle_count(table, FALSE);
 		table = NULL;
 	}
@@ -272,7 +272,7 @@ static dict_table_t* ib_lookup_table_by_name(const char* name)
 	UT_DBG_ENTER_FUNC;
 	dict_table_t* table = dict_table_get_low(name);
 	if (table != NULL && table->ibd_file_missing) {
-		ib_logger(ib_stream, "The .ibd file for table %s is missing.\n", name);
+		ib_log(state, "The .ibd file for table %s is missing.\n", name);
 		table = NULL;
 	}
 	return table;
@@ -478,7 +478,7 @@ ib_err_t ib_init(void){
 	IB_CHECK_PANIC();
 	ut_mem_init();
 	ib_logger = (ib_logger_t) fprintf;
-	ib_stream = stderr;
+	state->stream = stderr;
 	ib_err = ib_cfg_init();
 	return ib_err;
 }
@@ -495,7 +495,7 @@ ib_err_t ib_startup(const char* format)
 		// Check if format name was found.
 		if (db_format.id > DICT_TF_FORMAT_MAX) {
 			err = DB_UNSUPPORTED;
-			ib_logger(ib_stream, "InnoDB: format '%s' unknown.",
+			ib_log(state, "InnoDB: format '%s' unknown.",
 				  format);
 		}
 	}
@@ -514,7 +514,7 @@ ib_err_t ib_shutdown(ib_shutdown_t flag)
 	IB_CHECK_PANIC();
 	err = ib_cfg_shutdown();
 	if (err != DB_SUCCESS) {
-		ib_logger(ib_stream, "ib_cfg_shutdown(): %s; continuing shutdown anyway\n", ib_strerror(err));
+		ib_log(state, "ib_cfg_shutdown(): %s; continuing shutdown anyway\n", ib_strerror(err));
 	}
 	db_format.id = 0;
 	db_format.name = NULL;
@@ -3551,12 +3551,12 @@ ib_err_t b_savepoint_rollback(ib_trx_t ib_trx, const void* name, ib_ulint_t IB_N
 	trx_t* 		trx = (trx_t*) ib_trx;
 	IB_CHECK_PANIC();
 	if (trx->conc_state == TRX_NOT_STARTED) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: transaction trying to rollback a  "
 			"savepoint ");
-		ut_print_name(ib_stream, trx, FALSE, name);
-		ib_logger(ib_stream, " though it is not started\n");
+		ut_print_name(state->stream, trx, FALSE, name);
+		ib_log(state, " though it is not started\n");
 		return(DB_ERROR);
 	}
 	savep = UT_LIST_GET_FIRST(trx->trx_savepoints);
@@ -3929,7 +3929,7 @@ ib_err_t ib_tuple_read_float(ib_tpl_t ib_tpl, ib_ulint_t col_no, float* fval)
 void ib_logger_set(ib_msg_log_t ib_msg_log, ib_msg_stream_t ib_msg_stream)
 {
 	ib_logger = (ib_logger_t) ib_msg_log;
-	ib_stream = (ib_stream_t) ib_msg_stream;
+	state->stream = (ib_stream_t) ib_msg_stream;
 }
 
 const char* ib_strerror(ib_err_t num)

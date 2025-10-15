@@ -61,33 +61,6 @@ extern ulint os_n_pending_reads;
 /** Number of pending write operations */
 extern ulint os_n_pending_writes;
 
-#ifdef __WIN__
-
-/** We define always WIN_ASYNC_IO, and check at run-time whether
-   the OS actually supports it: Win 95 does not, NT does. */
-#define WIN_ASYNC_IO
-
-/** Use unbuffered I/O */
-#define IB_NON_BUFFERED_IO
-
-#endif
-
-#ifdef __WIN__
-/** File handle */
-#define os_file_t HANDLE
-/** Convert a C file descriptor to a native file handle
-@param fd	file descriptor
-@return		native file handle */
-#define OS_FILE_FROM_FD(fd) (HANDLE) _get_osfhandle(fd)
-#else
-/** File handle */
-typedef int os_file_t;
-/** Convert a C file descriptor to a native file handle
-@param fd	file descriptor
-@return		native file handle */
-#define OS_FILE_FROM_FD(fd) fd
-#endif
-
 /** Umask for creating files */
 extern ulint os_innodb_umask;
 
@@ -176,11 +149,6 @@ log. */
 				effect only in simulated aio */
 /* @} */
 
-#define OS_WIN31 1	 /*!< Microsoft Windows 3.x */
-#define OS_WIN95 2	 /*!< Microsoft Windows 95 */
-#define OS_WINNT 3	 /*!< Microsoft Windows NT 3.x */
-#define OS_WIN2000 4 /*!< Microsoft Windows 2000 */
-
 extern ulint os_n_file_reads;
 extern ulint os_n_file_writes;
 extern ulint os_n_fsyncs;
@@ -195,10 +163,7 @@ enum os_file_type_enum {
 };
 typedef enum os_file_type_enum os_file_type_t;
 
-/* Maximum path string length in bytes when referring to tables with in the
-'./databasename/tablename.ibd' path format; we can allocate at least 2 buffers
-of this size from the thread stack; that is why this should not be made much
-bigger than 4000 bytes */
+/* Maximum path string length in bytes when referring to tables with in the `./databasename/tablename.ibd` path format; we can allocate at least 2 buffers of this size from the thread stack; that is why this should not be made much bigger than 4000 bytes */
 #define OS_FILE_MAX_PATH 4000
 
 /* Struct used in fetching information of a file in a directory */
@@ -211,42 +176,34 @@ struct os_file_stat_struct
 	time_t mtime;				 /*!< modification time */
 	time_t atime;				 /*!< access time */
 };
+
 typedef struct os_file_stat_struct os_file_stat_t;
 
-#ifdef __WIN__
-typedef HANDLE os_file_dir_t; /*!< directory stream */
-#else
+
 typedef DIR *os_file_dir_t; /*!< directory stream */
-#endif
 
 /// \brief Gets the operating system version.
 /// \details Currently works only on Windows.
 /// \return OS_WIN95, OS_WIN31, OS_WINNT, or OS_WIN2000.
-IB_INTERN
-ulint os_get_os_version(void);
+IB_INTERN ulint os_get_os_version(void);
 #ifndef IB_HOTBACKUP
+
 /// \brief Creates the seek mutexes used in positioned reads and writes.
-IB_INTERN
-void os_io_init_simple(void);
+IB_INTERN void os_io_init_simple(void);
 /// \brief Creates a temporary file.
 /// \details This function is like tmpfile(3), but the temporary file is created in the configured temporary directory. On Netware, this function is like tmpfile(3), because the C run-time library of Netware does not expose the delete-on-close flag.
 /// \return Temporary file handle, or NULL on error.
-IB_INTERN
-FILE *
-os_file_create_tmpfile(void);
-#endif																	  /* !IB_HOTBACKUP */
+IB_INTERN FILE* os_file_create_tmpfile(void);
+#endif // !IB_HOTBACKUP 
+
 /***********************************************************************/ /**
 The os_file_opendir() function opens a directory stream corresponding to the
 directory named by the dirname argument. The directory stream is positioned
 at the first entry. In both Unix and Windows we automatically skip the '.'
 and '..' items at the start of the directory listing.
 @return	directory stream, NULL if error */
-IB_INTERN
-os_file_dir_t
-os_file_opendir(
-	/*============*/
-	const char *dirname, /*!< in: directory name; it must not
-					contain a trailing '\' or '/' */
+IB_INTERN os_file_dir_t os_file_opendir(
+	const char *dirname, /*!< in: directory name; it must not contain a trailing '\' or '/' */
 	ibool error_is_fatal
 );																		  /*!< in: TRUE if we should treat an
 					error as a fatal error; if we try to
@@ -256,11 +213,8 @@ os_file_opendir(
 /***********************************************************************/ /**
 Closes a directory stream.
 @return	0 if success, -1 if failure */
-IB_INTERN
-int os_file_closedir(
-	/*=============*/
-	os_file_dir_t dir
-);																		  /*!< in: directory stream */
+IB_INTERN int os_file_closedir(os_file_dir_t dir);																		  /*!< in: directory stream */
+
 /***********************************************************************/ /**
 This function returns information of the next file in the directory. We jump
 over the '.' and '..' entries in the directory.
@@ -734,7 +688,7 @@ Prints info of the aio arrays. */
 IB_INTERN
 void os_aio_print(
 	/*=========*/
-	ib_stream_t ib_stream
+	ib_stream_t state->stream
 );																		 /*!< in: stream where to print */
 /**********************************************************************/ /**
 Refreshes the statistics used to print per-second averages. */

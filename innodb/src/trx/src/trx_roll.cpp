@@ -227,8 +227,8 @@ trx_rollback_active(
 		unit = "M";
 	}
 
-	ut_print_timestamp(ib_stream);
-	ib_logger(ib_stream,
+	ut_print_timestamp(state->stream);
+	ib_log(state,
 		"  InnoDB: Rolling back trx with id " TRX_ID_FMT ", %lu%s"
 		" rows to undo\n",
 		TRX_ID_PREP_PRINTF(trx->id),
@@ -252,7 +252,7 @@ trx_rollback_active(
 
 		mutex_exit(&kernel_mutex);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Waiting for rollback of trx id %lu to end\n",
 			(ulong) ut_dulint_get_low(trx->id));
 		os_thread_sleep(100000);
@@ -268,7 +268,7 @@ trx_rollback_active(
 		/* If the transaction was for a dictionary operation, we
 		drop the relevant table, if it still exists */
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Dropping table with id %lu %lu"
 			" in recovery if it exists\n",
 			(ulong) ut_dulint_get_high(trx->table_id),
@@ -279,10 +279,10 @@ trx_rollback_active(
 		if (table) {
 			ulint	err;
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Table found: dropping table ");
-			ut_print_name(ib_stream, trx, TRUE, table->name);
-			ib_logger(ib_stream, " in recovery\n");
+			ut_print_name(state->stream, trx, TRUE, table->name);
+			ib_log(state, " in recovery\n");
 
 			err = ddl_drop_table(table->name, trx, TRUE);
 			trx_commit(trx);
@@ -295,7 +295,7 @@ trx_rollback_active(
 		dict_unlock_data_dictionary(trx);
 	}
 
-	ib_logger(ib_stream, "\nInnoDB: Rolling back of trx id " TRX_ID_FMT
+	ib_log(state, "\nInnoDB: Rolling back of trx id " TRX_ID_FMT
 		" completed\n",
 		TRX_ID_PREP_PRINTF(trx->id));
 	mem_heap_free(heap);
@@ -324,7 +324,7 @@ trx_rollback_or_clean_recovered(
 	}
 
 	if (all) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			  "InnoDB: Starting in background the rollback"
 			  " of uncommitted transactions\n");
 	}
@@ -347,7 +347,7 @@ loop:
 
 		case TRX_COMMITTED_IN_MEMORY:
 			mutex_exit(&kernel_mutex);
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Cleaning up trx with id "
 				TRX_ID_FMT "\n",
 				TRX_ID_PREP_PRINTF(trx->id));
@@ -366,8 +366,8 @@ loop:
 	}
 
 	if (all) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			  "  InnoDB: Rollback of non-prepared"
 			  " transactions completed\n");
 	}
@@ -638,7 +638,7 @@ trx_roll_pop_top_rec(
 						undo->top_page_no, mtr);
 	offset = undo->top_offset;
 
-	/*ib_logger(ib_stream, "Thread %lu undoing trx %lu undo record %lu\n",
+	/*ib_log(state, "Thread %lu undoing trx %lu undo record %lu\n",
 	os_thread_get_curr_id(), ut_dulint_get_low(trx->id),
 	ut_dulint_get_low(undo->top_undo_no)); */
 
@@ -763,11 +763,11 @@ try_again:
 			 / trx_roll_max_undo_no);
 		if (progress_pct != trx_roll_progress_printed_pct) {
 			if (trx_roll_progress_printed_pct == 0) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"\nInnoDB: Progress in percents:"
 					" %lu", (ulong) progress_pct);
 			} else {
-				ib_logger(ib_stream,
+				ib_log(state,
 					" %lu", (ulong) progress_pct);
 			}
 			trx_roll_progress_printed_pct = progress_pct;
@@ -1041,7 +1041,7 @@ trx_finish_rollback_off_kernel(
 
 #ifdef IB_DEBUG
 	if (lock_print_waits) {
-		ib_logger(ib_stream, "Trx %lu rollback finished\n",
+		ib_log(state, "Trx %lu rollback finished\n",
 			(ulong) ut_dulint_get_low(trx->id));
 	}
 #endif /* IB_DEBUG */

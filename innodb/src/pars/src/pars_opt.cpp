@@ -1081,7 +1081,7 @@ opt_clust_access(
 		if (dict_index_get_nth_field(index, pos)->prefix_len != 0
 		    || dict_index_get_nth_field(clust_index, i)
 		    ->prefix_len != 0) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"InnoDB: Error in pars0opt.c:"
 				" table %s has prefix_len != 0\n",
 				index->table_name);
@@ -1178,23 +1178,23 @@ opt_print_query_plan(
 	ulint	n_fields;
 	ulint	i;
 
-	ib_logger(ib_stream, "QUERY PLAN FOR A SELECT NODE\n");
+	ib_log(state, "QUERY PLAN FOR A SELECT NODE\n");
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		sel_node->asc ? "Asc. search; " : "Desc. search; ");
 
 	if (sel_node->set_x_locks) {
-		ib_logger(ib_stream, "sets row x-locks; ");
+		ib_log(state, "sets row x-locks; ");
 		ut_a(sel_node->row_lock_mode == LOCK_X);
 		ut_a(!sel_node->consistent_read);
 	} else if (sel_node->consistent_read) {
-		ib_logger(ib_stream, "consistent read; ");
+		ib_log(state, "consistent read; ");
 	} else {
 		ut_a(sel_node->row_lock_mode == LOCK_S);
-		ib_logger(ib_stream, "sets row s-locks; ");
+		ib_log(state, "sets row s-locks; ");
 	}
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 
 	for (i = 0; i < sel_node->n_tables; i++) {
 		plan = sel_node_get_nth_plan(sel_node, i);
@@ -1205,9 +1205,9 @@ opt_print_query_plan(
 			n_fields = 0;
 		}
 
-		ib_logger(ib_stream, "Table ");
-		dict_index_name_print(ib_stream, NULL, plan->index);
-		ib_logger(ib_stream,"; exact m. %lu, match %lu, end conds %lu\n",
+		ib_log(state, "Table ");
+		dict_index_name_print(state->stream, NULL, plan->index);
+		ib_log(state,"; exact m. %lu, match %lu, end conds %lu\n",
 			(unsigned long) plan->n_exact_match,
 			(unsigned long) n_fields,
 			(unsigned long) UT_LIST_GET_LEN(plan->end_conds));

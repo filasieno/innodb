@@ -97,8 +97,8 @@ independently of any IB_ debugging conditions. */
 #if defined IB_DEBUG || defined IB_ZIP_DEBUG
 # define page_zip_fail(s, ...) 						\
 {									\
-	ib_logger(s, "  InnoDB: ");					\
-	ib_logger(s, __VA_ARGS__);					\
+	state->log(s, "  InnoDB: ");					\
+	state->log(s, __VA_ARGS__);					\
 }
 #else /* IB_DEBUG || IB_ZIP_DEBUG */
 # define page_zip_fail(s, ...) /* empty */
@@ -711,14 +711,14 @@ page_zip_compress_deflate(
 {
 	int	status;
 	if (IB_UNLIKELY(page_zip_compress_dbg)) {
-		ut_print_buf(ib_stream, strm->next_in, strm->avail_in);
+		ut_print_buf(state->stream, strm->next_in, strm->avail_in);
 	}
 	if (IB_LIKELY_NULL(logfile)) {
 		fwrite(strm->next_in, 1, strm->avail_in, logfile);
 	}
 	status = deflate(strm, flush);
 	if (IB_UNLIKELY(page_zip_compress_dbg)) {
-		ib_logger(ib_stream, " -> %d\n", status);
+		ib_log(state, " -> %d\n", status);
 	}
 	return(status);
 }
@@ -1182,7 +1182,7 @@ page_zip_compress(
 	n_dense = page_dir_get_n_heap(page) - PAGE_HEAP_NO_USER_LOW;
 #ifdef PAGE_ZIP_COMPRESS_DBG
 	if (IB_UNLIKELY(page_zip_compress_dbg)) {
-		ib_logger(ib_stream, "compress %p %p %lu %lu %lu\n",
+		ib_log(state, "compress %p %p %lu %lu %lu\n",
 			(void*) page_zip, (void*) page,
 			page_is_leaf(page),
 			n_fields, n_dense);
@@ -1495,7 +1495,7 @@ page_zip_fields_decode(
 
 	if (IB_UNLIKELY(n > REC_MAX_N_FIELDS)) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_fields_decode: n = %lu\n",
 			       (ulong) n);
 		return(NULL);
@@ -1503,7 +1503,7 @@ page_zip_fields_decode(
 
 	if (IB_UNLIKELY(b > end)) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_fields_decode: %p > %p\n",
 			       (const void*) b, (const void*) end);
 		return(NULL);
@@ -1607,7 +1607,7 @@ page_zip_dir_decode(
 	n_recs = page_get_n_recs(page);
 
 	if (IB_UNLIKELY(n_recs > n_dense)) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_dir_decode 1: %lu > %lu\n",
 			       (ulong) n_recs, (ulong) n_dense);
 		return(FALSE);
@@ -1638,7 +1638,7 @@ page_zip_dir_decode(
 
 		if (IB_UNLIKELY((offs & PAGE_ZIP_DIR_SLOT_MASK)
 				  < PAGE_ZIP_START + REC_N_NEW_EXTRA_BYTES)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_dir_decode 2: %u %u %lx\n",
 				       (unsigned) i, (unsigned) n_recs,
 				       (ulong) offs);
@@ -1654,7 +1654,7 @@ page_zip_dir_decode(
 			page, page_dir_get_n_slots(page) - 1);
 
 		if (IB_UNLIKELY(slot != last_slot)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_dir_decode 3: %p != %p\n",
 				       (const void*) slot,
 				       (const void*) last_slot);
@@ -1667,7 +1667,7 @@ page_zip_dir_decode(
 		ulint	offs = page_zip_dir_get(page_zip, i);
 
 		if (IB_UNLIKELY(offs & ~PAGE_ZIP_DIR_SLOT_MASK)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_dir_decode 4: %u %u %lx\n",
 				       (unsigned) i, (unsigned) n_dense,
 				       (ulong) offs);
@@ -1719,7 +1719,7 @@ page_zip_set_extra_bytes(
 		offs &= PAGE_ZIP_DIR_SLOT_MASK;
 		if (IB_UNLIKELY(offs < PAGE_ZIP_START
 				  + REC_N_NEW_EXTRA_BYTES)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_set_extra_bytes 1:"
 				       " %u %u %lx\n",
 				       (unsigned) i, (unsigned) n,
@@ -1747,7 +1747,7 @@ page_zip_set_extra_bytes(
 			return(TRUE);
 		}
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_set_extra_bytes 2: %u != %u\n",
 			       (unsigned) i, (unsigned) n);
 		return(FALSE);
@@ -1760,7 +1760,7 @@ page_zip_set_extra_bytes(
 		if (IB_UNLIKELY(!offs)
 		    || IB_UNLIKELY(offs & ~PAGE_ZIP_DIR_SLOT_MASK)) {
 
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_set_extra_bytes 3: %lx\n",
 				       (ulong) offs);
 			return(FALSE);
@@ -1817,7 +1817,7 @@ page_zip_apply_log_ext(
 			    || IB_UNLIKELY
 			    (len < (DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN))
 			    || rec_offs_nth_extern(offsets, i)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log_ext:"
 					       " trx_id len %lu,"
 					       " %p - %p >= %p - %p\n",
@@ -1843,7 +1843,7 @@ page_zip_apply_log_ext(
 				- BTR_EXTERN_FIELD_REF_SIZE;
 
 			if (IB_UNLIKELY(data + len >= end)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log_ext: "
 					       "ext %p+%lu >= %p\n",
 					       (const void*) data,
@@ -1862,7 +1862,7 @@ page_zip_apply_log_ext(
 	/* Copy the last bytes of the record. */
 	len = rec_get_end(rec, offsets) - next_out;
 	if (IB_UNLIKELY(data + len >= end)) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_apply_log_ext: last %p+%lu >= %p\n",
 			       (const void*) data,
 			       (ulong) len,
@@ -1913,7 +1913,7 @@ page_zip_apply_log(
 		if (val & 0x80) {
 			val = (val & 0x7f) << 8 | *data++;
 			if (IB_UNLIKELY(!val)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log:"
 					       " invalid val %x%x\n",
 					       data[-2], data[-1]);
@@ -1921,14 +1921,14 @@ page_zip_apply_log(
 			}
 		}
 		if (IB_UNLIKELY(data >= end)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_apply_log: %p >= %p\n",
 				       (const void*) data,
 				       (const void*) end);
 			return(NULL);
 		}
 		if (IB_UNLIKELY((val >> 1) > n_dense)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_apply_log: %lu>>1 > %lu\n",
 				       (ulong) val, (ulong) n_dense);
 			return(NULL);
@@ -1945,7 +1945,7 @@ page_zip_apply_log(
 		the free list), or a new record, with the next
 		available_heap_no. */
 		if (IB_UNLIKELY(hs > heap_status)) {
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_apply_log: %lu > %lu\n",
 				       (ulong) hs, (ulong) heap_status);
 			return(NULL);
@@ -1953,7 +1953,7 @@ page_zip_apply_log(
 			/* A new record was allocated from the heap. */
 			if (IB_UNLIKELY(val & 1)) {
 				/* Only existing records may be cleared. */
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log:"
 					       " attempting to create"
 					       " deleted rec %lu\n",
@@ -2001,7 +2001,7 @@ page_zip_apply_log(
 			/* Non-leaf nodes should not contain any
 			externally stored columns. */
 			if (IB_UNLIKELY(hs & REC_STATUS_NODE_PTR)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log: "
 					       "%lu&REC_STATUS_NODE_PTR\n",
 					       (ulong) hs);
@@ -2019,7 +2019,7 @@ page_zip_apply_log(
 				- REC_NODE_PTR_SIZE;
 			/* Copy the data bytes, except node_ptr. */
 			if (IB_UNLIKELY(data + len >= end)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log: "
 					       "node_ptr %p+%lu >= %p\n",
 					       (const void*) data,
@@ -2035,7 +2035,7 @@ page_zip_apply_log(
 			/* Copy all data bytes of
 			a record in a secondary index. */
 			if (IB_UNLIKELY(data + len >= end)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log: "
 					       "sec %p+%lu >= %p\n",
 					       (const void*) data,
@@ -2055,7 +2055,7 @@ page_zip_apply_log(
 			if (IB_UNLIKELY(data + l >= end)
 			    || IB_UNLIKELY(len < (DATA_TRX_ID_LEN
 						    + DATA_ROLL_PTR_LEN))) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log: "
 					       "trx_id %p+%lu >= %p\n",
 					       (const void*) data,
@@ -2072,7 +2072,7 @@ page_zip_apply_log(
 			b = rec + l + (DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN);
 			len = rec_get_end(rec, offsets) - b;
 			if (IB_UNLIKELY(data + len >= end)) {
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_apply_log: "
 					       "clust %p+%lu >= %p\n",
 					       (const void*) data,
@@ -2132,7 +2132,7 @@ page_zip_decompress_node_ptrs(
 			}
 			/* fall through */
 		default:
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_decompress_node_ptrs:"
 				       " 1 inflate(Z_SYNC_FLUSH)=%s\n",
 				       d_stream->msg);
@@ -2168,7 +2168,7 @@ page_zip_decompress_node_ptrs(
 			}
 			/* fall through */
 		default:
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_decompress_node_ptrs:"
 				       " 2 inflate(Z_SYNC_FLUSH)=%s\n",
 				       d_stream->msg);
@@ -2192,7 +2192,7 @@ page_zip_decompress_node_ptrs(
 	if (IB_UNLIKELY(d_stream->avail_out > IB_PAGE_SIZE
 			  - PAGE_ZIP_START - PAGE_DIR)) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_node_ptrs:"
 			       " avail_out = %u\n",
 			       d_stream->avail_out);
@@ -2200,7 +2200,7 @@ page_zip_decompress_node_ptrs(
 	}
 
 	if (IB_UNLIKELY(inflate(d_stream, Z_FINISH) != Z_STREAM_END)) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_node_ptrs:"
 			       " inflate(Z_FINISH)=%s\n",
 			       d_stream->msg);
@@ -2251,7 +2251,7 @@ zlib_done:
 	    (page_zip_get_trailer_len(page_zip,
 				      dict_index_is_clust(index), NULL)
 	     + page_zip->m_end >= page_zip_get_size(page_zip))) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_node_ptrs:"
 			       " %lu + %lu >= %lu, %lu\n",
 			       (ulong) page_zip_get_trailer_len(
@@ -2328,7 +2328,7 @@ page_zip_decompress_sec(
 				}
 				/* fall through */
 			default:
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_sec:"
 					       " inflate(Z_SYNC_FLUSH)=%s\n",
 					       d_stream->msg);
@@ -2356,7 +2356,7 @@ page_zip_decompress_sec(
 	if (IB_UNLIKELY(d_stream->avail_out > IB_PAGE_SIZE
 			  - PAGE_ZIP_START - PAGE_DIR)) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_sec:"
 			       " avail_out = %u\n",
 			       d_stream->avail_out);
@@ -2364,7 +2364,7 @@ page_zip_decompress_sec(
 	}
 
 	if (IB_UNLIKELY(inflate(d_stream, Z_FINISH) != Z_STREAM_END)) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_sec:"
 			       " inflate(Z_FINISH)=%s\n",
 			       d_stream->msg);
@@ -2414,7 +2414,7 @@ zlib_done:
 	if (IB_UNLIKELY(page_zip_get_trailer_len(page_zip, FALSE, NULL)
 			  + page_zip->m_end >= page_zip_get_size(page_zip))) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_sec: %lu + %lu >= %lu\n",
 			       (ulong) page_zip_get_trailer_len(
 				       page_zip, FALSE, NULL),
@@ -2454,7 +2454,7 @@ page_zip_decompress_clust_ext(
 			if (IB_UNLIKELY(len < DATA_TRX_ID_LEN
 					  + DATA_ROLL_PTR_LEN)) {
 
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_clust_ext:"
 					       " len[%lu] = %lu\n",
 					       (ulong) i, (ulong) len);
@@ -2463,7 +2463,7 @@ page_zip_decompress_clust_ext(
 
 			if (rec_offs_nth_extern(offsets, i)) {
 
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_clust_ext:"
 					       " DB_TRX_ID at %lu is ext\n",
 					       (ulong) i);
@@ -2481,7 +2481,7 @@ page_zip_decompress_clust_ext(
 				}
 				/* fall through */
 			default:
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_clust_ext:"
 					       " 1 inflate(Z_SYNC_FLUSH)=%s\n",
 					       d_stream->msg);
@@ -2512,7 +2512,7 @@ page_zip_decompress_clust_ext(
 				}
 				/* fall through */
 			default:
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_clust_ext:"
 					       " 2 inflate(Z_SYNC_FLUSH)=%s\n",
 					       d_stream->msg);
@@ -2595,7 +2595,7 @@ page_zip_decompress_clust(
 			}
 			/* fall through */
 		default:
-			page_zip_fail(ib_stream, "page_zip_decompress_clust:"
+			page_zip_fail(state->stream, "page_zip_decompress_clust:"
 				       " 1 inflate(Z_SYNC_FLUSH)=%s\n",
 				       d_stream->msg);
 			goto zlib_error;
@@ -2633,7 +2633,7 @@ page_zip_decompress_clust(
 			if (IB_UNLIKELY(len < DATA_TRX_ID_LEN
 					  + DATA_ROLL_PTR_LEN)) {
 
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_clust:"
 					       " len = %lu\n", (ulong) len);
 				goto zlib_error;
@@ -2650,7 +2650,7 @@ page_zip_decompress_clust(
 				}
 				/* fall through */
 			default:
-				page_zip_fail(ib_stream,
+				page_zip_fail(state->stream,
 					       "page_zip_decompress_clust:"
 					       " 2 inflate(Z_SYNC_FLUSH)=%s\n",
 					       d_stream->msg);
@@ -2681,7 +2681,7 @@ page_zip_decompress_clust(
 			}
 			/* fall through */
 		default:
-			page_zip_fail(ib_stream,
+			page_zip_fail(state->stream,
 				       "page_zip_decompress_clust:"
 				       " 3 inflate(Z_SYNC_FLUSH)=%s\n",
 				       d_stream->msg);
@@ -2697,7 +2697,7 @@ page_zip_decompress_clust(
 	if (IB_UNLIKELY(d_stream->avail_out > IB_PAGE_SIZE
 			  - PAGE_ZIP_START - PAGE_DIR)) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_clust:"
 			       " avail_out = %u\n",
 			       d_stream->avail_out);
@@ -2705,7 +2705,7 @@ page_zip_decompress_clust(
 	}
 
 	if (IB_UNLIKELY(inflate(d_stream, Z_FINISH) != Z_STREAM_END)) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_clust:"
 			       " inflate(Z_FINISH)=%s\n",
 			       d_stream->msg);
@@ -2755,7 +2755,7 @@ zlib_done:
 	if (IB_UNLIKELY(page_zip_get_trailer_len(page_zip, TRUE, NULL)
 			  + page_zip->m_end >= page_zip_get_size(page_zip))) {
 
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_decompress_clust: %lu + %lu >= %lu\n",
 			       (ulong) page_zip_get_trailer_len(
 				       page_zip, TRUE, NULL),
@@ -2804,7 +2804,7 @@ zlib_done:
 			dst = rec_get_nth_field(rec, offsets, i, &len);
 
 			if (IB_UNLIKELY(len < BTR_EXTERN_FIELD_REF_SIZE)) {
-				page_zip_fail(ib_stream, 
+				page_zip_fail(state->stream, 
 					       "page_zip_decompress_clust:"
 					       " %lu < 20\n",
 					       (ulong) len);
@@ -2821,7 +2821,7 @@ zlib_done:
 				if (IB_UNLIKELY
 				    (externs < page_zip->data
 				     + page_zip->m_end)) {
-					page_zip_fail(ib_stream, "page_zip_"
+					page_zip_fail(state->stream, "page_zip_"
 						       "decompress_clust: "
 						       "%p < %p + %lu\n",
 						       (const void*) externs,
@@ -2884,7 +2884,7 @@ page_zip_decompress(
 	n_dense = page_dir_get_n_heap(page_zip->data) - PAGE_HEAP_NO_USER_LOW;
 	if (IB_UNLIKELY(n_dense * PAGE_ZIP_DIR_SLOT_SIZE
 			  >= page_zip_get_size(page_zip))) {
-		page_zip_fail(ib_stream, "page_zip_decompress 1: %lu %lu\n",
+		page_zip_fail(state->stream, "page_zip_decompress 1: %lu %lu\n",
 			       (ulong) n_dense,
 			       (ulong) page_zip_get_size(page_zip));
 		return(FALSE);
@@ -2965,14 +2965,14 @@ zlib_error:
 	/* Decode the zlib header and the index information. */
 	if (IB_UNLIKELY(inflate(&d_stream, Z_BLOCK) != Z_OK)) {
 
-		page_zip_fail(ib_stream, "page_zip_decompress:"
+		page_zip_fail(state->stream, "page_zip_decompress:"
 			       " 1 inflate(Z_BLOCK)=%s\n", d_stream.msg);
 		goto zlib_error;
 	}
 
 	if (IB_UNLIKELY(inflate(&d_stream, Z_BLOCK) != Z_OK)) {
 
-		page_zip_fail(ib_stream, "page_zip_decompress:"
+		page_zip_fail(state->stream, "page_zip_decompress:"
 			       " 2 inflate(Z_BLOCK)=%s\n", d_stream.msg);
 		goto zlib_error;
 	}
@@ -3083,20 +3083,20 @@ page_zip_hexdump_func(
 	ulint		addr;
 	const ulint	width	= 32; /* bytes per line */
 
-	ib_logger(ib_stream, "%s:\n", name);
+	ib_log(state, "%s:\n", name);
 
 	for (addr = 0; addr < size; addr += width) {
 		ulint	i;
 
-		ib_logger(ib_stream, "%04lx ", (ulong) addr);
+		ib_log(state, "%04lx ", (ulong) addr);
 
 		i = ut_min(width, size - addr);
 
 		while (i--) {
-			ib_logger(ib_stream, "%02x", *s++);
+			ib_log(state, "%02x", *s++);
 		}
 
-		ib_logger(ib_stream, "\n");
+		ib_log(state, "\n");
 	}
 }
 
@@ -3130,7 +3130,7 @@ page_zip_validate_low(
 	    || memcmp(page_zip->data + FIL_PAGE_TYPE, page + FIL_PAGE_TYPE, 2)
 	    || memcmp(page_zip->data + FIL_PAGE_DATA, page + FIL_PAGE_DATA,
 		      PAGE_DATA - FIL_PAGE_DATA)) {
-		page_zip_fail(ib_stream, "page_zip_validate: page header\n");
+		page_zip_fail(state->stream, "page_zip_validate: page header\n");
 		page_zip_hexdump(page_zip, sizeof *page_zip);
 		page_zip_hexdump(page_zip->data, page_zip_get_size(page_zip));
 		page_zip_hexdump(page, IB_PAGE_SIZE);
@@ -3165,32 +3165,32 @@ page_zip_validate_low(
 	temp_page_zip = *page_zip;
 	valid = page_zip_decompress(&temp_page_zip, temp_page, TRUE);
 	if (!valid) {
-		ib_logger(ib_stream, 
+		ib_log(state, 
 			  "page_zip_validate(): failed to decompress\n");
 		goto func_exit;
 	}
 	if (page_zip->n_blobs != temp_page_zip.n_blobs) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_validate: n_blobs: %u!=%u\n",
 			       page_zip->n_blobs, temp_page_zip.n_blobs);
 		valid = FALSE;
 	}
 #ifdef IB_DEBUG
 	if (page_zip->m_start != temp_page_zip.m_start) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_validate: m_start: %u!=%u\n",
 			       page_zip->m_start, temp_page_zip.m_start);
 		valid = FALSE;
 	}
 #endif /* IB_DEBUG */
 	if (page_zip->m_end != temp_page_zip.m_end) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_validate: m_end: %u!=%u\n",
 			       page_zip->m_end, temp_page_zip.m_end);
 		valid = FALSE;
 	}
 	if (page_zip->m_nonempty != temp_page_zip.m_nonempty) {
-		page_zip_fail(ib_stream,
+		page_zip_fail(state->stream,
 			       "page_zip_validate(): m_nonempty: %u!=%u\n",
 			       page_zip->m_nonempty,
 			       temp_page_zip.m_nonempty);
@@ -3224,7 +3224,7 @@ page_zip_validate_low(
 
 					/* Only the minimum record flag
 					differed.  Let us ignore it. */
-					page_zip_fail(ib_stream,
+					page_zip_fail(state->stream,
 						       "page_zip_validate: "
 						       "min_rec_flag "
 						       "(ignored, "
@@ -3236,7 +3236,7 @@ page_zip_validate_low(
 				}
 			}
 		}
-		page_zip_fail(ib_stream, "page_zip_validate: content\n");
+		page_zip_fail(state->stream, "page_zip_validate: content\n");
 		valid = FALSE;
 	}
 

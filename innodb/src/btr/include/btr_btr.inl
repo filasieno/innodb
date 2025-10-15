@@ -237,7 +237,7 @@ IB_INLINE ulint btr_node_ptr_get_child_page_no(const rec_t* rec, const ulint* of
 	ut_ad(len == 4);
 	page_no = mach_read_from_4(field);
 	if (IB_UNLIKELY(page_no == 0)) {
-		ib_logger(ib_stream, "InnoDB: a nonsensical page number 0 in a node ptr record at offset %lu\n", (ulong) page_offset(rec));
+		ib_log(state, "InnoDB: a nonsensical page number 0 in a node ptr record at offset %lu\n", (ulong) page_offset(rec));
 		buf_page_print(page_align(rec), 0);
 	}
 	return page_no;

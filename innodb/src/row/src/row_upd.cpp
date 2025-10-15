@@ -1467,19 +1467,19 @@ row_upd_sec_index_entry(
 	rec = btr_cur_get_rec(btr_cur);
 
 	if (IB_UNLIKELY(!found)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 		      "InnoDB: error in sec index entry update in\n"
 		      "InnoDB: ");
-		dict_index_name_print(ib_stream, trx, index);
-		ib_logger(ib_stream, "\nInnoDB: tuple ");
-		dtuple_print(ib_stream, entry);
-		ib_logger(ib_stream, "\nInnoDB: record ");
-		rec_print(ib_stream, rec, index);
-		ib_logger(ib_stream, "\n");
+		dict_index_name_print(state->stream, trx, index);
+		ib_log(state, "\nInnoDB: tuple ");
+		dtuple_print(state->stream, entry);
+		ib_log(state, "\nInnoDB: record ");
+		rec_print(state->stream, rec, index);
+		ib_log(state, "\n");
 
-		trx_print(ib_stream, trx, 0);
+		trx_print(state->stream, trx, 0);
 
-		ib_logger(ib_stream, "\n"
+		ib_log(state, "\n"
 		      "InnoDB: Submit a detailed bug report, check the"
 		      "InnoDB website for details");
 	} else {

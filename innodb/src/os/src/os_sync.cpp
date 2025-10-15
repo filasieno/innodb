@@ -46,13 +46,13 @@ struct os_mutex_struct{
 /** Mutex protecting counts and the lists of OS mutexes and events */
 IB_INTERN os_mutex_t	os_sync_mutex;
 /** TRUE if os_sync_mutex has been initialized */
-static ibool		os_sync_mutex_inited	= FALSE;
+static ibool		os_sync_mutex_inited = FALSE;
 /** TRUE when os_sync_free() is being executed */
-static ibool		os_sync_free_called	= FALSE;
+static ibool		os_sync_free_called	 = FALSE;
 
 /** This is incremented by 1 in os_thread_create and decremented by 1 in
 os_thread_exit */
-IB_INTERN ulint	os_thread_count		= 0;
+IB_INTERN ulint	state->os.thread_count		= 0;
 
 /** The list of all events created */
 static UT_LIST_BASE_NODE_T(os_event_struct_t)	os_event_list;
@@ -60,9 +60,9 @@ static UT_LIST_BASE_NODE_T(os_event_struct_t)	os_event_list;
 /** The list of all OS 'slow' mutexes */
 static UT_LIST_BASE_NODE_T(os_mutex_str_t)	os_mutex_list;
 
-IB_INTERN ulint	os_event_count		= 0;
-IB_INTERN ulint	os_mutex_count		= 0;
-IB_INTERN ulint	os_fast_mutex_count	= 0;
+IB_INTERN ulint	state->os.event_count		= 0;
+IB_INTERN ulint	state->os.mutex_count		= 0;
+IB_INTERN ulint	state->os.fast_mutex_count	= 0;
 
 /* Because a mutex is embedded inside an event and there is an
 event embedded inside a mutex, on free, this generates a recursive call.
@@ -76,14 +76,14 @@ void os_sync_var_init(void)
 	os_sync_mutex = NULL;
 	os_sync_mutex_inited = FALSE;
 	os_sync_free_called = FALSE;
-	os_thread_count = 0;
+	state->os.thread_count = 0;
 
 	memset(&os_event_list, 0x0, sizeof(os_event_list));
 	memset(&os_mutex_list, 0x0, sizeof(os_mutex_list));
 
-	os_event_count		= 0;
-	os_mutex_count		= 0;
-	os_fast_mutex_count	= 0;
+	state->os.event_count		= 0;
+	state->os.mutex_count		= 0;
+	state->os.fast_mutex_count	= 0;
 }
 
 /// \brief Initializes global event and OS 'slow' mutex lists.
@@ -160,7 +160,7 @@ os_event_create(
 				    FALSE, /* Initial state nonsignaled */
 				    (LPCTSTR) name);
 	if (!event->handle) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"InnoDB: Could not create a Windows event semaphore;"
 			" Windows error %lu\n",
 			(ulong) GetLastError());
@@ -197,7 +197,7 @@ os_event_create(
 	/* Put to the list of events */
 	UT_LIST_ADD_FIRST(os_event_list, os_event_list, event);
 
-	os_event_count++;
+	state->os.event_count++;
 
 	if (os_sync_mutex != NULL) {
 		os_mutex_exit(os_sync_mutex);
@@ -296,7 +296,7 @@ os_event_free_internal(
 
 	UT_LIST_REMOVE(os_event_list, os_event_list, event);
 
-	os_event_count--;
+	state->os.event_count--;
 
 	ut_free(event);
 }
@@ -326,7 +326,7 @@ os_event_free(
 
 	UT_LIST_REMOVE(os_event_list, os_event_list, event);
 
-	os_event_count--;
+	state->os.event_count--;
 
 	os_mutex_exit(os_sync_mutex);
 
@@ -489,7 +489,7 @@ os_mutex_create(
 
 	UT_LIST_ADD_FIRST(os_mutex_list, os_mutex_list, mutex_str);
 
-	os_mutex_count++;
+	state->os.mutex_count++;
 
 	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
@@ -567,7 +567,7 @@ os_mutex_free(
 
 	UT_LIST_REMOVE(os_mutex_list, os_mutex_list, mutex);
 
-	os_mutex_count--;
+	state->os.mutex_count--;
 
 	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
@@ -606,7 +606,7 @@ os_fast_mutex_init(
 		os_mutex_enter(os_sync_mutex);
 	}
 
-	os_fast_mutex_count++;
+	state->os.fast_mutex_count++;
 
 	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
@@ -643,33 +643,24 @@ os_fast_mutex_unlock(
 #endif
 }
 
-/**********************************************************//**
-Frees a mutex object. */
-IB_INTERN
-void
-os_fast_mutex_free(
-/*===============*/
-	os_fast_mutex_t*	fast_mutex)	/*!< in: mutex to free */
+
+
+IB_INTERN void os_fast_mutex_free(innodb_t* state, os_fast_mutex_t* fast_mutex)
 {
 #ifdef __WIN__
 	ut_a(fast_mutex);
-
 	DeleteCriticalSection((LPCRITICAL_SECTION) fast_mutex);
 #else
-	int	ret;
-
-	ret = pthread_mutex_destroy(fast_mutex);
+	int ret = pthread_mutex_destroy(fast_mutex);
 
 	if (IB_UNLIKELY(ret != 0)) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
-			"  InnoDB: error: return value %lu when calling\n"
-			"InnoDB: pthread_mutex_destroy().\n", (ulint)ret);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state, "  InnoDB: error: return value %lu when calling pthread_mutex_destroy()\n", , (ulint)ret);
+		ib_log(state,
 			"InnoDB: Byte contents of the pthread mutex at %p:\n",
 			(void*) fast_mutex);
-		ut_print_buf(ib_stream, fast_mutex, sizeof(os_fast_mutex_t));
-		ib_logger(ib_stream, "\n");
+		ut_print_buf(state->stream, fast_mutex, sizeof(os_fast_mutex_t));
+		ib_log(state, "\n");
 	}
 #endif
 	if (IB_LIKELY(os_sync_mutex_inited)) {
@@ -679,8 +670,8 @@ os_fast_mutex_free(
 		os_mutex_enter(os_sync_mutex);
 	}
 
-	ut_ad(os_fast_mutex_count > 0);
-	os_fast_mutex_count--;
+	ut_ad(state->os.fast_mutex_count > 0);
+	state->os.fast_mutex_count--;
 
 	if (IB_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);

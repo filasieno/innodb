@@ -459,17 +459,17 @@ ibool lock_check_trx_id_sanity(
 	// trx id counter
 
 	if (ut_dulint_cmp(trx_id, trx_sys->max_trx_id) >= 0) {
-		ut_print_timestamp(ib_stream);
-		ib_logger(
-			ib_stream,
+		ut_print_timestamp(state->stream);
+		state->log(
+			state->stream,
 			"  InnoDB: Error: transaction id associated"
 			" with record\n"
 		);
-		rec_print_new(ib_stream, rec, offsets);
-		ib_logger(ib_stream, "InnoDB: in ");
-		dict_index_name_print(ib_stream, NULL, index);
-		ib_logger(
-			ib_stream,
+		rec_print_new(state->stream, rec, offsets);
+		ib_log(state, "InnoDB: in ");
+		dict_index_name_print(state->stream, NULL, index);
+		state->log(
+			state->stream,
 			"\n"
 			"InnoDB: is " TRX_ID_FMT
 			" which is higher than the"
@@ -1852,13 +1852,13 @@ lock_rec_enqueue_waiting(
 		break;
 	case TRX_DICT_OP_TABLE:
 	case TRX_DICT_OP_INDEX:
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: a record lock wait happens"
 			" in a dictionary operation!\n"
 			"InnoDB: ");
-		dict_index_name_print(ib_stream, trx, index);
-		ib_logger(ib_stream,
+		dict_index_name_print(state->stream, trx, index);
+		ib_log(state,
 			".\n"
 			"InnoDB: Submit a detailed bug report "
 			"check the InnoDB website for details");
@@ -1895,9 +1895,9 @@ lock_rec_enqueue_waiting(
 
 #ifdef IB_DEBUG
 	if (lock_print_waits) {
-		ib_logger(ib_stream, "Lock wait for trx %lu in index ",
+		ib_log(state, "Lock wait for trx %lu in index ",
 			(ulong) ut_dulint_get_low(trx->id));
-		ut_print_name(ib_stream, trx, FALSE, index->name);
+		ut_print_name(state->stream, trx, FALSE, index->name);
 	}
 #endif // IB_DEBUG
 
@@ -2251,7 +2251,7 @@ lock_grant(
 
 #ifdef IB_DEBUG
 	if (lock_print_waits) {
-		ib_logger(ib_stream, "Lock wait for trx %lu ends\n",
+		ib_log(state, "Lock wait for trx %lu ends\n",
 			(ulong) ut_dulint_get_low(lock->trx->id));
 	}
 #endif // IB_DEBUG
@@ -2673,7 +2673,7 @@ lock_move_reorganize_page(
 
 				// if (new_heap_no == PAGE_HEAP_NO_SUPREMUM
 				&& lock_get_wait(lock)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 				"---\n--\n!!!Lock reorg: supr type %lu\n",
 				lock->type_mode);
 				} 
@@ -2696,7 +2696,7 @@ lock_move_reorganize_page(
 
 			// Check that all locks were moved.
 			if (IB_UNLIKELY(i != ULINT_UNDEFINED)) {
-				ib_logger(ib_stream,
+				ib_log(state,
 					"lock_move_reorganize_page():"
 					" %lu not moved in %p\n",
 					(ulong) i, (void*) lock);
@@ -2902,7 +2902,7 @@ lock_move_rec_list_start(
 				if (IB_UNLIKELY
 				    (lock_rec_get_nth_bit(lock, i))) {
 
-					ib_logger(ib_stream,
+					ib_log(state,
 						"lock_move_rec_list_start():"
 						" %lu not moved in %p\n",
 						(ulong) i, (void*) lock);
@@ -3381,28 +3381,28 @@ retry:
 		// If the lock search exceeds the max step
 		or the max depth, the current trx will be
 		the victim. Print its information. 
-		ut_print_timestamp(ib_stream);
+		ut_print_timestamp(state->stream);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			  "TOO DEEP OR LONG SEARCH IN THE LOCK TABLE"
 			  " WAITS-FOR GRAPH, WE WILL ROLL BACK"
 			  " FOLLOWING TRANSACTION \n");
 
-		ib_logger(ib_stream, "\n*** TRANSACTION:\n");
-		trx_print(ib_stream, trx, 3000);
+		ib_log(state, "\n*** TRANSACTION:\n");
+		trx_print(state->stream, trx, 3000);
 
-		ib_logger(ib_stream,
+		ib_log(state,
 			  "*** WAITING FOR THIS LOCK TO BE GRANTED:\n");
 
 		if (lock_get_type(lock) == LOCK_REC) {
-			lock_rec_print(ib_stream, lock);
+			lock_rec_print(state->stream, lock);
 		} else {
-			lock_table_print(ib_stream, lock);
+			lock_table_print(state->stream, lock);
 		}
 		break;
 
 	case LOCK_VICTIM_IS_START:
-		ib_logger(ib_stream,
+		ib_log(state,
 			"*** WE ROLL BACK TRANSACTION (2)\n");
 		break;
 
@@ -3519,55 +3519,55 @@ lock_deadlock_recursive(
 				point: a deadlock detected; or we have
 				searched the waits-for graph too long 
 
-				ib_stream_t	ib_stream;
+				ib_stream_t	state->stream;
 
-				ib_stream = lock_latest_err_stream;
+				state->stream = lock_latest_err_stream;
 
-				ut_print_timestamp(ib_stream);
+				ut_print_timestamp(state->stream);
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"\n*** (1) TRANSACTION:\n");
 
-				trx_print(ib_stream, wait_lock->trx, 3000);
+				trx_print(state->stream, wait_lock->trx, 3000);
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"*** (1) WAITING FOR THIS LOCK"
 					" TO BE GRANTED:\n");
 
 				if (lock_get_type_low(wait_lock) == LOCK_REC) {
-					lock_rec_print(ib_stream, wait_lock);
+					lock_rec_print(state->stream, wait_lock);
 				} else {
-					lock_table_print(ib_stream, wait_lock);
+					lock_table_print(state->stream, wait_lock);
 				}
 
-				ib_logger(ib_stream, "*** (2) TRANSACTION:\n");
+				ib_log(state, "*** (2) TRANSACTION:\n");
 
-				trx_print(ib_stream, lock->trx, 3000);
+				trx_print(state->stream, lock->trx, 3000);
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"*** (2) HOLDS THE LOCK(S):\n");
 
 				if (lock_get_type_low(lock) == LOCK_REC) {
-					lock_rec_print(ib_stream, lock);
+					lock_rec_print(state->stream, lock);
 				} else {
-					lock_table_print(ib_stream, lock);
+					lock_table_print(state->stream, lock);
 				}
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"*** (2) WAITING FOR THIS LOCK"
 					" TO BE GRANTED:\n");
 
 				if (lock_get_type_low(start->wait_lock)
 				    == LOCK_REC) {
 					lock_rec_print(
-						ib_stream, start->wait_lock);
+						state->stream, start->wait_lock);
 				} else {
 					lock_table_print(
-						ib_stream, start->wait_lock);
+						state->stream, start->wait_lock);
 				}
 #ifdef IB_DEBUG
 				if (lock_print_waits) {
-					ib_logger(ib_stream,
+					ib_log(state,
 						"Deadlock detected\n");
 				}
 #endif // IB_DEBUG
@@ -3588,7 +3588,7 @@ lock_deadlock_recursive(
 				as a victim to try to avoid deadlocking our
 				recursion starting point transaction 
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"*** WE ROLL BACK TRANSACTION (1)\n");
 
 				wait_lock->trx->was_chosen_as_deadlock_victim
@@ -3610,7 +3610,7 @@ lock_deadlock_recursive(
 
 #ifdef IB_DEBUG
 				if (lock_print_waits) {
-					ib_logger(ib_stream,
+					ib_log(state,
 						  "Deadlock search exceeds"
 						  " max steps or depth.\n");
 				}
@@ -3758,13 +3758,13 @@ lock_table_enqueue_waiting(
 		break;
 	case TRX_DICT_OP_TABLE:
 	case TRX_DICT_OP_INDEX:
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: a table lock wait happens"
 			" in a dictionary operation!\n"
 			"InnoDB: Table name ");
-		ut_print_name(ib_stream, trx, TRUE, table->name);
-		ib_logger(ib_stream,
+		ut_print_name(state->stream, trx, TRUE, table->name);
+		ib_log(state,
 			".\n"
 			"InnoDB: Submit a detailed bug report, "
 			"check the InnoDB website for details");
@@ -4021,8 +4021,8 @@ lock_rec_unlock(
 		lock_rec_reset_nth_bit(release_lock, heap_no);
 	} else {
 		mutex_exit(&kernel_mutex);
-		ut_print_timestamp(ib_stream);
-		ib_logger(ib_stream,
+		ut_print_timestamp(state->stream);
+		ib_log(state,
 			"  InnoDB: Error: unlock row could not"
 			" find a %lu mode lock on the record\n",
 			(ulong) lock_mode);
@@ -4259,38 +4259,38 @@ IB_INTERN
 void
 lock_table_print(
 //======================
-	ib_stream_t	ib_stream,	in: stream where to print 
+	ib_stream_t	state->stream,	in: stream where to print 
 	const lock_t*	lock)		in: table type lock 
 {
 	ut_ad(mutex_own(&kernel_mutex));
 	ut_a(lock_get_type_low(lock) == LOCK_TABLE);
 
-	ib_logger(ib_stream, "TABLE LOCK table ");
-	ut_print_name(ib_stream, lock->trx, TRUE,
+	ib_log(state, "TABLE LOCK table ");
+	ut_print_name(state->stream, lock->trx, TRUE,
 		      lock->un_member.tab_lock.table->name);
-	ib_logger(ib_stream, " trx id " TRX_ID_FMT,
+	ib_log(state, " trx id " TRX_ID_FMT,
 		TRX_ID_PREP_PRINTF(lock->trx->id));
 
 	if (lock_get_mode(lock) == LOCK_S) {
-		ib_logger(ib_stream, " lock mode S");
+		ib_log(state, " lock mode S");
 	} else if (lock_get_mode(lock) == LOCK_X) {
-		ib_logger(ib_stream, " lock mode X");
+		ib_log(state, " lock mode X");
 	} else if (lock_get_mode(lock) == LOCK_IS) {
-		ib_logger(ib_stream, " lock mode IS");
+		ib_log(state, " lock mode IS");
 	} else if (lock_get_mode(lock) == LOCK_IX) {
-		ib_logger(ib_stream, " lock mode IX");
+		ib_log(state, " lock mode IX");
 	} else if (lock_get_mode(lock) == LOCK_AUTO_INC) {
-		ib_logger(ib_stream, " lock mode AUTO-INC");
+		ib_log(state, " lock mode AUTO-INC");
 	} else {
-		ib_logger(ib_stream, " unknown lock mode %lu",
+		ib_log(state, " unknown lock mode %lu",
 			(ulong) lock_get_mode(lock));
 	}
 
 	if (lock_get_wait(lock)) {
-		ib_logger(ib_stream, " waiting");
+		ib_log(state, " waiting");
 	}
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 }
 
 /*********************************************************************/
@@ -4300,7 +4300,7 @@ IB_INTERN
 void
 lock_rec_print(
 //======================
-	ib_stream_t	ib_stream,	in: file where to print 
+	ib_stream_t	state->stream,	in: file where to print 
 	const lock_t*	lock)		in: record type lock 
 {
 	const buf_block_t*	block;
@@ -4319,41 +4319,41 @@ lock_rec_print(
 	space = lock->un_member.rec_lock.space;
 	page_no = lock->un_member.rec_lock.page_no;
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"RECORD LOCKS space id %lu page no %lu n bits %lu ",
 		(ulong) space, (ulong) page_no,
 		(ulong) lock_rec_get_n_bits(lock));
-	dict_index_name_print(ib_stream, lock->trx, lock->index);
-	ib_logger(ib_stream, " trx id " TRX_ID_FMT,
+	dict_index_name_print(state->stream, lock->trx, lock->index);
+	ib_log(state, " trx id " TRX_ID_FMT,
 		TRX_ID_PREP_PRINTF(lock->trx->id));
 
 	if (lock_get_mode(lock) == LOCK_S) {
-		ib_logger(ib_stream, " lock mode S");
+		ib_log(state, " lock mode S");
 	} else if (lock_get_mode(lock) == LOCK_X) {
-		ib_logger(ib_stream, " lock_mode X");
+		ib_log(state, " lock_mode X");
 	} else {
 		UT_ERROR;
 	}
 
 	if (lock_rec_get_gap(lock)) {
-		ib_logger(ib_stream, " locks gap before rec");
+		ib_log(state, " locks gap before rec");
 	}
 
 	if (lock_rec_get_rec_not_gap(lock)) {
-		ib_logger(ib_stream, " locks rec but not gap");
+		ib_log(state, " locks rec but not gap");
 	}
 
 	if (lock_rec_get_insert_intention(lock)) {
-		ib_logger(ib_stream, " insert intention");
+		ib_log(state, " insert intention");
 	}
 
 	if (lock_get_wait(lock)) {
-		ib_logger(ib_stream, " waiting");
+		ib_log(state, " waiting");
 	}
 
 	mtr_start(&mtr);
 
-	ib_logger(ib_stream, "\n");
+	ib_log(state, "\n");
 
 	block = buf_page_try_get(space, page_no, &mtr);
 
@@ -4369,16 +4369,16 @@ lock_rec_print(
 					rec, lock->index, offsets,
 					ULINT_UNDEFINED, &heap);
 
-				ib_logger(ib_stream,
+				ib_log(state,
 					"Record lock, heap no %lu ",
 					(ulong) i);
-				rec_print_new(ib_stream, rec, offsets);
-				ib_logger(ib_stream, "\n");
+				rec_print_new(state->stream, rec, offsets);
+				ib_log(state, "\n");
 			}
 		}
 	} else {
 		for (i = 0; i < lock_rec_get_n_bits(lock); i++) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Record lock, heap no %lu\n", (ulong) i);
 		}
 	}
@@ -4435,7 +4435,7 @@ IB_INTERN
 ibool
 lock_print_info_summary(
 //======================
-	ib_stream_t	ib_stream,	in: stream where to print 
+	ib_stream_t	state->stream,	in: stream where to print 
 	ibool   	nowait)		in: whether to wait for the
 					kernel mutex 
 {
@@ -4445,39 +4445,39 @@ lock_print_info_summary(
 	if (!nowait) {
 		lock_mutex_enter_kernel();
 	} else if (mutex_enter_nowait(&kernel_mutex)) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"FAIL TO OBTAIN KERNEL MUTEX, "
 			"SKIP LOCK INFO PRINTING\n");
 		return(FALSE);
 	}
 
 	if (lock_deadlock_found) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"------------------------\n"
 			"LATEST DETECTED DEADLOCK\n"
 			"------------------------\n");
 	}
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"------------\n"
 		"TRANSACTIONS\n"
 		"------------\n");
 
-	ib_logger(ib_stream, "Trx id counter " TRX_ID_FMT "\n",
+	ib_log(state, "Trx id counter " TRX_ID_FMT "\n",
 		TRX_ID_PREP_PRINTF(trx_sys->max_trx_id));
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Purge done for trx's n:o < " TRX_ID_FMT
 		" undo n:o < " TRX_ID_FMT "\n",
 		TRX_ID_PREP_PRINTF(purge_sys->purge_trx_no),
 		TRX_ID_PREP_PRINTF(purge_sys->purge_undo_no));
 
-	ib_logger(ib_stream,
+	ib_log(state,
 		"History list length %lu\n",
 		(ulong) trx_sys->rseg_history_len);
 
 #ifdef PRINT_NUM_OF_LOCK_STRUCTS
-	ib_logger(ib_stream,
+	ib_log(state,
 		"Total number of lock structs in row lock hash table %lu\n",
 		(ulong) lock_get_n_rec_locks());
 #endif // PRINT_NUM_OF_LOCK_STRUCTS
@@ -4491,7 +4491,7 @@ IB_INTERN
 void
 lock_print_info_all_transactions(
 //======================
-	ib_stream_t	ib_stream)	in: stream where to print 
+	ib_stream_t	state->stream)	in: stream where to print 
 {
 	lock_t*	lock;
 	ibool	load_page_first = TRUE;
@@ -4501,7 +4501,7 @@ lock_print_info_all_transactions(
 	mtr_t	mtr;
 	trx_t*	trx;
 
-	ib_logger(ib_stream, "LIST OF TRANSACTIONS FOR EACH SESSION:\n");
+	ib_log(state, "LIST OF TRANSACTIONS FOR EACH SESSION:\n");
 
 	// First print info on non-active transactions
 
@@ -4509,8 +4509,8 @@ lock_print_info_all_transactions(
 
 	while (trx) {
 		if (trx->conc_state == TRX_NOT_STARTED) {
-			ib_logger(ib_stream, "---");
-			trx_print(ib_stream, trx, 600);
+			ib_log(state, "---");
+			trx_print(state->stream, trx, 600);
 		}
 
 		trx = UT_LIST_GET_NEXT(client_trx_list, trx);
@@ -4540,11 +4540,11 @@ loop:
 	}
 
 	if (nth_lock == 0) {
-		ib_logger(ib_stream, "---");
-		trx_print(ib_stream, trx, 600);
+		ib_log(state, "---");
+		trx_print(state->stream, trx, 600);
 
 		if (trx->read_view) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Trx read view will not see trx with"
 				" id >= " TRX_ID_FMT
 				", sees < " TRX_ID_FMT "\n",
@@ -4555,19 +4555,19 @@ loop:
 		}
 
 		if (trx->que_state == TRX_QUE_LOCK_WAIT) {
-			ib_logger(ib_stream,
+			ib_log(state,
 				"------- TRX HAS BEEN WAITING %lu SEC"
 				" FOR THIS LOCK TO BE GRANTED:\n",
 				(ulong) difftime(time(NULL),
 						 trx->wait_started));
 
 			if (lock_get_type_low(trx->wait_lock) == LOCK_REC) {
-				lock_rec_print(ib_stream, trx->wait_lock);
+				lock_rec_print(state->stream, trx->wait_lock);
 			} else {
-				lock_table_print(ib_stream, trx->wait_lock);
+				lock_table_print(state->stream, trx->wait_lock);
 			}
 
-			ib_logger(ib_stream, "------------------\n");
+			ib_log(state, "------------------\n");
 		}
 	}
 
@@ -4609,7 +4609,7 @@ loop:
 				print the lock without attempting to
 				load the page in the buffer pool. 
 
-				ib_logger(ib_stream, "RECORD LOCKS on"
+				ib_log(state, "RECORD LOCKS on"
 					" non-existing space %lu\n",
 					(ulong) space);
 				goto print_rec;
@@ -4632,11 +4632,11 @@ loop:
 		}
 
 print_rec:
-		lock_rec_print(ib_stream, lock);
+		lock_rec_print(state->stream, lock);
 	} else {
 		ut_ad(lock_get_type_low(lock) & LOCK_TABLE);
 
-		lock_table_print(ib_stream, lock);
+		lock_table_print(state->stream, lock);
 	}
 
 	load_page_first = TRUE;
@@ -4644,7 +4644,7 @@ print_rec:
 	nth_lock++;
 
 	if (nth_lock >= 10) {
-		ib_logger(ib_stream,
+		ib_log(state,
 			"10 LOCKS PRINTED FOR THIS TRX:"
 			" SUPPRESSING FURTHER PRINTS\n");
 
@@ -4923,7 +4923,7 @@ loop:
 			offsets = rec_get_offsets(rec, index, offsets,
 						  ULINT_UNDEFINED, &heap);
 
-			ib_logger(ib_stream,
+			ib_log(state,
 				"Validating %lu %lu\n",
 				(ulong) space, (ulong) page_no);
 

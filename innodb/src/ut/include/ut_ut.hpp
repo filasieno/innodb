@@ -151,40 +151,57 @@ IB_INLINE int ut_ulint_cmp(ulint a, ulint b);
 /// \return -1 if a < b, 0 if a == b, 1 if a > b
 IB_INLINE int ut_pair_cmp(ulint a1, ulint b1, ulint a2, ulint b2);
 
-/**
-Determines if a number is zero or a power of two.
-@param n	in: number
-@return		nonzero if n is zero or a power of two; zero otherwise */
-#define ut_is_2pow(n) IB_LIKELY(!((n) & ((n) - 1)))
 
-/**
-Calculates fast the remainder of n/m when m is a power of two.
-@param n	in: numerator
-@param m	in: denominator, must be a power of two
-@return		the remainder of n/m */
-#define ut_2pow_remainder(n, m) ((n) & ((m) - 1))
 
-/**
-Calculates the biggest multiple of m that is not bigger than n
-when m is a power of two.  In other words, rounds n down to m * k.
-@param n	in: number to round down
-@param m	in: alignment, must be a power of two
-@return		n rounded down to the biggest possible integer multiple of m */
-#define ut_2pow_round(n, m) ((n) & ~((m) - 1))
+/// \brief Determines if a number is zero or a power of two.
+/// \param n in: number
+/// \return nonzero if n is zero or a power of two; zero otherwise
+template <typename T>
+constexpr T ut_is_2pow(T n) {
+	return IB_LIKELY(!(n & (n - 1)))
+}
 
-/** Align a number down to a multiple of a power of two.
-@param n	in: number to round down
-@param m	in: alignment, must be a power of two
-@return		n rounded down to the biggest possible integer multiple of m */
-#define ut_calc_align_down(n, m) ut_2pow_round(n, m)
+/// \brief Calculates fast the remainder of n/m when m is a power of two.
+/// \param n in: numerator
+/// \param m in: denominator, must be a power of two
+/// \return the remainder of n/m
+template <typename T>
+constexpr T ut_2pow_remainder(T n, T m) {
+	ut_a(ut_is_2pow(m));
+	return n & (m - 1);
+}
 
-/**
-Calculates the smallest multiple of m that is not smaller than n
-when m is a power of two.  In other words, rounds n up to m * k.
-@param n	in: number to round up
-@param m	in: alignment, must be a power of two
-@return		n rounded up to the smallest possible integer multiple of m */
-#define ut_calc_align(n, m) (((n) + ((m) - 1)) & ~((m) - 1))
+/// \brief Calculates the biggest multiple of m that is not bigger than n when m is a power of two.  
+/// \details In other words, rounds n down to m * k.
+/// \param n in: number to round down
+/// \param m in: alignment, must be a power of two
+/// \return n rounded down to the biggest possible integer multiple of m
+template <typename T>
+constexpr T ut_2pow_round(T n, T m) {
+	ut_a(ut_is_2pow(m));
+	return (n) & ~((m) - 1);
+}
+
+/// \brief  Align a number down to a multiple of a power of two.
+/// \param n in: number to round down
+/// \return n rounded down to the biggest possible integer multiple of m
+template <typename T>
+constexpr T ut_calc_align_down(T n, T m) {
+	ut_a(ut_is_2pow(m));
+	return ut_2pow_round(n, m);
+}
+
+
+/// \brief Calculates the smallest multiple of m that is not smaller than n
+/// when m is a power of two.  In other words, rounds n up to m * k.
+/// \param n in: number to round up
+/// \param m in: alignment, must be a power of two
+/// \return n rounded up to the smallest possible integer multiple of m
+template <typename T>
+constexpr T ut_calc_align(T n, T m) {
+	ut_a(ut_is_2pow(m));
+	return (n + (m - 1)) & ~(m - 1);
+}
 
 /**
 Calculates fast the 2-logarithm of a number, rounded upward to an
@@ -254,7 +271,7 @@ IB_INTERN double ut_difftime(ib_time_t time2, ib_time_t time1);
 /**Prints a timestamp to a file. */
 IB_INTERN
 void
-ut_print_timestamp(ib_stream_t	ib_stream); /*!< in: file where to print */
+ut_print_timestamp(ib_stream_t	state->stream); /*!< in: file where to print */
 
 /**
 Sprintfs a timestamp to a buffer, 13..14 chars plus terminating NUL. */
@@ -295,7 +312,7 @@ IB_INTERN
 void
 ut_print_buf(
 
-	ib_stream_t	ib_stream,	/*!< in: file where to print */
+	ib_stream_t	state->stream,	/*!< in: file where to print */
 	const void*	buf,		/*!< in: memory buffer */
 	ulint		len);		/*!< in: length of the buffer */
 
@@ -305,7 +322,7 @@ IB_INTERN
 void
 ut_print_filename(
 
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const char*	name);		/*!< in: name to print */
 
 #ifndef IB_HOTBACKUP
@@ -321,7 +338,7 @@ IB_INTERN
 void
 ut_print_name(
 
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	struct trx_struct*trx,		/*!< in: transaction */
 	ibool		table_id,	/*!< in: TRUE=print a table name,
 					FALSE=print other identifier */
@@ -335,37 +352,35 @@ as in SQL database_name.identifier. */
 IB_INTERN
 void
 ut_print_namel(
-	ib_stream_t	ib_stream,	/*!< in: output stream */
+	ib_stream_t	state->stream,	/*!< in: output stream */
 	const char*	name,		/*!< in: name to print */
 	ulint		namelen);	/*!< in: length of name */
 
 #endif /* !IB_HOTBACKUP */
 
 #ifdef __WIN__
-/**
-A substitute for snprintf(3), formatted output conversion into
-a limited buffer.
-@return number of characters that would have been printed if the size
-were unlimited, not including the terminating '\0'. */
-IB_INTERN
-int
-ut_snprintf(
-/*========*/
-	char*		str,	/*!< out: string */
-	size_t		size,	/*!< in: str size */
-	const char*	fmt,	/*!< in: format */
-	...);			/*!< in: format values */
+	/**
+	A substitute for snprintf(3), formatted output conversion into
+	a limited buffer.
+	@return number of characters that would have been printed if the size
+	were unlimited, not including the terminating '\0'. */
+	IB_INTERN
+	int
+	ut_snprintf(
+	/*========*/
+		char*		str,	/*!< out: string */
+		size_t		size,	/*!< in: str size */
+		const char*	fmt,	/*!< in: format */
+		...);			/*!< in: format values */
 #else
-
-
-/**
-A wrapper for snprintf(3), formatted output conversion into
-a limited buffer. */
-# define ut_snprintf	snprintf
+	/**
+	A wrapper for snprintf(3), formatted output conversion into
+	a limited buffer. */
+	# define ut_snprintf	snprintf
 #endif /* __WIN__ */
 
 extern ib_logger_t ib_logger;
-extern ib_stream_t ib_stream;
+extern ib_stream_t state->stream;
 
 #ifndef IB_DO_NOT_INLINE
   #include "ut_ut.inl"

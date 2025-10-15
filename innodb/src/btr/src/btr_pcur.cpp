@@ -227,10 +227,10 @@ btr_pcur_restore_position_func(
 	if (IB_UNLIKELY(cursor->old_stored != BTR_PCUR_OLD_STORED)
 	    || IB_UNLIKELY(cursor->pos_state != BTR_PCUR_WAS_POSITIONED
 			     && cursor->pos_state != BTR_PCUR_IS_POSITIONED)) {
-		ut_print_buf(ib_stream, cursor, sizeof(btr_pcur_t));
-		ib_logger(ib_stream, "\n");
+		ut_print_buf(state->stream, cursor, sizeof(btr_pcur_t));
+		ib_log(state, "\n");
 		if (cursor->trx_if_known) {
-			trx_print(ib_stream, cursor->trx_if_known, 0);
+			trx_print(state->stream, cursor->trx_if_known, 0);
 		}
 
 		UT_ERROR;

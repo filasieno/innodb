@@ -117,7 +117,7 @@ os_thread_create(
 	DWORD		win_thread_id;
 
 	os_mutex_enter(os_sync_mutex);
-	os_thread_count++;
+	state->os.thread_count++;
 	os_mutex_exit(os_sync_mutex);
 
 	thread = CreateThread(NULL,	/* no security attributes */
@@ -175,7 +175,7 @@ os_thread_create(
 	}
 #endif
 	os_mutex_enter(os_sync_mutex);
-	os_thread_count++;
+	state->os.thread_count++;
 	os_mutex_exit(os_sync_mutex);
 
 #ifdef IB_HPUX10
@@ -220,12 +220,12 @@ os_thread_exit(
 #endif /* __WIN__ */
 
 #ifdef IB_DEBUG_THREAD_CREATION
-	ib_logger(ib_stream, "Thread exits, id %lu\n",
+	ib_log(state, "Thread exits, id %lu\n",
 		os_thread_pf(os_thread_get_curr_id()));
 #endif /* IB_DEBUG_THREAD_CREATION */
 
 	os_mutex_enter(os_sync_mutex);
-	os_thread_count--;
+	state->os.thread_count--;
 	os_mutex_exit(os_sync_mutex);
 
 #ifdef __WIN__
