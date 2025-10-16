@@ -20,22 +20,17 @@
 
 #include "trx_trx.hpp"
 
-/// \brief Opens a session.
-/// \return	session object
 IB_INTERN ib_sess *sess_open(innodb_state* state)
 {
-	ib_sess *sess;
 	ut_ad(mutex_own(&kernel_mutex));
-	sess = mem_alloc(sizeof(ib_sess));
+	ib_sess* sess = mem_alloc(sizeof(ib_sess));
 	sess->state = SESS_ACTIVE;
 	sess->trx = trx_create(sess);
 	UT_LIST_INIT(sess->graphs);
 	return sess;
 }
 
-/*********************************************************************/ /**
-Closes a session, freeing the memory occupied by it. */
-IB_INTERN void sess_close(innodb_state* state, ib_sess *sess)								/*!< in, own: session object */
+IB_INTERN void sess_close(innodb_state* state, ib_sess *sess)
 {
 	ut_ad(!mutex_own(&kernel_mutex));
 	ut_a(UT_LIST_GET_LEN(sess->graphs) == 0);
