@@ -25,53 +25,18 @@ Created 6/25/1996 Heikki Tuuri
 
 #pragma once
 
-#include "univ.inl"
-#include "ut_byte.hpp"
-#include "trx_types.hpp"
-#include "srv_srv.hpp"
-#include "trx_types.hpp"
-#include "usr_types.hpp"
-#include "que_types.hpp"
-#include "data_data.hpp"
-#include "rem_rec.hpp"
+#include "defs.hpp"
+#include "state.hpp"
 
 /// \brief Opens a session.
+/// \param [in] state The state
 /// \return A session object
 /// \internal
-IB_INTERN sess_t* sess_open(void);
+IB_INTERN ib_sess* sess_open(innodb_state* state);
 
 /// \brief Closes a session, freeing the memory occupied by it.
 /// \param sess Session object
 /// \internal
-IB_INTERN void sess_close(sess_t* sess);
+IB_INTERN void sess_close(innodb_state* state, ib_sess* sess);
 
-/// \brief The session handle. 
-/// \details All fields are protected by the kernel mutex
-/// \internal
-struct sess_struct
-{
-	///  state of the session 
-	ulint state;		/*!<  */
-	trx_t* trx;		/*!< transaction object permanently
-					assigned for the session: the
-					transaction instance designated by the
-					trx id changes, but the memory
-					structure is preserved */
-	UT_LIST_BASE_NODE_T(que_t) graphs; /*!< query graphs belonging to this session */
-};
-
-/* Session states */
-#define SESS_ACTIVE		1
-
-/// Session contains an error message
-/// which has not yet been communicated
-/// session contains an error message
-/// which has not yet been communicated
-/// to the client
-#define SESS_ERROR		2	/*  */
-
-#ifndef IB_DO_NOT_INLINE
-#include "usr_sess.inl"
-
-#endif
 

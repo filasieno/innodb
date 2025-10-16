@@ -143,7 +143,7 @@ void
 que_graph_publish(
 /*==============*/
 	que_t*	graph,	/*!< in: graph */
-	sess_t*	sess)	/*!< in: session */
+	ib_sess*	sess)	/*!< in: session */
 {
 	ut_ad(mutex_own(&kernel_mutex));
 

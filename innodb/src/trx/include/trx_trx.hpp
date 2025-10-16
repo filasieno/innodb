@@ -40,7 +40,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "srv_srv.hpp"
 
 /// Dummy session used currently in MySQL interface
-extern sess_t* trx_dummy_sess;
+extern ib_sess* trx_dummy_sess;
 
 /// Number of transactions currently allocated for MySQL: protected by the kernel mutex
 extern ulint trx_n_transactions;
@@ -68,7 +68,7 @@ IB_INTERN
 trx_t*
 trx_create(
 /*=======*/
-	sess_t*	sess)	/*!< in: session */
+	ib_sess*	sess)	/*!< in: session */
 	__attribute__((nonnull));
 /********************************************************************//**
 Creates a transaction object.
@@ -586,7 +586,7 @@ struct trx_struct{
 	ulint		error_key_num;	/*!< if the index creation fails to a
 					duplicate key error, a key number of
 					that index is stored here */
-	sess_t*		sess;		/*!< session of the trx, NULL if none */
+	ib_sess*		sess;		/*!< session of the trx, NULL if none */
 	que_t*		graph;		/*!< query currently run in the session,
 					or NULL if none; NOTE that the query
 					belongs to the session, and it can

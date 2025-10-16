@@ -47,7 +47,7 @@ Created 3/26/1996 Heikki Tuuri
 
 /* TODO: Can we remove this? */
 /* Dummy session used currently in client interface */
-IB_INTERN sess_t*		trx_dummy_sess = NULL;
+IB_INTERN ib_sess*		trx_dummy_sess = NULL;
 
 /* Number of transactions currently allocated for the client: protected by
 the kernel mutex */
@@ -98,7 +98,7 @@ IB_INTERN
 trx_t*
 trx_create(
 /*=======*/
-	sess_t*	sess)	/*!< in: session */
+	ib_sess*	sess)	/*!< in: session */
 {
 	trx_t*	trx;
 

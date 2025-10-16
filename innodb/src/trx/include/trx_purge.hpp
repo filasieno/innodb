@@ -121,7 +121,7 @@ struct trx_purge_struct
     /// Purge system state
     ulint state;
     /// System session running the purge query
-    sess_t *sess;
+    ib_sess *sess;
     /// System transaction running the purge query: this trx is not in the trx list
     /// of the trx system and it never ends
     trx_t *trx;

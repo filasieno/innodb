@@ -406,7 +406,7 @@ This enhanced analysis provides the foundation for systematic global variable el
 | trx_doublewrite_buf_is_being_created | ibool | trx/include/trx_sys.hpp | Not found | mtr/include/mtr_log.inl |
 | trx_doublewrite_must_reset_space_ids | ibool | trx/include/trx_sys.hpp | Not found | srv/src/srv_start.cpp,trx/src/trx_sys.cpp |
 | trx_doublewrite | trx_doublewrite_t* | trx/include/trx_sys.hpp | srv/src/srv_start.cpp | buf/src/buf_buf.cpp,buf/src/buf_flu.cpp,buf/src/buf_rea.cpp,mtr/include/mtr_log.inl,srv/src/srv_start.cpp,trx/include/trx_sys.hpp,trx/src/trx_sys.cpp |
-| trx_dummy_sess | sess_t* | trx/include/trx_trx.hpp | Not found | None found |
+| trx_dummy_sess | ib_sess* | trx/include/trx_trx.hpp | Not found | None found |
 | trx_n_transactions | ulint | trx/include/trx_trx.hpp | log/src/log_log.cpp | log/src/log_log.cpp |
 | trx_purge_dummy_rec | trx_undo_rec_t | trx/include/trx_purge.hpp | Not found | row/src/row_purge.cpp,trx/include/trx_purge.hpp,trx/src/trx_purge.cpp |
 | trx_sys_multiple_tablespace_format | ibool | trx/include/trx_sys.hpp | Not found | ibuf/src/ibuf_ibuf.cpp |

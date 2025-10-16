@@ -48,7 +48,7 @@ void
 que_graph_publish(
 /*==============*/
 	que_t*	graph,	/*!< in: graph */
-	sess_t*	sess);	/*!< in: session */
+	ib_sess*	sess);	/*!< in: session */
 /***********************************************************************//**
 Creates a query graph fork node.
 @return	own: fork node */

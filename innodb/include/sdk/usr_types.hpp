@@ -26,3 +26,24 @@
 /// \date 2025-10-13
 
 #pragma once
+
+/// \brief Session is active
+constinit ulint SESS_ACTIVE = 1;
+
+/// \brief Session contains an error message which has not yet been communicated session contains an error message which has not yet been communicated to the client
+constinit ulint SESS_ERROR = 2;
+
+/// \brief The session handle. 
+/// \details All fields are protected by the kernel mutex
+/// \internal
+struct ib_sess
+{
+	/// \brief The state of the session 
+	ulint state;
+
+	/// \brief transaction object permanently assigned for the session: the transaction instance designated by the trx id changes, but the memory structure is preserved */
+	trx_t* trx;	
+
+	/// \brief Query graphs belonging to this session
+	UT_LIST_BASE_NODE_T(que_t) graphs;
+};
