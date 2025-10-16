@@ -154,11 +154,11 @@
 
 /// \brief Initializes the synchronization data structures.
 /// \param state The state
-IB_INTERN void sync_init(innodb_t* state);
+IB_INTERN void sync_init(innodb_state* state);
 
 /// \brief Frees the resources in synchronization data structures.
 /// \param state The state
-IB_INTERN void sync_close(innodb_t* state);
+IB_INTERN void sync_close(innodb_state* state);
 
 
 /** Creates, or rather, initializes a mutex object to a specified memory location (which must be appropriately aligned). 
@@ -183,15 +183,15 @@ necessary only if the memory block containing it is freed. */
 /// \param cfile_name The file name where created
 /// \param cline The line where created
 
-IB_INTERN void mutex_create(mutex_t* mutex, const char* cmutex_name, ulint level, const char* cfile_name = __FILE__, ulint cline = __LINE__); //IB_DEBUG && IB_SYNC_DEBUG
-IB_INTERN void mutex_create(mutex_t* mutex, const char*	cmutex_name, const char* cfile_name = __FILE__, ulint cline = __LINE__); // IB_DEBUG && ! IB_SYNC_DEBUG
-IB_INTERN void mutex_create(mutex_t* mutex, const char* cfile_name = __FILE__, ulint cline = __LINE__); // ! IB_DEBUG
+IB_INTERN void mutex_create(ib_mutex_t* mutex, const char* cmutex_name, ulint level, const char* cfile_name = __FILE__, ulint cline = __LINE__); //IB_DEBUG && IB_SYNC_DEBUG
+IB_INTERN void mutex_create(ib_mutex_t* mutex, const char*	cmutex_name, const char* cfile_name = __FILE__, ulint cline = __LINE__); // IB_DEBUG && ! IB_SYNC_DEBUG
+IB_INTERN void mutex_create(ib_mutex_t* mutex, const char* cfile_name = __FILE__, ulint cline = __LINE__); // ! IB_DEBUG
 
 /**
 Calling this function is obligatory only if the memory buffer containing
 the mutex is freed. Removes a mutex object from the mutex list. The mutex
 is checked to be in the reset state. */
-IB_INTERN void mutex_free(innodb_t* state, mutex_t* mutex);	/*!< in: mutex */
+IB_INTERN void mutex_free(innodb_state* state, ib_mutex_t* mutex);	/*!< in: mutex */
 
 /**
 NOTE! Use the corresponding macro in the header file, not this function
@@ -199,7 +199,7 @@ directly. Locks a mutex for the current thread. If the mutex is reserved
 the function spins a preset time (controlled by state->srv.n_spin_wait_rounds) waiting
 for the mutex before suspending the thread. */
 IB_INLINE void mutex_enter(
-	mutex_t* mutex,		/*!< in: pointer to mutex */
+	ib_mutex_t* mutex,		/*!< in: pointer to mutex */
 	const char*	file_name == __FILE__ ,	/*!< in: file name where locked */
 	ulint line == __LINE__ );		/*!< in: line where locked */
 /**************************************************************//**
@@ -215,13 +215,13 @@ directly. Tries to lock the mutex for the current thread. If the lock is not
 acquired immediately, returns with return value 1.
 @return	0 if succeed, 1 if not */
 IB_INTERN ulint mutex_enter_nowait(
-	mutex_t*	mutex,		/*!< in: pointer to mutex */
+	ib_mutex_t*	mutex,		/*!< in: pointer to mutex */
 	const char*	file_name,	/*!< in: file name where mutex requested */
 	ulint		line);		/*!< in: line where requested */
 
 /** Unlocks a mutex owned by the current thread. */
 /*!< in: pointer to mutex */
-IB_INLINE void mutex_exit(mutex_t* mutex);	
+IB_INLINE void mutex_exit(ib_mutex_t* mutex);	
 
 #ifdef IB_SYNC_DEBUG
 
@@ -234,11 +234,11 @@ IB_INLINE void mutex_exit(mutex_t* mutex);
 
 /** Prints wait info of the sync system. */
 /*!< in: stream where to print */
-IB_INTERN void sync_print_wait_info(innodb_t* state);	
+IB_INTERN void sync_print_wait_info(innodb_state* state);	
 
 /** Prints info of the sync system. */
 /*!< in: stream where to print */
-IB_INTERN void sync_print(innodb_t* state);	
+IB_INTERN void sync_print(innodb_state* state);	
 
 #ifdef IB_DEBUG
 	/******************************************************************//**
@@ -248,7 +248,7 @@ IB_INTERN void sync_print(innodb_t* state);
 	ibool
 	mutex_validate(
 	/*===========*/
-		const mutex_t*	mutex);	/*!< in: mutex */
+		const ib_mutex_t*	mutex);	/*!< in: mutex */
 	/******************************************************************//**
 	Checks that the current thread owns the mutex. Works only
 	in the debug version.
@@ -257,7 +257,7 @@ IB_INTERN void sync_print(innodb_t* state);
 	ibool
 	mutex_own(
 	/*======*/
-		const mutex_t*	mutex)	/*!< in: mutex */
+		const ib_mutex_t*	mutex)	/*!< in: mutex */
 		__attribute__((warn_unused_result));
 	#endif /* IB_DEBUG */
 	#ifdef IB_SYNC_DEBUG
@@ -317,7 +317,7 @@ IB_INTERN void sync_print(innodb_t* state);
 	void
 	mutex_get_debug_info(
 	/*=================*/
-		mutex_t*	mutex,		/*!< in: mutex */
+		ib_mutex_t*	mutex,		/*!< in: mutex */
 		const char**	file_name,	/*!< out: file where requested */
 		ulint*		line,		/*!< out: line where requested */
 		os_thread_id_t* thread_id);	/*!< out: id of the thread which owns
@@ -334,16 +334,16 @@ IB_INTERN void sync_print(innodb_t* state);
 
 /** NOT to be used outside this module except in debugging! Gets the value of the lock word. */
 /*!< in: mutex */
-IB_INLINE lock_word_t mutex_get_lock_word(const mutex_t* mutex);
+IB_INLINE lock_word_t mutex_get_lock_word(const ib_mutex_t* mutex);
 
 #ifdef IB_SYNC_DEBUG
 	/**
 	NOT to be used outside this module except in debugging! Gets the waiters field in a mutex. @return	value to set */
-	IB_INLINE ulint mutex_get_waiters(const mutex_t* mutex);	/*!< in: mutex */
+	IB_INLINE ulint mutex_get_waiters(const ib_mutex_t* mutex);	/*!< in: mutex */
 #endif // IB_SYNC_DEBUG
 
 /// \brief Reset variables.
-IB_INTERN void sync_var_init(innodb_t* state);
+IB_INTERN void sync_var_init(innodb_state* state);
 
 /* Latching order levels */
 
@@ -517,60 +517,15 @@ constinit ulint RW_LOCK_WAIT_EX = 353;
 /// \brief Synchronization mutex
 constinit ulint SYNC_MUTEX = 354;
 
-/// \brief InnoDB mutex
-struct mutex_struct {
-
-	static constinit ulint MAGIC_N = 979585;
-
-	os_event_t           event;	//!< Used by sync_arr.c for the wait queue
-	volatile lock_word_t lock_word;	/*!< lock_word is the target of the atomic test-and-set instruction when atomic operations are enabled. */
-
-#if !defined(IB_HAVE_ATOMIC_BUILTINS)
-	os_fast_mutex_t
-	os_fast_mutex;	/*!< We use this OS mutex in place of lock_word when atomic operations are not enabled */
-#endif
-
-	ulint waiters;	/*!< This ulint is set to 1 if there are (or may be) threads waiting in the global wait array for this mutex to be released. Otherwise, this is 0. */
-	UT_LIST_NODE_T(mutex_t)	list; /*!< All allocated mutexes are put into a list.	Pointers to the next and prev. */
-
-#ifdef IB_SYNC_DEBUG
-	const char*	file_name;     //!< File where the mutex was locked */
-	ulint line;		           //!< Line where the mutex was locked */
-	ulint level;		       //!< Level in the global latching order */
-#endif // IB_SYNC_DEBUG
-
-	const char*	cfile_name;    //!< File name where mutex created */
-	ulint cline;               //!< Line where created */
-
-#ifdef IB_DEBUG
-	os_thread_id_t thread_id;  //!< The thread id of the thread which locked the mutex. */
-	ulint magic_n;	           //!< Equal to MUTEX_MAGIC_N
-#endif // IB_DEBUG
-
-	ulong count_os_wait;	 //!< count of os_wait */
-
-#ifdef IB_DEBUG
-	ulong		count_using;	   /*!< count of times mutex used */
-	ulong		count_spin_loop;   /*!< count of spin loops */
-	ulong		count_spin_rounds; /*!< count of spin rounds */
-	ulong		count_os_yield;	   /*!< count of os_wait */
-	ib_uint64_t	lspent_time;	   /*!< mutex os_wait timer msec */
-	ib_uint64_t	lmax_spent_time;   /*!< mutex os_wait timer msec */
-	const char*	cmutex_name;	   /*!< mutex name */
-	ulint		mutex_type;	       /*!< 0=usual mutex, 1=rw_lock mutex */
-#endif // IB_DEBUG
-};
-
-
 /// \brief Global list of database mutexes (not OS mutexes) created
-typedef UT_LIST_BASE_NODE_T(mutex_t) ut_list_base_node_t;
+typedef UT_LIST_BASE_NODE_T(ib_mutex_t) ut_list_base_node_t;
 
+/// \brief The global array of wait cells for implementation of the databases own mutexes and read-write locks
+/// \details Appears here for debugging purposes only!
+extern sync_array_t* sync_primary_wait_array;
 
-/** The global array of wait cells for implementation of the databases own
-mutexes and read-write locks. */
-extern sync_array_t* sync_primary_wait_array; /* Appears here for debugging purposes only! */
-
-/** The number of mutex_exit calls. Intended for performance monitoring. */
+/// \brief The number of mutex_exit calls. 
+/// \details Intended for performance monitoring.
 extern ib_int64_t mutex_exit_count;
 
 /// \brief Latching order checks start when this is set TRUE
@@ -583,7 +538,7 @@ extern ibool sync_initialized;
 extern ut_list_base_node_t  mutex_list;
 
 /// \brief  Mutex protecting the mutex_list variable
-extern mutex_t mutex_list_mutex;
+extern ib_mutex_t mutex_list_mutex;
 
 
 #ifndef IB_DO_NOT_INLINE

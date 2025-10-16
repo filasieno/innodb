@@ -251,10 +251,10 @@ IB_INTERN buf_pool_t*	buf_pool = NULL;
 
 /** mutex protecting the buffer pool struct and control blocks, except the
 read-write lock in them */
-IB_INTERN mutex_t		buf_pool_mutex;
+IB_INTERN ib_mutex_t		buf_pool_mutex;
 /** mutex protecting the control blocks of compressed-only pages
 (of type buf_page_t, not buf_block_t) */
-IB_INTERN mutex_t		buf_pool_zip_mutex;
+IB_INTERN ib_mutex_t		buf_pool_zip_mutex;
 
 #if defined IB_DEBUG || defined IB_BUF_DEBUG
 static ulint	buf_dbg_counter	= 0; /*!< This is used to insert validation
@@ -1735,7 +1735,7 @@ buf_page_get_zip(
 	ulint		offset)	/*!< in: page number */
 {
 	buf_page_t*	bpage;
-	mutex_t*	block_mutex;
+	ib_mutex_t*	block_mutex;
 	ibool		must_read;
 	unsigned	access_time;
 

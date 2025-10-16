@@ -148,7 +148,7 @@ hash_get_heap(
 Gets the nth mutex in a hash table.
 @return	mutex */
 IB_INLINE
-mutex_t*
+ib_mutex_t*
 hash_get_nth_mutex(
 /*===============*/
 	hash_table_t*	table,	/*!< in: hash table */
@@ -165,7 +165,7 @@ hash_get_nth_mutex(
 Gets the mutex for a fold value in a hash table.
 @return	mutex */
 IB_INLINE
-mutex_t*
+ib_mutex_t*
 hash_get_mutex(
 /*===========*/
 	hash_table_t*	table,	/*!< in: hash table */

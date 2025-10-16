@@ -29,26 +29,33 @@
 
 #include "innodb_types.hpp"
 #include "os_types.hpp"
+#include "sync_types.hpp"
 
 struct innodb_state {
-    ib_logger_t log;
-    ib_stream_t stream;
-    os_state    os;
-
+	ib_logger_t log;
+	ib_stream_t stream;
+	os_state    os; 
+	
 	/// \brief The total amount of memory currently allocated from the operating system with os_mem_alloc_large() or malloc().  
-    /// \details Does not count malloc()
-	/// 
-    /// if `srv_use_sys_malloc` is set.  
-    /// Protected by \ref ut_list_mutex.
+	/// \details Does not count malloc() if `srv_use_sys_malloc` is set. Protected by \ref ut_list_mutex.
 	ulint ut_total_allocated_memory;
-
+	
 	/// \brief Mutex protecting `ut_total_allocated_memory` and `ut_mem_block_list`
+	/// TODO: replace with atomic operations
 	os_fast_mutex_t	ut_list_mutex;
+	
+	/// \brief initialize
+	struct sync_state sync;
 };
 
-constexpr void ib_logger(innodb_state* state, const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    state->log(state->stream, fmt, args);
-    va_end(args);
+/// \brief logging routine
+/// \param [in] state The state
+/// \param [in] fmt The format string
+/// \param [in] ... The arguments
+/// TODO: replace with proper logging system
+inline void ib_log(innodb_state* state, const char* fmt, ...) noexcept {
+	va_list args;
+	va_start(args, fmt);
+	state->log(state->stream, fmt, args);
+	va_end(args);
 }

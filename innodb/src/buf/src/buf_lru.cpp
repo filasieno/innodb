@@ -267,7 +267,7 @@ scan_again:
 	bpage = UT_LIST_GET_LAST(buf_pool->LRU);
 
 	while (bpage != NULL) {
-		mutex_t*	block_mutex = buf_page_get_mutex(bpage);
+		ib_mutex_t*	block_mutex = buf_page_get_mutex(bpage);
 		buf_page_t*	prev_bpage;
 
 		mutex_enter(block_mutex);
@@ -386,7 +386,7 @@ scan_again:
 
 			all_freed = FALSE;
 		} else {
-			mutex_t* block_mutex = buf_page_get_mutex(bpage);
+			ib_mutex_t* block_mutex = buf_page_get_mutex(bpage);
 			mutex_enter(block_mutex);
 
 			if (bpage->buf_fix_count > 0) {
@@ -643,7 +643,7 @@ buf_LRU_free_from_common_LRU_list(
 
 		enum buf_lru_free_block_status	freed;
 		unsigned			accessed;
-		mutex_t*			block_mutex
+		ib_mutex_t*			block_mutex
 			= buf_page_get_mutex(bpage);
 
 		ut_ad(buf_page_in_file(bpage));
@@ -1401,7 +1401,7 @@ buf_LRU_free_block(
 				was temporarily released, or NULL */
 {
 	buf_page_t*	b = NULL;
-	mutex_t*	block_mutex = buf_page_get_mutex(bpage);
+	ib_mutex_t*	block_mutex = buf_page_get_mutex(bpage);
 
 	ut_ad(buf_pool_mutex_own());
 	ut_ad(mutex_own(block_mutex));

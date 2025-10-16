@@ -126,7 +126,7 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 	static os_file_t files[1000];
 
 	/** Mutex protecting the ios count */
-	static mutex_t ios_mutex;
+	static ib_mutex_t ios_mutex;
 	/** Count of I/O operations in io_handler_thread() */
 	static ulint ios;
 

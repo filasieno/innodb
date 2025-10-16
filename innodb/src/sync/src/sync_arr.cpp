@@ -152,7 +152,7 @@ static os_event_t sync_cell_get_event(sync_cell_t* cell)
 	ulint type = cell->request_type;
 	switch (type) {
 	case SYNC_MUTEX:
-		return ((mutex_t *) cell->wait_object)->event;
+		return ((ib_mutex_t *) cell->wait_object)->event;
 	case RW_LOCK_WAIT_EX:
 		return ((rw_lock_t *) cell->wait_object)->wait_ex_event;
 	default:
@@ -247,7 +247,7 @@ IB_INTERN void sync_array_wait_event(sync_array_t* arr, ulint index)
 /// \brief Reports info of a wait array cell
 /// \param [in] state The state
 /// \param [in] cell The cell
-static void sync_array_cell_print(innodb_t* state, sync_cell_t* cell)
+static void sync_array_cell_print(innodb_state* state, sync_cell_t* cell)
 {
 	ut_a(state != nullptr);
 	ut_a(cell != nullptr);
@@ -255,7 +255,7 @@ static void sync_array_cell_print(innodb_t* state, sync_cell_t* cell)
 	ib_log(state, "Thread %lu has waited at %s line %lu for %.2f seconds the semaphore:\n", (ulong) os_thread_pf(cell->thread), cell->file, (ulong) cell->line, difftime(time(NULL), cell->reservation_time));
 	if (type == SYNC_MUTEX) {
 		// We use old_wait_mutex in case the cell has already been freed meanwhile
-		mutex_t* mutex = cell->old_wait_mutex;
+		ib_mutex_t* mutex = cell->old_wait_mutex;
 		if constexpr (IB_SYNC_DEBUG) {
 			ib_log(
 				state, 
@@ -353,7 +353,7 @@ static void sync_array_cell_print(innodb_t* state, sync_cell_t* cell)
 	/// \param [in] cell The cell to search
 	/// \param [in] depth The recursion depth
 	/// \return	TRUE if deadlock detected
-	static ibool sync_array_detect_deadlock(innodb_t* state, sync_array_t* arr, sync_cell_t* start, sync_cell_t* cell, ulint depth)
+	static ibool sync_array_detect_deadlock(innodb_state* state, sync_array_t* arr, sync_cell_t* start, sync_cell_t* cell, ulint depth)
 	{
 		ut_a(arr);
 		ut_a(start);
@@ -371,7 +371,7 @@ static void sync_array_cell_print(innodb_t* state, sync_cell_t* cell)
 
 		// Sync mutex
 		if (cell->request_type == SYNC_MUTEX) {
-			mutex_t* mutex = cell->wait_object;
+			ib_mutex_t* mutex = cell->wait_object;
 			if (mutex_get_lock_word(mutex) != 0) {
 				os_thread_id_t thread = mutex->thread_id;
 				// Note that mutex->thread_id above may be also OS_THREAD_ID_UNDEFINED, because the thread which held the mutex maybe has not
@@ -445,7 +445,7 @@ static void sync_array_cell_print(innodb_t* state, sync_cell_t* cell)
 static ibool sync_arr_cell_can_wake_up(sync_cell_t* cell)
 {
 	if (cell->request_type == SYNC_MUTEX) {
-		mutex_t* mutex = cell->wait_object;
+		ib_mutex_t* mutex = cell->wait_object;
 		if (mutex_get_lock_word(mutex) == 0) {
 			return TRUE;
 		}
@@ -536,7 +536,7 @@ IB_INTERN void sync_arr_wake_threads_if_sema_free(void)
 /// \brief Prints warnings of long semaphore waits to state->stream.
 /// \param state The state
 /// \return TRUE if fatal semaphore wait threshold was exceeded
-IB_INTERN ibool sync_array_print_long_waits(innodb_t* state)
+IB_INTERN ibool sync_array_print_long_waits(innodb_state* state)
 {
 	ulint fatal_timeout = srv_fatal_semaphore_wait_threshold;
 	ibool fatal = FALSE;
@@ -572,7 +572,7 @@ IB_INTERN ibool sync_array_print_long_waits(innodb_t* state)
 /// \brief Prints info of the wait array.
 /// \param state The state
 /// \param arr The wait array
-static void sync_array_output_info(innodb_t* state, sync_array_t* arr)
+static void sync_array_output_info(innodb_state* state, sync_array_t* arr)
 {
 	ib_log(state,"OS WAIT ARRAY INFO: reservation count %ld, signal count %ld\n", (long) arr->res_count, (long) arr->sg_count);
 	ulint i = 0;
@@ -590,7 +590,7 @@ static void sync_array_output_info(innodb_t* state, sync_array_t* arr)
 /// \brief Prints info of the wait array.
 /// \param state The state
 /// \param arr The wait array
-IB_INTERN void sync_array_print_info(innodb_t* state, sync_array_t* arr)
+IB_INTERN void sync_array_print_info(innodb_state* state, sync_array_t* arr)
 {
 	sync_array_enter(arr);
 	sync_array_output_info(state->stream, arr);

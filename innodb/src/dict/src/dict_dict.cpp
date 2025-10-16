@@ -81,7 +81,7 @@ static char	dict_ibfk[] = "_ibfk_";
 /** array of mutexes protecting dict_index_t::stat_n_diff_key_vals[] */
 #define DICT_INDEX_STAT_MUTEX_SIZE	32
 IB_INTERN
-mutex_t	dict_index_stat_mutex[DICT_INDEX_STAT_MUTEX_SIZE];
+ib_mutex_t	dict_index_stat_mutex[DICT_INDEX_STAT_MUTEX_SIZE];
 
 /*******************************************************************//**
 Tries to find column names for the index and sets the col field of the
@@ -153,7 +153,7 @@ dict_foreign_free(
 	dict_foreign_t*	foreign);	/*!< in, own: foreign key struct */
 
 /* mutex protecting the foreign and unique error buffers */
-IB_INTERN mutex_t	dict_foreign_err_mutex;
+IB_INTERN ib_mutex_t	dict_foreign_err_mutex;
 
 /******************************************************************//**
 Reset dict variables. */

@@ -134,7 +134,7 @@ struct trx_purge_struct
     /// The purge will not remove undo logs which are >= this view (purge view)
     read_view_t *view;
     /// Mutex protecting the fields below
-    mutex_t mutex;
+    ib_mutex_t mutex;
     /// Approximate number of undo log pages processed in purge
     ulint n_pages_handled;
     /// Target of how many pages to get processed in the current purge

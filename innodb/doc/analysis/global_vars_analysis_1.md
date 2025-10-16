@@ -36,14 +36,14 @@ This analysis identifies all global variables found in the `innodb/src` director
 | srv    | data_path_buf                           | char*                                     | global   |
 | srv    | files                                   | os_file_t[1000]                           | global   |
 | srv    | ios                                     | ulint                                     | global   |
-| srv    | ios_mutex                               | mutex_t                                   | global   |
+| srv    | ios_mutex                               | ib_mutex_t                                   | global   |
 | srv    | log_path_buf                            | char*                                     | global   |
 | srv    | n                                       | ulint[SRV_MAX_N_IO_THREADS + 6]           | global   |
 | srv    | srv_client_table                        | srv_slot_t*                               | global   |
 | srv    | srv_conc_mutex                          | os_fast_mutex_t                           | global   |
 | srv    | srv_conc_slots                          | srv_conc_slot_t*                          | global   |
 | srv    | srv_data_file_names                     | char**                                    | global   |
-| srv    | srv_innodb_monitor_mutex                | mutex_t                                   | global   |
+| srv    | srv_innodb_monitor_mutex                | ib_mutex_t                                   | global   |
 | srv    | srv_last_log_flush_time                 | time_t                                    | global   |
 | srv    | srv_last_monitor_time                   | time_t                                    | global   |
 | srv    | srv_log_group_home_dirs                 | char**                                    | global   |

@@ -504,7 +504,7 @@ identifier is added to this constant. */
 
 /** Doublewrite control struct */
 struct trx_doublewrite_struct{
-	mutex_t	mutex;		/*!< mutex protecting the first_free field and
+	ib_mutex_t	mutex;		/*!< mutex protecting the first_free field and
 				write_buf */
 	ulint	block1;		/*!< the page number of the first
 				doublewrite block (64 pages) */

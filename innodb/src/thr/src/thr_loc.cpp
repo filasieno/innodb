@@ -45,7 +45,7 @@ the thread local storage, just add it to struct thr_local_struct in the
 header file. */
 
 /** Mutex protecting thr_local_hash */
-static mutex_t		thr_local_mutex;
+static ib_mutex_t		thr_local_mutex;
 
 /** The hash table. The module is not yet initialized when it is NULL. */
 static hash_table_t*	thr_local_hash	= NULL;

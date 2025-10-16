@@ -129,7 +129,7 @@ IB_INLINE ulint rw_lock_get_reader_count(const rw_lock_t* lock)
 }
 
 #ifndef INNODB_RW_LOCKS_USE_ATOMICS
-	IB_INLINE mutex_t* rw_lock_get_mutex(rw_lock_t*	lock)
+	IB_INLINE ib_mutex_t* rw_lock_get_mutex(rw_lock_t*	lock)
 	{
 		return &lock->mutex;
 	}
@@ -381,69 +381,54 @@ IB_INLINE ibool rw_lock_x_lock_func_nowait(rw_lock_t* lock, const char*	file_nam
 		// Failure
 		return FALSE;
 	}
-
 	if constexpr (IB_SYNC_DEBUG) {
 		rw_lock_add_debug_info(lock, 0, RW_LOCK_EX, file_name, line);
 	}
-
 	lock->last_x_file_name = file_name;
 	lock->last_x_line = line;
 	ut_ad(rw_lock_validate(lock));
 	return TRUE;
 }
 
-/**
-Releases a shared mode lock. */
+/// \brief Releases a shared mode lock
 IB_INLINE void rw_lock_s_unlock_func(
-
 #ifdef IB_SYNC_DEBUG
-	ulint		pass,	/*!< in: pass value; != 0, if the lock may have
-				been passed to another thread to unlock */
+	ulint		pass,	/*!< in: pass value; != 0, if the lock may have been passed to another thread to unlock */
 #endif
 	rw_lock_t*	lock)	/*!< in/out: rw-lock */
 {
 	ut_ad((lock->lock_word % X_LOCK_DECR) != 0);
-
-#ifdef IB_SYNC_DEBUG
-	rw_lock_remove_debug_info(lock, pass, RW_LOCK_SHARED);
-#endif
-
-	/* Increment lock_word to indicate 1 less reader */
+	if constexpr (IB_SYNC_DEBUG) {
+		rw_lock_remove_debug_info(lock, pass, RW_LOCK_SHARED);
+	}
+	// Increment lock_word to indicate 1 less reader
 	if (rw_lock_lock_word_incr(lock, 1) == 0) {
-
-		/* wait_ex waiter exists. It may not be asleep, but we signal
-                anyway. We do not wake other waiters, because they can't
-                exist without wait_ex waiter and wait_ex waiter goes first.*/
+		// wait_ex waiter exists. It may not be asleep, but we signal anyway. We do not wake other waiters, because they can't exist without wait_ex waiter and wait_ex waiter goes first
 		os_event_set(lock->wait_ex_event);
 		sync_array_object_signalled(sync_primary_wait_array);
 
 	}
-
 	ut_ad(rw_lock_validate(lock));
-
-#ifdef IB_SYNC_PERF_STAT
-	rw_s_exit_count++;
-#endif
+	if constexpr (IB_SYNC_PERF_STAT) {
+		rw_s_exit_count++;
+	}
 }
 
-/// Releases a shared mode lock when we know there are no waiters and none else will access the lock during the time this function is executed.
-IB_INLINE void rw_lock_s_unlock_direct(
-	rw_lock_t*	lock)	/*!< in/out: rw-lock */
+/// \brief Releases a shared mode lock when we know there are no waiters and none else will access the lock during the time this function is executed.
+/// \param [in,out] lock the rw-lock 
+IB_INLINE void rw_lock_s_unlock_direct(rw_lock_t* lock)	
 {
 	ut_ad(lock->lock_word < X_LOCK_DECR);
-
-#ifdef IB_SYNC_DEBUG
-	rw_lock_remove_debug_info(lock, 0, RW_LOCK_SHARED);
-#endif
-
+	if constexpr (IB_SYNC_DEBUG) {
+		rw_lock_remove_debug_info(lock, 0, RW_LOCK_SHARED);
+	}
 	// Decrease reader count by incrementing lock_word
 	lock->lock_word++;
-
 	ut_ad(!lock->waiters);
 	ut_ad(rw_lock_validate(lock));
-#ifdef IB_SYNC_PERF_STAT
-	rw_s_exit_count++;
-#endif
+	if constexpr (IB_SYNC_PERF_STAT) {
+		rw_s_exit_count++;
+	}
 }
 
 /// \brief Releases an exclusive mode lock.

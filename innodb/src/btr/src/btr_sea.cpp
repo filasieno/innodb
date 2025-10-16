@@ -36,7 +36,7 @@ Created 2/17/1996 Heikki Tuuri
 Protected by btr_search_latch and btr_search_enabled_mutex. */
 IB_INTERN char		btr_search_enabled	= TRUE;
 /** Mutex protecting btr_search_enabled */
-static mutex_t			btr_search_enabled_mutex;
+static ib_mutex_t			btr_search_enabled_mutex;
 /** A dummy variable to fool the compiler */
 IB_INTERN ulint		btr_search_this_is_zero = 0;
 #ifdef IB_SEARCH_PERF_STAT

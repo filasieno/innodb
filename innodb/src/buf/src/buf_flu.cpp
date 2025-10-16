@@ -1027,7 +1027,7 @@ buf_flush_page(
 	enum buf_flush	flush_type)	/*!< in: BUF_FLUSH_LRU
 					or BUF_FLUSH_LIST */
 {
-	mutex_t*	block_mutex;
+	ib_mutex_t*	block_mutex;
 	ibool		is_uncompressed;
 
 	ut_ad(flush_type == BUF_FLUSH_LRU || flush_type == BUF_FLUSH_LIST);
@@ -1187,7 +1187,7 @@ buf_flush_try_neighbors(
 		if (flush_type != BUF_FLUSH_LRU
 		    || i == offset
 		    || buf_page_is_old(bpage)) {
-			mutex_t* block_mutex = buf_page_get_mutex(bpage);
+			ib_mutex_t* block_mutex = buf_page_get_mutex(bpage);
 
 			mutex_enter(block_mutex);
 
@@ -1301,7 +1301,7 @@ flush_next:
 		function a pointer to a block in the list! */
 
 		do {
-			mutex_t*block_mutex = buf_page_get_mutex(bpage);
+			ib_mutex_t*block_mutex = buf_page_get_mutex(bpage);
 			ibool	ready;
 
 			ut_a(buf_page_in_file(bpage));
@@ -1419,7 +1419,7 @@ buf_flush_LRU_recommendation(void)
 		   + BUF_FLUSH_EXTRA_MARGIN)
 	       && (distance < BUF_LRU_FREE_SEARCH_LEN)) {
 
-		mutex_t* block_mutex = buf_page_get_mutex(bpage);
+		ib_mutex_t* block_mutex = buf_page_get_mutex(bpage);
 
 		mutex_enter(block_mutex);
 

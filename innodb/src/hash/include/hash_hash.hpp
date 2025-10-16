@@ -368,7 +368,7 @@ hash_get_heap(
 Gets the nth mutex in a hash table.
 @return	mutex */
 IB_INLINE
-mutex_t*
+ib_mutex_t*
 hash_get_nth_mutex(
 /*===============*/
 	hash_table_t*	table,	/*!< in: hash table */
@@ -377,7 +377,7 @@ hash_get_nth_mutex(
 Gets the mutex for a fold value in a hash table.
 @return	mutex */
 IB_INLINE
-mutex_t*
+ib_mutex_t*
 hash_get_mutex(
 /*===========*/
 	hash_table_t*	table,	/*!< in: hash table */
@@ -435,7 +435,7 @@ struct hash_table_struct {
 #ifndef IB_HOTBACKUP
 	ulint		n_mutexes;/* if mutexes != NULL, then the number of
 				mutexes, must be a power of 2 */
-	mutex_t*	mutexes;/* NULL, or an array of mutexes used to
+	ib_mutex_t*	mutexes;/* NULL, or an array of mutexes used to
 				protect segments of the hash table */
 	mem_heap_t**	heaps;	/*!< if this is non-NULL, hash chain nodes for
 				external chaining can be allocated from these

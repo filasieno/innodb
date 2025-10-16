@@ -135,7 +135,7 @@ IB_INTERN ulint os_event_wait_time(
 	ulint		time);	/*!< in: timeout in microseconds, or OS_SYNC_INFINITE_TIME */
 /**
 Creates an operating system mutex semaphore. Because these are slow, the
-mutex semaphore of InnoDB itself (mutex_t) should be used where possible.
+mutex semaphore of InnoDB itself (ib_mutex_t) should be used where possible.
 @return	the mutex handle */
 IB_INTERN os_mutex_t os_mutex_create(const char*	name);	/*!< in: the name of the mutex, if NULL the mutex is created without a name */
 
@@ -189,7 +189,7 @@ IB_INTERN void os_fast_mutex_free(os_fast_mutex_t* fast_mutex);	/*!< in: mutex t
 
 /// \brief Reset the variables. 
 /// \param state The state of the InnoDB engine
-IB_INTERN void os_sync_var_init(innodb_t* state);
+IB_INTERN void os_sync_var_init(innodb_state* state);
 
 
 /**
@@ -281,15 +281,6 @@ Returns the old value of *ptr, atomically sets *ptr to new_val */
 #elif defined(IB_HAVE_WINDOWS_ATOMICS)
 
 #define IB_HAVE_ATOMIC_BUILTINS
-
-/* On Windows, use Windows atomics / interlocked */
-# ifdef _WIN64
-#  define win_cmp_and_xchg InterlockedCompareExchange64
-#  define win_xchg_and_add InterlockedExchangeAdd64
-# else /* _WIN64 */
-#  define win_cmp_and_xchg InterlockedCompareExchange
-#  define win_xchg_and_add InterlockedExchangeAdd
-# endif
 
 /**
 Returns true if swapped, ptr is pointer to target, old_val is value to

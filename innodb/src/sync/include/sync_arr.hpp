@@ -23,8 +23,7 @@ The wait array used in synchronization primitives
 Created 9/5/1995 Heikki Tuuri
 *******************************************************/
 
-#ifndef sync0arr_h
-#define sync0arr_h
+#pragma once
 
 #include "univ.i"
 #include "ut_lst.hpp"
@@ -37,8 +36,10 @@ typedef struct sync_cell_struct		sync_cell_t;
 typedef struct sync_array_struct	sync_array_t;
 
 /** Parameters for sync_array_create() @{ */
-#define SYNC_ARRAY_OS_MUTEX	1	/*!< protected by os_mutex_t */
-#define SYNC_ARRAY_MUTEX	2	/*!< protected by mutex_t */
+/// \note Protected by os_mutex_t
+constinit ulint SYNC_ARRAY_OS_MUTEX	= 1;
+/// \note Protected by ib_mutex_t
+constinit ulint SYNC_ARRAY_MUTEX	= 2;
 /* @} */
 
 /// \brief  Creates a synchronization wait array. 

@@ -362,10 +362,10 @@ IB_INTERN ibool	srv_print_innodb_table_monitor = FALSE;
 
 static time_t		srv_last_monitor_time;
 
-static	mutex_t		srv_innodb_monitor_mutex;
+static	ib_mutex_t		srv_innodb_monitor_mutex;
 
 /** Mutex for locking srv_monitor_file */
-IB_INTERN mutex_t	srv_monitor_file_mutex;
+IB_INTERN ib_mutex_t	srv_monitor_file_mutex;
 
 #ifdef IB_LINUX
 static ulint		srv_main_thread_process_no	= 0;
@@ -600,7 +600,7 @@ static srv_sys_t* srv_sys = NULL;
 the same memory cache line */
 IB_INTERN byte srv_pad1[64];
 /** Mutex protecting the server, trx structs, query threads, and lock table */
-IB_INTERN mutex_t* kernel_mutex_temp;
+IB_INTERN ib_mutex_t* kernel_mutex_temp;
 /* padding to prevent other memory update hotspots from residing on
 the same memory cache line */
 IB_INTERN byte srv_pad2[64];
@@ -974,7 +974,7 @@ srv_init(void)
 
 	srv_sys = mem_alloc(sizeof(srv_sys_t));
 
-	kernel_mutex_temp = mem_alloc(sizeof(mutex_t));
+	kernel_mutex_temp = mem_alloc(sizeof(ib_mutex_t));
 	mutex_create(&kernel_mutex, SYNC_KERNEL);
 
 	mutex_create(&srv_innodb_monitor_mutex, SYNC_NO_ORDER_CHECK);

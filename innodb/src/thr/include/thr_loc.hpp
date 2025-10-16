@@ -24,7 +24,7 @@
 
 /// \brief Initializes the thread local storage module.
 /// \param [in, out] state Pointer to state
-IB_INTERN void thr_local_init(innodb_t* state);
+IB_INTERN void thr_local_init(innodb_state* state);
 
 /// \brief Close the thread local storage module.
 IB_INTERN void thr_local_close(void);

@@ -447,7 +447,7 @@ buf_buddy_relocate(
 
 	if (size >= PAGE_ZIP_MIN_SIZE) {
 		/* This is a compressed page. */
-		mutex_t*	mutex;
+		ib_mutex_t*	mutex;
 
 		/* The src block may be split into smaller blocks,
 		some of which may be free.  Thus, the

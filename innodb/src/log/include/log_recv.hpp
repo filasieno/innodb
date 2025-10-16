@@ -385,7 +385,7 @@ typedef struct recv_sys_struct	recv_sys_t;
 /** Recovery system data structure */
 struct recv_sys_struct{
 #ifndef IB_HOTBACKUP
-	mutex_t		mutex;	/*!< mutex protecting the fields apply_log_recs,
+	ib_mutex_t		mutex;	/*!< mutex protecting the fields apply_log_recs,
 				n_addrs, and the state field in each recv_addr
 				struct */
 #endif /* !IB_HOTBACKUP */

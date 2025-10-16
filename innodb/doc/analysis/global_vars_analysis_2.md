@@ -26,7 +26,7 @@ This comprehensive analysis includes ALL global variables found in the InnoDB co
 | api    | GEN_CLUST_INDEX                         | const char*                               | api_api.cpp     |                                               |
 | page   | infimum_data                            | const byte[]                              | page_zip.cpp    |                                               |
 | page   | infimum_extra                           | const byte[]                              | page_zip.cpp    |                                               |
-| srv    | ios_mutex                               | mutex_t                                   | srv_start.cpp   |                                               |
+| srv    | ios_mutex                               | ib_mutex_t                                   | srv_start.cpp   |                                               |
 | srv    | ios                                     | ulint                                     | srv_start.cpp   | srv_srv.cpp, os_file.cpp, fil_fil.cpp (+2)    |
 | srv    | log_path_buf                            | char*                                     | srv_start.cpp   |                                               |
 | srv    | n                                       | ulint[SRV_MAX_N_IO_THREADS+6]             | mtr_mtr.cpp     | mtr_log.cpp,api_api.cpp,api_cfg.cpp (+88)     |
@@ -46,7 +46,7 @@ This comprehensive analysis includes ALL global variables found in the InnoDB co
 | srv    | srv_conc_mutex                          | os_fast_mutex_t                           | srv_srv.cpp     |                                               |
 | srv    | srv_conc_slots                          | srv_conc_slot_t*                          | srv_srv.cpp     |                                               |
 | srv    | srv_data_file_names                     | char**                                    | srv_start.cpp   |                                               |
-| srv    | srv_innodb_monitor_mutex                | mutex_t                                   | srv_srv.cpp     |                                               |
+| srv    | srv_innodb_monitor_mutex                | ib_mutex_t                                   | srv_srv.cpp     |                                               |
 | os     | srv_io_thread_function                  | const char*[SRV_MAX_N_IO_THREADS]         | os_file.cpp     |                                               |
 | os     | srv_io_thread_op_info                   | const char*[SRV_MAX_N_IO_THREADS]         | os_file.cpp     |                                               |
 | srv    | srv_last_log_flush_time                 | time_t                                    | srv_srv.cpp     |                                               |
@@ -98,7 +98,7 @@ This comprehensive analysis includes ALL global variables found in the InnoDB co
 | Module | Variable Name    | Type          | Definition File | Usage Files  |
 |--------|------------------|---------------|-----------------|--------------|
 | thr    | thr_local_hash   | hash_table_t* | thr_loc.cpp    | thr_loc.cpp  |
-| thr    | thr_local_mutex  | mutex_t       | thr_loc.cpp    | thr_loc.cpp  |
+| thr    | thr_local_mutex  | ib_mutex_t       | thr_loc.cpp    | thr_loc.cpp  |
 
 ## Variable Usage Mapping
 
@@ -216,8 +216,8 @@ This enhanced analysis provides the foundation for systematic global variable el
 | buf_LRU_stat_cur | buf_LRU_stat_t | buf/include/buf_lru.hpp | Not found | buf/include/buf_lru.hpp,buf/src/buf_buf.cpp,buf/src/buf_lru.cpp |
 | buf_LRU_stat_sum | buf_LRU_stat_t | buf/include/buf_lru.hpp | Not found | buf/src/buf_buf.cpp,buf/src/buf_lru.cpp |
 | buf_pool_mutex_exit_forbidden | ulint | buf/include/buf_buf.hpp | Not found | None found |
-| buf_pool_mutex | mutex_t | buf/include/buf_buf.hpp | buf/src/buf_buddy.cpp | buf/include/buf_buddy.hpp,buf/include/buf_buddy.inl,buf/include/buf_buf.hpp,buf/include/buf_buf.inl,buf/include/buf_lru.hpp,buf/src/buf_buddy.cpp,buf/src/buf_buf.cpp,buf/src/buf_flu.cpp,buf/src/buf_lru.cpp,sync/src/sync_sync.cpp |
-| buf_pool_zip_mutex | mutex_t | buf/include/buf_buf.hpp | Not found | buf/include/buf_buddy.hpp,buf/include/buf_buddy.inl,buf/include/buf_buf.hpp,buf/src/buf_buddy.cpp,buf/src/buf_lru.cpp,sync/src/sync_sync.cpp |
+| buf_pool_mutex | ib_mutex_t | buf/include/buf_buf.hpp | buf/src/buf_buddy.cpp | buf/include/buf_buddy.hpp,buf/include/buf_buddy.inl,buf/include/buf_buf.hpp,buf/include/buf_buf.inl,buf/include/buf_lru.hpp,buf/src/buf_buddy.cpp,buf/src/buf_buf.cpp,buf/src/buf_flu.cpp,buf/src/buf_lru.cpp,sync/src/sync_sync.cpp |
+| buf_pool_zip_mutex | ib_mutex_t | buf/include/buf_buf.hpp | Not found | buf/include/buf_buddy.hpp,buf/include/buf_buddy.inl,buf/include/buf_buf.hpp,buf/src/buf_buddy.cpp,buf/src/buf_lru.cpp,sync/src/sync_sync.cpp |
 | data_client_default_charset_coll | ulint | data/include/data_type.hpp | Not found | None found |
 | dict_foreign_err_file | ib_stream_t | dict/include/dict_dict.hpp | srv/src/srv_srv.cpp | srv/src/srv_srv.cpp |
 | dict_ind_compact | dict_index_t* | dict/include/dict_dict.hpp | dict/src/dict_dict.cpp | dict/include/dict_dict.hpp,dict/src/dict_dict.cpp |
@@ -243,7 +243,7 @@ This enhanced analysis provides the foundation for systematic global variable el
 | lock_print_waits | ibool | lock/include/lock_lock.hpp | Not found | lock/src/lock_lock.cpp,trx/src/trx_roll.cpp |
 | lock_sys | lock_sys_t* | lock/include/lock_lock.hpp | lock/src/lock_lock.cpp | lock/include/lock_lock.hpp,lock/src/lock_lock.cpp |
 | log_sys | log_t* | log/include/log_log.hpp | srv/src/srv_start.cpp | log/include/log_log.hpp,log/include/log_log.inl,log/include/log_recv.hpp,log/src/log_log.cpp,log/src/log_recv.cpp,srv/src/srv_srv.cpp,srv/src/srv_start.cpp |
-| mutex_list_mutex | mutex_t | sync/include/sync_sync.hpp | Not found | sync/src/sync_sync.cpp |
+| mutex_list_mutex | ib_mutex_t | sync/include/sync_sync.hpp | Not found | sync/src/sync_sync.cpp |
 | mutex_list | ut_list_base_node_t | sync/include/sync_sync.hpp | sync/src/sync_sync.cpp | sync/include/sync_sync.hpp,sync/src/sync_sync.cpp |
 | os_aio_print_debug | ibool | os/include/os_file.hpp | Not found | os/src/os_file.cpp |
 | os_aio_use_native_aio | ibool | os/include/os_file.hpp | Not found | fil/src/fil_fil.cpp,os/src/os_file.cpp,srv/src/srv_start.cpp |
@@ -312,8 +312,8 @@ This enhanced analysis provides the foundation for systematic global variable el
 | recv_replay_file_ops | ibool | log/include/log_recv.hpp | Not found | None found |
 | recv_sys | recv_sys_t* | log/include/log_recv.hpp | log/src/log_recv.cpp | log/include/log_recv.hpp,log/src/log_recv.cpp |
 | request | ulint srv_buf_pool_write_requests /*!< variable to count write | buf/include/buf_buf.hpp | sync/src/sync_arr.cpp | api/src/api_api.cpp,api/src/api_status.cpp,btr/src/btr_cur.cpp,buf/include/buf_buf.hpp,buf/include/buf_buf.inl,buf/include/buf_rea.hpp,buf/src/buf_buf.cpp,buf/src/buf_rea.cpp,data/include/data_type.hpp,data/src/data_type.cpp,fil/include/fil_fil.hpp,fil/src/fil_fil.cpp,ibuf/src/ibuf_ibuf.cpp,lock/include/lock_lock.hpp,lock/src/lock_lock.cpp,log/src/log_log.cpp,mem/include/mem_dbg.hpp,mem/include/mem_dbg.inl,mem/include/mem_mem.hpp,mem/include/mem_mem.inl,mem/src/mem_mem.cpp,mtr/include/mtr_log.inl,mtr/src/mtr_log.cpp,os/include/os_file.hpp,os/src/os_file.cpp,page/src/page_zip.cpp,pars/src/pars_grm.cpp,que/src/que_que.cpp,read/src/read_read.cpp,row/src/row_merge.cpp,row/src/row_sel.cpp,srv/include/srv_srv.hpp,srv/src/srv_srv.cpp,srv/src/srv_start.cpp,sync/include/sync_arr.hpp,sync/include/sync_rw.hpp,sync/include/sync_rw.inl,sync/include/sync_sync.hpp,sync/include/sync_sync.inl,sync/src/sync_arr.cpp,sync/src/sync_rw.cpp,sync/src/sync_sync.cpp,trx/include/trx_roll.hpp,trx/include/trx_trx.hpp,trx/src/trx_roll.cpp,ut/include/ut_byte.hpp,ut/include/ut_mem.hpp,ut/src/ut_mem.cpp |
-| rw_lock_debug_mutex | mutex_t | sync/include/sync_rw.hpp | Not found | sync/src/sync_arr.cpp,sync/src/sync_rw.cpp,sync/src/sync_sync.cpp |
-| rw_lock_list_mutex | mutex_t | sync/include/sync_rw.hpp | Not found | sync/src/sync_sync.cpp |
+| rw_lock_debug_mutex | ib_mutex_t | sync/include/sync_rw.hpp | Not found | sync/src/sync_arr.cpp,sync/src/sync_rw.cpp,sync/src/sync_sync.cpp |
+| rw_lock_list_mutex | ib_mutex_t | sync/include/sync_rw.hpp | Not found | sync/src/sync_sync.cpp |
 | rw_lock_list | rw_lock_list_t | sync/include/sync_rw.hpp | Not found | sync/include/sync_rw.hpp,sync/src/sync_rw.cpp,sync/src/sync_sync.cpp |
 | ses_lock_wait_timeout | ulint | srv/include/srv_srv.hpp | Not found | api/src/api_cfg.cpp,srv/src/srv_srv.cpp |
 | ses_rollback_on_timeout | ibool | srv/include/srv_srv.hpp | Not found | api/src/api_cfg.cpp,api/src/api_misc.cpp |
@@ -400,7 +400,7 @@ This enhanced analysis provides the foundation for systematic global variable el
 | srv_use_doublewrite_buf | ibool | srv/include/srv_srv.hpp | buf/src/buf_flu.cpp | api/src/api_cfg.cpp,buf/src/buf_flu.cpp |
 | srv_use_sys_malloc | ibool | srv/include/srv_srv.hpp | Not found | api/src/api_cfg.cpp,mem/src/mem_mem.cpp,srv/src/srv_start.cpp,ut/include/ut_mem.hpp,ut/src/ut_mem.cpp |
 | srv_win_file_flush_method | ulint | srv/include/srv_srv.hpp | Not found | os/src/os_file.cpp,srv/include/srv_srv.hpp |
-| structs, | mutex_t* kernel_mutex_temp/* mutex protecting the server, trx structs, | srv/include/srv_srv.hpp | Not found | srv/include/srv_srv.hpp,srv/src/srv_srv.cpp |
+| structs, | ib_mutex_t* kernel_mutex_temp/* mutex protecting the server, trx structs, | srv/include/srv_srv.hpp | Not found | srv/include/srv_srv.hpp,srv/src/srv_srv.cpp |
 | sync_initialized | ibool | sync/include/sync_sync.hpp | Not found | None found |
 | sync_order_checks_on | ibool | sync/include/sync_sync.hpp | Not found | sync/src/sync_sync.cpp |
 | trx_doublewrite_buf_is_being_created | ibool | trx/include/trx_sys.hpp | Not found | mtr/include/mtr_log.inl |

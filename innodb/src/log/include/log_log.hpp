@@ -782,7 +782,7 @@ struct log_struct{
 	ulint		buf_free;	/*!< first free offset within the log
 					buffer */
 #ifndef IB_HOTBACKUP
-	mutex_t		mutex;		/*!< mutex protecting the log */
+	ib_mutex_t		mutex;		/*!< mutex protecting the log */
 #endif /* !IB_HOTBACKUP */
 	byte*		buf_ptr;	/* unaligned log buffer */
 	byte*		buf;		/*!< log buffer */

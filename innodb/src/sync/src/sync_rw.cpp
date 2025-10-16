@@ -166,14 +166,14 @@ IB_INTERN ib_int64_t	rw_x_exit_count		= 0;
 
 /* The global list of rw-locks */
 IB_INTERN rw_lock_list_t	rw_lock_list;
-IB_INTERN mutex_t		rw_lock_list_mutex;
+IB_INTERN ib_mutex_t		rw_lock_list_mutex;
 
 #ifdef IB_SYNC_DEBUG
 /* The global mutex which protects debug info lists of all rw-locks.
 To modify the debug info list of an rw-lock, this mutex has to be
 acquired in addition to the mutex protecting the lock. */
 
-IB_INTERN mutex_t		rw_lock_debug_mutex;
+IB_INTERN ib_mutex_t		rw_lock_debug_mutex;
 /* If deadlock detection does not get immediately the mutex,
 it may wait for this event */
 IB_INTERN os_event_t		rw_lock_debug_event;

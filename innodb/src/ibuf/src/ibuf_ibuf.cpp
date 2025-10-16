@@ -179,8 +179,9 @@ IB_INTERN ulint	ibuf_flush_count	= 0;
 #ifdef IB_IBUF_COUNT_DEBUG
 /** Number of tablespaces in the ibuf_counts array */
 #define IBUF_COUNT_N_SPACES	4
-/** Number of pages within each tablespace in the ibuf_counts array */
-#define IBUF_COUNT_N_PAGES	130000
+
+/// \brief Number of pages within each tablespace in the ibuf_counts array
+constinit ulint IBUF_COUNT_N_PAGES = 130000;
 
 /** Buffered entry counts for file pages, used in debugging */
 static ulint	ibuf_counts[IBUF_COUNT_N_SPACES][IBUF_COUNT_N_PAGES];
@@ -222,13 +223,13 @@ ibuf_count_check(
 /* @} */
 
 /** The mutex used to block pessimistic inserts to ibuf trees */
-static mutex_t	ibuf_pessimistic_insert_mutex;
+static ib_mutex_t	ibuf_pessimistic_insert_mutex;
 
 /** The mutex protecting the insert buffer structs */
-static mutex_t	ibuf_mutex;
+static ib_mutex_t	ibuf_mutex;
 
 /** The mutex protecting the insert buffer bitmaps */
-static mutex_t	ibuf_bitmap_mutex;
+static ib_mutex_t	ibuf_bitmap_mutex;
 
 /** The area in pages from which contract looks for page numbers for merge */
 #define	IBUF_MERGE_AREA			8
@@ -458,19 +459,17 @@ Creates the insert buffer data structure at a database startup and initializes
 the data structures for the insert buffer. */
 IB_INTERN
 void
-ibuf_init_at_db_start(void)
+ibuf_init_at_db_start(innodb_state* state)
 /*=======================*/
 {
 	page_t*		root;
 	mtr_t		mtr;
 	dict_table_t*	table;
-	mem_heap_t*	heap;
 	dict_index_t*	index;
 	ulint		n_used;
-	page_t*		header_page;
 	ulint		error;
 
-	ibuf = mem_alloc(sizeof(ibuf_t));
+	state->ibuf.ibuf = mem_alloc(sizeof(ibuf_t));
 
 	memset(ibuf, 0, sizeof(*ibuf));
 
@@ -478,26 +477,15 @@ ibuf_init_at_db_start(void)
 	grow in size, as the references on the upper levels of the tree can
 	change */
 
-	ibuf->max_size = buf_pool_get_curr_size() / IB_PAGE_SIZE
-		/ IBUF_POOL_SIZE_PER_MAX_SIZE;
-
-	mutex_create(&ibuf_pessimistic_insert_mutex,
-		     SYNC_IBUF_PESS_INSERT_MUTEX);
-
+	ibuf->max_size = buf_pool_get_curr_size() / IB_PAGE_SIZE / IBUF_POOL_SIZE_PER_MAX_SIZE;
+	mutex_create(&ibuf_pessimistic_insert_mutex, SYNC_IBUF_PESS_INSERT_MUTEX);
 	mutex_create(&ibuf_mutex, SYNC_IBUF_MUTEX);
-
 	mutex_create(&ibuf_bitmap_mutex, SYNC_IBUF_BITMAP_MUTEX);
-
 	mtr_start(&mtr);
-
 	mutex_enter(&ibuf_mutex);
-
 	mtr_x_lock(fil_space_get_latch(IBUF_SPACE_ID, NULL), &mtr);
-
-	header_page = ibuf_header_page_get(&mtr);
-
-	fseg_n_reserved_pages(header_page + IBUF_HEADER + IBUF_TREE_SEG_HEADER,
-			      &n_used, &mtr);
+	page_t* header_page = ibuf_header_page_get(&mtr);
+	fseg_n_reserved_pages(header_page + IBUF_HEADER + IBUF_TREE_SEG_HEADER, &n_used, &mtr);
 	ibuf_enter();
 
 	ut_ad(n_used >= 2);
@@ -505,45 +493,32 @@ ibuf_init_at_db_start(void)
 	ibuf->seg_size = n_used;
 
 	{
-		buf_block_t*	block;
-
-		block = buf_page_get(
-			IBUF_SPACE_ID, 0, FSP_IBUF_TREE_ROOT_PAGE_NO,
-			RW_X_LATCH, &mtr);
+		buf_block_t* block = buf_page_get(IBUF_SPACE_ID, 0, FSP_IBUF_TREE_ROOT_PAGE_NO, RW_X_LATCH, &mtr);
 		buf_block_dbg_add_level(block, SYNC_TREE_NODE);
-
 		root = buf_block_get_frame(block);
 	}
 
 	ibuf_size_update(root, &mtr);
 	mutex_exit(&ibuf_mutex);
-
 	mtr_commit(&mtr);
-
 	ibuf_exit();
+	mem_heap_t* heap = mem_heap_create(450);
 
-	heap = mem_heap_create(450);
-
-	/* Use old-style record format for the insert buffer. */
+	// Use old-style record format for the insert buffer 
 	table = dict_mem_table_create(IBUF_TABLE_NAME, IBUF_SPACE_ID, 1, 0);
-
 	dict_mem_table_add_col(table, heap, "DUMMY_COLUMN", DATA_BINARY, 0, 0);
-
 	table->id = ut_dulint_add(DICT_IBUF_ID_MIN, IBUF_SPACE_ID);
 
 	dict_table_add_to_cache(table, heap);
 	mem_heap_free(heap);
 
-	index = dict_mem_index_create(
-		IBUF_TABLE_NAME, "CLUST_IND",
-		IBUF_SPACE_ID, DICT_CLUSTERED | DICT_UNIVERSAL | DICT_IBUF, 1);
+	index = dict_mem_index_create(IBUF_TABLE_NAME, "CLUST_IND", IBUF_SPACE_ID, DICT_CLUSTERED | DICT_UNIVERSAL | DICT_IBUF, 1);
 
 	dict_mem_index_add_field(index, "DUMMY_COLUMN", 0);
 
 	index->id = ut_dulint_add(DICT_IBUF_ID_MIN, IBUF_SPACE_ID);
 
-	error = dict_index_add_to_cache(table, index,
-					FSP_IBUF_TREE_ROOT_PAGE_NO, FALSE);
+	error = dict_index_add_to_cache(table, index, FSP_IBUF_TREE_ROOT_PAGE_NO, FALSE);
 	ut_a(error == DB_SUCCESS);
 
 	ibuf->index = dict_table_get_first_index(table);
@@ -570,8 +545,7 @@ ibuf_bitmap_page_init(
 	/* Write all zeros to the bitmap */
 
 	if (!zip_size) {
-		byte_offset = UT_BITS_IN_BYTES(IB_PAGE_SIZE
-					       * IBUF_BITS_PER_PAGE);
+		byte_offset = UT_BITS_IN_BYTES(IB_PAGE_SIZE * IBUF_BITS_PER_PAGE);
 	} else {
 		byte_offset = UT_BITS_IN_BYTES(zip_size * IBUF_BITS_PER_PAGE);
 	}
@@ -754,8 +728,7 @@ ibuf_bitmap_get_map_page_func(
 /*==========================*/
 	ulint		space,	/*!< in: space id of the file page */
 	ulint		page_no,/*!< in: page number of the file page */
-	ulint		zip_size,/*!< in: compressed page size in bytes;
-				0 for uncompressed pages */
+	ulint		zip_size,/*!< in: compressed page size in bytes; 0 for uncompressed pages */
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line where called */
 	mtr_t*		mtr)	/*!< in: mtr */
