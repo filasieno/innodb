@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+/// \file dict_mem.hpp
+/// \brief Data dictionary memory object creation
+/// \details Originally created by Heikki Tuuri in 1/8/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/dict0mem.h
-Data dictionary memory object creation
-
-Created 1/8/1996 Heikki Tuuri
-*******************************************************/
-
-#ifndef dict0mem_h
-#define dict0mem_h
+#pragma once
 
 #include "univ.i"
 #include "dict_types.hpp"
@@ -472,6 +466,4 @@ struct dict_table_struct{
 
 #ifndef IB_DO_NOT_INLINE
 #include "dict0mem.inl"
-#endif
-
 #endif

@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+/// \file dict_types.hpp
+/// \brief Data dictionary global types
+/// \details Originally created by Heikki Tuuri in 1/8/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/dict0types.h
-Data dictionary global types
-
-Created 1/8/1996 Heikki Tuuri
-*******************************************************/
-
-#ifndef dict0types_h
-#define dict0types_h
+#pragma once
 
 typedef struct dict_sys_struct		dict_sys_t;
 typedef struct dict_col_struct		dict_col_t;
@@ -42,7 +36,5 @@ typedef struct ind_node_struct		ind_node_t;
 typedef struct tab_node_struct		tab_node_t;
 
 /* Space id and page no where the dictionary header resides */
-#define	DICT_HDR_SPACE		0	/* the SYSTEM tablespace */
-#define	DICT_HDR_PAGE_NO	FSP_DICT_HDR_PAGE_NO
-
-#endif
+constinit ulint DICT_HDR_SPACE = 0;	/* the SYSTEM tablespace */
+constinit ulint DICT_HDR_PAGE_NO = FSP_DICT_HDR_PAGE_NO;

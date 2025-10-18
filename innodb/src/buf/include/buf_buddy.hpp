@@ -1,28 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 2006, 2025, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 2006, 2025, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/// @file buf_buddy.hpp
+/// \file buf_buddy.hpp
 /// \brief Binary buddy allocator for compressed pages
-///
-/// Created December 2006 by Marko Makela
+/// \details Originally created by Marko Makela in December 2006
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-#ifndef buf0buddy_h
-#define buf0buddy_h
+#pragma once
 
 #ifdef IB_MATERIALIZE
 # undef IB_INLINE
@@ -32,64 +28,41 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "univ.i"
 #include "buf_types.hpp"
 
-/**********************************************************************//**
-Allocate a block.  The thread calling this function must hold
-buf_pool_mutex and must not hold buf_pool_zip_mutex or any
-block->mutex.  The buf_pool_mutex may only be released and reacquired
-if lru != NULL.  This function should only be used for allocating
-compressed page frames or control blocks (buf_page_t).  Allocated
-control blocks must be properly initialized immediately after
-buf_buddy_alloc() has returned the memory, before releasing
-buf_pool_mutex.
-@return	allocated block, possibly NULL if lru == NULL */
-IB_INLINE
-void*
-buf_buddy_alloc(
-/*============*/
-	ulint	size,	/*!< in: block size, up to IB_PAGE_SIZE */
-	ibool*	lru)	/*!< in: pointer to a variable that will be assigned
-			TRUE if storage was allocated from the LRU list
-			and buf_pool_mutex was temporarily released,
-			or NULL if the LRU list should not be used */
+/// \brief Allocate a block.
+/// \details The thread calling this function must hold buf_pool_mutex and must not hold buf_pool_zip_mutex or any block->mutex. The buf_pool_mutex may only be released and reacquired if lru != NULL. This function should only be used for allocating compressed page frames or control blocks (buf_page_t). Allocated control blocks must be properly initialized immediately after buf_buddy_alloc() has returned the memory, before releasing buf_pool_mutex.
+/// \param [in] size block size, up to IB_PAGE_SIZE
+/// \param [in] lru pointer to a variable that will be assigned TRUE if storage was allocated from the LRU list and buf_pool_mutex was temporarily released, or NULL if the LRU list should not be used
+/// \return allocated block, possibly NULL if lru == NULL
+IB_INLINE void* buf_buddy_alloc(ulint size, ibool* lru)
 	__attribute__((malloc));
 
-/**********************************************************************//**
-Release a block. */
-IB_INLINE
-void
-buf_buddy_free(
-/*===========*/
-	void*	buf,	/*!< in: block to be freed, must not be
-			pointed to by the buffer pool */
-	ulint	size)	/*!< in: block size, up to IB_PAGE_SIZE */
+/// \brief Release a block.
+/// \param [in] buf block to be freed, must not be pointed to by the buffer pool
+/// \param [in] size block size, up to IB_PAGE_SIZE
+IB_INLINE void buf_buddy_free(void* buf, ulint size)
 	__attribute__((nonnull));
 
-/**************************************************************************
-Get the offset of the buddy of a compressed page frame. */
-IB_INTERN
-void
-buf_buddy_var_init(void);
-/*====================*/
+/// \brief Get the offset of the buddy of a compressed page frame.
+IB_INTERN void buf_buddy_var_init(void);
 
-/** Statistics of buddy blocks of a given size. */
+// Statistics of buddy blocks of a given size.
 struct buf_buddy_stat_struct {
-	/** Number of blocks allocated from the buddy system. */
+	// Number of blocks allocated from the buddy system.
 	ulint		used;
-	/** Number of blocks relocated by the buddy system. */
+	// Number of blocks relocated by the buddy system.
 	ib_uint64_t	relocated;
-	/** Total duration of block relocations, in microseconds. */
+	// Total duration of block relocations, in microseconds.
 	ib_uint64_t	relocated_usec;
 };
 
-/** Statistics of buddy blocks of a given size. */
+// Statistics of buddy blocks of a given size.
 typedef struct buf_buddy_stat_struct buf_buddy_stat_t;
 
-/** Statistics of the buddy system, indexed by block size.
-Protected by buf_pool_mutex. */
+// Statistics of the buddy system, indexed by block size.
+// Protected by buf_pool_mutex.
 extern buf_buddy_stat_t buf_buddy_stat[BUF_BUDDY_SIZES + 1];
 
 #ifndef IB_DO_NOT_INLINE
 # include "buf0buddy.ic"
 #endif
 
-#endif /* buf0buddy_h */

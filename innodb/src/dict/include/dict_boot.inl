@@ -1,93 +1,55 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+/// \file dict_boot.inl
+/// \brief Data dictionary creation and booting
+/// \details Originally created by Heikki Tuuri in 4/18/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
+/// \brief Writes the current value of the row id counter to the dictionary header file page.
+IB_INTERN void dict_hdr_flush_row_id(void);
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/dict0boot.ic
-Data dictionary creation and booting
-
-Created 4/18/1996 Heikki Tuuri
-*******************************************************/
-
-/**********************************************************************//**
-Writes the current value of the row id counter to the dictionary header file
-page. */
-IB_INTERN
-void
-dict_hdr_flush_row_id(void);
-/*=======================*/
-
-
-/**********************************************************************//**
-Returns a new row id.
-@return	the new id */
-IB_INLINE
-dulint
-dict_sys_get_new_row_id(void)
-/*=========================*/
+/// \brief Returns a new row id.
+/// \return the new id
+IB_INLINE dulint dict_sys_get_new_row_id(void)
 {
-	dulint	id;
+    mutex_enter(&(dict_sys->mutex));
+    dulint id = dict_sys->row_id;
 
-	mutex_enter(&(dict_sys->mutex));
-
-	id = dict_sys->row_id;
-
-	if (0 == (ut_dulint_get_low(id) % DICT_HDR_ROW_ID_WRITE_MARGIN)) {
-
-		dict_hdr_flush_row_id();
-	}
-
-	UT_DULINT_INC(dict_sys->row_id);
-
-	mutex_exit(&(dict_sys->mutex));
-
-	return(id);
+    if (0 == (ut_dulint_get_low(id) % DICT_HDR_ROW_ID_WRITE_MARGIN)) {
+        dict_hdr_flush_row_id();
+    }
+    UT_DULINT_INC(dict_sys->row_id);
+    mutex_exit(&(dict_sys->mutex));
+    return(id);
 }
 
-/**********************************************************************//**
-Reads a row id from a record or other 6-byte stored form.
-@return	row id */
-IB_INLINE
-dulint
-dict_sys_read_row_id(
-/*=================*/
-	byte*	field)	/*!< in: record field */
+/// \brief Reads a row id from a record or other 6-byte stored form.
+/// \return row id
+/// \param [in] field record field
+IB_INLINE dulint dict_sys_read_row_id(byte* field)
 {
-#if DATA_ROW_ID_LEN != 6
-# error "DATA_ROW_ID_LEN != 6"
-#endif
-
-	return(mach_read_from_6(field));
+    static_assert(DATA_ROW_ID_LEN == 6, "DATA_ROW_ID_LEN != 6");
+    return(mach_read_from_6(field));
 }
 
-/**********************************************************************//**
-Writes a row id to a record or other 6-byte stored form. */
-IB_INLINE
-void
-dict_sys_write_row_id(
-/*==================*/
-	byte*	field,	/*!< in: record field */
-	dulint	row_id)	/*!< in: row id */
+/// \brief Writes a row id to a record or other 6-byte stored form.
+/// \param [in] field record field
+/// \param [in] row_id row id
+IB_INLINE void dict_sys_write_row_id(byte* field, dulint row_id)
 {
-#if DATA_ROW_ID_LEN != 6
-# error "DATA_ROW_ID_LEN != 6"
-#endif
-
-	mach_write_to_6(field, row_id);
+    static_assert(DATA_ROW_ID_LEN == 6, "DATA_ROW_ID_LEN != 6");
+    mach_write_to_6(field, row_id);
 }
-
-

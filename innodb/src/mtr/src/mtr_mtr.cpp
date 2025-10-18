@@ -77,17 +77,13 @@ void mtr_memo_slot_release(mtr_t *mtr, mtr_memo_slot_t *slot)
 IB_INLINE
 void mtr_memo_pop_all(mtr_t *mtr)
 {
-	mtr_memo_slot_t *slot;
-	dyn_array_t *memo;
-	ulint offset;
-
 	ut_ad(mtr);
 	ut_ad(mtr->magic_n == MTR_MAGIC_N);
 	// Currently only used in commit
 	ut_ad(mtr->state == MTR_COMMITTING);
-	memo = &(mtr->memo);
-
-	offset = dyn_array_get_data_size(memo);
+	dyn_array_t *memo = &(mtr->memo);
+	ulint offset = dyn_array_get_data_size(memo);
+	mtr_memo_slot_t *slot;
 
 	while (offset > 0) {
 		offset -= sizeof(mtr_memo_slot_t);
@@ -104,16 +100,10 @@ void mtr_memo_pop_all(mtr_t *mtr)
 
 static void mtr_log_reserve_and_write(mtr_t *mtr, ulint recovery)
 {
-	dyn_array_t *mlog;
-	dyn_block_t *block;
-	ulint data_size;
-	byte *first_data;
-
 	ut_ad(mtr);
 
-	mlog = &mtr->log;
-
-	first_data = dyn_block_get_data(mlog);
+	dyn_array_t *mlog = &mtr->log;
+	byte *first_data = dyn_block_get_data(mlog);
 
 	if (mtr->n_log_recs > 1) {
 		mlog_catenate_ulint(mtr, MLOG_MULTI_REC_END, MLOG_1BYTE);
@@ -135,14 +125,14 @@ static void mtr_log_reserve_and_write(mtr_t *mtr, ulint recovery)
 		log_release();
 	}
 
-	data_size = dyn_array_get_data_size(mlog);
+	ulint data_size = dyn_array_get_data_size(mlog);
 
 	// Open the database log for log_write_low
 	mtr->start_lsn = log_reserve_and_open(data_size);
 
 	if (mtr->log_mode == MTR_LOG_ALL) {
 
-		block = mlog;
+		dyn_block_t *block = mlog;
 
 		while (block != NULL) {
 			log_write_low(dyn_block_get_data(block), dyn_block_get_used(block));

@@ -1,143 +1,82 @@
-/******************************************************
-Contains InnoDB DDL operations. 
+/// \file ddl_ddl.hpp
+/// \brief Contains InnoDB DDL operations
+/// \details Originally created in 12 Oct 2008 by Oracle Corpn/Innobase Oy
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-(c) 2008 Oracle Corpn/Innobase Oy
-
-Created 12 Oct 2008
-*******************************************************/
-
-#ifndef ddl0ddl_h
-#define ddl0ddl_h
+#pragma once
 
 #include "univ.i"
 #include "trx_types.hpp"
 #include "dict_types.hpp"
 
-/*************************************************************************
-Get the background drop list length. NOTE: the caller must own the kernel
-mutex!
-@return	how many tables in list */
-IB_INTERN
-ulint
-ddl_get_background_drop_list_len_low(void);
-/*======================================*/
+/// \brief Get the background drop list length.
+/// \details NOTE: the caller must own the kernel mutex!
+/// \return how many tables in list
+IB_INTERN ulint ddl_get_background_drop_list_len_low(void);
 
-/*************************************************************************
-Creates a table, if the name of the table ends in one of "innodb_monitor",
-"innodb_lock_monitor", "innodb_tablespace_monitor", "innodb_table_monitor",
-then this will also start the printing of monitor output by the master
-thread. If the table name ends in "innodb_mem_validate", InnoDB will
-try to invoke mem_validate().
-@return	error code or DB_SUCCESS */
-IB_INTERN
-ulint
-ddl_create_table(
-/*=============*/
-	dict_table_t*	table,		/*!< in: table definition */
-	trx_t*		trx);		/*!< in: transaction handle */
+/// \brief Creates a table, if the name of the table ends in one of "innodb_monitor", "innodb_lock_monitor", "innodb_tablespace_monitor", "innodb_table_monitor", then this will also start the printing of monitor output by the master thread.
+/// \details If the table name ends in "innodb_mem_validate", InnoDB will try to invoke mem_validate().
+/// \param [in] table table definition
+/// \param [in] trx transaction handle
+/// \return error code or DB_SUCCESS
+IB_INTERN ulint ddl_create_table(dict_table_t* table, trx_t* trx);
 
-/*************************************************************************
-Does an index creation operation. TODO: currently failure to create an
-index results in dropping the whole table! This is no problem currently
-as all indexes must be created at the same time as the table.
-@return	error number or DB_SUCCESS */
-IB_INTERN
-ulint
-ddl_create_index(
-/*=============*/
-	dict_index_t*	index,		/*!< in: index definition */
-	trx_t*		trx);		/*!< in: transaction handle */
+/// \brief Does an index creation operation.
+/// \details TODO: currently failure to create an index results in dropping the whole table! This is no problem currently as all indexes must be created at the same time as the table.
+/// \param [in] index index definition
+/// \param [in] trx transaction handle
+/// \return error number or DB_SUCCESS
+IB_INTERN ulint ddl_create_index(dict_index_t* index, trx_t* trx);
 
-/*************************************************************************
-Drops a table but does not commit the transaction.  If the
-name of the dropped table ends in one of "innodb_monitor",
-"innodb_lock_monitor", "innodb_tablespace_monitor",
-"innodb_table_monitor", then this will also stop the printing of
-monitor output by the master thread.
-@return	error code or DB_SUCCESS */
-IB_INTERN
-ulint
-ddl_drop_table(
-/*===========*/
-	const char*	name,		/*!< in: table name */
-	trx_t*		trx,		/*!< in: transaction handle */
-	ibool		drop_db);	/*!< in: TRUE=dropping whole database */
+/// \brief Drops a table but does not commit the transaction.
+/// \details If the name of the dropped table ends in one of "innodb_monitor", "innodb_lock_monitor", "innodb_tablespace_monitor", "innodb_table_monitor", then this will also stop the printing of monitor output by the master thread.
+/// \param [in] name table name
+/// \param [in] trx transaction handle
+/// \param [in] drop_db TRUE=dropping whole database
+/// \return error code or DB_SUCCESS
+IB_INTERN ulint ddl_drop_table(const char* name, trx_t* trx, ibool drop_db);
 
-/*************************************************************************
-Drops an index.
-@return	error code or DB_SUCCESS */
-IB_INTERN
-ulint
-ddl_drop_index(
-/*===========*/
-	dict_table_t*	table,		/*!< in: table instance */
-	dict_index_t*	index,		/*!< in: id of index to drop */
-	trx_t*		trx);		/*!< in: transaction handle */
+/// \brief Drops an index.
+/// \param [in] table table instance
+/// \param [in] index index to drop
+/// \param [in] trx transaction handle
+/// \return error code or DB_SUCCESS
+IB_INTERN ulint ddl_drop_index(dict_table_t* table, dict_index_t* index, trx_t* trx);
 
-/*************************************************************************
-The master thread in srv0srv.c calls this regularly to drop tables which
-we must drop in background after queries to them have ended. Such lazy
-dropping of tables is needed in ALTER TABLE on Unix.
-@return	how many tables dropped + remaining tables in list */
-IB_INTERN
-ulint
-ddl_drop_tables_in_background(void);
-/*===============================*/
+/// \brief The master thread in srv0srv.c calls this regularly to drop tables which we must drop in background after queries to them have ended.
+/// \details Such lazy dropping of tables is needed in ALTER TABLE on Unix.
+/// \return how many tables dropped + remaining tables in list
+IB_INTERN ulint ddl_drop_tables_in_background(void);
 
-/*************************************************************************
-Truncates a table
-@return	error code or DB_SUCCESS */
-IB_INTERN
-enum db_err
-ddl_truncate_table(
-/*===============*/
-	dict_table_t*	table,		/*!< in: table handle */
-	trx_t*		trx);		/*!< in: transaction handle */
-/*************************************************************************
-Renames a table.
-@return	error code or DB_SUCCESS */
-IB_INTERN
-ulint
-ddl_rename_table(
-/*=============*/
-	const char*	old_name,	/*!< in: old table name */
-	const char*	new_name,	/*!< in: new table name */
-	trx_t*		trx);		/*!< in: transaction handle */
+/// \brief Truncates a table
+/// \param [in] table table handle
+/// \param [in] trx transaction handle
+/// \return error code or DB_SUCCESS
+IB_INTERN enum db_err ddl_truncate_table(dict_table_t* table, trx_t* trx);
+/// \brief Renames a table.
+/// \param [in] old_name old table name
+/// \param [in] new_name new table name
+/// \param [in] trx transaction handle
+/// \return error code or DB_SUCCESS
+IB_INTERN ulint ddl_rename_table(const char* old_name, const char* new_name, trx_t* trx);
 
-/*************************************************************************
-Renames an index.
-@return	error code or DB_SUCCESS */
-IB_INTERN
-ulint
-ddl_rename_index(
-/*=============*/
-	const char*	table_name,	/*!< in: table that owns the index */
-	const char*	old_name,	/*!< in: old table name */
-	const char*	new_name,	/*!< in: new table name */
-	trx_t*		trx);		/*!< in: transaction handle */
+/// \brief Renames an index.
+/// \param [in] table_name table that owns the index
+/// \param [in] old_name old table name
+/// \param [in] new_name new table name
+/// \param [in] trx transaction handle
+/// \return error code or DB_SUCCESS
+IB_INTERN ulint ddl_rename_index(const char* table_name, const char* old_name, const char* new_name, trx_t* trx);
 
-/*************************************************************************
-Drops a database.
-@return	error code or DB_SUCCESS */
-IB_INTERN
-enum db_err
-ddl_drop_database(
-/*==============*/
-	const char*	name,		/*!< in: database name which ends
-					in '/' */
-	trx_t*		trx);		/*!< in: transaction handle */
-/*********************************************************************//**
-Drop all partially created indexes. */
-IB_INTERN
-void
-ddl_drop_all_temp_indexes(
-/*======================*/
-	ib_recovery_t	recovery);	/*!< in: recovery level setting */
-/*********************************************************************//**
-Drop all temporary tables. */
-IB_INTERN
-void
-ddl_drop_all_temp_tables(
-/*=====================*/
-	ib_recovery_t	recovery);	/*!< in: recovery level setting */
-#endif /* ddl0ddl_h */
+/// \brief Drops a database.
+/// \param [in] name database name which ends in '/'
+/// \param [in] trx transaction handle
+/// \return error code or DB_SUCCESS
+IB_INTERN enum db_err ddl_drop_database(const char* name, trx_t* trx);
+/// \brief Drop all partially created indexes.
+/// \param [in] recovery recovery level setting
+IB_INTERN void ddl_drop_all_temp_indexes(ib_recovery_t recovery);
+/// \brief Drop all temporary tables.
+/// \param [in] recovery recovery level setting
+IB_INTERN void ddl_drop_all_temp_tables(ib_recovery_t recovery);

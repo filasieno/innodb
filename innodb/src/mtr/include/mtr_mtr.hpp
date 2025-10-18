@@ -16,13 +16,13 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/// @file mtr_mtr.hpp
+/// \file mtr_mtr.hpp
 /// \brief Mini-transaction buffer
-///
-/// Created 11/26/1995 Heikki Tuuri
+/// \details Originally created by Heikki Tuuri in 11/26/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-#ifndef mtr0mtr_h
-#define mtr0mtr_h
+#pragma once
 
 #include "univ.i"
 #include "mem_mem.hpp"
@@ -33,159 +33,131 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mtr_types.hpp"
 #include "page_types.hpp"
 
-/* Logging modes for a mini-transaction */
-#define MTR_LOG_ALL		21	/* default mode: log all operations
-					modifying disk-based data */
-#define	MTR_LOG_NONE		22	/* log no operations */
+// -----------------------------------------------------------------------------------------
+// type definitions
+// -----------------------------------------------------------------------------------------
+
+/* Type definition of a mini-transaction memo stack slot. */
+typedef	struct mtr_memo_slot_struct	mtr_memo_slot_t;
+struct mtr_memo_slot_struct{
+	ulint	type;	/*!< type of the stored object (MTR_MEMO_S_LOCK, ...) */
+	void*	object;	/*!< pointer to the object */
+};
+
+/* Mini-transaction handle and buffer */
+struct mtr_struct{
+#ifdef IB_DEBUG
+	ulint		state;	/*!< MTR_ACTIVE, MTR_COMMITTING, MTR_COMMITTED */
+#endif
+	dyn_array_t	memo;	/*!< memo stack for locks etc. */
+	dyn_array_t	log;	/*!< mini-transaction log */
+	ibool		modifications;
+				/* TRUE if the mtr made modifications to
+				buffer pool pages */
+	ulint		n_log_recs;
+				/* count of how many page initial log records
+				have been written to the mtr log */
+	ulint		log_mode; /* specifies which operations should be
+				logged; default value MTR_LOG_ALL */
+	ib_uint64_t	start_lsn;/* start lsn of the possible log entry for
+				this mtr */
+	ib_uint64_t	end_lsn;/* end lsn of the possible log entry for
+				this mtr */
+#ifdef IB_DEBUG
+	ulint		magic_n;
+#endif /* IB_DEBUG */
+};
+
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+constinit ulint MTR_LOG_ALL = 21;
+constinit ulint MTR_LOG_NONE = 22;
 /*#define	MTR_LOG_SPACE	23 */	/* log only operations modifying
 					file space page allocation data
 					(operations in fsp0fsp.* ) */
-#define	MTR_LOG_SHORT_INSERTS	24	/* inserts are logged in a shorter
-					form */
+constinit ulint MTR_LOG_SHORT_INSERTS = 24;
 
-/* Types for the mlock objects to store in the mtr memo; NOTE that the
-first 3 values must be RW_S_LATCH, RW_X_LATCH, RW_NO_LATCH */
-#define	MTR_MEMO_PAGE_S_FIX	RW_S_LATCH
-#define	MTR_MEMO_PAGE_X_FIX	RW_X_LATCH
-#define	MTR_MEMO_BUF_FIX	RW_NO_LATCH
-#define MTR_MEMO_MODIFY		54
-#define	MTR_MEMO_S_LOCK		55
-#define	MTR_MEMO_X_LOCK		56
+constinit ulint MTR_MEMO_PAGE_S_FIX = RW_S_LATCH;
+constinit ulint MTR_MEMO_PAGE_X_FIX = RW_X_LATCH;
+constinit ulint MTR_MEMO_BUF_FIX = RW_NO_LATCH;
+constinit ulint MTR_MEMO_MODIFY = 54;
+constinit ulint MTR_MEMO_S_LOCK = 55;
+constinit ulint MTR_MEMO_X_LOCK = 56;
 
 /** @name Log item types
 The log items are declared 'byte' so that the compiler can warn if val
 and type parameters are switched in a call to mlog_write_ulint. NOTE!
 For 1 - 8 bytes, the flag value must give the length also! @{ */
-#define	MLOG_SINGLE_REC_FLAG	128		/*!< if the mtr contains only
-						one log record for one page,
-						i.e., write_initial_log_record
-						has been called only once,
-						this flag is ORed to the type
-						of that first log record */
-#define	MLOG_1BYTE		(1)		/*!< one byte is written */
-#define	MLOG_2BYTES		(2)		/*!< 2 bytes ... */
-#define	MLOG_4BYTES		(4)		/*!< 4 bytes ... */
-#define	MLOG_8BYTES		(8)		/*!< 8 bytes ... */
-#define	MLOG_REC_INSERT		((byte)9)	/*!< record insert */
-#define	MLOG_REC_CLUST_DELETE_MARK ((byte)10)	/*!< mark clustered index record
-						deleted */
-#define	MLOG_REC_SEC_DELETE_MARK ((byte)11)	/*!< mark secondary index record
-						deleted */
-#define MLOG_REC_UPDATE_IN_PLACE ((byte)13)	/*!< update of a record,
-						preserves record field sizes */
-#define MLOG_REC_DELETE		((byte)14)	/*!< delete a record from a
-						page */
-#define	MLOG_LIST_END_DELETE	((byte)15)	/*!< delete record list end on
-						index page */
-#define	MLOG_LIST_START_DELETE	((byte)16)	/*!< delete record list start on
-						index page */
-#define	MLOG_LIST_END_COPY_CREATED ((byte)17)	/*!< copy record list end to a
-						new created index page */
-#define	MLOG_PAGE_REORGANIZE	((byte)18)	/*!< reorganize an
-						index page in
-						ROW_FORMAT=REDUNDANT */
-#define MLOG_PAGE_CREATE	((byte)19)	/*!< create an index page */
-#define	MLOG_UNDO_INSERT	((byte)20)	/*!< insert entry in an undo
-						log */
-#define MLOG_UNDO_ERASE_END	((byte)21)	/*!< erase an undo log
-						page end */
-#define	MLOG_UNDO_INIT		((byte)22)	/*!< initialize a page in an
-						undo log */
-#define MLOG_UNDO_HDR_DISCARD	((byte)23)	/*!< discard an update undo log
-						header */
-#define	MLOG_UNDO_HDR_REUSE	((byte)24)	/*!< reuse an insert undo log
-						header */
-#define MLOG_UNDO_HDR_CREATE	((byte)25)	/*!< create an undo
-						log header */
-#define MLOG_REC_MIN_MARK	((byte)26)	/*!< mark an index
-						record as the
-						predefined minimum
-						record */
-#define MLOG_IBUF_BITMAP_INIT	((byte)27)	/*!< initialize an
-						ibuf bitmap page */
+constinit ulint MLOG_SINGLE_REC_FLAG = 128;
+constinit ulint MLOG_1BYTE = (1);
+constinit ulint MLOG_2BYTES = (2);
+constinit ulint MLOG_4BYTES = (4);
+constinit ulint MLOG_8BYTES = (8);
+constinit byte MLOG_REC_INSERT = ((byte)9);
+constinit byte MLOG_REC_CLUST_DELETE_MARK = ((byte)10);
+constinit byte MLOG_REC_SEC_DELETE_MARK = ((byte)11);
+constinit byte MLOG_REC_UPDATE_IN_PLACE = ((byte)13);
+constinit byte MLOG_REC_DELETE = ((byte)14);
+constinit byte MLOG_LIST_END_DELETE = ((byte)15);
+constinit byte MLOG_LIST_START_DELETE = ((byte)16);
+constinit byte MLOG_LIST_END_COPY_CREATED = ((byte)17);
+constinit byte MLOG_PAGE_REORGANIZE = ((byte)18);
+constinit byte MLOG_PAGE_CREATE = ((byte)19);
+constinit byte MLOG_UNDO_INSERT = ((byte)20);
+constinit byte MLOG_UNDO_ERASE_END = ((byte)21);
+constinit byte MLOG_UNDO_INIT = ((byte)22);
+constinit byte MLOG_UNDO_HDR_DISCARD = ((byte)23);
+constinit byte MLOG_UNDO_HDR_REUSE = ((byte)24);
+constinit byte MLOG_UNDO_HDR_CREATE = ((byte)25);
+constinit byte MLOG_REC_MIN_MARK = ((byte)26);
+constinit byte MLOG_IBUF_BITMAP_INIT = ((byte)27);
 /*#define	MLOG_FULL_PAGE	((byte)28)	full contents of a page */
 #ifdef IB_LOG_LSN_DEBUG
-# define MLOG_LSN		((byte)28)	/* current LSN */
+constinit byte MLOG_LSN = ((byte)28);
 #endif
-#define MLOG_INIT_FILE_PAGE	((byte)29)	/*!< this means that a
-						file page is taken
-						into use and the prior
-						contents of the page
-						should be ignored: in
-						recovery we must not
-						trust the lsn values
-						stored to the file
-						page */
-#define MLOG_WRITE_STRING	((byte)30)	/*!< write a string to
-						a page */
-#define	MLOG_MULTI_REC_END	((byte)31)	/*!< if a single mtr writes
-						several log records,
-						this log record ends the
-						sequence of these records */
-#define MLOG_DUMMY_RECORD	((byte)32)	/*!< dummy log record used to
-						pad a log block full */
-#define MLOG_FILE_CREATE	((byte)33)	/*!< log record about an .ibd
-						file creation */
-#define MLOG_FILE_RENAME	((byte)34)	/*!< log record about an .ibd
-						file rename */
-#define MLOG_FILE_DELETE	((byte)35)	/*!< log record about an .ibd
-						file deletion */
-#define MLOG_COMP_REC_MIN_MARK	((byte)36)	/*!< mark a compact
-						index record as the
-						predefined minimum
-						record */
-#define MLOG_COMP_PAGE_CREATE	((byte)37)	/*!< create a compact
-						index page */
-#define MLOG_COMP_REC_INSERT	((byte)38)	/*!< compact record insert */
-#define MLOG_COMP_REC_CLUST_DELETE_MARK ((byte)39)
-						/*!< mark compact
-						clustered index record
-						deleted */
-#define MLOG_COMP_REC_SEC_DELETE_MARK ((byte)40)/*!< mark compact
-						secondary index record
-						deleted; this log
-						record type is
-						redundant, as
-						MLOG_REC_SEC_DELETE_MARK
-						is independent of the
-						record format. */
-#define MLOG_COMP_REC_UPDATE_IN_PLACE ((byte)41)/*!< update of a
-						compact record,
-						preserves record field
-						sizes */
-#define MLOG_COMP_REC_DELETE	((byte)42)	/*!< delete a compact record
-						from a page */
-#define MLOG_COMP_LIST_END_DELETE ((byte)43)	/*!< delete compact record list
-						end on index page */
-#define MLOG_COMP_LIST_START_DELETE ((byte)44)	/*!< delete compact record list
-						start on index page */
-#define MLOG_COMP_LIST_END_COPY_CREATED ((byte)45)
-						/*!< copy compact
-						record list end to a
-						new created index
-						page */
-#define MLOG_COMP_PAGE_REORGANIZE ((byte)46)	/*!< reorganize an index page */
-#define MLOG_FILE_CREATE2	((byte)47)	/*!< log record about creating
-						an .ibd file, with format */
-#define MLOG_ZIP_WRITE_NODE_PTR	((byte)48)	/*!< write the node pointer of
-						a record on a compressed
-						non-leaf B-tree page */
-#define MLOG_ZIP_WRITE_BLOB_PTR	((byte)49)	/*!< write the BLOB pointer
-						of an externally stored column
-						on a compressed page */
-#define MLOG_ZIP_WRITE_HEADER	((byte)50)	/*!< write to compressed page
-						header */
-#define MLOG_ZIP_PAGE_COMPRESS	((byte)51)	/*!< compress an index page */
-#define MLOG_BIGGEST_TYPE	((byte)51)	/*!< biggest value (used in
-						assertions) */
+constinit byte MLOG_INIT_FILE_PAGE = ((byte)29);
+constinit byte MLOG_WRITE_STRING = ((byte)30);
+constinit byte MLOG_MULTI_REC_END = ((byte)31);
+constinit byte MLOG_DUMMY_RECORD = ((byte)32);
+constinit byte MLOG_FILE_CREATE = ((byte)33);
+constinit byte MLOG_FILE_RENAME = ((byte)34);
+constinit byte MLOG_FILE_DELETE = ((byte)35);
+constinit byte MLOG_COMP_REC_MIN_MARK = ((byte)36);
+constinit byte MLOG_COMP_PAGE_CREATE = ((byte)37);
+constinit byte MLOG_COMP_REC_INSERT = ((byte)38);
+constinit byte MLOG_COMP_REC_CLUST_DELETE_MARK = ((byte)39);
+constinit byte MLOG_COMP_REC_SEC_DELETE_MARK = ((byte)40);
+constinit byte MLOG_COMP_REC_UPDATE_IN_PLACE = ((byte)41);
+constinit byte MLOG_COMP_REC_DELETE = ((byte)42);
+constinit byte MLOG_COMP_LIST_END_DELETE = ((byte)43);
+constinit byte MLOG_COMP_LIST_START_DELETE = ((byte)44);
+constinit byte MLOG_COMP_LIST_END_COPY_CREATED = ((byte)45);
+constinit byte MLOG_COMP_PAGE_REORGANIZE = ((byte)46);
+constinit byte MLOG_FILE_CREATE2 = ((byte)47);
+constinit byte MLOG_ZIP_WRITE_NODE_PTR = ((byte)48);
+constinit byte MLOG_ZIP_WRITE_BLOB_PTR = ((byte)49);
+constinit byte MLOG_ZIP_WRITE_HEADER = ((byte)50);
+constinit byte MLOG_ZIP_PAGE_COMPRESS = ((byte)51);
+constinit byte MLOG_BIGGEST_TYPE = ((byte)51);
 /* @} */
 
-/** @name Flags for MLOG_FILE operations
-(stored in the page number parameter, called log_flags in the
-functions).  The page number parameter was originally written as 0. @{ */
-#define MLOG_FILE_FLAG_TEMP	1	/*!< identifies TEMPORARY TABLE in
-					MLOG_FILE_CREATE, MLOG_FILE_CREATE2 */
-/* @} */
+constinit ulint MLOG_FILE_FLAG_TEMP = 1;
+
+#ifdef IB_DEBUG
+constinit ulint MTR_MAGIC_N = 54551;
+#endif /* IB_DEBUG */
+
+constinit ulint MTR_ACTIVE = 12231;
+constinit ulint MTR_COMMITTING = 56456;
+constinit ulint MTR_COMMITTED = 34676;
+
+constinit ulint MTR_BUF_MEMO_SIZE = 200;
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 
 /// \brief Starts a mini-transaction and creates a mini-transaction handle
 /// and buffer in the memory buffer given by the caller.
@@ -278,22 +250,19 @@ IB_INLINE void mtr_x_lock_func(
 	mtr_t*		mtr);	/*!< in: mtr */
 #endif // !IB_HOTBACKUP
 
-/** Releases an object in the memo stack. */
-IB_INTERN void mtr_memo_release(
-	mtr_t*	mtr,	/*!< in: mtr */
-	void*	object,	/*!< in: object */
-	ulint	type);	/*!< in: object type: MTR_MEMO_S_LOCK, ... */
+/// \brief Releases an object in the memo stack.
+/// \param [in] mtr mtr
+/// \param [in] object object
+/// \param [in] type object type: MTR_MEMO_S_LOCK, ...
+IB_INTERN void mtr_memo_release(mtr_t* mtr, void* object, ulint type);
 #ifdef IB_DEBUG
 # ifndef IB_HOTBACKUP
-/** Checks if memo contains the given item.
-@return	TRUE if contains */
-IB_INLINE
-ibool
-mtr_memo_contains(
-/*==============*/
-	mtr_t*		mtr,	/*!< in: mtr */
-	const void*	object,	/*!< in: object to search */
-	ulint		type);	/*!< in: type of object */
+/// \brief Checks if memo contains the given item.
+/// \param [in] mtr mtr
+/// \param [in] object object to search
+/// \param [in] type type of object
+/// \return TRUE if contains
+IB_INLINE ibool mtr_memo_contains(mtr_t* mtr, const void* object, ulint type);
 
 /// \brief Checks if memo contains the given page.
 /// \param mtr Mtr.
@@ -313,9 +282,6 @@ mtr_print(mtr_t* mtr);
 #  define mtr_memo_contains_page(mtr, ptr, type)	TRUE
 # endif /* !IB_HOTBACKUP */
 #endif /* IB_DEBUG */
-/*######################################################################*/
-
-#define	MTR_BUF_MEMO_SIZE	200	/* number of slots in memo */
 
 /// \brief Pushes an object to an mtr memo stack.
 /// \param mtr Mtr.
@@ -324,46 +290,6 @@ mtr_print(mtr_t* mtr);
 IB_INLINE
 void
 mtr_memo_push(mtr_t* mtr, void* object, ulint type);
-
-
-/* Type definition of a mini-transaction memo stack slot. */
-typedef	struct mtr_memo_slot_struct	mtr_memo_slot_t;
-struct mtr_memo_slot_struct{
-	ulint	type;	/*!< type of the stored object (MTR_MEMO_S_LOCK, ...) */
-	void*	object;	/*!< pointer to the object */
-};
-
-/* Mini-transaction handle and buffer */
-struct mtr_struct{
-#ifdef IB_DEBUG
-	ulint		state;	/*!< MTR_ACTIVE, MTR_COMMITTING, MTR_COMMITTED */
-#endif
-	dyn_array_t	memo;	/*!< memo stack for locks etc. */
-	dyn_array_t	log;	/*!< mini-transaction log */
-	ibool		modifications;
-				/* TRUE if the mtr made modifications to
-				buffer pool pages */
-	ulint		n_log_recs;
-				/* count of how many page initial log records
-				have been written to the mtr log */
-	ulint		log_mode; /* specifies which operations should be
-				logged; default value MTR_LOG_ALL */
-	ib_uint64_t	start_lsn;/* start lsn of the possible log entry for
-				this mtr */
-	ib_uint64_t	end_lsn;/* end lsn of the possible log entry for
-				this mtr */
-#ifdef IB_DEBUG
-	ulint		magic_n;
-#endif /* IB_DEBUG */
-};
-
-#ifdef IB_DEBUG
-# define MTR_MAGIC_N		54551
-#endif /* IB_DEBUG */
-
-#define MTR_ACTIVE		12231
-#define MTR_COMMITTING		56456
-#define MTR_COMMITTED		34676
 
 #ifndef IB_DO_NOT_INLINE
 #include "mtr0mtr.inl"

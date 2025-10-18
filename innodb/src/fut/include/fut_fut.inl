@@ -1,56 +1,42 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/******************************************************************//**
-@file include/fut0fut.ic
-File-based utilities
-
-Created 12/13/1995 Heikki Tuuri
-***********************************************************************/
+/// \file fut_fut.inl
+/// \brief File-based utilities inline implementations
+/// \details Originally created by Heikki Tuuri in 12/13/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "sync_rw.hpp"
 #include "buf_buf.hpp"
 
-/********************************************************************//**
-Gets a pointer to a file address and latches the page.
-@return pointer to a byte in a frame; the file page in the frame is
-bufferfixed and latched */
-IB_INLINE
-byte*
-fut_get_ptr(
-/*========*/
-	ulint		space,	/*!< in: space id */
-	ulint		zip_size,/*!< in: compressed page size in bytes
-				or 0 for uncompressed pages */
-	fil_addr_t	addr,	/*!< in: file address */
-	ulint		rw_latch, /*!< in: RW_S_LATCH, RW_X_LATCH */
-	mtr_t*		mtr)	/*!< in: mtr handle */
+/// \brief Gets a pointer to a file address and latches the page.
+/// \param [in] space space id
+/// \param [in] zip_size compressed page size in bytes or 0 for uncompressed pages
+/// \param [in] addr file address
+/// \param [in] rw_latch RW_S_LATCH, RW_X_LATCH
+/// \param [in] mtr mtr handle
+/// \return pointer to a byte in a frame; the file page in the frame is bufferfixed and latched
+IB_INLINE byte* fut_get_ptr(ulint space, ulint zip_size, fil_addr_t addr, ulint rw_latch, mtr_t* mtr)
 {
-	buf_block_t*	block;
-	byte*		ptr;
-
 	ut_ad(addr.boffset < IB_PAGE_SIZE);
 	ut_ad((rw_latch == RW_S_LATCH) || (rw_latch == RW_X_LATCH));
 
-	block = buf_page_get(space, zip_size, addr.page, rw_latch, mtr);
-	ptr = buf_block_get_frame(block) + addr.boffset;
+	buf_block_t* block = buf_page_get(space, zip_size, addr.page, rw_latch, mtr);
+	byte* ptr = buf_block_get_frame(block) + addr.boffset;
 
 	buf_block_dbg_add_level(block, SYNC_NO_ORDER_CHECK);
 
-	return(ptr);
+	return ptr;
 }

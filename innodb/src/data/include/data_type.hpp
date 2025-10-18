@@ -9,58 +9,43 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-// @file include/data_type.hpp
-// Data types
-// Created 1/16/1996 Heikki Tuuri
+/// \file data_type.hpp
+/// \brief Data types
+/// \details Originally created by Heikki Tuuri in 1/16/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-#ifndef data0type_h
-#define data0type_h
+#pragma once
 
 #include "univ.i"
 
 extern ulint data_client_default_charset_coll;
-#define DATA_CLIENT_LATIN1_SWEDISH_CHARSET_COLL 8
-#define DATA_CLIENT_BINARY_CHARSET_COLL 63
+constinit ulint DATA_CLIENT_LATIN1_SWEDISH_CHARSET_COLL = 8;
+constinit ulint DATA_CLIENT_BINARY_CHARSET_COLL = 63;
 
 /* SQL data type struct */
 typedef struct dtype_struct dtype_t;
 
 /*-------------------------------------------*/
 /* The 'MAIN TYPE' of a column */
-#define DATA_VARCHAR \
-    1 /* character varying of the
-				latin1_swedish_ci charset-collation */
-#define DATA_CHAR \
-    2                    /* fixed length character of the
-				latin1_swedish_ci charset-collation */
-#define DATA_FIXBINARY 3 /* binary string of fixed length */
-#define DATA_BINARY 4    /* binary string */
-#define DATA_BLOB \
-    5                    /* binary large object, or a TEXT type;
-				if prtype & DATA_BINARY_TYPE == 0, then this is
-				actually a TEXT column (or a BLOB created
-				with < 4.0.14; since column prefix indexes
-				came only in 4.0.14, the missing flag in BLOBs
-				created before that does not cause any harm) */
-#define DATA_INT 6       /* integer: can be any size 1 - 8 bytes */
-#define DATA_SYS_CHILD 7 /* address of the child page in node pointer */
-#define DATA_SYS 8       /* system column */
+constinit ulint DATA_VARCHAR = 1; /* character varying of the latin1_swedish_ci charset-collation */
+constinit ulint DATA_CHAR = 2; /* fixed length character of the latin1_swedish_ci charset-collation */
+constinit ulint DATA_FIXBINARY = 3; /* binary string of fixed length */
+constinit ulint DATA_BINARY = 4; /* binary string */
+constinit ulint DATA_BLOB = 5; /* binary large object, or a TEXT type; if prtype & DATA_BINARY_TYPE == 0, then this is actually a TEXT column (or a BLOB created with < 4.0.14; since column prefix indexes came only in 4.0.14, the missing flag in BLOBs created before that does not cause any harm) */
+constinit ulint DATA_INT = 6; /* integer: can be any size 1 - 8 bytes */
+constinit ulint DATA_SYS_CHILD = 7; /* address of the child page in node pointer */
+constinit ulint DATA_SYS = 8; /* system column */
 
-/* Data types >= DATA_FLOAT must be compared using the whole field, not as
-binary strings */
+/* Data types >= DATA_FLOAT must be compared using the whole field, not as binary strings */
 
-#define DATA_FLOAT 9
-#define DATA_DOUBLE 10
-#define DATA_DECIMAL 11   /* decimal number stored as an ASCII string */
-#define DATA_VARCLIENT 12 /* any charset varying length char */
-#define DATA_CLIENT 13    /* any charset fixed length char */
-/* NOTE that 4.1.1 used DATA_CLIENT and
-				DATA_VARCLIENT for all character sets, and the
-				charset-collation for tables created with it
-				can also be latin1_swedish_ci */
-#define DATA_MTYPE_MAX \
-    63 /* dtype_store_for_order_and_null_size()
-				requires the values are <= 63 */
+constinit ulint DATA_FLOAT = 9;
+constinit ulint DATA_DOUBLE = 10;
+constinit ulint DATA_DECIMAL = 11; /* decimal number stored as an ASCII string */
+constinit ulint DATA_VARCLIENT = 12; /* any charset varying length char */
+constinit ulint DATA_CLIENT = 13; /* any charset fixed length char */
+/* NOTE that 4.1.1 used DATA_CLIENT and DATA_VARCLIENT for all character sets, and the charset-collation for tables created with it can also be latin1_swedish_ci */
+constinit ulint DATA_MTYPE_MAX = 63; /* dtype_store_for_order_and_null_size() requires the values are <= 63 */
 /*-------------------------------------------*/
 /* The 'PRECISE TYPE' of a column */
 /*
@@ -102,51 +87,38 @@ InnoDB's own internal system tables have different precise types for their
 columns, and for them the precise type is usually not used at all.
 */
 
-#define DATA_ENGLISH \
-    4                  /* English language character string: 
-				only used for InnoDB's own system tables */
-#define DATA_ERROR 111 /* Used for error checking and debugging */
+constinit ulint DATA_ENGLISH = 4; /* English language character string: only used for InnoDB's own system tables */
+constinit ulint DATA_ERROR = 111; /* Used for error checking and debugging */
 
-#define DATA_CLIENT_TYPE_MASK \
-    255 /* AND with this mask to extract the user
-				 type from the precise type */
+constinit ulint DATA_CLIENT_TYPE_MASK = 255; /* AND with this mask to extract the user type from the precise type */
 
 /* Precise data types for system columns and the length of those columns;
 NOTE: the values must run from 0 up in the order given! All codes must
 be less than 256 */
-#define DATA_ROW_ID 0     /* row id: a dulint */
-#define DATA_ROW_ID_LEN 6 /* stored length for row id */
+constinit ulint DATA_ROW_ID = 0; /* row id: a dulint */
+constinit ulint DATA_ROW_ID_LEN = 6; /* stored length for row id */
 
-#define DATA_TRX_ID 1 /* transaction id: 6 bytes */
-#define DATA_TRX_ID_LEN 6
+constinit ulint DATA_TRX_ID = 1; /* transaction id: 6 bytes */
+constinit ulint DATA_TRX_ID_LEN = 6;
 
-#define DATA_ROLL_PTR 2 /* rollback data pointer: 7 bytes */
-#define DATA_ROLL_PTR_LEN 7
+constinit ulint DATA_ROLL_PTR = 2; /* rollback data pointer: 7 bytes */
+constinit ulint DATA_ROLL_PTR_LEN = 7;
 
-#define DATA_N_SYS_COLS 3 /* number of system columns defined above */
+constinit ulint DATA_N_SYS_COLS = 3; /* number of system columns defined above */
 
-#define DATA_SYS_PRTYPE_MASK 0xF /* mask to extract the above from prtype */
+constinit ulint DATA_SYS_PRTYPE_MASK = 0xF; /* mask to extract the above from prtype */
 
 /* Flags ORed to the precise data type */
-#define DATA_NOT_NULL \
-    256 /* this is ORed to the precise type when
-				the column is declared as NOT NULL */
-#define DATA_UNSIGNED \
-    512 /* this id ORed to the precise type when
-				we have an unsigned integer type */
-#define DATA_BINARY_TYPE \
-    1024                      /* if the data type is a binary character
-				string, this is ORed to the precise type. */
-#define DATA_CUSTOM_TYPE 2048 /* first custom type starts here */
+constinit ulint DATA_NOT_NULL = 256; /* this is ORed to the precise type when the column is declared as NOT NULL */
+constinit ulint DATA_UNSIGNED = 512; /* this id ORed to the precise type when we have an unsigned integer type */
+constinit ulint DATA_BINARY_TYPE = 1024; /* if the data type is a binary character string, this is ORed to the precise type. */
+constinit ulint DATA_CUSTOM_TYPE = 2048; /* first custom type starts here */
 /*-------------------------------------------*/
 
-/* This many bytes we need to store the type information affecting the
-alphabetical order for a single field and decide the storage size of an
-SQL null*/
-#define DATA_ORDER_NULL_TYPE_BUF_SIZE 4
-/* In the >= 4.1.x storage format we add 2 bytes more so that we can also
-store the charset-collation number; one byte is left unused, though */
-#define DATA_NEW_ORDER_NULL_TYPE_BUF_SIZE 6
+/* This many bytes we need to store the type information affecting the alphabetical order for a single field and decide the storage size of an SQL null*/
+constinit ulint DATA_ORDER_NULL_TYPE_BUF_SIZE = 4;
+/* In the >= 4.1.x storage format we add 2 bytes more so that we can also store the charset-collation number; one byte is left unused, though */
+constinit ulint DATA_NEW_ORDER_NULL_TYPE_BUF_SIZE = 6;
 
 #ifndef IB_HOTBACKUP
 /// \brief Determine how many bytes the first n characters of the given string occupy.

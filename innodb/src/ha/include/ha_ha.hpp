@@ -1,30 +1,23 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+/// \file ha_ha.hpp
+/// \brief The hash table with external chains
+/// \details Originally created by Heikki Tuuri in 8/18/1994
+/// \author Fabio N. Filasieno
+/// \date 18/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/ha0ha.h
-The hash table with external chains
-
-Created 8/18/1994 Heikki Tuuri
-*******************************************************/
-
-#ifndef ha0ha_h
-#define ha0ha_h
+#pragma once
 
 #include "univ.i"
 
@@ -32,30 +25,22 @@ Created 8/18/1994 Heikki Tuuri
 #include "page_types.hpp"
 #include "buf_types.hpp"
 
-/*************************************************************//**
-Looks for an element in a hash table.
-@return pointer to the data of the first hash table node in chain
-having the fold number, NULL if not found */
-IB_INLINE
-void*
-ha_search_and_get_data(
-/*===================*/
-	hash_table_t*	table,	/*!< in: hash table */
-	ulint		fold);	/*!< in: folded value of the searched data */
-/*********************************************************//**
-Looks for an element when we know the pointer to the data and updates
-the pointer to data if found. */
-IB_INTERN
-void
-ha_search_and_update_if_found_func(
-/*===============================*/
-	hash_table_t*	table,	/*!< in/out: hash table */
-	ulint		fold,	/*!< in: folded value of the searched data */
-	void*		data,	/*!< in: pointer to the data */
+/// \brief Looks for an element in a hash table.
+/// \return pointer to the data of the first hash table node in chain having the fold number, NULL if not found
+/// \param [in] table hash table
+/// \param [in] fold folded value of the searched data
+IB_INLINE void* ha_search_and_get_data(hash_table_t* table, ulint fold);
+/// \brief Looks for an element when we know the pointer to the data and updates the pointer to data if found.
+/// \param [in,out] table hash table
+/// \param [in] fold folded value of the searched data
+/// \param [in] data pointer to the data
+/// \param [in] new_block block containing new_data (only in debug builds)
+/// \param [in] new_data new pointer to the data
+IB_INTERN void ha_search_and_update_if_found_func(hash_table_t* table, ulint fold, void* data,
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
-	buf_block_t*	new_block,/*!< in: block containing new_data */
+	buf_block_t* new_block,
 #endif /* IB_AHI_DEBUG || IB_DEBUG */
-	void*		new_data);/*!< in: new pointer to the data */
+	void* new_data);
 
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
 /** Looks for an element when we know the pointer to the data and
@@ -78,21 +63,16 @@ updates the pointer to data if found.
 # define ha_search_and_update_if_found(table,fold,data,new_block,new_data) \
 	ha_search_and_update_if_found_func(table,fold,data,new_data)
 #endif /* IB_AHI_DEBUG || IB_DEBUG */
-/*************************************************************//**
-Creates a hash table with at least n array cells.  The actual number
-of cells is chosen to be a prime number slightly bigger than n.
-@return	own: created table */
-IB_INTERN
-hash_table_t*
-ha_create_func(
-/*===========*/
-	ulint	n,		/*!< in: number of array cells */
+/// \brief Creates a hash table with at least n array cells. The actual number of cells is chosen to be a prime number slightly bigger than n.
+/// \return own: created table
+/// \param [in] n number of array cells
+/// \param [in] mutex_level level of the mutexes in the latching order: this is used in the debug version
+/// \param [in] n_mutexes number of mutexes to protect the hash table: must be a power of 2, or 0
+IB_INTERN hash_table_t* ha_create_func(ulint n,
 #ifdef IB_SYNC_DEBUG
-	ulint	mutex_level,	/*!< in: level of the mutexes in the latching
-				order: this is used in the debug version */
+	ulint mutex_level,
 #endif /* IB_SYNC_DEBUG */
-	ulint	n_mutexes);	/*!< in: number of mutexes to protect the
-				hash table: must be a power of 2, or 0 */
+	ulint n_mutexes);
 #ifdef IB_SYNC_DEBUG
 /** Creates a hash table.
 @return		own: created table
@@ -113,32 +93,21 @@ chosen to be a slightly bigger prime number.
 # define ha_create(n_c,n_m,level) ha_create_func(n_c,n_m)
 #endif /* IB_SYNC_DEBUG */
 
-/*************************************************************//**
-Empties a hash table and frees the memory heaps. */
-IB_INTERN
-void
-ha_clear(
-/*=====*/
-	hash_table_t*	table);	/*!< in, own: hash table */
+/// \brief Empties a hash table and frees the memory heaps.
+/// \param [in,own] table hash table
+IB_INTERN void ha_clear(hash_table_t* table);
 
-/*************************************************************//**
-Inserts an entry into a hash table. If an entry with the same fold number
-is found, its node is updated to point to the new data, and no new node
-is inserted.
-@return	TRUE if succeed, FALSE if no more memory could be allocated */
-IB_INTERN
-ibool
-ha_insert_for_fold_func(
-/*====================*/
-	hash_table_t*	table,	/*!< in: hash table */
-	ulint		fold,	/*!< in: folded value of data; if a node with
-				the same fold value already exists, it is
-				updated to point to the same data, and no new
-				node is created! */
+/// \brief Inserts an entry into a hash table. If an entry with the same fold number is found, its node is updated to point to the new data, and no new node is inserted.
+/// \return TRUE if succeed, FALSE if no more memory could be allocated
+/// \param [in] table hash table
+/// \param [in] fold folded value of data; if a node with the same fold value already exists, it is updated to point to the same data, and no new node is created!
+/// \param [in] block buffer block containing the data (only in debug builds)
+/// \param [in] data data, must not be NULL
+IB_INTERN ibool ha_insert_for_fold_func(hash_table_t* table, ulint fold,
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
-	buf_block_t*	block,	/*!< in: buffer block containing the data */
+	buf_block_t* block,
 #endif /* IB_AHI_DEBUG || IB_DEBUG */
-	void*		data);	/*!< in: data, must not be NULL */
+	void* data);
 
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
 /**
@@ -164,46 +133,28 @@ is inserted.
 # define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,d)
 #endif /* IB_AHI_DEBUG || IB_DEBUG */
 
-/*********************************************************//**
-Looks for an element when we know the pointer to the data and deletes
-it from the hash table if found.
-@return	TRUE if found */
-IB_INLINE
-ibool
-ha_search_and_delete_if_found(
-/*==========================*/
-	hash_table_t*	table,	/*!< in: hash table */
-	ulint		fold,	/*!< in: folded value of the searched data */
-	void*		data);	/*!< in: pointer to the data */
+/// \brief Looks for an element when we know the pointer to the data and deletes it from the hash table if found.
+/// \return TRUE if found
+/// \param [in] table hash table
+/// \param [in] fold folded value of the searched data
+/// \param [in] data pointer to the data
+IB_INLINE ibool ha_search_and_delete_if_found(hash_table_t* table, ulint fold, void* data);
 #ifndef IB_HOTBACKUP
-/*****************************************************************//**
-Removes from the chain determined by fold all nodes whose data pointer
-points to the page given. */
-IB_INTERN
-void
-ha_remove_all_nodes_to_page(
-/*========================*/
-	hash_table_t*	table,	/*!< in: hash table */
-	ulint		fold,	/*!< in: fold value */
-	const page_t*	page);	/*!< in: buffer page */
-/*************************************************************//**
-Validates a given range of the cells in hash table.
-@return	TRUE if ok */
-IB_INTERN
-ibool
-ha_validate(
-/*========*/
-	hash_table_t*	table,		/*!< in: hash table */
-	ulint		start_index,	/*!< in: start index */
-	ulint		end_index);	/*!< in: end index */
-/*************************************************************//**
-Prints info of a hash table. */
-IB_INTERN
-void
-ha_print_info(
-/*==========*/
-	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	hash_table_t*	table);		/*!< in: hash table */
+/// \brief Removes from the chain determined by fold all nodes whose data pointer points to the page given.
+/// \param [in] table hash table
+/// \param [in] fold fold value
+/// \param [in] page buffer page
+IB_INTERN void ha_remove_all_nodes_to_page(hash_table_t* table, ulint fold, const page_t* page);
+/// \brief Validates a given range of the cells in hash table.
+/// \return TRUE if ok
+/// \param [in] table hash table
+/// \param [in] start_index start index
+/// \param [in] end_index end index
+IB_INTERN ibool ha_validate(hash_table_t* table, ulint start_index, ulint end_index);
+/// \brief Prints info of a hash table.
+/// \param [in] state->stream stream where to print
+/// \param [in] table hash table
+IB_INTERN void ha_print_info(ib_stream_t state->stream, hash_table_t* table);
 #endif /* !IB_HOTBACKUP */
 
 /** The hash table external chain node */
@@ -236,6 +187,4 @@ hash bucket corresponding to a fold value.
 
 #ifndef IB_DO_NOT_INLINE
 #include "ha0ha.inl"
-#endif
-
 #endif

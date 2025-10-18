@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/******************************************************************//**
-@file fsp/fsp0fsp.c
-File space management
-
-Created 11/29/1995 Heikki Tuuri
-***********************************************************************/
+/// \file fsp_fsp.cpp
+/// \brief File space management implementation
+/// \details Originally created by Heikki Tuuri in 11/29/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "fsp_fsp.hpp"
 
@@ -237,15 +232,7 @@ static ibool fsp_tbs_full_error_printed = FALSE;
 
 /**********************************************************************//**
 Returns an extent to the free list of a space. */
-static
-void
-fsp_free_extent(
-/*============*/
-	ulint		space,	/*!< in: space id */
-	ulint		zip_size,/*!< in: compressed page size in bytes
-				or 0 for uncompressed pages */
-	ulint		page,	/*!< in: page offset in the extent */
-	mtr_t*		mtr);	/*!< in: mtr */
+static void fsp_free_extent(ulint space, ulint zip_size, ulint page, mtr_t* mtr);
 /**********************************************************************//**
 Frees an extent of a segment to the space free list. */
 static
@@ -405,9 +392,7 @@ xdes_get_bit(
 	byte_index = index / 8;
 	bit_index = index % 8;
 
-	return(ut_bit_get_nth(mtr_read_ulint(descr + XDES_BITMAP + byte_index,
-					     MLOG_1BYTE, mtr),
-			      bit_index));
+	return(ut_bit_get_nth(mtr_read_ulint(descr + XDES_BITMAP + byte_index, MLOG_1BYTE, mtr), bit_index));
 }
 
 /**********************************************************************//**
@@ -437,8 +422,7 @@ xdes_set_bit(
 	byte_index = index / 8;
 	bit_index = index % 8;
 
-	descr_byte = mtr_read_ulint(descr + XDES_BITMAP + byte_index,
-				    MLOG_1BYTE, mtr);
+    descr_byte = mtr_read_ulint(descr + XDES_BITMAP + byte_index, MLOG_1BYTE, mtr);
 	descr_byte = ut_bit_set_nth(descr_byte, bit_index, val);
 
 	mlog_write_ulint(descr + XDES_BITMAP + byte_index, descr_byte,
@@ -1773,18 +1757,10 @@ fsp_free_page(
 
 /**********************************************************************//**
 Returns an extent to the free list of a space. */
-static
-void
-fsp_free_extent(
-/*============*/
-	ulint	space,	/*!< in: space id */
-	ulint	zip_size,/*!< in: compressed page size in bytes
-			or 0 for uncompressed pages */
-	ulint	page,	/*!< in: page offset in the extent */
-	mtr_t*	mtr)	/*!< in: mtr */
+static void fsp_free_extent(ulint space, ulint zip_size, ulint page, mtr_t* mtr)
 {
-	fsp_header_t*	header;
-	xdes_t*		descr;
+	fsp_header_t* header;
+	xdes_t* descr;
 
 	ut_ad(mtr);
 

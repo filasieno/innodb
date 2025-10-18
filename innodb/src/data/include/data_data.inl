@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/********************************************************************//**
-@file include/data0data.ic
-SQL data field and tuple
-
-Created 5/30/1994 Heikki Tuuri
-*************************************************************************/
+/// \file data_data.inl
+/// \brief SQL data field and tuple
+/// \details Originally created by Heikki Tuuri in 5/30/1994
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "mem_mem.hpp"
 #include "ut_rnd.hpp"
@@ -47,14 +42,10 @@ dfield_get_type(
 }
 #endif /* IB_DEBUG */
 
-/*********************************************************************//**
-Sets the type struct of SQL data field. */
-IB_INLINE
-void
-dfield_set_type(
-/*============*/
-	dfield_t*	field,	/*!< in: SQL data field */
-	dtype_t*	type)	/*!< in: pointer to data type struct */
+/// \brief Sets the type struct of SQL data field.
+/// \param [in] field SQL data field
+/// \param [in] type pointer to data type struct
+IB_INLINE void dfield_set_type(dfield_t* field, dtype_t* type)
 {
 	ut_ad(field && type);
 
@@ -62,14 +53,10 @@ dfield_set_type(
 }
 
 #ifdef IB_DEBUG
-/*********************************************************************//**
-Gets pointer to the data in a field.
-@return	pointer to data */
-IB_INLINE
-void*
-dfield_get_data(
-/*============*/
-	const dfield_t* field)	/*!< in: field */
+/// \brief Gets pointer to the data in a field.
+/// \return pointer to data
+/// \param [in] field field
+IB_INLINE void* dfield_get_data(const dfield_t* field)
 {
 	ut_ad(field);
 	ut_ad((field->len == IB_SQL_NULL)
@@ -79,14 +66,10 @@ dfield_get_data(
 }
 #endif /* IB_DEBUG */
 
-/*********************************************************************//**
-Gets length of field data.
-@return	length of data; IB_SQL_NULL if SQL null data */
-IB_INLINE
-ulint
-dfield_get_len(
-/*===========*/
-	const dfield_t*	field)	/*!< in: field */
+/// \brief Gets length of field data.
+/// \return length of data; IB_SQL_NULL if SQL null data
+/// \param [in] field field
+IB_INLINE ulint dfield_get_len(const dfield_t* field)
 {
 	ut_ad(field);
 	ut_ad((field->len == IB_SQL_NULL)
@@ -95,14 +78,10 @@ dfield_get_len(
 	return(field->len);
 }
 
-/*********************************************************************//**
-Sets length in a field. */
-IB_INLINE
-void
-dfield_set_len(
-/*===========*/
-	dfield_t*	field,	/*!< in: field */
-	ulint		len)	/*!< in: length or IB_SQL_NULL */
+/// \brief Sets length in a field.
+/// \param [in] field field
+/// \param [in] len length or IB_SQL_NULL
+IB_INLINE void dfield_set_len(dfield_t* field, ulint len)
 {
 	ut_ad(field);
 #ifdef IB_VALGRIND_DEBUG
@@ -113,56 +92,40 @@ dfield_set_len(
 	field->len = len;
 }
 
-/*********************************************************************//**
-Determines if a field is SQL NULL
-@return	nonzero if SQL null data */
-IB_INLINE
-ulint
-dfield_is_null(
-/*===========*/
-	const dfield_t* field)	/*!< in: field */
+/// \brief Determines if a field is SQL NULL
+/// \return nonzero if SQL null data
+/// \param [in] field field
+IB_INLINE ulint dfield_is_null(const dfield_t* field)
 {
 	ut_ad(field);
 
 	return(field->len == IB_SQL_NULL);
 }
 
-/*********************************************************************//**
-Determines if a field is externally stored
-@return	nonzero if externally stored */
-IB_INLINE
-ulint
-dfield_is_ext(
-/*==========*/
-	const dfield_t* field)	/*!< in: field */
+/// \brief Determines if a field is externally stored
+/// \return nonzero if externally stored
+/// \param [in] field field
+IB_INLINE ulint dfield_is_ext(const dfield_t* field)
 {
 	ut_ad(field);
 
 	return(IB_UNLIKELY(field->ext));
 }
 
-/*********************************************************************//**
-Sets the "external storage" flag */
-IB_INLINE
-void
-dfield_set_ext(
-/*===========*/
-	dfield_t*	field)	/*!< in/out: field */
+/// \brief Sets the "external storage" flag
+/// \param [in,out] field field
+IB_INLINE void dfield_set_ext(dfield_t* field)
 {
 	ut_ad(field);
 
 	field->ext = 1;
 }
 
-/*********************************************************************//**
-Sets pointer to the data and length in a field. */
-IB_INLINE
-void
-dfield_set_data(
-/*============*/
-	dfield_t*	field,	/*!< in: field */
-	const void*	data,	/*!< in: data */
-	ulint		len)	/*!< in: length or IB_SQL_NULL */
+/// \brief Sets pointer to the data and length in a field.
+/// \param [in] field field
+/// \param [in] data data
+/// \param [in] len length or IB_SQL_NULL
+IB_INLINE void dfield_set_data(dfield_t* field, const void* data, ulint len)
 {
 	ut_ad(field);
 
@@ -174,25 +137,17 @@ dfield_set_data(
 	field->len = len;
 }
 
-/*********************************************************************//**
-Sets a data field to SQL NULL. */
-IB_INLINE
-void
-dfield_set_null(
-/*============*/
-	dfield_t*	field)	/*!< in/out: field */
+/// \brief Sets a data field to SQL NULL.
+/// \param [in,out] field field
+IB_INLINE void dfield_set_null(dfield_t* field)
 {
 	dfield_set_data(field, NULL, IB_SQL_NULL);
 }
 
-/*********************************************************************//**
-Copies the data and len fields. */
-IB_INLINE
-void
-dfield_copy_data(
-/*=============*/
-	dfield_t*	field1,	/*!< out: field to copy to */
-	const dfield_t*	field2)	/*!< in: field to copy from */
+/// \brief Copies the data and len fields.
+/// \param [out] field1 field to copy to
+/// \param [in] field2 field to copy from
+IB_INLINE void dfield_copy_data(dfield_t* field1, const dfield_t* field2)
 {
 	ut_ad(field1 && field2);
 

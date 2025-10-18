@@ -89,14 +89,10 @@ IB_INLINE void mlog_catenate_ulint_compressed(mtr_t* mtr, ulint val)
 	mlog_close(mtr, log_ptr);
 }
 
-/********************************************************//**
-Catenates a compressed dulint to mlog. */
-IB_INLINE
-void
-mlog_catenate_dulint_compressed(
-/*============================*/
-	mtr_t*	mtr,	/*!< in: mtr */
-	dulint	val)	/*!< in: value to write */
+/// \brief Catenates a compressed dulint to mlog.
+/// \param [in] mtr mtr
+/// \param [in] val value to write
+IB_INLINE void mlog_catenate_dulint_compressed(mtr_t* mtr, dulint val)
 {
 	byte*	log_ptr;
 
@@ -113,22 +109,14 @@ mlog_catenate_dulint_compressed(
 	mlog_close(mtr, log_ptr);
 }
 
-/********************************************************//**
-Writes the initial part of a log record (3..11 bytes).
-If the implementation of this function is changed, all
-size parameters to mlog_open() should be adjusted accordingly!
-@return	new value of log_ptr */
-IB_INLINE
-byte*
-mlog_write_initial_log_record_fast(
-/*===============================*/
-	const byte*	ptr,	/*!< in: pointer to (inside) a buffer
-				frame holding the file page where
-				modification is made */
-	byte		type,	/*!< in: log item type: MLOG_1BYTE, ... */
-	byte*		log_ptr,/*!< in: pointer to mtr log which has
-				been opened */
-	mtr_t*		mtr)	/*!< in: mtr */
+/// \brief Writes the initial part of a log record (3..11 bytes).
+/// \details If the implementation of this function is changed, all size parameters to mlog_open() should be adjusted accordingly!
+/// \param [in] ptr pointer to (inside) a buffer frame holding the file page where modification is made
+/// \param [in] type log item type: MLOG_1BYTE, ...
+/// \param [in] log_ptr pointer to mtr log which has been opened
+/// \param [in] mtr mtr
+/// \return new value of log_ptr
+IB_INLINE byte* mlog_write_initial_log_record_fast(const byte* ptr, byte type, byte* log_ptr, mtr_t* mtr)
 {
 #ifdef IB_DEBUG
 	buf_block_t*	block;

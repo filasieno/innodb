@@ -16,10 +16,11 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/// @file data_data.cpp
+/// \file data_data.cpp
 /// \brief SQL data field and tuple
-///
-/// Created 5/30/1994 Heikki Tuuri
+/// \details Originally created by Heikki Tuuri in 5/30/1994
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "data_data.hpp"
 

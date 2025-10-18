@@ -1,25 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2025, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2025, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/// @file dict_dict.cpp
+/// \file dict_dict.cpp
 /// \brief Data dictionary system
-///
-/// Created 1/8/1996 Heikki Tuuri
+/// \details Originally created by Heikki Tuuri on 1/8/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "dict_dict.hpp"
 
@@ -55,6 +52,10 @@ IB_INTERN dict_index_t*	dict_ind_compact;
 
 #include <ctype.h>
 
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
 /** the dictionary system */
 IB_INTERN dict_sys_t*	dict_sys	= NULL;
 
@@ -68,175 +69,101 @@ we need this; NOTE: a transaction which reserves this must keep book
 on the mode in trx_struct::dict_operation_lock_mode */
 IB_INTERN rw_lock_t	dict_operation_lock;
 
-#define	DICT_HEAP_SIZE		100	/*!< initial memory heap size when
-					creating a table or index object */
-#define DICT_POOL_PER_TABLE_HASH 512	/*!< buffer pool max size per table
-					hash table fixed size in bytes */
-#define DICT_POOL_PER_VARYING	4	/*!< buffer pool max size per data
-					dictionary varying size in bytes */
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+constinit ulint DICT_HEAP_SIZE = 100;
+constinit ulint DICT_POOL_PER_TABLE_HASH = 512;
+constinit ulint DICT_POOL_PER_VARYING = 4;
 
 /** Identifies generated InnoDB foreign key names */
 static char	dict_ibfk[] = "_ibfk_";
 
 /** array of mutexes protecting dict_index_t::stat_n_diff_key_vals[] */
-#define DICT_INDEX_STAT_MUTEX_SIZE	32
+constinit ulint DICT_INDEX_STAT_MUTEX_SIZE = 32;
 IB_INTERN
 mutex_t	dict_index_stat_mutex[DICT_INDEX_STAT_MUTEX_SIZE];
 
-/*******************************************************************//**
-Tries to find column names for the index and sets the col field of the
-index.
-@return TRUE if the column names were found */
-static
-ibool
-dict_index_find_cols(
-/*=================*/
-	dict_table_t*	table,	/*!< in: table */
-	dict_index_t*	index);	/*!< in: index */
-/*******************************************************************//**
-Builds the internal dictionary cache representation for a clustered
-index, containing also system fields not defined by the user.
-@return	own: the internal representation of the clustered index */
-static
-dict_index_t*
-dict_index_build_internal_clust(
-/*============================*/
-	const dict_table_t*	table,	/*!< in: table */
-	dict_index_t*		index);	/*!< in: user representation of
-					a clustered index */
-/*******************************************************************//**
-Builds the internal dictionary cache representation for a non-clustered
-index, containing also system fields not defined by the user.
-@return	own: the internal representation of the non-clustered index */
-static
-dict_index_t*
-dict_index_build_internal_non_clust(
-/*================================*/
-	const dict_table_t*	table,	/*!< in: table */
-	dict_index_t*		index);	/*!< in: user representation of
-					a non-clustered index */
-/**********************************************************************//**
-Removes a foreign constraint struct from the dictionary cache. */
-static
-void
-dict_foreign_remove_from_cache(
-/*===========================*/
-	dict_foreign_t*	foreign);	/*!< in, own: foreign constraint */
-/**********************************************************************//**
-Prints a column data. */
-static
-void
-dict_col_print_low(
-/*===============*/
-	const dict_table_t*	table,	/*!< in: table */
-	const dict_col_t*	col);	/*!< in: column */
-/**********************************************************************//**
-Prints an index data. */
-static
-void
-dict_index_print_low(
-/*=================*/
-	dict_index_t*	index);	/*!< in: index */
-/**********************************************************************//**
-Prints a field data. */
-static
-void
-dict_field_print_low(
-/*=================*/
-	const dict_field_t*	field);	/*!< in: field */
-/*********************************************************************//**
-Frees a foreign key struct. */
-static
-void
-dict_foreign_free(
-/*==============*/
-	dict_foreign_t*	foreign);	/*!< in, own: foreign key struct */
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+/// \brief Tries to find column names for the index and sets the col field of the index.
+/// \return TRUE if the column names were found
+static ibool dict_index_find_cols(dict_table_t* table, dict_index_t* index);
+/// \brief Builds the internal dictionary cache representation for a clustered index, containing also system fields not defined by the user.
+/// \return own: the internal representation of the clustered index
+static dict_index_t* dict_index_build_internal_clust(const dict_table_t* table, dict_index_t* index);
+/// \brief Builds the internal dictionary cache representation for a non-clustered index, containing also system fields not defined by the user.
+/// \return own: the internal representation of the non-clustered index
+static dict_index_t* dict_index_build_internal_non_clust(const dict_table_t* table, dict_index_t* index);
+/// \brief Removes a foreign constraint struct from the dictionary cache.
+static void dict_foreign_remove_from_cache(dict_foreign_t* foreign);
+/// \brief Prints a column data.
+static void dict_col_print_low(const dict_table_t* table, const dict_col_t* col);
+/// \brief Prints an index data.
+static void dict_index_print_low(dict_index_t* index);
+/// \brief Prints a field data.
+static void dict_field_print_low(const dict_field_t* field);
+/// \brief Frees a foreign key struct.
+static void dict_foreign_free(dict_foreign_t* foreign);
 
 /* mutex protecting the foreign and unique error buffers */
 IB_INTERN mutex_t	dict_foreign_err_mutex;
 
-/******************************************************************//**
-Reset dict variables. */
-IB_INTERN
-void
-dict_var_init(void)
-/*===============*/
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
+
+/// \brief Reset dict variables.
+IB_INTERN void dict_var_init(void)
 {
 	dict_sys	= NULL;
 	memset(&dict_operation_lock, 0x0, sizeof(dict_operation_lock));
 	memset(&dict_foreign_err_mutex, 0x0, sizeof(dict_foreign_err_mutex));
 }
 
-/**********************************************************************
-Makes all characters in a NUL-terminated UTF-8 string lower case. */
-IB_INTERN
-void
-dict_casedn_str(
-/*============*/
-	char*	a)	/*!< in/out: string to put in lower case */
+/// \brief Makes all characters in a NUL-terminated UTF-8 string lower case.
+IB_INTERN void dict_casedn_str(char* a);
 {
 	ib_utf8_casedown(a);
 }
 
-/********************************************************************//**
-Checks if the database name in two table names is the same.
-@return	TRUE if same db name */
-IB_INTERN
-ibool
-dict_tables_IB_HAVE_same_db(
-/*=====================*/
-	const char*	name1,	/*!< in: table name in the form
-				dbname '/' tablename */
-	const char*	name2)	/*!< in: table name in the form
-				dbname '/' tablename */
+/// \brief Checks if the database name in two table names is the same.
+/// \return TRUE if same db name
+IB_INTERN ibool dict_tables_IB_HAVE_same_db(const char* name1, const char* name2);
 {
 	for (; *name1 == *name2; name1++, name2++) {
 		if (*name1 == '/') {
-			return(TRUE);
+			return TRUE;
 		}
 		ut_a(*name1); /* the names must contain '/' */
 	}
-	return(FALSE);
+	return FALSE;
 }
 
-/********************************************************************//**
-Return the end of table name where we have removed dbname and '/'.
-@return	table name */
-IB_INTERN
-const char*
-dict_remove_db_name(
-/*================*/
-	const char*	name)	/*!< in: table name in the form
-				dbname '/' tablename */
+/// \brief Return the end of table name where we have removed dbname and '/'.
+/// \return table name
+IB_INTERN const char* dict_remove_db_name(const char* name);
 {
 	const char*	s = strchr(name, '/');
 	ut_a(s);
 
-	return(s + 1);
+	return s + 1;
 }
 
-/********************************************************************//**
-Get the database name length in a table name.
-@return	database name length */
-IB_INTERN
-ulint
-dict_get_db_IB_NAME_LEN(
-/*=================*/
-	const char*	name)	/*!< in: table name in the form
-				dbname '/' tablename */
+/// \brief Get the database name length in a table name.
+/// \return database name length
+IB_INTERN ulint dict_get_db_IB_NAME_LEN(const char* name);
 {
-	const char*	s;
-	s = strchr(name, '/');
+	const char* s = strchr(name, '/');
 	ut_a(s);
-	return(s - name);
+	return s - name;
 }
 
-/********************************************************************//**
-Reserves the dictionary system mutex for client. */
-IB_INTERN
-void
-dict_mutex_enter(void)
-/*==================*/
+/// \brief Reserves the dictionary system mutex for client.
+IB_INTERN void dict_mutex_enter(void)
 {
 	mutex_enter(&(dict_sys->mutex));
 }
@@ -246,58 +173,37 @@ dict_mutex_enter(void)
 	(&dict_index_stat_mutex[ut_fold_dulint(index->id) \
 	 			% DICT_INDEX_STAT_MUTEX_SIZE])
 
-/**********************************************************************//**
-Lock the appropriate mutex to protect index->stat_n_diff_key_vals[].
-index->id is used to pick the right mutex and it should not change
-before dict_index_stat_mutex_exit() is called on this index. */
-IB_INTERN
-void
-dict_index_stat_mutex_enter(
-/*========================*/
-	const dict_index_t*	index)	/*!< in: index */
+/// \brief Lock the appropriate mutex to protect index->stat_n_diff_key_vals[].
+/// \details index->id is used to pick the right mutex and it should not change before dict_index_stat_mutex_exit() is called on this index.
+IB_INTERN void dict_index_stat_mutex_enter(const dict_index_t* index);
 {
-	ut_ad(index != NULL);
-	ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-	ut_ad(index->cached);
-	ut_ad(!index->to_be_dropped);
-
-	mutex_enter(GET_INDEX_STAT_MUTEX(index));
+    ut_ad(index != NULL);
+    ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
+    ut_ad(index->cached);
+    ut_ad(!index->to_be_dropped);
+    mutex_enter(GET_INDEX_STAT_MUTEX(index));
 }
 
-/**********************************************************************//**
-Unlock the appropriate mutex that protects index->stat_n_diff_key_vals[]. */
-IB_INTERN
-void
-dict_index_stat_mutex_exit(
-/*=======================*/
-	const dict_index_t*	index)	/*!< in: index */
+/// \brief Unlock the appropriate mutex that protects index->stat_n_diff_key_vals[].
+IB_INTERN void dict_index_stat_mutex_exit(const dict_index_t* index);
 {
-	ut_ad(index != NULL);
-	ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-	ut_ad(index->cached);
-	ut_ad(!index->to_be_dropped);
-
-	mutex_exit(GET_INDEX_STAT_MUTEX(index));
+    ut_ad(index != NULL);
+    ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
+    ut_ad(index->cached);
+    ut_ad(!index->to_be_dropped);
+    mutex_exit(GET_INDEX_STAT_MUTEX(index));
 }
 
-/********************************************************************//**
-Releases the dictionary system mutex for client. */
-IB_INTERN
-void
-dict_mutex_exit(void)
-/*================*/
+/// \brief Releases the dictionary system mutex for client.
+IB_INTERN void dict_mutex_exit(void)
 {
 	mutex_exit(&(dict_sys->mutex));
 }
 
-/********************************************************************//**
-Decrements the count of open client handles to a table. */
-IB_INTERN
-void
-dict_table_decrement_handle_count(
-/*==============================*/
-	dict_table_t*	table,		/*!< in/out: table */
-	ibool		dict_locked)	/*!< in: TRUE=data dictionary locked */
+/// \brief Decrements the count of open client handles to a table.
+/// \param table in/out: table
+/// \param dict_locked in: TRUE=data dictionary locked
+IB_INTERN void dict_table_decrement_handle_count(dict_table_t* table, ibool dict_locked);
 {
 	if (!dict_locked) {
 		mutex_enter(&dict_sys->mutex);
@@ -336,32 +242,22 @@ dict_table_increment_handle_count(
 }
 #endif /* !IB_HOTBACKUP */
 
-/**********************************************************************//**
-Returns a column's name.
-@return column name. NOTE: not guaranteed to stay valid if table is
-modified in any way (columns added, etc.). */
-IB_INTERN
-const char*
-dict_table_get_col_name(
-/*====================*/
-	const dict_table_t*	table,	/*!< in: table */
-	ulint			col_nr)	/*!< in: column number */
+/// \brief Returns a column's name.
+/// \return column name. NOTE: not guaranteed to stay valid if table is modified in any way (columns added, etc.).
+IB_INTERN const char* dict_table_get_col_name(const dict_table_t* table, ulint col_nr);
 {
-	ulint		i;
-	const char*	s;
-
 	ut_ad(table);
 	ut_ad(col_nr < table->n_def);
 	ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
 
-	s = table->col_names;
+	const char* s = table->col_names;
 	if (s) {
-		for (i = 0; i < col_nr; i++) {
+		for (ulint i = 0; i < col_nr; i++) {
 			s += strlen(s) + 1;
 		}
 	}
 
-	return(s);
+    return s;
 }
 
 #ifndef IB_HOTBACKUP
@@ -386,53 +282,38 @@ dict_table_get_col_no(
 	if (s) {
 		for (i = 0; i < table->n_def; i++, s += strlen(s) + 1) {
 			if (strcmp(s, name) == 0) {
-				return(i);
+                            return i;
 			}
 		}
 	}
 
-	return(-1);
+	return -1;
 }
 
-/**********************************************************************//**
-Looks for an index with the given table and index id.
-NOTE that we do not reserve the dictionary mutex.
-@return	index or NULL if not found from cache */
-IB_INTERN
-dict_index_t*
-dict_index_get_on_id_low(
-/*=====================*/
-	dict_table_t*	table,	/*!< in: table */
-	dulint		id)	/*!< in: index id */
+/// \brief Looks for an index with the given table and index id.
+/// \details NOTE that we do not reserve the dictionary mutex.
+/// \return index or NULL if not found from cache
+IB_INTERN dict_index_t* dict_index_get_on_id_low(dict_table_t* table, dulint id);
 {
-	dict_index_t*	dict_index;
-
-	dict_index = dict_table_get_first_index(table);
+	dict_index_t* dict_index = dict_table_get_first_index(table);
 
 	while (dict_index) {
 		if (0 == ut_dulint_cmp(id, dict_index->id)) {
-			/* Found */
+			// Found
 
-			return(dict_index);
+			return dict_index;
 		}
 
 		dict_index = dict_table_get_next_index(dict_index);
 	}
 
-	return(NULL);
+	return NULL;
 }
 #endif /* !IB_HOTBACKUP */
 
-/********************************************************************//**
-Looks for column n in an index.
-@return position in internal representation of the index;
-ULINT_UNDEFINED if not contained */
-IB_INTERN
-ulint
-dict_index_get_nth_col_pos(
-/*=======================*/
-	const dict_index_t*	dict_index,	/*!< in: index */
-	ulint			n)	/*!< in: column number */
+/// \brief Looks for column n in an index.
+/// \return position in internal representation of the index; ULINT_UNDEFINED if not contained
+IB_INTERN ulint dict_index_get_nth_col_pos(const dict_index_t* dict_index, ulint n);
 {
 	const dict_field_t*	field;
 	const dict_col_t*	col;
@@ -464,15 +345,9 @@ dict_index_get_nth_col_pos(
 }
 
 #ifndef IB_HOTBACKUP
-/********************************************************************//**
-Returns TRUE if the index contains a column or a prefix of that column.
-@return	TRUE if contains the column or its prefix */
-IB_INTERN
-ibool
-dict_index_contains_col_or_prefix(
-/*==============================*/
-	const dict_index_t*	dict_index,	/*!< in: index */
-	ulint			n)	/*!< in: column number */
+/// \brief Returns TRUE if the index contains a column or a prefix of that column.
+/// \return TRUE if contains the column or its prefix
+IB_INTERN ibool dict_index_contains_col_or_prefix(const dict_index_t* dict_index, ulint n);
 {
 	const dict_field_t*	field;
 	const dict_col_t*	col;
@@ -503,20 +378,10 @@ dict_index_contains_col_or_prefix(
 	return(FALSE);
 }
 
-/********************************************************************//**
-Looks for a matching field in an index. The column has to be the same. The
-column in index must be complete, or must contain a prefix longer than the
-column in index2. That is, we must be able to construct the prefix in index2
-from the prefix in index.
-@return position in internal representation of the index;
-ULINT_UNDEFINED if not contained */
-IB_INTERN
-ulint
-dict_index_get_nth_field_pos(
-/*=========================*/
-	const dict_index_t*	dict_index,	/*!< in: index from which to search */
-	const dict_index_t*	index2,	/*!< in: index */
-	ulint			n)	/*!< in: field number in index2 */
+/// \brief Looks for a matching field in an index. The column has to be the same.
+/// \details The column in index must be complete, or must contain a prefix longer than the column in index2. That is, we must be able to construct the prefix in index2 from the prefix in index.
+/// \return position in internal representation of the index; ULINT_UNDEFINED if not contained
+IB_INTERN ulint dict_index_get_nth_field_pos(const dict_index_t* dict_index, const dict_index_t* index2, ulint n);
 {
 	const dict_field_t*	field;
 	const dict_field_t*	field2;
@@ -545,30 +410,20 @@ dict_index_get_nth_field_pos(
 	return(ULINT_UNDEFINED);
 }
 
-/**********************************************************************//**
-Returns a table object based on table id.
-@return	table, NULL if does not exist */
-IB_INTERN
-dict_table_t*
-dict_table_get_on_id(
-/*=================*/
-	ib_recovery_t	recovery,	/*!< in: recovery flag */
-	dulint		table_id,	/*!< in: table id */
-	trx_t*		trx)		/*!< in: transaction handle */
+/// \brief Returns a table object based on table id.
+/// \return table, NULL if does not exist
+IB_INTERN dict_table_t* dict_table_get_on_id(ib_recovery_t recovery, dulint table_id, trx_t* trx);
 {
 	dict_table_t*	table;
 
 	if (ut_dulint_cmp(table_id, DICT_FIELDS_ID) <= 0
 	    || trx->dict_operation_lock_mode == RW_X_LATCH) {
-		/* It is a system table which will always exist in the table
-		cache: we avoid acquiring the dictionary mutex, because
-		if we are doing a rollback to handle an error in TABLE
-		CREATE, for example, we already have the mutex! */
+		// It is a system table which will always exist in the table cache: we avoid acquiring the dictionary mutex, because if we are doing a rollback to handle an error in TABLE CREATE, for example, we already have the mutex!
 
 		ut_ad(mutex_own(&(dict_sys->mutex))
 		      || trx->dict_operation_lock_mode == RW_X_LATCH);
 
-		return(dict_table_get_on_id_low(recovery, table_id));
+		return dict_table_get_on_id_low(recovery, table_id);
 	}
 
 	mutex_enter(&(dict_sys->mutex));
@@ -580,30 +435,17 @@ dict_table_get_on_id(
 	return(table);
 }
 
-/********************************************************************//**
-Looks for column n position in the clustered index.
-@return	position in internal representation of the clustered index */
-IB_INTERN
-ulint
-dict_table_get_nth_col_pos(
-/*=======================*/
-	const dict_table_t*	table,	/*!< in: table */
-	ulint			n)	/*!< in: column number */
+/// \brief Looks for column n position in the clustered index.
+/// \return position in internal representation of the clustered index
+IB_INTERN ulint dict_table_get_nth_col_pos(const dict_table_t* table, ulint n);
 {
 	return(dict_index_get_nth_col_pos(dict_table_get_first_index(table),
 					  n));
 }
 
-/********************************************************************//**
-Checks if a column is in the ordering columns of the clustered index of a
-table. Column prefixes are treated like whole columns.
-@return	TRUE if the column, or its prefix, is in the clustered key */
-IB_INTERN
-ibool
-dict_table_col_in_clustered_key(
-/*============================*/
-	const dict_table_t*	table,	/*!< in: table */
-	ulint			n)	/*!< in: column number */
+/// \brief Checks if a column is in the ordering columns of the clustered index of a table. Column prefixes are treated like whole columns.
+/// \return TRUE if the column, or its prefix, is in the clustered key
+IB_INTERN ibool dict_table_col_in_clustered_key(const dict_table_t* table, ulint n);
 {
 	const dict_index_t*	dict_index;
 	const dict_field_t*	field;
@@ -631,15 +473,9 @@ dict_table_col_in_clustered_key(
 	return(FALSE);
 }
 
-/**********************************************************************//**
-Inits the data dictionary module. */
-IB_INTERN
-void
-dict_init(void)
-/*===========*/
+/// \brief Inits the data dictionary module.
+IB_INTERN void dict_init(void)
 {
-	int	i;
-
 	dict_sys = mem_alloc(sizeof(dict_sys_t));
 
 	mutex_create(&dict_sys->mutex, SYNC_DICT);
@@ -658,24 +494,15 @@ dict_init(void)
 
 	mutex_create(&dict_foreign_err_mutex, SYNC_ANY_LATCH);
 
-	for (i = 0; i < DICT_INDEX_STAT_MUTEX_SIZE; i++) {
+	for (int i = 0; i < DICT_INDEX_STAT_MUTEX_SIZE; i++) {
 		mutex_create(&dict_index_stat_mutex[i], SYNC_INDEX_TREE);
 	}
 }
 
-/**********************************************************************//**
-Returns a table object and optionally increment its open handle count.
-NOTE! This is a high-level function to be used mainly from outside the
-'dict' directory. Inside this directory dict_table_get_low is usually the
-appropriate function.
-@return	table, NULL if does not exist */
-IB_INTERN
-dict_table_t*
-dict_table_get(
-/*===========*/
-	const char*	table_name,	/*!< in: table name */
-	ibool		ref_count)	/*!< in: whether to increment the open
-					handle count on the table */
+/// \brief Returns a table object and optionally increment its open handle count.
+/// \details NOTE! This is a high-level function to be used mainly from outside the 'dict' directory. Inside this directory dict_table_get_low is usually the appropriate function.
+/// \return table, NULL if does not exist
+IB_INTERN dict_table_t* dict_table_get(const char* table_name, ibool ref_count);
 {
 	dict_table_t*	table;
 
@@ -700,17 +527,9 @@ dict_table_get(
 }
 #endif /* !IB_HOTBACKUP */
 
-/**********************************************************************//**
-Returns a table instance based on table id.
-@return	table, NULL if does not exist */
-IB_INTERN
-dict_table_t*
-dict_table_get_using_id(
-/*====================*/
-	ib_recovery_t	recovery,	/*!< in: recovery flag */
-	dulint		table_id,	/*!< in: table id */
-	ibool		ref_count)	/*!< in: increment open handle count
-					if TRUE */
+/// \brief Returns a table instance based on table id.
+/// \return table, NULL if does not exist
+IB_INTERN dict_table_t* dict_table_get_using_id(ib_recovery_t recovery, dulint table_id, ibool ref_count);
 {
 	dict_table_t*	table;
 
@@ -772,20 +591,11 @@ dict_table_add_system_columns(
 }
 
 #ifndef IB_HOTBACKUP
-/**********************************************************************//**
-Adds a table object to the dictionary cache. */
-IB_INTERN
-void
-dict_table_add_to_cache(
-/*====================*/
-	dict_table_t*	table,	/*!< in: table */
-	mem_heap_t*	heap)	/*!< in: temporary heap */
+/// \brief Adds a table object to the dictionary cache.
+/// \param table in: table
+/// \param heap in: temporary heap
+IB_INTERN void dict_table_add_to_cache(dict_table_t* table, mem_heap_t* heap);
 {
-	ulint	fold;
-	ulint	id_fold;
-	ulint	i;
-	ulint	row_len;
-
 	/* The lower limit for what we consider a "big" row */
 #define BIG_ROW_SIZE 1024
 
@@ -795,11 +605,11 @@ dict_table_add_to_cache(
 
 	table->cached = TRUE;
 
-	fold = ut_fold_string(table->name);
-	id_fold = ut_fold_dulint(table->id);
+	ulint fold = ut_fold_string(table->name);
+	ulint id_fold = ut_fold_dulint(table->id);
 
-	row_len = 0;
-	for (i = 0; i < table->n_def; i++) {
+	ulint row_len = 0;
+	for (ulint i = 0; i < table->n_def; i++) {
 		ulint	col_len = dict_col_get_max_size(
 			dict_table_get_nth_col(table, i));
 
@@ -863,30 +673,21 @@ dict_table_add_to_cache(
 	dict_sys->size += mem_heap_get_size(table->heap);
 }
 
-/**********************************************************************//**
-Looks for an index with the given id. NOTE that we do not reserve
-the dictionary mutex: this function is for emergency purposes like
-printing info of a corrupt database page!
-@return	index or NULL if not found from cache */
-IB_INTERN
-dict_index_t*
-dict_index_find_on_id_low(
-/*======================*/
-	dulint	id)	/*!< in: index id */
+/// \brief Looks for an index with the given id.
+/// \details NOTE that we do not reserve the dictionary mutex: this function is for emergency purposes like printing info of a corrupt database page!
+/// \return index or NULL if not found from cache
+IB_INTERN dict_index_t* dict_index_find_on_id_low(dulint id);
 {
-	dict_table_t*	table;
-	dict_index_t*	dict_index;
-
-	table = UT_LIST_GET_FIRST(dict_sys->table_LRU);
+	dict_table_t* table = UT_LIST_GET_FIRST(dict_sys->table_LRU);
 
 	while (table) {
-		dict_index = dict_table_get_first_index(table);
+		dict_index_t* dict_index = dict_table_get_first_index(table);
 
 		while (dict_index) {
 			if (0 == ut_dulint_cmp(id, dict_index->id)) {
 				/* Found */
 
-				return(dict_index);
+				return dict_index;
 			}
 
 			dict_index = dict_table_get_next_index(dict_index);
@@ -895,7 +696,7 @@ dict_index_find_on_id_low(
 		table = UT_LIST_GET_NEXT(table_LRU, table);
 	}
 
-	return(NULL);
+	return NULL;
 }
 
 /**********************************************************************//**
@@ -1238,19 +1039,16 @@ dict_col_name_is_reserved(
 		}
 	}
 
-	return(FALSE);
+	return FALSE;
 }
 
-/****************************************************************//**
-If an undo log record for this table might not fit on a single page,
-return TRUE.
-@return	TRUE if the undo log record could become too big */
-static
-ibool
-dict_index_too_big_for_undo(
-/*========================*/
-	const dict_table_t*	table,		/*!< in: table */
-	const dict_index_t*	new_index)	/*!< in: index */
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
+
+/// \brief If an undo log record for this table might not fit on a single page, return TRUE.
+/// \return TRUE if the undo log record could become too big
+static ibool dict_index_too_big_for_undo(const dict_table_t* table, const dict_index_t* new_index);
 {
 	/* Make sure that all column prefixes will fit in the undo log record
 	in trx_undo_page_report_modify() right after trx_undo_page_init(). */
@@ -4763,15 +4561,10 @@ dict_table_get_index_on_name(
 	return(NULL);
 }
 
-/**********************************************************************//**
-Replace the index passed in with another equivalent index in the tables
-foreign key list. */
-IB_INTERN
-void
-dict_table_replace_index_in_foreign_list(
-/*=====================================*/
-	dict_table_t*	table,  /*!< in/out: table */
-	dict_index_t*	index)	/*!< in: index to be replaced */
+/// \brief Replace the index passed in with another equivalent index in the tables foreign key list.
+/// \param table in/out: table
+/// \param index in: index to be replaced
+IB_INTERN void dict_table_replace_index_in_foreign_list(dict_table_t* table, dict_index_t* index);
 {
 	dict_foreign_t*	foreign;
 
@@ -4789,16 +4582,9 @@ dict_table_replace_index_in_foreign_list(
 	}
 }
 
-/**********************************************************************//**
-In case there is more than one index with the same name return the index
-with the min(id).
-@return	index, NULL if does not exist */
-IB_INTERN
-dict_index_t*
-dict_table_get_index_on_name_and_min_id(
-/*=====================================*/
-	dict_table_t*	table,	/*!< in: table */
-	const char*	name)	/*!< in: name of the index to find */
+/// \brief In case there is more than one index with the same name return the index with the min(id).
+/// \return index, NULL if does not exist
+IB_INTERN dict_index_t* dict_table_get_index_on_name_and_min_id(dict_table_t* table, const char* name);
 {
 	dict_index_t*	index;
 	dict_index_t*	min_index; /* Index with matching name and min(id) */

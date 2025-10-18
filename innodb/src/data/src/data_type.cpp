@@ -16,10 +16,11 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/// @file data_type.cpp
+/// \file data_type.cpp
 /// \brief Data types
-///
-/// Created 1/16/1996 Heikki Tuuri
+/// \details Originally created by Heikki Tuuri in 1/16/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "data_type.hpp"
 

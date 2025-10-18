@@ -1,27 +1,21 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/********************************************************************//**
-@file ha/ha0ha.c
-The hash table with external chains
-
-Created 8/22/1994 Heikki Tuuri
-*************************************************************************/
+/// \file ha_ha.cpp
+/// \brief The hash table with external chains
+/// \details Originally created by Heikki Tuuri in 8/22/1994
+/// \author Fabio N. Filasieno
+/// \date 18/10/2025
 
 #include "ha_ha.hpp"
 #ifdef IB_DO_NOT_INLINE
@@ -40,25 +34,14 @@ Created 8/22/1994 Heikki Tuuri
 Creates a hash table with at least n array cells.  The actual number
 of cells is chosen to be a prime number slightly bigger than n.
 @return	own: created table */
-IB_INTERN
-hash_table_t*
-ha_create_func(
-/*===========*/
-	ulint	n,		/*!< in: number of array cells */
+IB_INTERN hash_table_t* ha_create_func(ulint n,
 #ifdef IB_SYNC_DEBUG
-	ulint	mutex_level,	/*!< in: level of the mutexes in the latching
-				order: this is used in the debug version */
+	ulint mutex_level,
 #endif /* IB_SYNC_DEBUG */
-	ulint	n_mutexes)	/*!< in: number of mutexes to protect the
-				hash table: must be a power of 2, or 0 */
+	ulint n_mutexes)
 {
-	hash_table_t*	table;
-#ifndef IB_HOTBACKUP
-	ulint		i;
-#endif /* !IB_HOTBACKUP */
-
 	ut_ad(ut_is_2pow(n_mutexes));
-	table = hash_create(n);
+	hash_table_t* table = hash_create(n);
 
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
 # ifndef IB_HOTBACKUP
@@ -73,7 +56,7 @@ ha_create_func(
 			ut_min(4096, MEM_MAX_ALLOC_IN_BUF));
 		ut_a(table->heap);
 
-		return(table);
+	return table;
 	}
 
 #ifndef IB_HOTBACKUP
@@ -81,7 +64,7 @@ ha_create_func(
 
 	table->heaps = mem_alloc(n_mutexes * sizeof(void*));
 
-	for (i = 0; i < n_mutexes; i++) {
+	for (ulint i = 0; i < n_mutexes; i++) {
 		table->heaps[i] = mem_heap_create_in_btr_search(4096);
 		ut_a(table->heaps[i]);
 	}
@@ -92,34 +75,23 @@ ha_create_func(
 
 /*************************************************************//**
 Empties a hash table and frees the memory heaps. */
-IB_INTERN
-void
-ha_clear(
-/*=====*/
-	hash_table_t*	table)	/*!< in, own: hash table */
+IB_INTERN void ha_clear(hash_table_t* table)
 {
-	ulint	i;
-	ulint	n;
-
 	ut_ad(table);
 	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
 #ifdef IB_SYNC_DEBUG
 	ut_ad(rw_lock_own(&btr_search_latch, RW_LOCK_EXCLUSIVE));
 #endif /* IB_SYNC_DEBUG */
-
 #ifndef IB_HOTBACKUP
 	/* Free the memory heaps. */
-	n = table->n_mutexes;
-
-	for (i = 0; i < n; i++) {
+	ulint n = table->n_mutexes;
+	for (ulint i = 0; i < n; i++) {
 		mem_heap_free(table->heaps[i]);
 	}
 #endif /* !IB_HOTBACKUP */
-
 	/* Clear the hash table. */
 	n = hash_get_n_cells(table);
-
-	for (i = 0; i < n; i++) {
+	for (ulint i = 0; i < n; i++) {
 		hash_get_nth_cell(table, i)->node = NULL;
 	}
 }

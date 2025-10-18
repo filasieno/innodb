@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2010, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file dict/dict0boot.c
-Data dictionary creation and booting
-
-Created 4/18/1996 Heikki Tuuri
-*******************************************************/
+/// \file dict_boot.cpp
+/// \brief Data dictionary creation and booting
+/// \details Originally created by Heikki Tuuri in 4/18/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "dict_boot.hpp"
 
@@ -40,25 +35,12 @@ Created 4/18/1996 Heikki Tuuri
 #include "log_recv.hpp"
 #include "os_file.hpp"
 
-/**********************************************************************//**
-Gets a pointer to the dictionary header and x-latches its page.
-@return	pointer to the dictionary header, page x-latched */
-IB_INTERN
-dict_hdr_t*
-dict_hdr_get(
-/*=========*/
-	mtr_t*	mtr)	/*!< in: mtr */
+IB_INTERN dict_hdr_t* dict_hdr_get(mtr_t* mtr)
 {
-	buf_block_t*	block;
-	dict_hdr_t*	header;
-
-	block = buf_page_get(DICT_HDR_SPACE, 0, DICT_HDR_PAGE_NO,
-			     RW_X_LATCH, mtr);
-	header = DICT_HDR + buf_block_get_frame(block);
-
-	buf_block_dbg_add_level(block, SYNC_DICT_HEADER);
-
-	return(header);
+    buf_block_t* block = buf_page_get(DICT_HDR_SPACE, 0, DICT_HDR_PAGE_NO, RW_X_LATCH, mtr);
+    dict_hdr_t* header = DICT_HDR + buf_block_get_frame(block);
+    buf_block_dbg_add_level(block, SYNC_DICT_HEADER);
+    return(header);
 }
 
 /**********************************************************************//**

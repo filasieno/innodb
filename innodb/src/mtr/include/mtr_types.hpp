@@ -16,14 +16,12 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/// @file mtr_types.hpp
+/// \file mtr_types.hpp
 /// \brief Mini-transaction buffer global types
-///
-/// Created 11/26/1995 Heikki Tuuri
+/// \details Originally created by Heikki Tuuri in 11/26/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-#ifndef mtr0types_h
-#define mtr0types_h
+#pragma once
 
 typedef struct mtr_struct	mtr_t;
-
-#endif

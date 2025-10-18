@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file fil/fil0fil.c
-The tablespace memory cache
-
-Created 10/25/1995 Heikki Tuuri
-*******************************************************/
+/// \file fil_fil.cpp
+/// \brief The tablespace memory cache
+/// \details Originally created by Heikki Tuuri on 10/25/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "fil_fil.hpp"
 
@@ -285,28 +280,18 @@ struct fil_system_struct {
 initialized. */
 static fil_system_t*	fil_system	= NULL;
 
-/*******************************************************************//**
-Frees a space object from the tablespace memory cache. Closes the files in
-the chain but does not delete them. There must not be any pending i/o's or
-flushes on the files.
-@return	TRUE if success */
-static
-ibool
-fil_space_free(
-/*===========*/
-	ulint		id,		/*!< in: space id */
-	ibool		own_mutex);	/*!< in: TRUE if own
-					fil_system->mutex */
+/// \brief Frees a space object from the tablespace memory cache.
+/// \param [in] id space id
+/// \param [in] own_mutex TRUE if own fil_system->mutex
+/// \details Closes the files in the chain but does not delete them. There must not be any pending i/o's or flushes on the files.
+/// \return TRUE if success
+static ibool fil_space_free(ulint id, ibool own_mutex);
 
-/************************************************************************
-Remove extraneous '.' && '\' && '/' characters from the prefix.
-Note: Currently it will not handle paths like: ../a/b.
-@return	pointer to normalized path */
-IB_INLINE
-const char*
-fil_normalize_path(
-/*===============*/
-	const char*	ptr)		/*!< in: path to normalize */
+/// \brief Remove extraneous '.' && '\' && '/' characters from the prefix.
+/// \param [in] ptr path to normalize
+/// \details Note: Currently it will not handle paths like: ../a/b.
+/// \return pointer to normalized path
+IB_INLINE const char* fil_normalize_path(const char* ptr);
 {
 	if (*ptr == '.' && *(ptr + 1) == SRV_PATH_SEPARATOR) {
 
@@ -322,17 +307,12 @@ fil_normalize_path(
 	return(ptr);
 }
 
-/********************************************************************//**
-Compare two table names. It will compare the two table names using the
-canonical names. e.g., ./a/b == a/b. TODO: /path/to/a/b == a/b if both
-/path/to/a/b and a/b refer to the same file.
-@return	 = 0 if name1 == name2 < 0 if name1 < name2 > 0 if name1 > name2 */
-IB_INLINE
-int
-fil_tablename_compare(
-/*==================*/
-	const char*	name1,		/*!< in: table name to compare */
-	const char*	name2)		/*!< in: table name to compare */
+/// \brief Compare two table names.
+/// \param [in] name1 table name to compare
+/// \param [in] name2 table name to compare
+/// \details It will compare the two table names using the canonical names. e.g., ./a/b == a/b. TODO: /path/to/a/b == a/b if both /path/to/a/b and a/b refer to the same file.
+/// \return = 0 if name1 == name2 < 0 if name1 < name2 > 0 if name1 > name2
+IB_INLINE int fil_tablename_compare(const char* name1, const char* name2);
 {
 	name1 = fil_normalize_path(name1);
 	name2 = fil_normalize_path(name2);
@@ -340,59 +320,30 @@ fil_tablename_compare(
 	return(strcmp(name1, name2));
 }
 
-/************************************************************************
-NOTE: you must call fil_mutex_enter_and_prepare_for_io() first!
-
-Prepares a file node for i/o. Opens the file if it is closed. Updates the
-pending i/o's field in the node and the system appropriately. Takes the node
-off the LRU list if it is in the LRU list. The caller must hold the fil_sys
-mutex. */
-static
-void
-fil_node_prepare_for_io(
-/*====================*/
-	fil_node_t*	node,	/*!< in: file node */
-	fil_system_t*	system,	/*!< in: tablespace memory cache */
-	fil_space_t*	space);	/*!< in: space */
-/********************************************************************//**
-Updates the data structures when an i/o operation finishes. Updates the
-pending i/o's field in the node appropriately. */
-static
-void
-fil_node_complete_io(
-/*=================*/
-	fil_node_t*	node,	/*!< in: file node */
-	fil_system_t*	system,	/*!< in: tablespace memory cache */
-	ulint		type);	/*!< in: OS_FILE_WRITE or OS_FILE_READ; marks
-				the node as modified if
-				type == OS_FILE_WRITE */
-/*******************************************************************//**
-Checks if a single-table tablespace for a given table name exists in the
-tablespace memory cache.
-@return	space id, ULINT_UNDEFINED if not found */
-static
-ulint
-fil_get_space_id_for_table(
-/*=======================*/
-	const char*	name);	/*!< in: table name in the standard
-				'databasename/tablename' format */
-/*******************************************************************//**
-Frees a space object from the tablespace memory cache. Closes the files in
-the chain but does not delete them. There must not be any pending i/o's or
-flushes on the files. */
-static
-ibool
-fil_space_free(
-/*===========*/
-				/* out: TRUE if success */
-	ulint		id,	/* in: space id */
-	ibool		own_mutex);/* in: TRUE if own system->mutex */
-/********************************************************************//**
-Reset variables. */
-IB_INTERN
-void
-fil_var_init(void)
-/*==============*/
+/// \brief Prepares a file node for i/o.
+/// \param [in] node file node
+/// \param [in] system tablespace memory cache
+/// \param [in] space space
+/// \details NOTE: you must call fil_mutex_enter_and_prepare_for_io() first! Opens the file if it is closed. Updates the pending i/o's field in the node and the system appropriately. Takes the node off the LRU list if it is in the LRU list. The caller must hold the fil_sys mutex.
+static void fil_node_prepare_for_io(fil_node_t* node, fil_system_t* system, fil_space_t* space);
+/// \brief Updates the data structures when an i/o operation finishes.
+/// \param [in] node file node
+/// \param [in] system tablespace memory cache
+/// \param [in] type OS_FILE_WRITE or OS_FILE_READ; marks the node as modified if type == OS_FILE_WRITE
+/// \details Updates the pending i/o's field in the node appropriately.
+static void fil_node_complete_io(fil_node_t* node, fil_system_t* system, ulint type);
+/// \brief Checks if a single-table tablespace for a given table name exists in the tablespace memory cache.
+/// \param [in] name table name in the standard 'databasename/tablename' format
+/// \return space id, ULINT_UNDEFINED if not found
+static ulint fil_get_space_id_for_table(const char* name);
+/// \brief Frees a space object from the tablespace memory cache.
+/// \param [in] id space id
+/// \param [in] own_mutex TRUE if own system->mutex
+/// \details Closes the files in the chain but does not delete them. There must not be any pending i/o's or flushes on the files.
+/// \return TRUE if success
+static ibool fil_space_free(ulint id, ibool own_mutex);
+/// \brief Reset variables.
+IB_INTERN void fil_var_init(void);
 {
 	fil_system = NULL;
 	fil_n_log_flushes = 0;
@@ -400,187 +351,107 @@ fil_var_init(void)
 	fil_n_pending_tablespace_flushes = 0;
 }
 
-/************************************************************************
-Reads data from a space to a buffer. Remember that the possible incomplete
-blocks at the end of file are ignored: they are not taken into account when
-calculating the byte offset within a space.
-@return DB_SUCCESS, or DB_TABLESPACE_DELETED if we are trying to do
-i/o on a tablespace which does not exist */
-IB_INLINE
-ulint
-fil_read(
-/*=====*/
-	ibool	sync,		/*!< in: TRUE if synchronous aio is desired */
-	ulint	space_id,	/*!< in: space id */
-	ulint	zip_size,	/*!< in: compressed page size in bytes;
-				0 for uncompressed pages */
-	ulint	block_offset,	/*!< in: offset in number of blocks */
-	ulint	byte_offset,	/*!< in: remainder of offset in bytes; in aio
-				this must be divisible by the OS block size */
-	ulint	len,		/*!< in: how many bytes to read; this must not
-				cross a file boundary; in aio this must be a
-				block size multiple */
-	void*	buf,		/*!< in/out: buffer where to store data read;
-				in aio this must be appropriately aligned */
-	void*	message)	/*!< in: message for aio handler if non-sync
-				aio used, else ignored */
+/// \brief Reads data from a space to a buffer.
+/// \param [in] sync TRUE if synchronous aio is desired
+/// \param [in] space_id space id
+/// \param [in] zip_size compressed page size in bytes; 0 for uncompressed pages
+/// \param [in] block_offset offset in number of blocks
+/// \param [in] byte_offset remainder of offset in bytes; in aio this must be divisible by the OS block size
+/// \param [in] len how many bytes to read; this must not cross a file boundary; in aio this must be a block size multiple
+/// \param [in,out] buf buffer where to store data read; in aio this must be appropriately aligned
+/// \param [in] message message for aio handler if non-sync aio used, else ignored
+/// \details Remember that the possible incomplete blocks at the end of file are ignored: they are not taken into account when calculating the byte offset within a space.
+/// \return DB_SUCCESS, or DB_TABLESPACE_DELETED if we are trying to do i/o on a tablespace which does not exist
+IB_INLINE ulint fil_read(ibool sync, ulint space_id, ulint zip_size, ulint block_offset, ulint byte_offset, ulint len, void* buf, void* message);
 {
 	return(fil_io(OS_FILE_READ, sync, space_id, zip_size, block_offset,
 					  byte_offset, len, buf, message));
 }
 
-/********************************************************************//**
-Writes data to a space from a buffer. Remember that the possible incomplete
-blocks at the end of file are ignored: they are not taken into account when
-calculating the byte offset within a space.
-@return DB_SUCCESS, or DB_TABLESPACE_DELETED if we are trying to do
-i/o on a tablespace which does not exist */
-IB_INLINE
-ulint
-fil_write(
-/*======*/
-	ibool	sync,		/*!< in: TRUE if synchronous aio is desired */
-	ulint	space_id,	/*!< in: space id */
-	ulint	zip_size,	/*!< in: compressed page size in bytes;
-				0 for uncompressed pages */
-	ulint	block_offset,	/*!< in: offset in number of blocks */
-	ulint	byte_offset,	/*!< in: remainder of offset in bytes; in aio
-				this must be divisible by the OS block size */
-	ulint	len,		/*!< in: how many bytes to write; this must
-				not cross a file boundary; in aio this must
-				be a block size multiple */
-	void*	buf,		/*!< in: buffer from which to write; in aio
-				this must be appropriately aligned */
-	void*	message)	/*!< in: message for aio handler if non-sync
-				aio used, else ignored */
+/// \brief Writes data to a space from a buffer.
+/// \param [in] sync TRUE if synchronous aio is desired
+/// \param [in] space_id space id
+/// \param [in] zip_size compressed page size in bytes; 0 for uncompressed pages
+/// \param [in] block_offset offset in number of blocks
+/// \param [in] byte_offset remainder of offset in bytes; in aio this must be divisible by the OS block size
+/// \param [in] len how many bytes to write; this must not cross a file boundary; in aio this must be a block size multiple
+/// \param [in] buf buffer from which to write; in aio this must be appropriately aligned
+/// \param [in] message message for aio handler if non-sync aio used, else ignored
+/// \details Remember that the possible incomplete blocks at the end of file are ignored: they are not taken into account when calculating the byte offset within a space.
+/// \return DB_SUCCESS, or DB_TABLESPACE_DELETED if we are trying to do i/o on a tablespace which does not exist
+IB_INLINE ulint fil_write(ibool sync, ulint space_id, ulint zip_size, ulint block_offset, ulint byte_offset, ulint len, void* buf, void* message);
 {
-	return(fil_io(OS_FILE_WRITE, sync, space_id, zip_size, block_offset,
-					   byte_offset, len, buf, message));
+	return(fil_io(OS_FILE_WRITE, sync, space_id, zip_size, block_offset, byte_offset, len, buf, message));
 }
 
-/*******************************************************************//**
-Returns the table space by a given id, NULL if not found. */
-IB_INLINE
-fil_space_t*
-fil_space_get_by_id(
-/*================*/
-	ulint	id)	/*!< in: space id */
+/// \brief Returns the table space by a given id, NULL if not found.
+/// \param [in] id space id
+/// \return table space, NULL if not found
+IB_INLINE fil_space_t* fil_space_get_by_id(ulint id)
 {
-	fil_space_t*	space;
-
 	ut_ad(mutex_own(&fil_system->mutex));
-
-	HASH_SEARCH(hash, fil_system->spaces, id,
-		    fil_space_t*, space,
-		    ut_ad(space->magic_n == FIL_SPACE_MAGIC_N),
-		    space->id == id);
-
-	return(space);
+	fil_space_t* space;
+	HASH_SEARCH(hash, fil_system->spaces, id, fil_space_t*, space, ut_ad(space->magic_n == FIL_SPACE_MAGIC_N), space->id == id);
+	return space;
 }
 
-/*******************************************************************//**
-Returns the table space by a given name, NULL if not found. */
-IB_INLINE
-fil_space_t*
-fil_space_get_by_name(
-/*==================*/
-	const char*	name)	/*!< in: space name */
+/// \brief Returns the table space by a given name, NULL if not found.
+/// \param [in] name space name
+/// \return table space, NULL if not found
+IB_INLINE fil_space_t* fil_space_get_by_name(const char* name)
 {
-	fil_space_t*	space;
-	ulint		fold;
-
 	ut_ad(mutex_own(&fil_system->mutex));
-
-	fold = ut_fold_string(name);
-
-	HASH_SEARCH(name_hash, fil_system->name_hash, fold,
-		    fil_space_t*, space,
-		    ut_ad(space->magic_n == FIL_SPACE_MAGIC_N),
-		    !fil_tablename_compare(name, space->name));
-
-	return(space);
+	ulint fold = ut_fold_string(name);
+	fil_space_t* space;
+	HASH_SEARCH(name_hash, fil_system->name_hash, fold, fil_space_t*, space, ut_ad(space->magic_n == FIL_SPACE_MAGIC_N), !fil_tablename_compare(name, space->name));
+	return space;
 }
 
 #ifndef IB_HOTBACKUP
-/*******************************************************************//**
-Returns the version number of a tablespace, -1 if not found.
-@return version number, -1 if the tablespace does not exist in the
-memory cache */
-IB_INTERN
-ib_int64_t
-fil_space_get_version(
-/*==================*/
-	ulint	id)	/*!< in: space id */
+/// \brief Returns the version number of a tablespace, -1 if not found.
+/// \param [in] id space id
+/// \return version number, -1 if the tablespace does not exist in the memory cache
+IB_INTERN ib_int64_t fil_space_get_version(ulint id)
 {
-	fil_space_t*	space;
-	ib_int64_t	version		= -1;
-
 	ut_ad(fil_system);
-
 	mutex_enter(&fil_system->mutex);
-
-	space = fil_space_get_by_id(id);
-
+	fil_space_t* space = fil_space_get_by_id(id);
+	ib_int64_t version = -1;
 	if (space) {
 		version = space->tablespace_version;
 	}
-
 	mutex_exit(&fil_system->mutex);
-
-	return(version);
+	return version;
 }
 
-/*******************************************************************//**
-Returns the latch of a file space.
-@return	latch protecting storage allocation */
-IB_INTERN
-rw_lock_t*
-fil_space_get_latch(
-/*================*/
-	ulint	id,	/*!< in: space id */
-	ulint*	flags)	/*!< out: tablespace flags */
+/// \brief Returns the latch of a file space.
+/// \param [in] id space id
+/// \param [out] flags tablespace flags
+/// \return latch protecting storage allocation
+IB_INTERN rw_lock_t* fil_space_get_latch(ulint id, ulint* flags)
 {
-	fil_space_t*	space;
-
 	ut_ad(fil_system);
-
 	mutex_enter(&fil_system->mutex);
-
-	space = fil_space_get_by_id(id);
-
+	fil_space_t* space = fil_space_get_by_id(id);
 	ut_a(space);
-
 	if (flags) {
 		*flags = space->flags;
 	}
-
 	mutex_exit(&fil_system->mutex);
-
-	return(&(space->latch));
+	return &space->latch;
 }
 
-/*******************************************************************//**
-Returns the type of a file space.
-@return	FIL_TABLESPACE or FIL_LOG */
-IB_INTERN
-ulint
-fil_space_get_type(
-/*===============*/
-	ulint	id)	/*!< in: space id */
+/// \brief Returns the type of a file space.
+/// \param [in] id space id
+/// \return FIL_TABLESPACE or FIL_LOG
+IB_INTERN ulint fil_space_get_type(ulint id)
 {
-	fil_space_t*	space;
-
 	ut_ad(fil_system);
-
 	mutex_enter(&fil_system->mutex);
-
-	space = fil_space_get_by_id(id);
-
+	fil_space_t* space = fil_space_get_by_id(id);
 	ut_a(space);
-
 	mutex_exit(&fil_system->mutex);
-
-	return(space->purpose);
+	return space->purpose;
 }
 #endif /* !IB_HOTBACKUP */
 
