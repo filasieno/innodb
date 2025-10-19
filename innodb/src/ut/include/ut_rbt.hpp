@@ -56,7 +56,7 @@ typedef enum ib_rbt_color_enum ib_rbt_color_t;
 
 
 
-/// \struct ib_rbt_color_t
+/// \struct ib_rbt_node_struct
 /// \brief Red black tree node
 /// \var ib_rbt_color_t ib_rbt_node_struct::color
 /// \brief color of this node
