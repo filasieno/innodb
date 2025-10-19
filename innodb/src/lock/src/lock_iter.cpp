@@ -18,40 +18,19 @@
 /// \author Fabio N. Filasieno
 /// \date 2025-10-20
 
-#define LOCK_MODULE_IMPLEMENTATION
+#include "defs.hpp"
 
 #include "lock_iter.hpp"
 #include "lock_lock.hpp"
 #include "lock_priv.hpp"
-#include "univ.inl"
 #include "ut_dbg.hpp"
 #include "ut_lst.hpp"
-
-// -----------------------------------------------------------------------------------------
-// type definitions
-// -----------------------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------------------
-// macro constants
-// -----------------------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------------------
-// globals
-// -----------------------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------------------
-// Static helper routine declarations
-// -----------------------------------------------------------------------------------------
-
-// (none)
 
 // -----------------------------------------------------------------------------------------
 // routine definitions
 // -----------------------------------------------------------------------------------------
 
-///
-/// \brief Initialize lock queue iterator so that it starts to iterate from
-/// "lock".
+/// \brief Initialize lock queue iterator so that it starts to iterate from "lock".
 /// \details bit_no specifies the record number within the heap where the record is stored.
 /// It can be undefined (ULINT_UNDEFINED) in two cases:
 /// 1. If the lock is a table lock, thus we have a table lock queue;
@@ -62,51 +41,45 @@
 /// \param iter iterator
 /// \param lock lock to start from
 /// \param bit_no record number in the heap
-IB_INTERN void lock_queue_iterator_reset(lock_queue_iterator_t *iter, const lock_t *lock, ulint bit_no)
+IB_INTERN void lock_queue_iterator_reset(lock_queue_iterator_t *iter, const ib_lock_t *lock, ulint bit_no)
 {
 	iter->current_lock = lock;
 	if (bit_no != ULINT_UNDEFINED) {
 		iter->bit_no = bit_no;
 	} else {
 		switch (lock_get_type_low(lock)) {
-			case LOCK_TABLE:
-				iter->bit_no = ULINT_UNDEFINED;
-				break;
-			case LOCK_REC:
-				iter->bit_no = lock_rec_find_set_bit(lock);
-				ut_a(iter->bit_no != ULINT_UNDEFINED);
-				break;
-			default:
-				UT_ERROR;
+		case LOCK_TABLE:
+			iter->bit_no = ULINT_UNDEFINED;
+			break;
+		case LOCK_REC:
+			iter->bit_no = lock_rec_find_set_bit(lock);
+			ut_a(iter->bit_no != ULINT_UNDEFINED);
+			break;
+		default:
+			UT_ERROR;
 		}
 	}
 }
 
-///
-/// \brief Gets the previous lock in the lock queue, returns NULL if there are no
-/// more locks (i.e. the current lock is the first one). The iterator is
-/// receded (if not-NULL is returned).
+/// \brief Gets the previous lock in the lock queue, returns NULL if there are no more locks (i.e. the current lock is the first one). 
+/// The iterator is receded (if not-NULL is returned).
 /// \param [in/out] iterator
 /// \return previous lock or NULL
-IB_INTERN const lock_t *lock_queue_iterator_get_prev(lock_queue_iterator_t *iter)
+IB_INTERN const ib_lock_t *lock_queue_iterator_get_prev(lock_queue_iterator_t *iter)
 {
-	const lock_t *prev_lock;
+	const ib_lock_t* prev_lock = nullptr;
 	switch (lock_get_type_low(iter->current_lock)) {
-		case LOCK_REC:
-		{
-			prev_lock = lock_rec_get_prev(iter->current_lock, iter->bit_no);
-			break;
-		}
-		case LOCK_TABLE:
-		{
-			prev_lock = UT_LIST_GET_PREV(un_member.tab_lock.locks, iter->current_lock);
-			break;
-		}
-		default:
-			UT_ERROR;
+	case LOCK_REC:
+		prev_lock = lock_rec_get_prev(iter->current_lock, iter->bit_no);
+		break;
+	case LOCK_TABLE:
+		prev_lock = UT_LIST_GET_PREV(un_member.tab_lock.locks, iter->current_lock);
+		break;
+	default:
+		UT_ERROR;
 	}
 	if (prev_lock != NULL) {
 		iter->current_lock = prev_lock;
 	}
-	return (prev_lock);
+	return prev_lock;
 }

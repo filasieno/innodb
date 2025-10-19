@@ -12,11 +12,6 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-/// \file lock_lock.inl
-/// \brief The transaction lock system inline methods.
-/// \details Originally created by Heikki Tuuri on 5/7/1996.
-/// \author Fabio N. Filasieno
-/// \date 2025-10-20
 
 #include "sync_sync.hpp"
 #include "srv_srv.hpp"
@@ -33,47 +28,19 @@
 #include "read_read.hpp"
 #include "log_recv.hpp"
 
-/*********************************************************************//**
-Calculates the fold value of a page file address: used in inserting or
-searching for a lock in the hash table.
-@return	folded value */
-IB_INLINE
-ulint
-lock_rec_fold(
-/*==========*/
-	ulint	space,	/*!< in: space */
-	ulint	page_no)/*!< in: page number */
+IB_INLINE ulint lock_rec_fold(ulint space, ulint page_no)
 {
-	return(ut_fold_ulint_pair(space, page_no));
+	return ut_fold_ulint_pair(space, page_no);
 }
 
-/*********************************************************************//**
-Calculates the hash value of a page file address: used in inserting or
-searching for a lock in the hash table.
-@return	hashed value */
-IB_INLINE
-ulint
-lock_rec_hash(
-/*==========*/
-	ulint	space,	/*!< in: space */
-	ulint	page_no)/*!< in: page number */
+IB_INLINE ulint lock_rec_hash(ulint space, ulint page_no)
 {
-    return(hash_calc_hash(lock_rec_fold(space, page_no), lock_sys->rec_hash));
+	return hash_calc_hash(lock_rec_fold(space, page_no), lock_sys->rec_hash);
 }
 
-/*********************************************************************//**
-Checks if some transaction has an implicit x-lock on a record in a clustered
-index.
-@return	transaction which has the x-lock, or NULL */
-IB_INLINE
-trx_t*
-lock_clust_rec_some_has_impl(
-/*=========================*/
-	const rec_t*	rec,	/*!< in: user record */
-	ib_dict_index_t*	dict_index,	/*!< in: clustered index */
-	const ulint*	offsets)/*!< in: rec_get_offsets(rec, index) */
+IB_INLINE trx_t* lock_clust_rec_some_has_impl(const rec_t* rec, ib_dict_index_t* dict_index, const ulint* offsets)
 {
-	trx_id_t	trx_id;
+	trx_id_t trx_id;
 
 	ut_ad(mutex_own(&kernel_mutex));
 	ut_ad(dict_index_is_clust(dict_index));
@@ -82,33 +49,20 @@ lock_clust_rec_some_has_impl(
 	trx_id = row_get_rec_trx_id(rec, dict_index, offsets);
 
 	if (trx_is_active(trx_id)) {
-        // The modifying or inserting transaction is active
-        return(trx_get_on_id(trx_id));
+		// The modifying or inserting transaction is active
+		return trx_get_on_id(trx_id);
 	}
 
-    return NULL;
+	return NULL;
 }
 
-/*********************************************************************//**
-Gets the heap_no of the smallest user record on a page.
-@return	heap_no of smallest user record, or PAGE_HEAP_NO_SUPREMUM */
-IB_INLINE
-ulint
-lock_get_min_heap_no(
-/*=================*/
-	const buf_block_t*	block)	/*!< in: buffer block */
+IB_INLINE ulint lock_get_min_heap_no(const buf_block_t* block)
 {
-	const page_t*	page	= block->frame;
+	const page_t* page = block->frame;
 
 	if (page_is_comp(page)) {
-		return(rec_get_heap_no_new(
-			       page
-			       + rec_get_next_offs(page + PAGE_NEW_INFIMUM,
-						   TRUE)));
+		return rec_get_heap_no_new(page + rec_get_next_offs(page + PAGE_NEW_INFIMUM, TRUE));
 	} else {
-		return(rec_get_heap_no_old(
-			       page
-			       + rec_get_next_offs(page + PAGE_OLD_INFIMUM,
-						   FALSE)));
+		return rec_get_heap_no_old(page + rec_get_next_offs(page + PAGE_OLD_INFIMUM, FALSE));
 	}
 }
