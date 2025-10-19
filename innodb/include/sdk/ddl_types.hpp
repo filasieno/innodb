@@ -26,3 +26,15 @@
 /// \date 2025-10-13
 
 #pragma once
+
+///  List of tables we should drop in background. ALTER TABLE requires
+/// that the table handler can drop the table in background when there are no
+/// queries to it any more. Protected by the kernel mutex. 
+
+struct ddl_drop_struct{
+	char*                       table_name;
+	UT_LIST_NODE_T(ddl_drop_t)  ddl_drop_list;
+};
+
+
+typedef struct ddl_drop_struct	ddl_drop_t;
