@@ -17,6 +17,8 @@
 ///
 /// Created 1/20/1994 Heikki Tuuri
 
+
+
 #pragma once
 
 #include "defs.hpp"
@@ -159,7 +161,7 @@ IB_INLINE ib_uint64_t ut_uint64_align_up(ib_uint64_t n, ulint align_no);
 /// \param high in: high bound of sort interval, noninclusive
 IB_INTERN void ut_dulint_sort(dulint* arr, dulint* aux_arr, ulint low, ulint high);
 
-#endif /* notdefined */
+#endif // notdefined
 
 /// \brief Rounds up a pointer to the nearest aligned address.
 /// \param ptr Pointer.

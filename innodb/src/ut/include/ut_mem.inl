@@ -53,22 +53,22 @@ IB_INLINE ulint ut_raw_to_hex(const void* raw, ulint raw_size, char* hex, ulint 
 		#define UINT16_GET_B(u)	((unsigned char) ((u) >> 8))
 	#endif
 
-	#define MK_ALL_UINT16_WITH_A(a)	\
-		MK_UINT16(a, '0'),	\
-		MK_UINT16(a, '1'),	\
-		MK_UINT16(a, '2'),	\
-		MK_UINT16(a, '3'),	\
-		MK_UINT16(a, '4'),	\
-		MK_UINT16(a, '5'),	\
-		MK_UINT16(a, '6'),	\
-		MK_UINT16(a, '7'),	\
-		MK_UINT16(a, '8'),	\
-		MK_UINT16(a, '9'),	\
-		MK_UINT16(a, 'A'),	\
-		MK_UINT16(a, 'B'),	\
-		MK_UINT16(a, 'C'),	\
-		MK_UINT16(a, 'D'),	\
-		MK_UINT16(a, 'E'),	\
+	#define MK_ALL_UINT16_WITH_A(a)\
+		MK_UINT16(a, '0'),\
+		MK_UINT16(a, '1'),\
+		MK_UINT16(a, '2'),\
+		MK_UINT16(a, '3'),\
+		MK_UINT16(a, '4'),\
+		MK_UINT16(a, '5'),\
+		MK_UINT16(a, '6'),\
+		MK_UINT16(a, '7'),\
+		MK_UINT16(a, '8'),\
+		MK_UINT16(a, '9'),\
+		MK_UINT16(a, 'A'),\
+		MK_UINT16(a, 'B'),\
+		MK_UINT16(a, 'C'),\
+		MK_UINT16(a, 'D'),\
+		MK_UINT16(a, 'E'),\
 		MK_UINT16(a, 'F')
 
 	static const ib_uint16_t hex_map[256] = {
@@ -103,13 +103,13 @@ IB_INLINE ulint ut_raw_to_hex(const void* raw, ulint raw_size, char* hex, ulint 
 		read_bytes = raw_size;
 		write_bytes = 2 * raw_size + 1;
 	}
-	#define LOOP_READ_BYTES(ASSIGN) \
-		{ \
-			for (ulint i = 0; i < read_bytes; i++) { \
-				ASSIGN; \
-				hex += 2; \
-				rawc++; \
-			} \
+	#define LOOP_READ_BYTES(ASSIGN)\
+		{\
+			for (ulint i = 0; i < read_bytes; i++) {\
+				ASSIGN;\
+				hex += 2;\
+				rawc++;\
+			}\
 		}
 	if (ut_align_offset(hex, 2) == 0) {
 		LOOP_READ_BYTES(*(ib_uint16_t*) hex = hex_map[*rawc]);
@@ -144,7 +144,7 @@ IB_INLINE ulint ut_str_sql_format(const char* str, ulint str_len, char* buf, uli
 		buf_i++;
 		/* fallthrough */
 	case 0:
-		return(buf_i);
+		return buf_i;
 	}
 	buf[0] = '\'';
 	buf_i = 1;

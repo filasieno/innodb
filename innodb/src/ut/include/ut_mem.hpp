@@ -87,34 +87,33 @@ IB_INTERN void ut_free(void* ptr);
 
 #ifndef IB_HOTBACKUP
 
+/// \brief Implements realloc.
+/// \details This is needed by /pars/lexyy.c. Otherwise, you should not use this function because the allocation functions in mem0mem.h are the recommended ones in InnoDB.
+/// man realloc in Linux, 2004:
+///        realloc()  changes the size of the memory block pointed to
+///        by ptr to size bytes.  The contents will be  unchanged  to
+///        the minimum of the old and new sizes; newly allocated mem�
+///        ory will be uninitialized.  If ptr is NULL,  the	 call  is
+///        equivalent  to malloc(size); if size is equal to zero, the
+///        call is equivalent to free(ptr).	 Unless ptr is	NULL,  it
+///        must  have  been	 returned by an earlier call to malloc(),
+///        calloc() or realloc().
+/// RETURN VALUE
+///        realloc() returns a pointer to the newly allocated memory,
+///        which is suitably aligned for any kind of variable and may
+///        be different from ptr, or NULL if the  request  fails.  If
+///        size  was equal to 0, either NULL or a pointer suitable to
+///        be passed to free() is returned.	 If realloc()  fails  the
+///        original	 block	is  left  untouched  - it is not freed or
+///        moved.
+/// \param [in] ptr pointer to old block or NULL
+/// \param [in] size desired size
+/// \return pointer to new mem block or NULL
+IB_INTERN void* ut_realloc(void* ptr, ulint size);
 
-	/// \brief Implements realloc.
-	/// \details This is needed by /pars/lexyy.c. Otherwise, you should not use this function because the allocation functions in mem0mem.h are the recommended ones in InnoDB.
-	/// man realloc in Linux, 2004:
-	///        realloc()  changes the size of the memory block pointed to
-	///        by ptr to size bytes.  The contents will be  unchanged  to
-	///        the minimum of the old and new sizes; newly allocated mem�
-	///        ory will be uninitialized.  If ptr is NULL,  the	 call  is
-	///        equivalent  to malloc(size); if size is equal to zero, the
-	///        call is equivalent to free(ptr).	 Unless ptr is	NULL,  it
-	///        must  have  been	 returned by an earlier call to malloc(),
-	///        calloc() or realloc().
-	/// RETURN VALUE
-	///        realloc() returns a pointer to the newly allocated memory,
-	///        which is suitably aligned for any kind of variable and may
-	///        be different from ptr, or NULL if the  request  fails.  If
-	///        size  was equal to 0, either NULL or a pointer suitable to
-	///        be passed to free() is returned.	 If realloc()  fails  the
-	///        original	 block	is  left  untouched  - it is not freed or
-	///        moved.
-	/// \param [in] ptr pointer to old block or NULL
-	/// \param [in] size desired size
-	/// \return pointer to new mem block or NULL
-	IB_INTERN void* ut_realloc(void* ptr, ulint size);
 
-
-	/// \brief Frees in shutdown all allocated memory not freed yet.
-	IB_INTERN void ut_free_all_mem(void);
+/// \brief Frees in shutdown all allocated memory not freed yet.
+IB_INTERN void ut_free_all_mem(void);
 
 #endif // !IB_HOTBACKUP
 

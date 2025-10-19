@@ -1,26 +1,21 @@
-/*****************************************************************************
-Copyright (c) 2006, 2009, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2006, 2009, Innobase Oy. All Rights Reserved.
+// 
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+// 
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/*******************************************************************//**
-@file include/ut0rbt.h
-Red-Black tree implementation.
-
-Created 2007-03-20 Sunny Bains
-************************************************************************/
+/// \file include/ut0rbt.h
+/// \brief Red-Black tree implementation.
+///
+/// Created 2007-03-20 Sunny Bains
 
 #pragma once
 
@@ -43,15 +38,15 @@ Created 2007-03-20 Sunny Bains
 #define	FALSE		0
 #endif
 
-/* Red black tree typedefs */
+/// \brief Red black tree typedefs
 typedef struct ib_rbt_struct ib_rbt_t;
 typedef struct ib_rbt_node_struct ib_rbt_node_t;
-/* FIXME: Iterator is a better name than _bound_ */
+/// \todo FIXME: Iterator is a better name than _bound_
 typedef struct ib_rbt_bound_struct ib_rbt_bound_t;
 typedef void (*ib_rbt_print_node)(const ib_rbt_node_t* node);
 typedef int (*ib_rbt_compare)(const void* p1, const void* p2);
 
-/* Red black tree color types */
+/// \brief Red black tree color types
 enum ib_rbt_color_enum {
 	IB_RBT_RED,
 	IB_RBT_BLACK
@@ -59,45 +54,64 @@ enum ib_rbt_color_enum {
 
 typedef enum ib_rbt_color_enum ib_rbt_color_t;
 
-/* Red black tree node */
+
+
+/// \struct ib_rbt_node_struct
+/// \brief Red black tree node
+/// \var ib_rbt_color_t ib_rbt_node_struct::color
+/// \brief color of this node
+/// \var ib_rbt_node_t* ib_rbt_node_struct::left
+/// \brief points left child
+/// \var ib_rbt_node_t* ib_rbt_node_struct::right
+/// \brief points right child
+/// \var ib_rbt_node_t* ib_rbt_node_struct::parent
+/// \brief points parent node
+/// \var char ib_rbt_node_struct::value
+/// \brief Data value
+
 struct ib_rbt_node_struct {
-	ib_rbt_color_t	color;			/* color of this node */
-
-	ib_rbt_node_t*	left;			/* points left child */
-	ib_rbt_node_t*	right;			/* points right child */
-	ib_rbt_node_t*	parent;			/* points parent node */
-
-	char		value[1];		/* Data value */
+	ib_rbt_color_t color;
+	ib_rbt_node_t* left;
+	ib_rbt_node_t* right;
+	ib_rbt_node_t* parent;
+	char           value[1];
 };
 
-/* Red black tree instance.*/
+/// \struct ib_rbt_struct
+/// \brief Red black tree instance.
+/// \var ib_rbt_node_t* ib_rbt_struct::nil
+/// \brief Black colored node that is used as a sentinel. This is pre-allocated too.
+/// \var ib_rbt_node_t* ib_rbt_struct::root
+/// \brief Root of the tree, this is pre-allocated and the first data node is the left child.
+/// \var ulint ib_rbt_struct::n_nodes
+/// \brief Total number of data nodes
+/// \var ib_rbt_compare ib_rbt_struct::compare
+/// \brief Fn. to use for comparison
+/// \var ulint ib_rbt_struct::sizeof_value
+/// \brief Sizeof the item in bytes
+
 struct	ib_rbt_struct {
-	ib_rbt_node_t*	nil;			/* Black colored node that is
-						used as a sentinel. This is
-						pre-allocated too.*/
-
-	ib_rbt_node_t*	root;			/* Root of the tree, this is
-						pre-allocated and the first
-						data node is the left child.*/
-
-	ulint		n_nodes;		/* Total number of data nodes */
-
-	ib_rbt_compare	compare;		/* Fn. to use for comparison */
-	ulint		sizeof_value;		/* Sizeof the item in bytes */
+	ib_rbt_node_t* nil;
+	ib_rbt_node_t* root;
+	ulint          n_nodes;
+	ib_rbt_compare compare;
+	ulint          sizeof_value;
 };
 
-/* The result of searching for a key in the tree, this is useful for
-a speedy lookup and insert if key doesn't exist.*/
+
+/// \struct ib_rbt_bound_struct
+/// The result of searching for a key in the tree, this is useful for a speedy lookup and insert if key doesn't exist.
+/// \var const ib_rbt_node_t* ib_rbt_bound_struct::last;
+/// \brief Last node visited
+/// \var int ib_rbt_bound_struct::result
+/// \brief Result of comparing with the last non-nil node that was visited
+
 struct ib_rbt_bound_struct {
-	const ib_rbt_node_t*
-			last;			/* Last node visited */
-
-	int		result;			/* Result of comparing with
-						the last non-nil node that
-						was visited */
+	const ib_rbt_node_t* last;
+	int result;
 };
 
-/* Size in elements (t is an rb tree instance) */
+/// \brief Size in elements (t is an rb tree instance)
 #define rbt_size(t)	(t->n_nodes)
 
 /* Check whether the rb tree is empty (t is an rb tree instance) */

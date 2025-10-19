@@ -51,16 +51,16 @@ IB_INTERN void ut_dbg_assertion_failed(const char* expr, const char* file, ulint
 /// \param EXPR assertion expression that should hold
 #define ut_a(EXPR) do { \
 	if (UT_DBG_FAIL(EXPR)) { \
-		ut_dbg_assertion_failed(#EXPR, __FILE__, (ulint) __LINE__);	\
+		ut_dbg_assertion_failed(#EXPR, __FILE__, (ulint) __LINE__); \
 		UT_DBG_PANIC; \
 	} \
 	UT_DBG_STOP; \
 } while (0)
 
 /// \brief Abort execution.
-#define UT_ERROR do {						\
-	ut_dbg_assertion_failed(0, __FILE__, (ulint) __LINE__);	\
-	UT_DBG_PANIC;						\
+#define UT_ERROR do { \
+	ut_dbg_assertion_failed(0, __FILE__, (ulint) __LINE__); \
+	UT_DBG_PANIC; \
 } while (0)
 
 #ifdef IB_DEBUG
