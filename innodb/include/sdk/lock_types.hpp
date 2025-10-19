@@ -26,3 +26,33 @@
 /// \date 2025-10-13
 
 #pragma once
+
+/// \brief Basic lock modes.
+enum ib_lock_mode {
+	LOCK_IS = 0,         //!< intention shared
+	LOCK_IX,             //!< intention exclusive
+	LOCK_S,              //!< shared
+	LOCK_X,              //!< exclusive
+	LOCK_AUTO_INC,	     //!< locks the auto-inc counter of a table in an exclusive mode
+	LOCK_NONE,	         //!< this is used elsewhere to note consistent read
+	LOCK_NUM = LOCK_NONE //!< number of lock modes
+};
+
+struct ib_lock_queue_iterator_t {
+	const ib_lock_t* current_lock;
+	ulint		     bit_no;       //!< In case this is a record lock queue (not table lock queue) then bit_no is the record number within the heap in which the record is stored.
+};
+
+/// \brief Lock operation struct
+typedef struct ib_lock_op_struct lock_op_t;
+
+/// \struct ib_lock_op_struct Lock operation struct
+struct ib_lock_op_struct{
+	dict_table_t* table; //!< table to be locked
+	enum ib_lock_mode mode; //!< lock mode
+};
+
+/** The lock system struct */
+struct lock_sys_struct{
+	hash_table_t* rec_hash;	/*!< hash table of the record locks */
+};

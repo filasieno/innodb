@@ -177,21 +177,21 @@ IB_INTERN void dict_mutex_enter(void)
 /// \details index->id is used to pick the right mutex and it should not change before dict_index_stat_mutex_exit() is called on this index.
 IB_INTERN void dict_index_stat_mutex_enter(const dict_index_t* index);
 {
-    ut_ad(index != NULL);
-    ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-    ut_ad(index->cached);
-    ut_ad(!index->to_be_dropped);
-    mutex_enter(GET_INDEX_STAT_MUTEX(index));
+	ut_ad(index != NULL);
+	ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
+	ut_ad(index->cached);
+	ut_ad(!index->to_be_dropped);
+	mutex_enter(GET_INDEX_STAT_MUTEX(index));
 }
 
 /// \brief Unlock the appropriate mutex that protects index->stat_n_diff_key_vals[].
 IB_INTERN void dict_index_stat_mutex_exit(const dict_index_t* index);
 {
-    ut_ad(index != NULL);
-    ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-    ut_ad(index->cached);
-    ut_ad(!index->to_be_dropped);
-    mutex_exit(GET_INDEX_STAT_MUTEX(index));
+	ut_ad(index != NULL);
+	ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
+	ut_ad(index->cached);
+	ut_ad(!index->to_be_dropped);
+	mutex_exit(GET_INDEX_STAT_MUTEX(index));
 }
 
 /// \brief Releases the dictionary system mutex for client.
@@ -699,18 +699,9 @@ IB_INTERN dict_index_t* dict_index_find_on_id_low(dulint id);
 	return NULL;
 }
 
-/**********************************************************************//**
-Renames a table object.
-@return	TRUE if success */
-IB_INTERN
-ibool
-dict_table_rename_in_cache(
-/*=======================*/
-	dict_table_t*	table,		/*!< in/out: table */
-	const char*	new_name,	/*!< in: new name */
-	ibool		rename_also_foreigns)/*!< in: in ALTER TABLE we want
-					to preserve the original table name
-					in constraints which reference it */
+/// \brief Renames a table object.
+/// \return TRUE if success
+IB_INTERN ibool dict_table_rename_in_cache(dict_table_t* table, const char* new_name, ibool rename_also_foreigns);
 {
 	dict_foreign_t*	foreign;
 	dict_index_t*	index;
@@ -917,15 +908,10 @@ dict_table_rename_in_cache(
 	return(TRUE);
 }
 
-/**********************************************************************//**
-Change the id of a table object in the dictionary cache. This is used in
-DISCARD TABLESPACE. */
-IB_INTERN
-void
-dict_table_change_id_in_cache(
-/*==========================*/
-	dict_table_t*	table,	/*!< in/out: table object already in cache */
-	dulint		new_id)	/*!< in: new id to set */
+/// \brief Change the id of a table object in the dictionary cache. This is used in DISCARD TABLESPACE.
+/// \param table in/out: table object already in cache
+/// \param new_id in: new id to set
+IB_INTERN void dict_table_change_id_in_cache(dict_table_t* table, dulint new_id);
 {
 	ut_ad(table);
 	ut_ad(mutex_own(&(dict_sys->mutex)));
@@ -942,13 +928,9 @@ dict_table_change_id_in_cache(
 		    ut_fold_dulint(table->id), table);
 }
 
-/**********************************************************************//**
-Removes a table object from the dictionary cache. */
-IB_INTERN
-void
-dict_table_remove_from_cache(
-/*=========================*/
-	dict_table_t*	table)	/*!< in, own: table */
+/// \brief Removes a table object from the dictionary cache.
+/// \param table in, own: table
+IB_INTERN void dict_table_remove_from_cache(dict_table_t* table);
 {
 	dict_foreign_t*	foreign;
 	dict_index_t*	index;
@@ -1010,15 +992,9 @@ dict_table_remove_from_cache(
 	dict_mem_table_free(table);
 }
 
-/****************************************************************//**
-If the given column name is reserved for InnoDB system columns, return
-TRUE.
-@return	TRUE if name is reserved */
-IB_INTERN
-ibool
-dict_col_name_is_reserved(
-/*======================*/
-	const char*	name)	/*!< in: column name */
+/// \brief If the given column name is reserved for InnoDB system columns, return TRUE.
+/// \return TRUE if name is reserved
+IB_INTERN ibool dict_col_name_is_reserved(const char* name);
 {
 	/* This check reminds that if a new system column is added to
 	the program, it should be dealt with here. */
@@ -1141,16 +1117,9 @@ is_ord_part:
 	return(undo_page_len >= IB_PAGE_SIZE);
 }
 
-/****************************************************************//**
-If a record of this index might not fit on a single B-tree page,
-return TRUE.
-@return	TRUE if the index record could become too big */
-static
-ibool
-dict_index_too_big_for_tree(
-/*========================*/
-	const dict_table_t*	table,		/*!< in: table */
-	const dict_index_t*	new_index)	/*!< in: index */
+/// \brief If a record of this index might not fit on a single B-tree page, return TRUE.
+/// \return TRUE if the index record could become too big
+static ibool dict_index_too_big_for_tree(const dict_table_t* table, const dict_index_t* new_index);
 {
 	ulint	zip_size;
 	ulint	comp;
@@ -1290,20 +1259,9 @@ add_field_size:
 	return(FALSE);
 }
 
-/**********************************************************************//**
-Adds an index to the dictionary cache.
-@return	DB_SUCCESS, DB_TOO_BIG_RECORD, or DB_CORRUPTION */
-IB_INTERN
-ulint
-dict_index_add_to_cache(
-/*====================*/
-	dict_table_t*	table,	/*!< in: table on which the index is */
-	dict_index_t*	index,	/*!< in, own: index; NOTE! The index memory
-				object is freed in this function! */
-	ulint		page_no,/*!< in: root page number of the index */
-	ibool		strict)	/*!< in: TRUE=refuse to create the index
-				if records could be too big to fit in
-				an B-tree page */
+/// \brief Adds an index to the dictionary cache.
+/// \return DB_SUCCESS, DB_TOO_BIG_RECORD, or DB_CORRUPTION
+IB_INTERN ulint dict_index_add_to_cache(dict_table_t* table, dict_index_t* index, ulint page_no, ibool strict);
 {
 	dict_index_t*	new_index;
 	ulint		n_ord;
@@ -1451,14 +1409,10 @@ undo_size_ok:
 	return(DB_SUCCESS);
 }
 
-/**********************************************************************//**
-Removes an index from the dictionary cache. */
-IB_INTERN
-void
-dict_index_remove_from_cache(
-/*=========================*/
-	dict_table_t*	table,	/*!< in/out: table */
-	dict_index_t*	index)	/*!< in, own: index */
+/// \brief Removes an index from the dictionary cache.
+/// \param table in/out: table
+/// \param index in, own: index
+IB_INTERN void dict_index_remove_from_cache(dict_table_t* table, dict_index_t* index);
 {
 	ulint		size;
 	ulint		retries = 0;
@@ -1577,16 +1531,12 @@ found:
 }
 #endif /* !IB_HOTBACKUP */
 
-/*******************************************************************//**
-Adds a column to index. */
-IB_INTERN
-void
-dict_index_add_col(
-/*===============*/
-	dict_index_t*		index,		/*!< in/out: index */
-	const dict_table_t*	table,		/*!< in: table */
-	dict_col_t*		col,		/*!< in: column */
-	ulint			prefix_len)	/*!< in: column prefix length */
+/// \brief Adds a column to index.
+/// \param index in/out: index
+/// \param table in: table
+/// \param col in: column
+/// \param prefix_len in: column prefix length
+IB_INTERN void dict_index_add_col(dict_index_t* index, const dict_table_t* table, dict_col_t* col, ulint prefix_len);
 {
 	dict_field_t*	field;
 	const char*	col_name;
@@ -1625,17 +1575,13 @@ dict_index_add_col(
 }
 
 #ifndef IB_HOTBACKUP
-/*******************************************************************//**
-Copies fields contained in index2 to index1. */
-static
-void
-dict_index_copy(
-/*============*/
-	dict_index_t*		index1,	/*!< in: index to copy to */
-	dict_index_t*		index2,	/*!< in: index to copy from */
-	const dict_table_t*	table,	/*!< in: table */
-	ulint			start,	/*!< in: first position to copy */
-	ulint			end)	/*!< in: last position to copy */
+/// \brief Copies fields contained in index2 to index1.
+/// \param index1 in: index to copy to
+/// \param index2 in: index to copy from
+/// \param table in: table
+/// \param start in: first position to copy
+/// \param end in: last position to copy
+static void dict_index_copy(dict_index_t* index1, dict_index_t* index2, const dict_table_t* table, ulint start, ulint end);
 {
 	dict_field_t*	field;
 	ulint		i;
