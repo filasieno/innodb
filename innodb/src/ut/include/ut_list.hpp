@@ -1,47 +1,41 @@
-/*****************************************************************************
+// Copyright (c) 2006, 2009, Innobase Oy. All Rights Reserved.
+// 
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+// 
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 2006, 2009, Innobase Oy. All Rights Reserved.
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+/// \file include/ut0list.h
+/// \brief A double-linked list
+///
+/// Created 4/26/2006 Osku Salerma
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/*******************************************************************//**
-@file include/ut0list.h
-A double-linked list
-
-Created 4/26/2006 Osku Salerma
-************************************************************************/
-
-/*******************************************************************//**
-A double-linked list. This differs from the one in ut0lst.h in that in this
-one, each list node contains a pointer to the data, whereas the one in
-ut0lst.h uses a strategy where the list pointers are embedded in the data
-items themselves.
-
-Use this one when you need to store arbitrary data in the list where you
-can't embed the list pointers in the data, if a data item needs to be
-stored in multiple lists, etc.
-
-Note about the memory management: ib_list_t is a fixed-size struct whose
-allocation/deallocation is done through ib_list_create/ib_list_free, but the
-memory for the list nodes is allocated through a user-given memory heap,
-which can either be the same for all nodes or vary per node. Most users will
-probably want to create a memory heap to store the item-specific data, and
-pass in this same heap to the list node creation functions, thus
-automatically freeing the list node when the item's heap is freed.
-
-************************************************************************/
+/// \brief A double-linked list.
+/// \details This differs from the one in ut0lst.h in that in this
+/// one, each list node contains a pointer to the data, whereas the one in
+/// ut0lst.h uses a strategy where the list pointers are embedded in the data
+/// items themselves.
+/// 
+/// Use this one when you need to store arbitrary data in the list where you
+/// can't embed the list pointers in the data, if a data item needs to be
+/// stored in multiple lists, etc.
+/// 
+/// Note about the memory management: ib_list_t is a fixed-size struct whose
+/// allocation/deallocation is done through ib_list_create/ib_list_free, but the
+/// memory for the list nodes is allocated through a user-given memory heap,
+/// which can either be the same for all nodes or vary per node. Most users will
+/// probably want to create a memory heap to store the item-specific data, and
+/// pass in this same heap to the list node creation functions, thus
+/// automatically freeing the list node when the item's heap is freed.
 
 #pragma once
 

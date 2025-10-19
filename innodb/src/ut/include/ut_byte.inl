@@ -1,27 +1,21 @@
-/*****************************************************************************
+//Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+//This program is free software; you can redistribute it and/or modify it under
+//the terms of the GNU General Public License as published by the Free Software
+//Foundation; version 2 of the License.
+//
+//This program is distributed in the hope that it will be useful, but WITHOUT
+//ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+//FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License along with
+//this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+//Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************************//**
-@file include/ut0byte.ic
-Utilities for byte operations
-
-Created 5/30/1994 Heikki Tuuri
-*******************************************************************/
+/// \file include/ut0byte.ic
+/// \brief Utilities for byte operations
+///
+/// Created 5/30/1994 Heikki Tuuri
 
 IB_INLINE dulint ut_dulint_create(ulint	high, ulint	low)
 {
@@ -121,7 +115,6 @@ IB_INLINE ib_uint64_t ut_uint64_align_up(ib_uint64_t n, ulint align_no)
 {
 	ut_ad(align_no > 0);
 	ut_ad(ut_is_2pow(align_no));
-
 	ib_uint64_t	align_1 = (ib_uint64_t) align_no - 1;
 	return (n + align_1) & ~align_1;
 }
@@ -141,8 +134,7 @@ IB_INLINE void* ut_align_down(const void ptr, ulint align_no)
 	ut_ad(((align_no - 1) & align_no) == 0);
 	ut_ad(ptr);
 	ut_ad(sizeof(void*) == sizeof(ulint));
-
-	return((void*)((((ulint)ptr)) & ~(align_no - 1)));
+	return (void*)((((ulint)ptr)) & ~(align_no - 1));
 }
 
 IB_INLINE ulint ut_align_offset(const void*	ptr, ulint align_no)
@@ -164,8 +156,8 @@ IB_INLINE ulint ut_bit_set_nth(ulint a, ulint n, ibool val)
 {
 	ut_ad(n < 8 * sizeof(ulint));
 	if (val) {
-		return(((ulint) 1 << n) | a);
+		return ((ulint) 1 << n) | a;
 	} else {
-		return(~((ulint) 1 << n) & a);
+		return ~((ulint) 1 << n) & a;
 	}
 }
