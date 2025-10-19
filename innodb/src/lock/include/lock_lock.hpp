@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2010, Innobase Oy. All Rights Reserved.
+/// \file lock_lock.hpp
+/// \brief The transaction lock system.
+/// \details Originally created by Heikki Tuuri on 5/7/1996.
+/// \author Fabio N. Filasieno
+/// \date 2025-10-20
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/lock0lock.h
-The transaction lock system
-
-Created 5/7/1996 Heikki Tuuri
-*******************************************************/
-
-#ifndef lock0lock_h
-#define lock0lock_h
+#pragma once
 
 #include "univ.i"
 #include "buf_types.hpp"
@@ -44,45 +38,24 @@ extern ibool	lock_print_waits;
 /* Buffer for storing information about the most recent deadlock error */
 extern ib_stream_t	lock_latest_err_stream;
 
-/*********************************************************************//**
-Gets the size of a lock struct.
-@return	size in bytes */
-IB_INTERN
-ulint
-lock_get_size(void);
-/*===============*/
-/*********************************************************************//**
-Creates the lock system at database start. */
-IB_INTERN
-void
-lock_sys_create(
-/*============*/
-	ulint	n_cells);	/*!< in: number of slots in lock hash table */
-/*********************************************************************//**
-Closes the lock system at database shutdown. */
-IB_INTERN
-void
-lock_sys_close(void);
-/*================*/
-/*********************************************************************//**
-Checks if some transaction has an implicit x-lock on a record in a clustered
-index.
-@return	transaction which has the x-lock, or NULL */
-IB_INLINE
-trx_t*
-lock_clust_rec_some_has_impl(
-/*=========================*/
-	const rec_t*	rec,	/*!< in: user record */
-	dict_index_t*	index,	/*!< in: clustered index */
-	const ulint*	offsets);/*!< in: rec_get_offsets(rec, index) */
-/*********************************************************************//**
-Gets the heap_no of the smallest user record on a page.
-@return	heap_no of smallest user record, or PAGE_HEAP_NO_SUPREMUM */
-IB_INLINE
-ulint
-lock_get_min_heap_no(
-/*=================*/
-	const buf_block_t*	block);	/*!< in: buffer block */
+/// \brief Gets the size of a lock struct.
+/// \return size in bytes
+IB_INTERN ulint lock_get_size(void);
+/// \brief Creates the lock system at database start.
+/// \param [in] n_cells number of slots in lock hash table
+IB_INTERN void lock_sys_create(ulint n_cells);
+/// \brief Closes the lock system at database shutdown.
+IB_INTERN void lock_sys_close(void);
+/// \brief Checks if some transaction has an implicit x-lock on a record in a clustered index.
+/// \return transaction which has the x-lock, or NULL
+/// \param [in] rec user record
+/// \param [in] index clustered index
+/// \param [in] offsets rec_get_offsets(rec, index)
+IB_INLINE trx_t* lock_clust_rec_some_has_impl(const rec_t* rec, ib_dict_index_t* index, const ulint* offsets);
+/// \brief Gets the heap_no of the smallest user record on a page.
+/// \return heap_no of smallest user record, or PAGE_HEAP_NO_SUPREMUM
+/// \param [in] block buffer block
+IB_INLINE ulint lock_get_min_heap_no(const buf_block_t* block);
 /*************************************************************//**
 Updates the lock table when we have reorganized a page. NOTE: we copy
 also the locks set on the infimum of the page; the infimum may carry
@@ -293,7 +266,7 @@ lock_rec_insert_check_and_lock(
 				set, does nothing */
 	const rec_t*	rec,	/*!< in: record after which to insert */
 	buf_block_t*	block,	/*!< in/out: buffer block of rec */
-	dict_index_t*	index,	/*!< in: index */
+	ib_dict_index_t*	index,	/*!< in: index */
 	que_thr_t*	thr,	/*!< in: query thread */
 	mtr_t*		mtr,	/*!< in/out: mini-transaction */
 	ibool*		inherit);/*!< out: set to TRUE if the new
@@ -317,7 +290,7 @@ lock_clust_rec_modify_check_and_lock(
 	const buf_block_t*	block,	/*!< in: buffer block of rec */
 	const rec_t*		rec,	/*!< in: record which should be
 					modified */
-	dict_index_t*		index,	/*!< in: clustered index */
+	ib_dict_index_t*		index,	/*!< in: clustered index */
 	const ulint*		offsets,/*!< in: rec_get_offsets(rec, index) */
 	que_thr_t*		thr);	/*!< in: query thread */
 /*********************************************************************//**
@@ -336,7 +309,7 @@ lock_sec_rec_modify_check_and_lock(
 				index, we always have to modify the
 				clustered index record first: see the
 				comment below */
-	dict_index_t*	index,	/*!< in: secondary index */
+	ib_dict_index_t*	index,	/*!< in: secondary index */
 	que_thr_t*	thr,	/*!< in: query thread */
 	mtr_t*		mtr);	/*!< in/out: mini-transaction */
 /*********************************************************************//**
@@ -354,9 +327,9 @@ lock_sec_rec_read_check_and_lock(
 					supremum record which should
 					be read or passed over by a
 					read cursor */
-	dict_index_t*		index,	/*!< in: secondary index */
+	ib_dict_index_t*		index,	/*!< in: secondary index */
 	const ulint*		offsets,/*!< in: rec_get_offsets(rec, index) */
-	enum lock_mode		mode,	/*!< in: mode of the lock which
+	enum ib_lock_mode		mode,	/*!< in: mode of the lock which
 					the read cursor should set on
 					records: LOCK_S or LOCK_X; the
 					latter is possible in
@@ -383,9 +356,9 @@ lock_clust_rec_read_check_and_lock(
 					supremum record which should
 					be read or passed over by a
 					read cursor */
-	dict_index_t*		index,	/*!< in: clustered index */
+	ib_dict_index_t*		index,	/*!< in: clustered index */
 	const ulint*		offsets,/*!< in: rec_get_offsets(rec, index) */
-	enum lock_mode		mode,	/*!< in: mode of the lock which
+	enum ib_lock_mode		mode,	/*!< in: mode of the lock which
 					the read cursor should set on
 					records: LOCK_S or LOCK_X; the
 					latter is possible in
@@ -414,8 +387,8 @@ lock_clust_rec_read_check_and_lock_alt(
 					supremum record which should
 					be read or passed over by a
 					read cursor */
-	dict_index_t*		index,	/*!< in: clustered index */
-	enum lock_mode		mode,	/*!< in: mode of the lock which
+	ib_dict_index_t*		index,	/*!< in: clustered index */
+	enum ib_lock_mode		mode,	/*!< in: mode of the lock which
 					the read cursor should set on
 					records: LOCK_S or LOCK_X; the
 					latter is possible in
@@ -433,7 +406,7 @@ lock_clust_rec_cons_read_sees(
 /*==========================*/
 	const rec_t*	rec,	/*!< in: user record which should be read or
 				passed over by a read cursor */
-	dict_index_t*	index,	/*!< in: clustered index */
+	ib_dict_index_t*	index,	/*!< in: clustered index */
 	const ulint*	offsets,/*!< in: rec_get_offsets(rec, index) */
 	read_view_t*	view);	/*!< in: consistent read view */
 /*********************************************************************//**
@@ -465,7 +438,7 @@ lock_table(
 	ulint		flags,	/*!< in: if BTR_NO_LOCKING_FLAG bit is set,
 				does nothing */
 	dict_table_t*	table,	/*!< in: database table in dictionary cache */
-	enum lock_mode	mode,	/*!< in: lock mode */
+	enum ib_lock_mode	mode,	/*!< in: lock mode */
 	que_thr_t*	thr);	/*!< in: query thread */
 /*************************************************************//**
 Removes a granted record lock of a transaction from the queue and grants
@@ -479,7 +452,7 @@ lock_rec_unlock(
 					set a record lock */
 	const buf_block_t*	block,	/*!< in: buffer block containing rec */
 	const rec_t*		rec,	/*!< in: record */
-	enum lock_mode		lock_mode);/*!< in: LOCK_S or LOCK_X */
+	enum ib_lock_mode		ib_lock_mode);/*!< in: LOCK_S or LOCK_X */
 /*********************************************************************//**
 Releases transaction locks, and releases possible other transactions waiting
 because of these locks. */
@@ -495,7 +468,7 @@ IB_INTERN
 void
 lock_cancel_waiting_and_release(
 /*============================*/
-	lock_t*	lock);	/*!< in: waiting lock request */
+	ib_lock_t*	lock);	/*!< in: waiting lock request */
 
 /*********************************************************************//**
 Removes locks on a table to be dropped or truncated.
@@ -542,7 +515,7 @@ IB_INTERN
 ulint
 lock_rec_find_set_bit(
 /*==================*/
-	const lock_t*	lock);	/*!< in: record lock with at least one
+	const ib_lock_t*	lock);	/*!< in: record lock with at least one
 				bit set */
 
 /*********************************************************************//**
@@ -558,7 +531,7 @@ lock_get_src_table(
 /*===============*/
 	trx_t*		trx,	/*!< in: transaction */
 	dict_table_t*	dest,	/*!< in: destination of ALTER TABLE */
-	enum lock_mode*	mode);	/*!< out: lock mode of the source table */
+	enum ib_lock_mode*	mode);	/*!< out: lock mode of the source table */
 /*********************************************************************//**
 Determine if the given table is exclusively "owned" by the given
 transaction, i.e., transaction holds LOCK_IX and possibly LOCK_AUTO_INC
@@ -578,8 +551,8 @@ IB_INTERN
 ibool
 lock_has_to_wait(
 /*=============*/
-	const lock_t*	lock1,	/*!< in: waiting lock */
-	const lock_t*	lock2);	/*!< in: another lock; NOTE that it is
+	const ib_lock_t*	lock1,	/*!< in: waiting lock */
+	const ib_lock_t*	lock2);	/*!< in: another lock; NOTE that it is
 				assumed that this has a lock bit set
 				on the same record as in lock1 if the
 				locks are record locks */
@@ -592,7 +565,7 @@ lock_check_trx_id_sanity(
 /*=====================*/
 	trx_id_t	trx_id,		/*!< in: trx id */
 	const rec_t*	rec,		/*!< in: user record */
-	dict_index_t*	index,		/*!< in: clustered index */
+	ib_dict_index_t*	index,		/*!< in: clustered index */
 	const ulint*	offsets,	/*!< in: rec_get_offsets(rec, index) */
 	ibool		has_kernel_mutex);/*!< in: TRUE if the caller owns the
 					kernel mutex */
@@ -603,7 +576,7 @@ void
 lock_table_print(
 /*=============*/
 	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	const lock_t*	lock);		/*!< in: table type lock */
+	const ib_lock_t*	lock);		/*!< in: table type lock */
 /*********************************************************************//**
 Prints info of a record lock. */
 IB_INTERN
@@ -611,7 +584,7 @@ void
 lock_rec_print(
 /*===========*/
 	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	const lock_t*	lock);		/*!< in: record type lock */
+	const ib_lock_t*	lock);		/*!< in: record type lock */
 /*********************************************************************//**
 Prints info of locks for all transactions.
 @return FALSE if not able to obtain kernel mutex
@@ -628,199 +601,100 @@ lock_print_info_summary(
 Prints info of locks for each transaction. */
 IB_INTERN
 void
-lock_print_info_all_transactions(
-/*=============================*/
-	ib_stream_t	state->stream);	/*!< in: stream where to print */
+lock_print_info_all_transactions(ib_stream_t	state->stream);	/*!< in: stream where to print */
 /*********************************************************************//**
 Return approximate number or record locks (bits set in the bitmap) for
 this transaction. Since delete-marked records may be removed, the
 record count will not be precise. */
 IB_INTERN
 ulint
-lock_number_of_rows_locked(
-/*=======================*/
-	trx_t*	trx);	/*!< in: transaction */
+lock_number_of_rows_locked(trx_t* trx);	/*!< in: transaction */
 
 /*******************************************************************//**
 Gets the type of a lock. Non-inline version for using outside of the
 lock module.
 @return	LOCK_TABLE or LOCK_REC */
-IB_INTERN
-ulint
-lock_get_type(
-/*==========*/
-	const lock_t*	lock);	/*!< in: lock */
+IB_INTERN ulint lock_get_type(const ib_lock_t* lock);	/*!< in: lock */
 
-/*******************************************************************//**
-Gets the id of the transaction owning a lock.
-@return	transaction id */
-IB_INTERN
-ib_uint64_t
-lock_get_trx_id(
-/*============*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief Gets the id of the transaction owning a lock.
+/// \param [in] lock the lock
+/// \return	transaction id
+IB_INTERN ib_uint64_t lock_get_trx_id(const ib_lock_t* lock);
 
-/*******************************************************************//**
-Gets the mode of a lock in a human readable string.
-The string should not be free()'d or modified.
-@return	lock mode */
-IB_INTERN
-const char*
-lock_get_mode_str(
-/*==============*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief Gets the mode of a lock in a human readable string.
+/// \param [in] lock the lock
+/// \return	lock mode
+IB_INTERN const char* lock_get_mode_str(const ib_lock_t* lock);
 
-/*******************************************************************//**
-Gets the type of a lock in a human readable string.
-The string should not be free()'d or modified.
-@return	lock type */
-IB_INTERN
-const char*
-lock_get_type_str(
-/*==============*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief Gets the type of a lock in a human readable string.
+/// \param [in] lock the lock
+/// \return	lock type
+IB_INTERN const char* lock_get_type_str(const ib_lock_t* lock);
 
-/*******************************************************************//**
-Gets the id of the table on which the lock is.
-@return	id of the table */
-IB_INTERN
-ib_uint64_t
-lock_get_table_id(
-/*==============*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief Gets the id of the table on which the lock is.
+/// \param [in] lock the lock
+/// \return	id of the table
+IB_INTERN ib_uint64_t lock_get_table_id(const ib_lock_t* lock);
 
-/*******************************************************************//**
-Gets the name of the table on which the lock is.
-The string should not be free()'d or modified.
-@return	name of the table */
-IB_INTERN
-const char*
-lock_get_table_name(
-/*================*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief Gets the name of the table on which the lock is.
+/// \param [in] lock the lock
+/// \return	name of the table
+IB_INTERN const char* lock_get_table_name(const ib_lock_t* lock);
 
-/*******************************************************************//**
-For a record lock, gets the index on which the lock is.
-@return	index */
-IB_INTERN
-const dict_index_t*
-lock_rec_get_index(
-/*===============*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief For a record lock, gets the index on which the lock is.
+/// \param [in] lock the lock
+/// \return	index
+IB_INTERN const ib_dict_index_t* lock_rec_get_index(const ib_lock_t* lock);
 
-/*******************************************************************//**
-For a record lock, gets the name of the index on which the lock is.
-The string should not be free()'d or modified.
-@return	name of the index */
-IB_INTERN
-const char*
-lock_rec_get_index_name(
-/*====================*/
-	const lock_t*	lock);	/*!< in: lock */
 
-/*******************************************************************//**
-For a record lock, gets the tablespace number on which the lock is.
-@return	tablespace number */
-IB_INTERN
-ulint
-lock_rec_get_space_id(
-/*==================*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief For a record lock, gets the name of the index on which the lock is.
+/// \param [in] lock the lock
+/// \return	name of the index
+IB_INTERN const char* lock_rec_get_index_name(const ib_lock_t* lock);
 
-/*******************************************************************//**
-For a record lock, gets the page number on which the lock is.
-@return	page number */
-IB_INTERN
-ulint
-lock_rec_get_page_no(
-/*=================*/
-	const lock_t*	lock);	/*!< in: lock */
+/// \brief For a record lock, gets the tablespace number on which the lock is.
+/// \return	tablespace number
+IB_INTERN ulint lock_rec_get_space_id(const ib_lock_t* lock);
 
-/***********************************************************************//**
-Reset the lock variables. */
-IB_INTERN
-void
-lock_var_init(void);
-/*===============*/
-/***********************************************************************//**
-Closes the lock system at database shutdown. */
-IB_INTERN
-void
-lock_sys_close(void);
-/*================*/
+/// \brief  For a record lock, gets the page number on which the lock is.
+/// \param [in] lock 
+/// \return	page number
+IB_INTERN ulint lock_rec_get_page_no(const ib_lock_t* lock);
+
+
+/// \brief Reset the lock variables.
+IB_INTERN void lock_var_init(void);
+
+
+/// \brief Closes the lock system at database shutdown.
+IB_INTERN void lock_sys_close(void);
+
 
 /** Lock modes and types */
 /* @{ */
-#define LOCK_MODE_MASK	0xFUL	/*!< mask used to extract mode from the
-				type_mode field in a lock */
+constinit ulint LOCK_MODE_MASK = 0xFUL; // mask used to extract mode from the type_mode field in a lock
 /** Lock types */
 /* @{ */
-#define LOCK_TABLE	16	/*!< table lock */
-#define	LOCK_REC	32	/*!< record lock */
-#define LOCK_TYPE_MASK	0xF0UL	/*!< mask used to extract lock type from the
-				type_mode field in a lock */
-#if LOCK_MODE_MASK & LOCK_TYPE_MASK
-# error "LOCK_MODE_MASK & LOCK_TYPE_MASK"
-#endif
+constinit ulint LOCK_TABLE = 16; // table lock
+constinit ulint LOCK_REC = 32; // record lock
+constinit ulint LOCK_TYPE_MASK = 0xF0UL; // mask used to extract lock type from the type_mode field in a lock
+static_assert((LOCK_MODE_MASK & LOCK_TYPE_MASK) == 0, "LOCK_MODE_MASK & LOCK_TYPE_MASK");
 
-#define LOCK_WAIT	256	/*!< Waiting lock flag; when set, it
-				means that the lock has not yet been
-				granted, it is just waiting for its
-				turn in the wait queue */
+constinit ulint LOCK_WAIT = 256; // Waiting lock flag; when set, it means that the lock has not yet been granted, it is just waiting for its turn in the wait queue
 /* Precise modes */
-#define LOCK_ORDINARY	0	/*!< this flag denotes an ordinary
-				next-key lock in contrast to LOCK_GAP
-				or LOCK_REC_NOT_GAP */
-#define LOCK_GAP	512	/*!< when this bit is set, it means that the
-				lock holds only on the gap before the record;
-				for instance, an x-lock on the gap does not
-				give permission to modify the record on which
-				the bit is set; locks of this type are created
-				when records are removed from the index chain
-				of records */
-#define LOCK_REC_NOT_GAP 1024	/*!< this bit means that the lock is only on
-				the index record and does NOT block inserts
-				to the gap before the index record; this is
-				used in the case when we retrieve a record
-				with a unique key, and is also used in
-				locking plain SELECTs (not part of UPDATE
-				or DELETE) when the user has set the READ
-				COMMITTED isolation level */
-#define LOCK_INSERT_INTENTION 2048 /*!< this bit is set when we place a waiting
-				gap type record lock request in order to let
-				an insert of an index record to wait until
-				there are no conflicting locks by other
-				transactions on the gap; note that this flag
-				remains set when the waiting lock is granted,
-				or if the lock is inherited to a neighboring
-				record */
-#if (LOCK_WAIT|LOCK_GAP|LOCK_REC_NOT_GAP|LOCK_INSERT_INTENTION)&LOCK_MODE_MASK
-# error
-#endif
-#if (LOCK_WAIT|LOCK_GAP|LOCK_REC_NOT_GAP|LOCK_INSERT_INTENTION)&LOCK_TYPE_MASK
-# error
-#endif
+constinit ulint LOCK_ORDINARY = 0; // ordinary next-key lock in contrast to LOCK_GAP or LOCK_REC_NOT_GAP
+constinit ulint LOCK_GAP = 512; // lock holds only on the gap before the record
+constinit ulint LOCK_REC_NOT_GAP = 1024; // lock only on the index record; does not block gap inserts
+constinit ulint LOCK_INSERT_INTENTION = 2048; // waiting gap-type lock request to allow insert to wait for conflicting locks to clear
+static_assert(((LOCK_WAIT|LOCK_GAP|LOCK_REC_NOT_GAP|LOCK_INSERT_INTENTION) & LOCK_MODE_MASK) == 0);
+static_assert(((LOCK_WAIT|LOCK_GAP|LOCK_REC_NOT_GAP|LOCK_INSERT_INTENTION) & LOCK_TYPE_MASK) == 0);
 /* @} */
 
-/** Lock operation struct */
-typedef struct lock_op_struct	lock_op_t;
-/** Lock operation struct */
-struct lock_op_struct{
-	dict_table_t*	table;	/*!< table to be locked */
-	enum lock_mode	mode;	/*!< lock mode */
-};
-
-/** The lock system struct */
-struct lock_sys_struct{
-	hash_table_t*	rec_hash;	/*!< hash table of the record locks */
-};
-
-/** The lock system */
-extern lock_sys_t*	lock_sys;
-
+/// \brief The lock system
+extern lock_sys_t* lock_sys;
 
 #ifndef IB_DO_NOT_INLINE
-#include "lock0lock.inl"
+	#include "lock_lock.inl"
 #endif
 
 #endif

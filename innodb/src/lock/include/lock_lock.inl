@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/lock0lock.ic
-The transaction lock system
-
-Created 5/7/1996 Heikki Tuuri
-*******************************************************/
+/// \file lock_lock.inl
+/// \brief The transaction lock system inline methods.
+/// \details Originally created by Heikki Tuuri on 5/7/1996.
+/// \author Fabio N. Filasieno
+/// \date 2025-10-20
 
 #include "sync_sync.hpp"
 #include "srv_srv.hpp"
@@ -63,8 +58,7 @@ lock_rec_hash(
 	ulint	space,	/*!< in: space */
 	ulint	page_no)/*!< in: page number */
 {
-	return(hash_calc_hash(lock_rec_fold(space, page_no),
-			      lock_sys->rec_hash));
+    return(hash_calc_hash(lock_rec_fold(space, page_no), lock_sys->rec_hash));
 }
 
 /*********************************************************************//**
@@ -76,7 +70,7 @@ trx_t*
 lock_clust_rec_some_has_impl(
 /*=========================*/
 	const rec_t*	rec,	/*!< in: user record */
-	dict_index_t*	dict_index,	/*!< in: clustered index */
+	ib_dict_index_t*	dict_index,	/*!< in: clustered index */
 	const ulint*	offsets)/*!< in: rec_get_offsets(rec, index) */
 {
 	trx_id_t	trx_id;
@@ -88,12 +82,11 @@ lock_clust_rec_some_has_impl(
 	trx_id = row_get_rec_trx_id(rec, dict_index, offsets);
 
 	if (trx_is_active(trx_id)) {
-		/* The modifying or inserting transaction is active */
-
-		return(trx_get_on_id(trx_id));
+        // The modifying or inserting transaction is active
+        return(trx_get_on_id(trx_id));
 	}
 
-	return(NULL);
+    return NULL;
 }
 
 /*********************************************************************//**

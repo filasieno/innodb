@@ -12,12 +12,11 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-///
-/// @file lock/lock0iter.c
-/// Lock queue iterator. Can iterate over table and record
-/// lock queues.
-///
-/// Created July 16, 2007 Vasil Dimov
+/// \file lock_iter.cpp
+/// \brief Lock queue iterator.
+/// \details Can iterate over table and record lock queues.
+/// \author Fabio N. Filasieno
+/// \date 2025-10-20
 
 #define LOCK_MODULE_IMPLEMENTATION
 
@@ -27,6 +26,28 @@
 #include "univ.inl"
 #include "ut_dbg.hpp"
 #include "ut_lst.hpp"
+
+// -----------------------------------------------------------------------------------------
+// type definitions
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+// (none)
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 
 ///
 /// \brief Initialize lock queue iterator so that it starts to iterate from

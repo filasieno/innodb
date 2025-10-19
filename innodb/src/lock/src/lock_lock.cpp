@@ -12,11 +12,74 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
+/// \file lock_lock.cpp
+/// \brief The transaction lock system implementation.
+/// \details 
+/// An explicit record lock affects both the record and the gap before it. An implicit x-lock does not affect the gap, it only locks the index record from read or update.
 ///
-/// \file lock/lock0lock.c
-/// The transaction lock system
+/// If a transaction has modified or inserted an index record, then it owns an implicit x-lock on the record. On a secondary index record, a transaction has an implicit x-lock also if it has modified the clustered index record, the max trx id of the page where the secondary index record resides is >= trx id of the transaction (or database recovery is running), and there are no explicit non-gap lock requests on the secondary index record.
 ///
-/// Created 5/7/1996 Heikki Tuuri
+/// This complicated definition for a secondary index comes from the implementation: we want to be able to determine if a secondary index record has an implicit x-lock, just by looking at the present clustered index record, not at the historical versions of the record. The complicated definition can be explained to the user so that there is nondeterminism in the access path when a query is answered: we may, or may not, access the clustered index record and thus may, or may not, bump into an x-lock set there.
+///
+/// Different transaction can have conflicting locks set on the gap at the same time. The locks on the gap are purely inhibitive: an insert cannot be made, or a select cursor may have to wait if a different transaction has a conflicting lock on the gap. An x-lock on the gap does not give the right to insert into the gap.
+///
+/// An explicit lock can be placed on a user record or the supremum record of a page. The locks on the supremum record are always thought to be of the gap type, though the gap bit is not set. When we perform an update of a record where the size of the record changes, we may temporarily store its explicit locks on the infimum record of the page, though the infimum otherwise never carries locks.
+///
+/// A waiting record lock can also be of the gap type. A waiting lock request can be granted when there is no conflicting mode lock request by another transaction ahead of it in the explicit lock queue.
+///
+/// In version 4.0.5 we added yet another explicit lock type: LOCK_REC_NOT_GAP. It only locks the record it is placed on, not the gap before the record. This lock type is necessary to emulate an Oracle-like READ COMMITTED isolation level.
+///
+/// -------------------------------------------------------------------------
+/// RULE 1: If there is an implicit x-lock on a record, and there are non-gap lock requests waiting in the queue, then the transaction holding the implicit x-lock also has an explicit non-gap record x-lock. Therefore, as locks are released, we can grant locks to waiting lock requests purely by looking at the explicit lock requests in the queue.
+///
+/// RULE 3: Different transactions cannot have conflicting granted non-gap locks on a record at the same time. However, they can have conflicting granted gap locks.
+/// RULE 4: If a there is a waiting lock request in a queue, no lock request, gap or not, can be inserted ahead of it in the queue. In record deletes and page splits new gap type locks can be created by the database manager for a transaction, and without rule 4, the waits-for graph of transactions might become cyclic without the database noticing it, as the deadlock check is only performed when a transaction itself requests a lock!
+/// -------------------------------------------------------------------------
+///
+/// An insert is allowed to a gap if there are no explicit lock requests by other transactions on the next record. It does not matter if these lock requests are granted or waiting, gap bit set or not, with the exception that a gap type request set by another transaction to wait for its turn to do an insert is ignored. On the other hand, an implicit x-lock by another transaction does not prevent an insert, which allows for more concurrency when using an Oracle-style sequence number generator for the primary key with many transactions doing inserts concurrently.
+///
+/// A modify of a record is allowed if the transaction has an x-lock on the record, or if other transactions do not have any non-gap lock requests on the record.
+///
+/// A read of a single user record with a cursor is allowed if the transaction has a non-gap explicit, or an implicit lock on the record, or if the other transactions have no x-lock requests on the record. At a page supremum a read is always allowed.
+///
+/// In summary, an implicit lock is seen as a granted x-lock only on the record, not on the gap. An explicit lock with no gap bit set is a lock both on the record and the gap. If the gap bit is set, the lock is only on the gap. Different transaction cannot own conflicting locks on the record at the same time, but they may own conflicting locks on the gap. Granted locks on a record give an access right to the record, but gap type locks just inhibit operations.
+///
+/// NOTE: Finding out if some transaction has an implicit x-lock on a secondary index record can be cumbersome. We may have to look at previous versions of the corresponding clustered index record to find out if a delete marked secondary index record was delete marked by an active transaction, not by a committed one.
+///
+/// FACT A: If a transaction has inserted a row, it can delete it any time without need to wait for locks.
+///
+/// PROOF: The transaction has an implicit x-lock on every index record inserted for the row, and can thus modify each record without the need to wait. Q.E.D.
+///
+/// FACT B: If a transaction has read some result set with a cursor, it can read it again, and retrieves the same result set, if it has not modified the result set in the meantime. Hence, there is no phantom problem. If the biggest record, in the alphabetical order, touched by the cursor is removed, a lock wait may occur, otherwise not.
+///
+/// PROOF: When a read cursor proceeds, it sets an s-lock on each user record it passes, and a gap type s-lock on each page supremum. The cursor must wait until it has these locks granted. Then no other transaction can have a granted x-lock on any of the user records, and therefore cannot modify the user records. Neither can any other transaction insert into the gaps which were passed over by the cursor. Page splits and merges, and removal of obsolete versions of records do not affect this, because when a user record or a page supremum is removed, the next record inherits its locks as gap type locks, and therefore blocks inserts to the same gap. Also, if a page supremum is inserted, it inherits its locks from the successor record. When the cursor is positioned again at the start of the result set, the records it will touch on its course are either records it touched during the last pass or new inserted page supremums. It can immediately access all these records, and when it arrives at the biggest record, it notices that the result set is complete. If the biggest record was removed, lock wait can occur because the next record only inherits a gap type lock, and a wait may be needed. Q.E.D./
+
+/// If an index record should be changed or a new inserted, we must check the lock on the record or the next. When a read cursor starts reading, we will set a record level s-lock on each record it passes, except on the initial record on which the cursor is positioned before we start to fetch records. Our index tree search has the convention that the B-tree cursor is positioned BEFORE the first possibly matching record in the search. Optimizations are possible here: if the record is searched on an equality condition to a unique key, we could actually set a special lock on the record, a lock which would not prevent any insert before this record. In the next key locking an x-lock set on a record also prevents inserts just before that record.
+/// 	There are special infimum and supremum records on each page. A supremum record can be locked by a read cursor. This records cannot be updated but the lock prevents insert of a user record to the end of the page.
+/// 	Next key locks will prevent the phantom problem where new rows could appear to SELECT result sets after the select operation has been performed. Prevention of phantoms ensures the serilizability of transactions.
+/// 	What should we check if an insert of a new record is wanted? Only the lock on the next record on the same page, because also the supremum record can carry a lock. An s-lock prevents insertion, but what about an x-lock? If it was set by a searched update, then there is implicitly an s-lock, too, and the insert should be prevented.
+/// What if our transaction owns an x-lock to the next record, but there is a waiting s-lock request on the next record? If this s-lock was placed by a read cursor moving in the ascending order in the index, we cannot do the insert immediately, because when we finally commit our transaction, the read cursor should see also the new inserted record. So we should move the read cursor backward from the next record for it to pass over the new inserted record. This move backward may be too cumbersome to implement. If we in this situation just enqueue a second x-lock request for our transaction on the next record, then the deadlock mechanism notices a deadlock between our transaction and the s-lock request transaction. This seems to be an ok solution.
+/// 	We could have the convention that granted explicit record locks, lock the corresponding records from changing, and also lock the gaps before them from inserting. A waiting explicit lock request locks the gap before from inserting. Implicit record x-locks, which we derive from the transaction id in the clustered index record, only lock the record itself from modification, not the gap before it from inserting.
+/// 	How should we store update locks? If the search is done by a unique key, we could just modify the record trx id. Otherwise, we could put a record x-lock on the record. If the update changes ordering fields of the clustered index record, the inserted new record needs no record lock in lock table, the trx id is enough. The same holds for a secondary index record. Searched delete is similar to update.
+///
+/// PROBLEM:
+/// What about waiting lock requests? If a transaction is waiting to make an update to a record which another modified, how does the other transaction know to send the end-lock-wait signal to the waiting transaction? If we have the convention that a transaction may wait for just one lock at a time, how do we preserve it if lock wait ends?
+///
+/// PROBLEM:
+/// Checking the trx id label of a secondary index record. In the case of a modification, not an insert, is this necessary? A secondary index record is modified only by setting or resetting its deleted flag. A secondary index record contains fields to uniquely determine the corresponding clustered index record. A secondary index record is therefore only modified if we also modify the clustered index record, and the trx id checking is done on the clustered index record, before we come to modify the secondary index record. So, in the case of delete marking or unmarking a secondary index record, we do not have to care about trx ids, only the locks in the lock table must be checked. In the case of a select from a secondary index, the trx id is relevant, and in this case we may have to search the clustered index record.
+///
+/// PROBLEM: How to update record locks when page is split or merged, or a record is deleted or updated?
+/// --------------------------------------------------------------------
+/// If the size of fields in a record changes, we perform the update by a delete followed by an insert. How can we retain the locks set or waiting on the record? Because a record lock is indexed in the bitmap by the heap number of the record, when we remove the record from the record list, it is possible still to keep the lock bits. If the page is reorganized, we could make a table of old and new heap numbers, and permute the bitmaps in the locks accordingly. We can add to the table a row telling where the updated record ended. If the update does not require a reorganization of the page, we can simply move the lock bits for the updated record to the position determined by its new heap number (we may have to allocate a new lock, if we run out of the bitmap in the old one).
+/// 	A more complicated case is the one where the reinsertion of the updated record is done pessimistically, because the structure of the tree may change.
+///
+/// PROBLEM: If a supremum record is removed in a page merge, or a record removed in a purge, what to do to the waiting lock requests? In a split to the right, we just move the lock requests to the new supremum. If a record is removed, we could move the waiting lock request to its inheritor, the next record in the index. But, the next record may already have lock requests on its own queue. A new deadlock check should be made then. Maybe it is easier just to release the waiting transactions. They can then enqueue new lock requests on appropriate records.
+///
+/// PROBLEM: When a record is inserted, what locks should it inherit from the upper neighbor? An insert of a new supremum record in a page split is always possible, but an insert of a new user record requires that the upper neighbor does not have any lock requests by other transactions, granted or waiting, in its lock queue. Solution: We can copy the locks as gap type locks, so that also the waiting locks are transformed to granted gap type locks on the inserted record.
+/// Originally created by Heikki Tuuri.
+/// \author Fabio N. Filasieno
+/// \date 2025-10-20
+
 
 #define LOCK_MODULE_IMPLEMENTATION
 
@@ -34,258 +97,50 @@
 #include "trx_sys.hpp"
 #include "usr_sess.hpp"
 
+// -----------------------------------------------------------------------------------------
+// type definitions
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+#ifdef IB_DEBUG
+static ibool lock_validate(void);
+static ibool lock_rec_validate_page(ulint space, ulint zip_size, ulint page_no);
+#endif
+static ibool lock_deadlock_occurs(lock_t* lock, trx_t* trx);
+static ulint lock_deadlock_recursive(trx_t* start, trx_t* trx, lock_t* wait_lock, ulint* cost, ulint depth);
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
+
 // Restricts the length of search we will do in the waits-for
 // graph of transactions
-#define LOCK_MAX_N_STEPS_IN_DEADLOCK_CHECK 1000000
+constinit ulint LOCK_MAX_N_STEPS_IN_DEADLOCK_CHECK = 1000000;
 
 // Restricts the recursion depth of the search we will do in the waits-for
 // graph of transactions
-#define LOCK_MAX_DEPTH_IN_DEADLOCK_CHECK 200
+constinit ulint LOCK_MAX_DEPTH_IN_DEADLOCK_CHECK = 200;
 
 // When releasing transaction locks, this specifies how often we release
 // the kernel mutex for a moment to give also others access to it
-
-#define LOCK_RELEASE_KERNEL_INTERVAL 1000
+constinit ulint LOCK_RELEASE_KERNEL_INTERVAL = 1000;
 
 // Safety margin when creating a new record lock: this many extra records
 // can be inserted to the page without need to create a lock with a bigger
 // bitmap
+constinit ulint LOCK_PAGE_BITMAP_MARGIN = 64;
 
-#define LOCK_PAGE_BITMAP_MARGIN 64
 
-// An explicit record lock affects both the record and the gap before it.
-// An implicit x-lock does not affect the gap, it only locks the index
-// record from read or update.
-//
-// If a transaction has modified or inserted an index record, then
-// it owns an implicit x-lock on the record. On a secondary index record,
-// a transaction has an implicit x-lock also if it has modified the
-// clustered index record, the max trx id of the page where the secondary
-// index record resides is >= trx id of the transaction (or database recovery
-// is running), and there are no explicit non-gap lock requests on the
-// secondary index record.
-//
-// This complicated definition for a secondary index comes from the
-// implementation: we want to be able to determine if a secondary index
-// record has an implicit x-lock, just by looking at the present clustered
-// index record, not at the historical versions of the record. The
-// complicated definition can be explained to the user so that there is
-// nondeterminism in the access path when a query is answered: we may,
-// or may not, access the clustered index record and thus may, or may not,
-// bump into an x-lock set there.
-//
-// Different transaction can have conflicting locks set on the gap at the
-// same time. The locks on the gap are purely inhibitive: an insert cannot
-// be made, or a select cursor may have to wait if a different transaction
-// has a conflicting lock on the gap. An x-lock on the gap does not give
-// the right to insert into the gap.
-//
-// An explicit lock can be placed on a user record or the supremum record of
-// a page. The locks on the supremum record are always thought to be of the gap
-// type, though the gap bit is not set. When we perform an update of a record
-// where the size of the record changes, we may temporarily store its explicit
-// locks on the infimum record of the page, though the infimum otherwise never
-// carries locks.
-//
-// A waiting record lock can also be of the gap type. A waiting lock request
-// can be granted when there is no conflicting mode lock request by another
-// transaction ahead of it in the explicit lock queue.
-//
-// In version 4.0.5 we added yet another explicit lock type: LOCK_REC_NOT_GAP.
-// It only locks the record it is placed on, not the gap before the record.
-// This lock type is necessary to emulate an Oracle-like READ COMMITTED isolation
-// level.
-//
-// -------------------------------------------------------------------------
-// RULE 1: If there is an implicit x-lock on a record, and there are non-gap
-// -------
-// lock requests waiting in the queue, then the transaction holding the implicit
-// x-lock also has an explicit non-gap record x-lock. Therefore, as locks are
-// released, we can grant locks to waiting lock requests purely by looking at
-// the explicit lock requests in the queue.
-//
-// RULE 3: Different transactions cannot have conflicting granted non-gap locks
-// -------
-// on a record at the same time. However, they can have conflicting granted gap
-// locks.
-// RULE 4: If a there is a waiting lock request in a queue, no lock request,
-// -------
-// gap or not, can be inserted ahead of it in the queue. In record deletes
-// and page splits new gap type locks can be created by the database manager
-// for a transaction, and without rule 4, the waits-for graph of transactions
-// might become cyclic without the database noticing it, as the deadlock check
-// is only performed when a transaction itself requests a lock!
-// -------------------------------------------------------------------------
-//
-// An insert is allowed to a gap if there are no explicit lock requests by
-// other transactions on the next record. It does not matter if these lock
-// requests are granted or waiting, gap bit set or not, with the exception
-// that a gap type request set by another transaction to wait for
-// its turn to do an insert is ignored. On the other hand, an
-// implicit x-lock by another transaction does not prevent an insert, which
-// allows for more concurrency when using an Oracle-style sequence number
-// generator for the primary key with many transactions doing inserts
-// concurrently.
-//
-// A modify of a record is allowed if the transaction has an x-lock on the
-// record, or if other transactions do not have any non-gap lock requests on the
-// record.
-//
-// A read of a single user record with a cursor is allowed if the transaction
-// has a non-gap explicit, or an implicit lock on the record, or if the other
-// transactions have no x-lock requests on the record. At a page supremum a
-// read is always allowed.
-//
-// In summary, an implicit lock is seen as a granted x-lock only on the
-// record, not on the gap. An explicit lock with no gap bit set is a lock
-// both on the record and the gap. If the gap bit is set, the lock is only
-// on the gap. Different transaction cannot own conflicting locks on the
-// record at the same time, but they may own conflicting locks on the gap.
-// Granted locks on a record give an access right to the record, but gap type
-// locks just inhibit operations.
-//
-// NOTE: Finding out if some transaction has an implicit x-lock on a secondary
-// index record can be cumbersome. We may have to look at previous versions of
-// the corresponding clustered index record to find out if a delete marked
-// secondary index record was delete marked by an active transaction, not by
-// a committed one.
-//
-// FACT A: If a transaction has inserted a row, it can delete it any time
-// without need to wait for locks.
-//
-// PROOF: The transaction has an implicit x-lock on every index record inserted
-// for the row, and can thus modify each record without the need to wait. Q.E.D.
-//
-// FACT B: If a transaction has read some result set with a cursor, it can read
-// it again, and retrieves the same result set, if it has not modified the
-// result set in the meantime. Hence, there is no phantom problem. If the
-// biggest record, in the alphabetical order, touched by the cursor is removed,
-// a lock wait may occur, otherwise not.
-//
-// PROOF: When a read cursor proceeds, it sets an s-lock on each user record
-// it passes, and a gap type s-lock on each page supremum. The cursor must
-// wait until it has these locks granted. Then no other transaction can
-// have a granted x-lock on any of the user records, and therefore cannot
-// modify the user records. Neither can any other transaction insert into
-// the gaps which were passed over by the cursor. Page splits and merges,
-// and removal of obsolete versions of records do not affect this, because
-// when a user record or a page supremum is removed, the next record inherits
-// its locks as gap type locks, and therefore blocks inserts to the same gap.
-// Also, if a page supremum is inserted, it inherits its locks from the successor
-// record. When the cursor is positioned again at the start of the result set,
-// the records it will touch on its course are either records it touched
-// during the last pass or new inserted page supremums. It can immediately
-// access all these records, and when it arrives at the biggest record, it
-// notices that the result set is complete. If the biggest record was removed,
-// lock wait can occur because the next record only inherits a gap type lock,
-// and a wait may be needed. Q.E.D.
-
-// If an index record should be changed or a new inserted, we must check
-// the lock on the record or the next. When a read cursor starts reading,
-// we will set a record level s-lock on each record it passes, except on the
-// initial record on which the cursor is positioned before we start to fetch
-// records. Our index tree search has the convention that the B-tree
-// cursor is positioned BEFORE the first possibly matching record in
-// the search. Optimizations are possible here: if the record is searched
-// on an equality condition to a unique key, we could actually set a special
-// lock on the record, a lock which would not prevent any insert before
-// this record. In the next key locking an x-lock set on a record also
-// prevents inserts just before that record.
-// 	There are special infimum and supremum records on each page.
-// A supremum record can be locked by a read cursor. This records cannot be
-// updated but the lock prevents insert of a user record to the end of
-// the page.
-// 	Next key locks will prevent the phantom problem where new rows
-// could appear to SELECT result sets after the select operation has been
-// performed. Prevention of phantoms ensures the serilizability of
-// transactions.
-// 	What should we check if an insert of a new record is wanted?
-// Only the lock on the next record on the same page, because also the
-// supremum record can carry a lock. An s-lock prevents insertion, but
-// what about an x-lock? If it was set by a searched update, then there
-// is implicitly an s-lock, too, and the insert should be prevented.
-// What if our transaction owns an x-lock to the next record, but there is
-// a waiting s-lock request on the next record? If this s-lock was placed
-// by a read cursor moving in the ascending order in the index, we cannot
-// do the insert immediately, because when we finally commit our transaction,
-// the read cursor should see also the new inserted record. So we should
-// move the read cursor backward from the next record for it to pass over
-// the new inserted record. This move backward may be too cumbersome to
-// implement. If we in this situation just enqueue a second x-lock request
-// for our transaction on the next record, then the deadlock mechanism
-// notices a deadlock between our transaction and the s-lock request
-// transaction. This seems to be an ok solution.
-// 	We could have the convention that granted explicit record locks,
-// lock the corresponding records from changing, and also lock the gaps
-// before them from inserting. A waiting explicit lock request locks the gap
-// before from inserting. Implicit record x-locks, which we derive from the
-// transaction id in the clustered index record, only lock the record itself
-// from modification, not the gap before it from inserting.
-// 	How should we store update locks? If the search is done by a unique
-// key, we could just modify the record trx id. Otherwise, we could put a record
-// x-lock on the record. If the update changes ordering fields of the
-// clustered index record, the inserted new record needs no record lock in
-// lock table, the trx id is enough. The same holds for a secondary index
-// record. Searched delete is similar to update.
-//
-// PROBLEM:
-// What about waiting lock requests? If a transaction is waiting to make an
-// update to a record which another modified, how does the other transaction
-// know to send the end-lock-wait signal to the waiting transaction? If we have
-// the convention that a transaction may wait for just one lock at a time, how
-// do we preserve it if lock wait ends?
-//
-// PROBLEM:
-// Checking the trx id label of a secondary index record. In the case of a
-// modification, not an insert, is this necessary? A secondary index record
-// is modified only by setting or resetting its deleted flag. A secondary index
-// record contains fields to uniquely determine the corresponding clustered
-// index record. A secondary index record is therefore only modified if we
-// also modify the clustered index record, and the trx id checking is done
-// on the clustered index record, before we come to modify the secondary index
-// record. So, in the case of delete marking or unmarking a secondary index
-// record, we do not have to care about trx ids, only the locks in the lock
-// table must be checked. In the case of a select from a secondary index, the
-// trx id is relevant, and in this case we may have to search the clustered
-// index record.
-//
-// PROBLEM: How to update record locks when page is split or merged, or
-// --------------------------------------------------------------------
-// a record is deleted or updated?
-// If the size of fields in a record changes, we perform the update by
-// a delete followed by an insert. How can we retain the locks set or
-// waiting on the record? Because a record lock is indexed in the bitmap
-// by the heap number of the record, when we remove the record from the
-// record list, it is possible still to keep the lock bits. If the page
-// is reorganized, we could make a table of old and new heap numbers,
-// and permute the bitmaps in the locks accordingly. We can add to the
-// table a row telling where the updated record ended. If the update does
-// not require a reorganization of the page, we can simply move the lock
-// bits for the updated record to the position determined by its new heap
-// number (we may have to allocate a new lock, if we run out of the bitmap
-// in the old one).
-// 	A more complicated case is the one where the reinsertion of the
-// updated record is done pessimistically, because the structure of the
-// tree may change.
-//
-// PROBLEM: If a supremum record is removed in a page merge, or a record
-// ---------------------------------------------------------------------
-// removed in a purge, what to do to the waiting lock requests? In a split to
-// the right, we just move the lock requests to the new supremum. If a record
-// is removed, we could move the waiting lock request to its inheritor, the
-// next record in the index. But, the next record may already have lock
-// requests on its own queue. A new deadlock check should be made then. Maybe
-// it is easier just to release the waiting transactions. They can then enqueue
-// new lock requests on appropriate records.
-//
-// PROBLEM: When a record is inserted, what locks should it inherit from the
-// -------------------------------------------------------------------------
-// upper neighbor? An insert of a new supremum record in a page split is
-// always possible, but an insert of a new user record requires that the upper
-// neighbor does not have any lock requests by other transactions, granted or
-// waiting, in its lock queue. Solution: We can copy the locks as gap type
-// locks, so that also the waiting locks are transformed to granted gap type
-// locks on the inserted record.
 
 // LOCK COMPATIBILITY MATRIX
 //    IS IX S  X  AI
@@ -367,29 +222,21 @@ IB_INTERN ib_stream_t lock_latest_err_stream;
 /// \return TRUE if a deadlock was detected and we chose trx as a victim;
 /// FALSE if no deadlock, or there was a deadlock, but we chose other
 /// transaction(s) as victim(s)
-static ibool lock_deadlock_occurs(
-	//======================
-	lock_t *lock, trx_t *trx
-)
-	///
-	/// \brief Looks recursively for a deadlock.
-	/// \details Recursively traverses the wait-for graph starting from a given
-	/// transaction to detect deadlock cycles in the transaction dependency graph.
-	/// \return 0 if no deadlock found, LOCK_VICTIM_IS_START if there was a
-	/// deadlock and we chose 'start' as the victim, LOCK_VICTIM_IS_OTHER if a
-	/// deadlock was found and we chose some other trx as a victim: we must do
-	/// the search again in this last case because there may be another
-	/// deadlock!
-	/// LOCK_EXCEED_MAX_DEPTH if the lock search exceeds max steps or max depth.
-	static ulint lock_deadlock_recursive(
-		//======================
-		trx_t *start, trx_t *trx, lock_t *wait_lock, ulint *cost, ulint depth
-	)
+static ibool lock_deadlock_occurs(lock_t *lock, trx_t *trx);
 
-	///
-	/// \brief Reset the lock variables.
-	IB_INTERN void lock_var_init(void)
-//======================
+/// \brief Looks recursively for a deadlock.
+/// \details Recursively traverses the wait-for graph starting from a given
+/// transaction to detect deadlock cycles in the transaction dependency graph.
+/// \param [in] start transaction
+/// \param [in] trx transaction waiting for a lock
+/// \param [in] wait_lock lock that is waiting to be granted to trx
+/// \param [in,out] cost number of calculation steps thus far: if this exceeds LOCK_MAX_N_STEPS_... we return LOCK_EXCEED_MAX_DEPTH
+/// \param [in] depth recursion depth: if this exceeds LOCK_MAX_DEPTH_IN_DEADLOCK_CHECK, we return LOCK_EXCEED_MAX_DEPTH
+/// \return 0 if no deadlock found, LOCK_VICTIM_IS_START if there was a deadlock and we chose 'start' as the victim, LOCK_VICTIM_IS_OTHER if a deadlock was found and we chose some other trx as a victim: we must do the search again in this last case because there may be another deadlock! LOCK_EXCEED_MAX_DEPTH if the lock search exceeds max steps or max depth.
+static ulint lock_deadlock_recursive(trx_t *start, trx_t *trx, lock_t *wait_lock, ulint *cost, ulint depth);
+
+/// \brief Reset the lock variables.
+IB_INTERN void lock_var_init(void)
 {
 #ifdef IB_DEBUG
 	lock_print_waits = FALSE;
@@ -399,16 +246,12 @@ static ibool lock_deadlock_occurs(
 	lock_latest_err_stream = NULL;
 }
 
-///
 /// \brief Gets the nth bit of a record lock.
 /// \details Checks whether a specific bit is set in a record lock's bitmap,
 /// indicating whether a particular record heap position is locked.
 /// \return TRUE if bit set also if i == ULINT_UNDEFINED return FALSE
 IB_INLINE
-ibool lock_rec_get_nth_bit(
-	//======================
-	const lock_t *lock, ulint i
-)
+ibool lock_rec_get_nth_bit(const lock_t *lock, ulint i)
 {
 	ulint byte_index;
 	ulint bit_index;
@@ -417,7 +260,6 @@ ibool lock_rec_get_nth_bit(
 	ut_ad(lock_get_type_low(lock) == LOCK_REC);
 
 	if (i >= lock->un_member.rec_lock.n_bits) {
-
 		return (FALSE);
 	}
 
@@ -427,7 +269,6 @@ ibool lock_rec_get_nth_bit(
 	return (1 & ((const byte *)&lock[1])[byte_index] >> bit_index);
 }
 
-/*************************************************************************/
 
 #define lock_mutex_enter_kernel() mutex_enter(&kernel_mutex)
 #define lock_mutex_exit_kernel() mutex_exit(&kernel_mutex)
@@ -603,52 +444,36 @@ void lock_sys_close(void)
 	lock_sys = NULL;
 }
 
-/*************************************************************************
-Gets the size of a lock struct.
-\return	size in bytes 
-IB_INTERN
-ulint
-lock_get_size(void)
-//======================
+
+/// \brief Gets the size of a lock struct.
+/// \return	size in bytes 
+IB_INTERN ulint lock_get_size(void)
 {
-	return((ulint)sizeof(lock_t));
+	return (ulint)sizeof(lock_t);
 }
 
-///
+
 /// \brief Gets the mode of a lock.
 /// \details Extracts the lock mode (shared, exclusive, etc.) from a lock structure.
 /// \param lock lock
 /// \return mode
-IB_INLINE
-enum lock_mode
-lock_get_mode(
-//======================
-	const lock_t*	lock) 
+IB_INLINE enum lock_mode lock_get_mode(const lock_t* lock) 
 {
 	ut_ad(lock);
-
-	return(lock->type_mode & LOCK_MODE_MASK);
+	return lock->type_mode & LOCK_MODE_MASK;
 }
 
-///
 /// \brief Gets the wait flag of a lock.
 /// \details Determines whether a lock is in a waiting state or has been granted.
 /// \param lock lock
 /// \return TRUE if waiting
-IB_INLINE
-ibool
-lock_get_wait(
-//======================
-	const lock_t*	lock) 
+IB_INLINE ibool lock_get_wait(const lock_t*	lock) 
 {
 	ut_ad(lock);
-
 	if (IB_UNLIKELY(lock->type_mode & LOCK_WAIT)) {
-
-		return(TRUE);
+		return TRUE ;
 	}
-
-	return(FALSE);
+	return FALSE;
 }
 
 ///
@@ -725,19 +550,17 @@ lock_get_src_table(
 	return(src);
 }
 
-/*********************************************************************/
-/**
-Determine if the given table is exclusively "owned" by the given
-transaction, i.e., transaction holds LOCK_IX and possibly LOCK_AUTO_INC
-on the table.
-\return TRUE if table is only locked by trx, with LOCK_IX, and
-possibly LOCK_AUTO_INC 
+
+// Determine if the given table is exclusively "owned" by the given
+// transaction, i.e., transaction holds LOCK_IX and possibly LOCK_AUTO_INC
+// on the table.
+// \return TRUE if table is only locked by trx, with LOCK_IX, and
+// possibly LOCK_AUTO_INC 
 IB_INTERN
 ibool
 lock_is_table_exclusive(
-//======================
-	dict_table_t*	table,	in: table 
-	trx_t*		trx)	in: transaction 
+	dict_table_t*	table,//	in: table 
+	trx_t*		trx)	//in: transaction 
 {
 	const lock_t*	lock;
 	ibool		ok	= FALSE;
@@ -783,9 +606,8 @@ func_exit:
 	return(ok);
 }
 
-/*********************************************************************/
-/**
-Sets the wait flag of a lock and the back pointer in trx to lock. 
+
+// Sets the wait flag of a lock and the back pointer in trx to lock. 
 IB_INLINE
 void
 lock_set_lock_and_trx_wait(
@@ -800,14 +622,13 @@ lock_set_lock_and_trx_wait(
 	lock->type_mode |= LOCK_WAIT;
 }
 
-/**********************************************************************/
-/**
-The back pointer to a waiting lock request in the transaction is set to NULL
-and the wait bit in lock type_mode is reset. 
+
+
+// The back pointer to a waiting lock request in the transaction is set to NULL
+// and the wait bit in lock type_mode is reset. 
 IB_INLINE
 void
 lock_reset_lock_and_trx_wait(
-//======================
 	lock_t*	lock)	in: record lock 
 {
 	ut_ad((lock->trx)->wait_lock == lock);
@@ -819,15 +640,12 @@ lock_reset_lock_and_trx_wait(
 	lock->type_mode &= ~LOCK_WAIT;
 }
 
-/*********************************************************************/
-/**
-Gets the gap flag of a record lock.
-\return	TRUE if gap flag set 
-IB_INLINE
-ibool
-lock_rec_get_gap(
-//======================
-	const lock_t*	lock)	in: record lock 
+// Gets the gap flag of a record lock.
+// \return	TRUE if gap flag set
+// IB_INLINE
+// ibool
+// lock_rec_get_gap(
+//	const lock_t*	lock)	in: record lock 
 {
 	ut_ad(lock);
 	ut_ad(lock_get_type_low(lock) == LOCK_REC);
@@ -840,15 +658,12 @@ lock_rec_get_gap(
 	return(FALSE);
 }
 
-/*********************************************************************/
-/**
-Gets the LOCK_REC_NOT_GAP flag of a record lock.
-\return	TRUE if LOCK_REC_NOT_GAP flag set 
-IB_INLINE
-ibool
-lock_rec_get_rec_not_gap(
-//======================
-	const lock_t*	lock)	in: record lock 
+// Gets the LOCK_REC_NOT_GAP flag of a record lock.
+// \return	TRUE if LOCK_REC_NOT_GAP flag set
+// IB_INLINE
+// ibool
+// lock_rec_get_rec_not_gap(
+//	const lock_t*	lock)	in: record lock 
 {
 	ut_ad(lock);
 	ut_ad(lock_get_type_low(lock) == LOCK_REC);
@@ -861,15 +676,12 @@ lock_rec_get_rec_not_gap(
 	return(FALSE);
 }
 
-/*********************************************************************/
-/**
-Gets the waiting insert flag of a record lock.
-\return	TRUE if gap flag set 
-IB_INLINE
-ibool
-lock_rec_get_insert_intention(
-//======================
-	const lock_t*	lock)	in: record lock 
+// Gets the waiting insert flag of a record lock.
+// \return	TRUE if gap flag set
+// IB_INLINE
+// ibool
+// lock_rec_get_insert_intention(
+//	const lock_t*	lock)	in: record lock 
 {
 	ut_ad(lock);
 	ut_ad(lock_get_type_low(lock) == LOCK_REC);
@@ -889,7 +701,6 @@ Calculates if lock mode 1 is stronger or equal to lock mode 2.
 IB_INLINE
 ulint
 lock_mode_stronger_or_eq(
-//======================
 	enum lock_mode	mode1,	in: lock mode 
 	enum lock_mode	mode2)	in: lock mode 
 {
@@ -908,7 +719,6 @@ Calculates if lock mode 1 is compatible with lock mode 2.
 IB_INLINE
 ulint
 lock_mode_compatible(
-//======================
 	enum lock_mode	mode1,	in: lock mode 
 	enum lock_mode	mode2)	in: lock mode 
 {
@@ -927,7 +737,6 @@ Checks if a lock request for a new lock has to wait for request lock2.
 IB_INLINE
 ibool
 lock_rec_has_to_wait(
-//======================
 	const trx_t*	trx,	in: trx of new lock 
 	ulint		type_mode,in: precise mode of the new lock
 				to set: LOCK_S or LOCK_X, possibly
@@ -1010,7 +819,6 @@ Checks if a lock request lock1 has to wait for request lock2.
 IB_INTERN
 ibool
 lock_has_to_wait(
-//======================
 	const lock_t*	lock1,	in: waiting lock 
 	const lock_t*	lock2)	in: another lock; NOTE that it is
 				assumed that this has a lock bit set
@@ -1049,7 +857,6 @@ Gets the number of bits in a record lock bitmap.
 IB_INLINE
 ulint
 lock_rec_get_n_bits(
-//======================
 	const lock_t*	lock)	in: record lock 
 {
 	return(lock->un_member.rec_lock.n_bits);
@@ -1061,7 +868,6 @@ Sets the nth bit of a record lock to TRUE.
 IB_INLINE
 void
 lock_rec_set_nth_bit(
-//======================
 	lock_t*	lock,	in: record lock 
 	ulint	i)	in: index of the bit 
 {
@@ -1087,7 +893,6 @@ none found
 IB_INTERN
 ulint
 lock_rec_find_set_bit(
-//======================
 	const lock_t*	lock)	in: record lock with at least one bit set 
 {
 	ulint	i;
@@ -1109,7 +914,6 @@ Resets the nth bit of a record lock.
 IB_INLINE
 void
 lock_rec_reset_nth_bit(
-//======================
 	lock_t*	lock,	in: record lock 
 	ulint	i)	in: index of the bit which must be set to TRUE
 			when this function is called 
@@ -1134,7 +938,6 @@ Gets the first or next record lock on a page.
 IB_INLINE
 lock_t*
 lock_rec_get_next_on_page(
-//======================
 	lock_t*	lock)	in: a record lock 
 {
 	ulint	space;
@@ -1172,7 +975,6 @@ file address.
 IB_INLINE
 lock_t*
 lock_rec_get_first_on_page_addr(
-//======================
 	ulint	space,	in: space 
 	ulint	page_no)in: page number 
 {
@@ -1202,7 +1004,6 @@ Returns TRUE if there are explicit record locks on a page.
 IB_INTERN
 ibool
 lock_rec_expl_exist_on_page(
-//======================
 	ulint	space,	in: space id 
 	ulint	page_no)in: page number 
 {
@@ -1229,7 +1030,6 @@ pointer to it.
 IB_INLINE
 lock_t*
 lock_rec_get_first_on_page(
-//======================
 	const buf_block_t*	block)	in: buffer block 
 {
 	ulint	hash;
@@ -1263,7 +1063,6 @@ Gets the next explicit lock request on a record.
 IB_INLINE
 lock_t*
 lock_rec_get_next(
-//======================
 	ulint	heap_no,in: heap number of the record 
 	lock_t*	lock)	in: lock 
 {
@@ -1284,7 +1083,6 @@ Gets the first explicit lock request on a record.
 IB_INLINE
 lock_t*
 lock_rec_get_first(
-//======================
 	const buf_block_t*	block,	in: block containing the record 
 	ulint			heap_no)in: heap number of the record 
 {
@@ -1310,7 +1108,6 @@ and resetting.
 static
 void
 lock_rec_bitmap_reset(
-//======================
 	lock_t*	lock)	in: record lock 
 {
 	ulint	n_bytes;
@@ -1334,7 +1131,6 @@ Copies a record lock to heap.
 static
 lock_t*
 lock_rec_copy(
-//======================
 	const lock_t*	lock,	in: record lock 
 	mem_heap_t*	heap)	in: memory heap 
 {
@@ -1354,7 +1150,6 @@ Gets the previous record lock set on a record.
 IB_INTERN
 const lock_t*
 lock_rec_get_prev(
-//======================
 	const lock_t*	in_lock,in: record lock 
 	ulint		heap_no)in: heap number of the record 
 {
@@ -1397,7 +1192,6 @@ Checks if a transaction has the specified table lock, or stronger.
 IB_INLINE
 lock_t*
 lock_table_has(
-//======================
 	trx_t*		trx,	in: transaction 
 	dict_table_t*	table,	in: table 
 	enum lock_mode	mode)	in: lock mode 
@@ -1439,7 +1233,6 @@ to precise_mode.
 IB_INLINE
 lock_t*
 lock_rec_has_expl(
-//======================
 	ulint			precise_mode,in: LOCK_S or LOCK_X
 					possibly ORed to LOCK_GAP or
 					LOCK_REC_NOT_GAP, for a
@@ -1489,7 +1282,6 @@ Checks if some other transaction has a lock request in the queue.
 static
 lock_t*
 lock_rec_other_has_expl_req(
-//======================
 	enum lock_mode		mode,	in: LOCK_S or LOCK_X 
 	ulint			gap,	in: LOCK_GAP if also gap
 					locks are taken into account,
@@ -1539,7 +1331,6 @@ in the queue, so that we have to wait.
 static
 lock_t*
 lock_rec_other_has_conflicting(
-//======================
 	enum lock_mode		mode,	in: LOCK_S or LOCK_X,
 					possibly ORed to LOCK_GAP or
 					LOC_REC_NOT_GAP,
@@ -1591,7 +1382,6 @@ no new struct is needed, if a suitable old is found.
 IB_INLINE
 lock_t*
 lock_rec_find_similar_on_page(
-//======================
 	ulint		type_mode,	in: lock type_mode field 
 	ulint		heap_no,	in: heap number of the record 
 	lock_t*		lock,		in: lock_rec_get_first_on_page() 
@@ -1621,7 +1411,6 @@ index.
 static
 trx_t*
 lock_sec_rec_some_has_impl_off_kernel(
-//======================
 	const rec_t*	rec,	in: user record 
 	dict_index_t*	index,	in: secondary index 
 	const ulint*	offsets)in: rec_get_offsets(rec, index) 
@@ -1669,7 +1458,6 @@ record count will not be precise.
 IB_INTERN
 ulint
 lock_number_of_rows_locked(
-//======================
 	trx_t*	trx)	in: transaction 
 {
 	lock_t*	lock;
@@ -1706,7 +1494,6 @@ for deadlocks or lock compatibility!
 static
 lock_t*
 lock_rec_create_low(
-//======================
 	ulint		type_mode,	in: lock mode and wait
 					flag, type is ignored and
 					replaced by LOCK_REC 
@@ -1773,7 +1560,6 @@ Creates a new record lock and inserts it to the lock queue.
 static
 lock_t*
 lock_rec_create(
-//======================
 	ulint			type_mode,in: lock mode and wait
 					flag, type is ignored and
 					replaced by LOCK_REC 
@@ -1813,7 +1599,6 @@ no need to wait then
 static
 ulint
 lock_rec_enqueue_waiting(
-//======================
 	ulint			type_mode,in: lock mode this
 					transaction is requesting:
 					LOCK_S or LOCK_X, possibly
@@ -1916,7 +1701,6 @@ which does NOT check for deadlocks or lock compatibility!
 static
 lock_t*
 lock_rec_add_to_queue(
-//======================
 	ulint			type_mode,in: lock mode, wait, gap
 					etc. flags; type is ignored
 					and replaced by LOCK_REC 
@@ -2013,7 +1797,6 @@ a page supremum record, a gap type lock.
 IB_INLINE
 ibool
 lock_rec_lock_fast(
-//======================
 	ibool			impl,	in: if TRUE, no lock is set
 					if no wait is necessary: we
 					assume that the caller will
@@ -2087,7 +1870,6 @@ lock, or in the case of a page supremum record, a gap type lock.
 static
 ulint
 lock_rec_lock_slow(
-//======================
 	ibool			impl,	in: if TRUE, no lock is set
 					if no wait is necessary: we
 					assume that the caller will
@@ -2155,7 +1937,6 @@ of a page supremum record, a gap type lock.
 static
 ulint
 lock_rec_lock(
-//======================
 	ibool			impl,	in: if TRUE, no lock is set
 					if no wait is necessary: we
 					assume that the caller will
@@ -2203,7 +1984,6 @@ Checks if a waiting record lock request still has to wait in a queue.
 static
 ibool
 lock_rec_has_to_wait_in_queue(
-//======================
 	lock_t*	wait_lock)	in: waiting record lock 
 {
 	lock_t*	lock;
@@ -2242,7 +2022,6 @@ transaction.
 static
 void
 lock_grant(
-//======================
 	lock_t*	lock)	in/out: waiting lock request 
 {
 	ut_ad(mutex_own(&kernel_mutex));
@@ -2274,7 +2053,6 @@ one can now be granted!
 static
 void
 lock_rec_cancel(
-//======================
 	lock_t*	lock)	in: waiting record lock request 
 {
 	ut_ad(mutex_own(&kernel_mutex));
@@ -2300,7 +2078,6 @@ to a lock. NOTE: all record locks contained in in_lock are removed.
 static
 void
 lock_rec_dequeue_from_page(
-//======================
 	lock_t*	in_lock)in: record lock object: all record locks which
 			are contained in this lock object are removed;
 			transactions waiting behind will get their lock
@@ -2347,7 +2124,6 @@ Removes a record lock request, waiting or granted, from the queue.
 static
 void
 lock_rec_discard(
-//======================
 	lock_t*	in_lock)in: record lock object: all record locks which
 			are contained in this lock object are removed 
 {
@@ -2377,7 +2153,6 @@ lock bitmaps must already be reset when this function is called.
 static
 void
 lock_rec_free_all_from_discard_page(
-//======================
 	const buf_block_t*	block)	in: page to be discarded 
 {
 	ulint	space;
@@ -2413,7 +2188,6 @@ lock requests here.
 static
 void
 lock_rec_reset_and_release_wait(
-//======================
 	const buf_block_t*	block,	in: buffer block containing
 					the record 
 	ulint			heap_no)in: heap number of record 
@@ -2444,7 +2218,6 @@ GRANTED gap locks.
 static
 void
 lock_rec_inherit_to_gap(
-//======================
 	const buf_block_t*	heir_block,	in: block containing the
 						record which inherits 
 	const buf_block_t*	block,		in: block containing the
@@ -2490,7 +2263,6 @@ other record. Also waiting lock requests are inherited as GRANTED gap locks.
 static
 void
 lock_rec_inherit_to_gap_if_gap_lock(
-//======================
 	const buf_block_t*	block,		in: buffer block 
 	ulint			heir_heap_no,	in: heap_no of
 						record which inherits 
@@ -2527,7 +2299,6 @@ the donating record.
 static
 void
 lock_rec_move(
-//======================
 	const buf_block_t*	receiver,	in: buffer block containing
 						the receiving record 
 	const buf_block_t*	donator,	in: buffer block containing
@@ -2576,7 +2347,6 @@ were temporarily stored on the infimum.
 IB_INTERN
 void
 lock_move_reorganize_page(
-//======================
 	const buf_block_t*	block,	in: old index page, now
 					reorganized 
 	const buf_block_t*	oblock)	in: copy of the old, not
@@ -2724,7 +2494,6 @@ list end is moved to another page.
 IB_INTERN
 void
 lock_move_rec_list_end(
-//======================
 	const buf_block_t*	new_block,	in: index page to move to 
 	const buf_block_t*	block,		in: index page 
 	const rec_t*		rec)		in: record on page: this
@@ -2818,7 +2587,6 @@ list start is moved to another page.
 IB_INTERN
 void
 lock_move_rec_list_start(
-//======================
 	const buf_block_t*	new_block,	in: index page to move to 
 	const buf_block_t*	block,		in: index page 
 	const rec_t*		rec,		in: record on page:
@@ -2928,7 +2696,6 @@ Updates the lock table when a page is split to the right.
 IB_INTERN
 void
 lock_update_split_right(
-//======================
 	const buf_block_t*	right_block,	in: right page 
 	const buf_block_t*	left_block)	in: left page 
 {
@@ -2957,7 +2724,6 @@ Updates the lock table when a page is merged to the right.
 IB_INTERN
 void
 lock_update_merge_right(
-//======================
 	const buf_block_t*	right_block,	in: right page to
 						which merged 
 	const rec_t*		orig_succ,	in: original
@@ -3000,7 +2766,6 @@ to be updated.
 IB_INTERN
 void
 lock_update_root_raise(
-//======================
 	const buf_block_t*	block,	in: index page to which copied 
 	const buf_block_t*	root)	in: root page 
 {
@@ -3021,7 +2786,6 @@ is removed from the chain of leaf pages, except if page is the root!
 IB_INTERN
 void
 lock_update_copy_and_discard(
-//======================
 	const buf_block_t*	new_block,	in: index page to
 						which copied 
 	const buf_block_t*	block)		in: index page;
@@ -3045,7 +2809,6 @@ Updates the lock table when a page is split to the left.
 IB_INTERN
 void
 lock_update_split_left(
-//======================
 	const buf_block_t*	right_block,	in: right page 
 	const buf_block_t*	left_block)	in: left page 
 {
@@ -3068,7 +2831,6 @@ Updates the lock table when a page is merged to the left.
 IB_INTERN
 void
 lock_update_merge_left(
-//======================
 	const buf_block_t*	left_block,	in: left page to
 						which merged 
 	const rec_t*		orig_pred,	in: original predecessor
@@ -3119,7 +2881,6 @@ inherited from rec.
 IB_INTERN
 void
 lock_rec_reset_and_inherit_gap_locks(
-//======================
 	const buf_block_t*	heir_block,	in: block containing the
 						record which inherits 
 	const buf_block_t*	block,		in: block containing the
@@ -3146,7 +2907,6 @@ Updates the lock table when a page is discarded.
 IB_INTERN
 void
 lock_update_discard(
-//======================
 	const buf_block_t*	heir_block,	in: index page
 						which will inherit the locks 
 	ulint			heir_heap_no,	in: heap_no of the record
@@ -3210,7 +2970,6 @@ Updates the lock table when a new user record is inserted.
 IB_INTERN
 void
 lock_update_insert(
-//======================
 	const buf_block_t*	block,	in: buffer block containing rec 
 	const rec_t*		rec)	in: the inserted record 
 {
@@ -3244,7 +3003,6 @@ Updates the lock table when a record is removed.
 IB_INTERN
 void
 lock_update_delete(
-//======================
 	const buf_block_t*	block,	in: buffer block containing rec 
 	const rec_t*		rec)	in: the record to be removed 
 {
@@ -3290,7 +3048,6 @@ actual record is being moved.
 IB_INTERN
 void
 lock_rec_store_on_page_infimum(
-//======================
 	const buf_block_t*	block,	in: buffer block containing rec 
 	const rec_t*		rec)	in: record whose lock state
 					is stored on the infimum
@@ -3316,7 +3073,6 @@ state was stored on the infimum of the page.
 IB_INTERN
 void
 lock_rec_restore_from_page_infimum(
-//======================
 	const buf_block_t*	block,	in: buffer block containing rec 
 	const rec_t*		rec,	in: record whose lock state
 					is restored 
@@ -3346,7 +3102,6 @@ transaction(s) as victim(s)
 static
 ibool
 lock_deadlock_occurs(
-//======================
 	lock_t*	lock,	in: lock the transaction is requesting 
 	trx_t*	trx)	in: transaction 
 {
@@ -3428,7 +3183,6 @@ LOCK_EXCEED_MAX_DEPTH if the lock search exceeds max steps or max depth.
 static
 ulint
 lock_deadlock_recursive(
-//======================
 	trx_t*	start,		in: recursion starting point 
 	trx_t*	trx,		in: a transaction waiting for a lock 
 	lock_t*	wait_lock,	in: lock that is waiting to be granted 
@@ -3654,8 +3408,7 @@ lock_deadlock_recursive(
 		}
 	}// end of the 'for (;;)'-loop
 }
-
-//========================= TABLE LOCKS ==============================
+=== TABLE LOCKS ==============================
 
 /*********************************************************************/
 /**
@@ -3665,7 +3418,6 @@ of the table. Does NOT check for deadlocks or lock compatibility.
 IB_INLINE
 lock_t*
 lock_table_create(
-//======================
 	dict_table_t*	table,	in: database table in dictionary cache 
 	ulint		type_mode,in: lock mode possibly ORed with
 				LOCK_WAIT 
@@ -3703,7 +3455,6 @@ can now be granted.
 IB_INLINE
 void
 lock_table_remove_low(
-//======================
 	lock_t*	lock)	in: table lock 
 {
 	trx_t*		trx;
@@ -3730,7 +3481,6 @@ no need to wait then
 static
 ulint
 lock_table_enqueue_waiting(
-//======================
 	ulint		mode,	in: lock mode this transaction is
 				requesting 
 	dict_table_t*	table,	in: table 
@@ -3811,7 +3561,6 @@ the lock queue.
 IB_INLINE
 lock_t*
 lock_table_other_has_incompatible(
-//======================
 	trx_t*		trx,	in: transaction, or NULL if all
 				transactions should be included 
 	ulint		wait,	in: LOCK_WAIT if also waiting locks are
@@ -3910,7 +3659,7 @@ Checks if a waiting table lock request still has to wait in a queue.
 static
 ibool
 lock_table_has_to_wait_in_queue(
-//======================
+
 	lock_t*	wait_lock)	in: waiting table lock 
 {
 	dict_table_t*	table;
@@ -3943,7 +3692,7 @@ lock.
 static
 void
 lock_table_dequeue(
-//======================
+
 	lock_t*	in_lock)in: table lock object; transactions waiting
 			behind will get their lock requests granted, if
 			they are now qualified to it 
@@ -3973,7 +3722,7 @@ lock_table_dequeue(
 	}
 }
 
-//=========================== LOCK RELEASE ==============================
+===== LOCK RELEASE ==============================
 
 /*************************************************************/
 /**
@@ -3983,7 +3732,7 @@ to a lock.
 IB_INTERN
 void
 lock_rec_unlock(
-//======================
+
 	trx_t*			trx,	in: transaction that has
 					set a record lock 
 	const buf_block_t*	block,	in: buffer block containing rec 
@@ -4054,7 +3803,7 @@ because of these locks.
 IB_INTERN
 void
 lock_release_off_kernel(
-//======================
+
 	trx_t*	trx)	in: transaction 
 {
 	ulint		count;
@@ -4103,7 +3852,7 @@ waiting behind it.
 IB_INTERN
 void
 lock_cancel_waiting_and_release(
-//======================
+
 	lock_t*	lock)	in: waiting lock request 
 {
 	ut_ad(mutex_own(&kernel_mutex));
@@ -4141,7 +3890,7 @@ No lock, that is going to be removed, is allowed to be a wait lock.
 static
 void
 lock_remove_all_on_table_for_trx(
-//======================
+
 	dict_table_t*	table,			in: table to be dropped 
 	trx_t*		trx,			in: a transaction 
 	ibool		remove_also_table_sx_locks)in: also removes
@@ -4185,7 +3934,7 @@ No lock, that is going to be removed, is allowed to be a wait lock.
 IB_INTERN
 void
 lock_remove_all_on_table(
-//======================
+
 	dict_table_t*	table,			in: table to be dropped
 						or truncated 
 	ibool		remove_also_table_sx_locks)in: also removes
@@ -4258,7 +4007,7 @@ Prints info of a table lock.
 IB_INTERN
 void
 lock_table_print(
-//======================
+
 	ib_stream_t	state->stream,	in: stream where to print 
 	const lock_t*	lock)		in: table type lock 
 {
@@ -4299,7 +4048,7 @@ Prints info of a record lock.
 IB_INTERN
 void
 lock_rec_print(
-//======================
+
 	ib_stream_t	state->stream,	in: file where to print 
 	const lock_t*	lock)		in: record type lock 
 {
@@ -4403,7 +4152,7 @@ Calculates the number of record lock structs in the record lock hash table.
 static
 ulint
 lock_get_n_rec_locks(void)
-//======================
+
 {
 	lock_t*	lock;
 	ulint	n_locks	= 0;
@@ -4434,7 +4183,7 @@ and exits without printing info
 IB_INTERN
 ibool
 lock_print_info_summary(
-//======================
+
 	ib_stream_t	state->stream,	in: stream where to print 
 	ibool   	nowait)		in: whether to wait for the
 					kernel mutex 

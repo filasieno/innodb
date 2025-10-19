@@ -1,69 +1,38 @@
-/*****************************************************************************
+// Copyright (c) 2007, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 2007, 2009, Innobase Oy. All Rights Reserved.
+/// \file lock_iter.hpp
+/// \brief Lock queue iterator type and function prototypes.
+/// \details Originally created by Vasil Dimov on July 16, 2007.
+/// \author Fabio N. Filasieno
+/// \date 2025-10-20
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
+#pragma once
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/lock0iter.h
-Lock queue iterator type and function prototypes.
-
-Created July 16, 2007 Vasil Dimov
-*******************************************************/
-
-#ifndef lock0iter_h
-#define lock0iter_h
-
-#include "univ.i"
+#include "defs.hpp"
 #include "lock_types.hpp"
 
-typedef struct lock_queue_iterator_struct {
-	const lock_t*	current_lock;
-	/* In case this is a record lock queue (not table lock queue)
-	then bit_no is the record number within the heap in which the
-	record is stored. */
-	ulint		bit_no;
-} lock_queue_iterator_t;
+/// \brief Initialize lock queue iterator so that it starts to iterate from lock.
+/// \details bit_no specifies the record number within the heap where the record is stored. It can be undefined (ULINT_UNDEFINED) in two cases: 1) table lock queue; 2) record wait lock where bit_no is derived via lock_rec_find_set_bit().
+/// \param [out] iter iterator
+/// \param [in] lock lock to start from
+/// \param [in] bit_no record number in the heap
+IB_INTERN void lock_queue_iterator_reset(ib_lock_queue_iterator_t* iter, const ib_lock_t* lock, ulint bit_no);
 
-/*******************************************************************//**
-Initialize lock queue iterator so that it starts to iterate from
-"lock". bit_no specifies the record number within the heap where the
-record is stored. It can be undefined (ULINT_UNDEFINED) in two cases:
-1. If the lock is a table lock, thus we have a table lock queue;
-2. If the lock is a record lock and it is a wait lock. In this case
-   bit_no is calculated in this function by using
-   lock_rec_find_set_bit(). There is exactly one bit set in the bitmap
-   of a wait lock. */
-IB_INTERN
-void
-lock_queue_iterator_reset(
-/*======================*/
-	lock_queue_iterator_t*	iter,	/*!< out: iterator */
-	const lock_t*		lock,	/*!< in: lock to start from */
-	ulint			bit_no);/*!< in: record number in the
-					heap */
+/// \brief Gets the previous lock in the lock queue.
+/// \details Returns NULL if there are no more locks (i.e. the current lock is the first one). The iterator is receded if a non-NULL value is returned.
+/// \param [in,out] iter iterator
+/// \return previous lock or NULL
+const ib_lock_t* lock_queue_iterator_get_prev(ib_lock_queue_iterator_t* iter);
 
-/*******************************************************************//**
-Gets the previous lock in the lock queue, returns NULL if there are no
-more locks (i.e. the current lock is the first one). The iterator is
-receded (if not-NULL is returned).
-@return	previous lock or NULL */
-
-const lock_t*
-lock_queue_iterator_get_prev(
-/*=========================*/
-	lock_queue_iterator_t*	iter);	/*!< in/out: iterator */
-
-#endif /* lock0iter_h */
