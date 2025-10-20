@@ -1,121 +1,82 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/log0log.ic
-Database log
-
-Created 12/9/1995 Heikki Tuuri
-*******************************************************/
+/// \file log_log.inl
+/// \brief Database log inline functions
+/// \details Originally created by Heikki Tuuri on 12/9/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "os_file.hpp"
 #include "mach_data.hpp"
 #include "mtr_mtr.hpp"
 #include "srv_srv.hpp"
 
-/*************************************************************************//**
-Acquire the log mutex. */
-IB_INLINE
-void
-log_acquire(void)
-/*=============*/
+/// \brief Acquire the log mutex.
+IB_INLINE void log_acquire(void)
 {
-	ut_ad(!mutex_own(&log_sys->mutex));
-	mutex_enter(&log_sys->mutex);
+    ut_ad(!mutex_own(&log_sys->mutex));
+    mutex_enter(&log_sys->mutex);
 }
 
-/*************************************************************************//**
-Releases the log mutex. */
-IB_INLINE
-void
-log_release(void)
-/*=============*/
+/// \brief Releases the log mutex.
+IB_INLINE void log_release(void)
 {
-	ut_ad(mutex_own(&log_sys->mutex));
-	mutex_exit(&log_sys->mutex);
+    ut_ad(mutex_own(&log_sys->mutex));
+    mutex_exit(&log_sys->mutex);
 }
 
 #ifdef IB_LOG_DEBUG
-/******************************************************//**
-Checks by parsing that the catenated log segment for a single mtr is
-consistent. */
-IB_INTERN
-ibool
-log_check_log_recs(
-/*===============*/
-	const byte*	buf,		/*!< in: pointer to the start of
-					the log segment in the
-					log_sys->buf log buffer */
-	ulint		len,		/*!< in: segment length in bytes */
-	ib_uint64_t	buf_start_lsn);	/*!< in: buffer start lsn */
+/// \brief Checks by parsing that the catenated log segment for a single mtr is consistent.
+/// \param [in] buf pointer to the start of the log segment in the log_sys->buf log buffer
+/// \param [in] len segment length in bytes
+/// \param [in] buf_start_lsn buffer start lsn
+IB_INTERN ibool log_check_log_recs(const byte* buf, ulint len, ib_uint64_t buf_start_lsn);
 #endif /* IB_LOG_DEBUG */
 
-/************************************************************//**
-Gets a log block flush bit.
-@return	TRUE if this block was the first to be written in a log flush */
-IB_INLINE
-ibool
-log_block_get_flush_bit(
-/*====================*/
-	const byte*	log_block)	/*!< in: log block */
+/// \brief Gets a log block flush bit.
+/// \return TRUE if this block was the first to be written in a log flush
+/// \param [in] log_block log block
+IB_INLINE ibool log_block_get_flush_bit(const byte* log_block)
 {
-	if (LOG_BLOCK_FLUSH_BIT_MASK
-	    & mach_read_from_4(log_block + LOG_BLOCK_HDR_NO)) {
-
-		return(TRUE);
-	}
-
-	return(FALSE);
+    ulint field_value = mach_read_from_4(log_block + LOG_BLOCK_HDR_NO);
+    if (LOG_BLOCK_FLUSH_BIT_MASK & field_value) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
-/************************************************************//**
-Sets the log block flush bit. */
-IB_INLINE
-void
-log_block_set_flush_bit(
-/*====================*/
-	byte*	log_block,	/*!< in/out: log block */
-	ibool	val)		/*!< in: value to set */
+/// \brief Sets the log block flush bit.
+/// \param [in,out] log_block log block
+/// \param [in] val value to set
+IB_INLINE void log_block_set_flush_bit(byte* log_block, ibool val)
 {
-	ulint	field;
-
-	field = mach_read_from_4(log_block + LOG_BLOCK_HDR_NO);
-
-	if (val) {
-		field = field | LOG_BLOCK_FLUSH_BIT_MASK;
-	} else {
-		field = field & ~LOG_BLOCK_FLUSH_BIT_MASK;
-	}
-
-	mach_write_to_4(log_block + LOG_BLOCK_HDR_NO, field);
+    ulint field = mach_read_from_4(log_block + LOG_BLOCK_HDR_NO);
+    if (val) {
+        field = field | LOG_BLOCK_FLUSH_BIT_MASK;
+    } else {
+        field = field & ~LOG_BLOCK_FLUSH_BIT_MASK;
+    }
+    mach_write_to_4(log_block + LOG_BLOCK_HDR_NO, field);
 }
 
-/************************************************************//**
-Gets a log block number stored in the header.
-@return	log block number stored in the block header */
-IB_INLINE
-ulint
-log_block_get_hdr_no(
-/*=================*/
-	const byte*	log_block)	/*!< in: log block */
+/// \brief Gets a log block number stored in the header.
+/// \return log block number stored in the block header
+/// \param [in] log_block log block
+IB_INLINE ulint log_block_get_hdr_no(const byte* log_block)
 {
-	return(~LOG_BLOCK_FLUSH_BIT_MASK
-	       & mach_read_from_4(log_block + LOG_BLOCK_HDR_NO));
+    return (~LOG_BLOCK_FLUSH_BIT_MASK & mach_read_from_4(log_block + LOG_BLOCK_HDR_NO));
 }
 
 /************************************************************//**
