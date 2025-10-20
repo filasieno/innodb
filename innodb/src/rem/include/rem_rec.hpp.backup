@@ -102,105 +102,182 @@ IB_INLINE ulint rec_get_n_owned_new(const rec_t* rec);
 /// \param [in,out] page_zip compressed page, or NULL
 /// \param [in] n_owned the number of owned
 IB_INLINE void rec_set_n_owned_new(rec_t* rec, page_zip_des_t* page_zip, ulint n_owned);
-/// \brief The following function is used to retrieve the info bits of a record.
-/// \param [in] rec physical record
-/// \param [in] comp nonzero=compact page format
-/// \return info bits
-IB_INLINE ulint rec_get_info_bits(const rec_t* rec, ulint comp);
+/******************************************************//**
+The following function is used to retrieve the info bits of
+a record.
+@return	info bits */
+IB_INLINE
+ulint
+rec_get_info_bits(
+/*==============*/
+	const rec_t*	rec,	/*!< in: physical record */
+	ulint		comp);	/*!< in: nonzero=compact page format */
+/******************************************************//**
+The following function is used to set the info bits of a record. */
+IB_INLINE
+void
+rec_set_info_bits_old(
+/*==================*/
+	rec_t*	rec,	/*!< in: old-style physical record */
+	ulint	bits);	/*!< in: info bits */
+/******************************************************//**
+The following function is used to set the info bits of a record. */
+IB_INLINE
+void
+rec_set_info_bits_new(
+/*==================*/
+	rec_t*	rec,	/*!< in/out: new-style physical record */
+	ulint	bits);	/*!< in: info bits */
+/******************************************************//**
+The following function retrieves the status bits of a new-style record.
+@return	status bits */
+IB_INLINE
+ulint
+rec_get_status(
+/*===========*/
+	const rec_t*	rec);	/*!< in: physical record */
 
-/// \brief The following function is used to set the info bits of a record.
-/// \param [in] rec old-style physical record
-/// \param [in] bits info bits
-IB_INLINE void rec_set_info_bits_old(rec_t* rec, ulint bits);
+/******************************************************//**
+The following function is used to set the status bits of a new-style record. */
+IB_INLINE
+void
+rec_set_status(
+/*===========*/
+	rec_t*	rec,	/*!< in/out: physical record */
+	ulint	bits);	/*!< in: info bits */
 
-/// \brief The following function is used to set the info bits of a record.
-/// \param [in,out] rec new-style physical record
-/// \param [in] bits info bits
-IB_INLINE void rec_set_info_bits_new(rec_t* rec, ulint bits);
-/// \brief The following function retrieves the status bits of a new-style record.
-/// \param [in] rec physical record
-/// \return status bits
-IB_INLINE ulint rec_get_status(const rec_t* rec);
+/******************************************************//**
+The following function is used to retrieve the info and status
+bits of a record.  (Only compact records have status bits.)
+@return	info bits */
+IB_INLINE
+ulint
+rec_get_info_and_status_bits(
+/*=========================*/
+	const rec_t*	rec,	/*!< in: physical record */
+	ulint		comp);	/*!< in: nonzero=compact page format */
+/******************************************************//**
+The following function is used to set the info and status
+bits of a record.  (Only compact records have status bits.) */
+IB_INLINE
+void
+rec_set_info_and_status_bits(
+/*=========================*/
+	rec_t*	rec,	/*!< in/out: compact physical record */
+	ulint	bits);	/*!< in: info bits */
 
-/// \brief The following function is used to set the status bits of a new-style record.
-/// \param [in,out] rec physical record
-/// \param [in] bits info bits
-IB_INLINE void rec_set_status(rec_t* rec, ulint bits);
+/******************************************************//**
+The following function tells if record is delete marked.
+@return	nonzero if delete marked */
+IB_INLINE
+ulint
+rec_get_deleted_flag(
+/*=================*/
+	const rec_t*	rec,	/*!< in: physical record */
+	ulint		comp);	/*!< in: nonzero=compact page format */
+/******************************************************//**
+The following function is used to set the deleted bit. */
+IB_INLINE
+void
+rec_set_deleted_flag_old(
+/*=====================*/
+	rec_t*	rec,	/*!< in: old-style physical record */
+	ulint	flag);	/*!< in: nonzero if delete marked */
+/******************************************************//**
+The following function is used to set the deleted bit. */
+IB_INLINE
+void
+rec_set_deleted_flag_new(
+/*=====================*/
+	rec_t*		rec,	/*!< in/out: new-style physical record */
+	page_zip_des_t*	page_zip,/*!< in/out: compressed page, or NULL */
+	ulint		flag);	/*!< in: nonzero if delete marked */
+/******************************************************//**
+The following function tells if a new-style record is a node pointer.
+@return	TRUE if node pointer */
+IB_INLINE
+ibool
+rec_get_node_ptr_flag(
+/*==================*/
+	const rec_t*	rec);	/*!< in: physical record */
+/******************************************************//**
+The following function is used to get the order number
+of an old-style record in the heap of the index page.
+@return	heap order number */
+IB_INLINE
+ulint
+rec_get_heap_no_old(
+/*================*/
+	const rec_t*	rec);	/*!< in: physical record */
+/******************************************************//**
+The following function is used to set the heap number
+field in an old-style record. */
+IB_INLINE
+void
+rec_set_heap_no_old(
+/*================*/
+	rec_t*	rec,	/*!< in: physical record */
+	ulint	heap_no);/*!< in: the heap number */
+/******************************************************//**
+The following function is used to get the order number
+of a new-style record in the heap of the index page.
+@return	heap order number */
+IB_INLINE
+ulint
+rec_get_heap_no_new(
+/*================*/
+	const rec_t*	rec);	/*!< in: physical record */
+/******************************************************//**
+The following function is used to set the heap number
+field in a new-style record. */
+IB_INLINE
+void
+rec_set_heap_no_new(
+/*================*/
+	rec_t*	rec,	/*!< in/out: physical record */
+	ulint	heap_no);/*!< in: the heap number */
+/******************************************************//**
+The following function is used to test whether the data offsets
+in the record are stored in one-byte or two-byte format.
+@return	TRUE if 1-byte form */
+IB_INLINE
+ibool
+rec_get_1byte_offs_flag(
+/*====================*/
+	const rec_t*	rec);	/*!< in: physical record */
 
-/// \brief The following function is used to retrieve the info and status bits of a record.
-/// \details (Only compact records have status bits.)
-/// \param [in] rec physical record
-/// \param [in] comp nonzero=compact page format
-/// \return info bits
-IB_INLINE ulint rec_get_info_and_status_bits(const rec_t* rec, ulint comp);
-/// \brief The following function is used to set the info and status bits of a record.
-/// \details (Only compact records have status bits.)
-/// \param [in,out] rec compact physical record
-/// \param [in] bits info bits
-IB_INLINE void rec_set_info_and_status_bits(rec_t* rec, ulint bits);
+/******************************************************//**
+Determine how many of the first n columns in a compact
+physical record are stored externally.
+@return	number of externally stored columns */
+IB_INTERN
+ulint
+rec_get_n_extern_new(
+/*=================*/
+	const rec_t*	rec,	/*!< in: compact physical record */
+	dict_index_t*	index,	/*!< in: record descriptor */
+	ulint		n);	/*!< in: number of columns to scan */
 
-/// \brief The following function tells if record is delete marked.
-/// \param [in] rec physical record
-/// \param [in] comp nonzero=compact page format
-/// \return nonzero if delete marked
-IB_INLINE ulint rec_get_deleted_flag(const rec_t* rec, ulint comp);
-
-/// \brief The following function is used to set the deleted bit.
-/// \param [in] rec old-style physical record
-/// \param [in] flag nonzero if delete marked
-IB_INLINE void rec_set_deleted_flag_old(rec_t* rec, ulint flag);
-/// \brief The following function is used to set the deleted bit.
-/// \param [in,out] rec new-style physical record
-/// \param [in,out] page_zip compressed page, or NULL
-/// \param [in] flag nonzero if delete marked
-IB_INLINE void rec_set_deleted_flag_new(rec_t* rec, page_zip_des_t* page_zip, ulint flag);
-
-/// \brief The following function tells if a new-style record is a node pointer.
-/// \param [in] rec physical record
-/// \return TRUE if node pointer
-IB_INLINE ibool rec_get_node_ptr_flag(const rec_t* rec);
-
-/// \brief The following function is used to get the order number of an old-style record in the heap of the index page.
-/// \param [in] rec physical record
-/// \return heap order number
-IB_INLINE ulint rec_get_heap_no_old(const rec_t* rec);
-/// \brief The following function is used to set the heap number field in an old-style record.
-/// \param [in] rec physical record
-/// \param [in] heap_no the heap number
-IB_INLINE void rec_set_heap_no_old(rec_t* rec, ulint heap_no);
-
-/// \brief The following function is used to get the order number of a new-style record in the heap of the index page.
-/// \param [in] rec physical record
-/// \return heap order number
-IB_INLINE ulint rec_get_heap_no_new(const rec_t* rec);
-
-/// \brief The following function is used to set the heap number field in a new-style record.
-/// \param [in,out] rec physical record
-/// \param [in] heap_no the heap number
-IB_INLINE void rec_set_heap_no_new(rec_t* rec, ulint heap_no);
-/// \brief The following function is used to test whether the data offsets in the record are stored in one-byte or two-byte format.
-/// \param [in] rec physical record
-/// \return TRUE if 1-byte form
-IB_INLINE ibool rec_get_1byte_offs_flag(const rec_t* rec);
-
-/// \brief Determine how many of the first n columns in a compact physical record are stored externally.
-/// \param [in] rec compact physical record
-/// \param [in] index record descriptor
-/// \param [in] n number of columns to scan
-/// \return number of externally stored columns
-IB_INTERN ulint rec_get_n_extern_new(const rec_t* rec, dict_index_t* index, ulint n);
-
-/// \brief The following function determines the offsets to each field in the record.
-/// \details It can reuse a previously allocated array.
-/// \param [in] rec physical record
-/// \param [in] index record descriptor
-/// \param [in,out] offsets array consisting of offsets[0] allocated elements, or an array from rec_get_offsets(), or NULL
-/// \param [in] n_fields maximum number of initialized fields (ULINT_UNDEFINED if all fields)
-/// \param [in,out] heap memory heap
-/// \param [in] file file name where called
-/// \param [in] line line number where called
-/// \return the new offsets
-IB_INTERN ulint* rec_get_offsets_func(const rec_t* rec, const dict_index_t* index, ulint* offsets, ulint n_fields, mem_heap_t** heap, const char* file, ulint line);
+/******************************************************//**
+The following function determines the offsets to each field
+in the record.	It can reuse a previously allocated array.
+@return	the new offsets */
+IB_INTERN
+ulint*
+rec_get_offsets_func(
+/*=================*/
+	const rec_t*		rec,	/*!< in: physical record */
+	const dict_index_t*	index,	/*!< in: record descriptor */
+	ulint*			offsets,/*!< in/out: array consisting of
+					offsets[0] allocated elements,
+					or an array from rec_get_offsets(),
+					or NULL */
+	ulint			n_fields,/*!< in: maximum number of
+					initialized fields
+					 (ULINT_UNDEFINED if all fields) */
+	mem_heap_t**		heap,	/*!< in/out: memory heap */
+	const char*		file,	/*!< in: file name where called */
+	ulint			line);	/*!< in: line number where called */
 
 #define rec_get_offsets(rec,index,offsets,n,heap)	\
 	rec_get_offsets_func(rec,index,offsets,n,heap,__FILE__,__LINE__)

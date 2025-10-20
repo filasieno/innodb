@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/*******************************************************************//**
-@file rem/rem0cmp.c
-Comparison services for records
-
-Created 7/1/1994 Heikki Tuuri
-************************************************************************/
+/// \file rem_cmp.cpp
+/// \brief Comparison services for records
+/// \details Originally created by Heikki Tuuri in 7/1/1994
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "rem_cmp.hpp"
 
@@ -53,64 +48,38 @@ where two records disagree only in the way that one
 has more fields than the other. */
 
 #ifdef IB_DEBUG
-/*************************************************************//**
-Used in debug checking of cmp_dtuple_... .
-This function is used to compare a data tuple to a physical record. If
-dtuple has n fields then rec must have either m >= n fields, or it must
-differ from dtuple in some of the m fields rec has.
-@return 1, 0, -1, if dtuple is greater, equal, less than rec,
-respectively, when only the common first fields are compared */
-static
-int
-cmp_debug_dtuple_rec_with_match(
-/*============================*/
-	void*		cmp_ctx,/*!< in: client compare context */
-	const dtuple_t*	dtuple,	/*!< in: data tuple */
-	const rec_t*	rec,	/*!< in: physical record which differs from
-				dtuple in some of the common fields, or which
-				has an equal number or more fields than
-				dtuple */
-	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
-	ulint*		matched_fields);/*!< in/out: number of already
-				completely  matched fields; when function
-				returns, contains the value for current
-				comparison */
+/// \brief Used in debug checking of cmp_dtuple_... .
+/// \details This function is used to compare a data tuple to a physical record. If dtuple has n fields then rec must have either m >= n fields, or it must differ from dtuple in some of the m fields rec has.
+/// \param [in] cmp_ctx client compare context
+/// \param [in] dtuple data tuple
+/// \param [in] rec physical record which differs from dtuple in some of the common fields, or which has an equal number or more fields than dtuple
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \param [in,out] matched_fields number of already completely matched fields; when function returns, contains the value for current comparison
+/// \return 1, 0, -1, if dtuple is greater, equal, less than rec, respectively, when only the common first fields are compared
+static int cmp_debug_dtuple_rec_with_match(void* cmp_ctx, const dtuple_t* dtuple, const rec_t* rec, const ulint* offsets, ulint* matched_fields);
 #endif /* IB_DEBUG */
-/*********************************************************************//**
-Transforms the character code so that it is ordered appropriately for the
-language. This is only used for the latin1 char set. The client does the
-comparisons for other char sets.
-@return	collation order position */
-IB_INLINE
-ulint
-cmp_collate(
-/*========*/
-	ulint	code)	/*!< in: code of a character stored in
-			database record */
+/// \brief Transforms the character code so that it is ordered appropriately for the language.
+/// \details This is only used for the latin1 char set. The client does the comparisons for other char sets.
+/// \param [in] code code of a character stored in database record
+/// \return collation order position
+IB_INLINE ulint cmp_collate(ulint code)
 {
 	//return((ulint) srv_latin1_ordering[code]);
 	/* FIXME: Default to ASCII */
 	return(code);
 }
 
-/*************************************************************//**
-Returns TRUE if two columns are equal for comparison purposes.
-@return	TRUE if the columns are considered equal in comparisons */
-IB_INTERN
-ibool
-cmp_cols_are_equal(
-/*===============*/
-	const dict_col_t*	col1,	/*!< in: column 1 */
-	const dict_col_t*	col2,	/*!< in: column 2 */
-	ibool			check_charsets)
-					/*!< in: whether to check charsets */
+/// \brief Returns TRUE if two columns are equal for comparison purposes.
+/// \param [in] col1 column 1
+/// \param [in] col2 column 2
+/// \param [in] check_charsets whether to check charsets
+/// \return TRUE if the columns are considered equal in comparisons
+IB_INTERN ibool cmp_cols_are_equal(const dict_col_t* col1, const dict_col_t* col2, ibool check_charsets)
 {
 	if (dtype_is_non_binary_string_type(col1->mtype, col1->prtype)
 	    && dtype_is_non_binary_string_type(col2->mtype, col2->prtype)) {
-
 		/* Both are non-binary string types: they can be compared if
 		and only if the charset-collation is the same */
-
 		if (check_charsets) {
 			return(dtype_get_charset_coll(col1->prtype)
 			       == dtype_get_charset_coll(col2->prtype));
@@ -118,52 +87,37 @@ cmp_cols_are_equal(
 			return(TRUE);
 		}
 	}
-
 	if (dtype_is_binary_string_type(col1->mtype, col1->prtype)
 	    && dtype_is_binary_string_type(col2->mtype, col2->prtype)) {
-
 		/* Both are binary string types: they can be compared */
-
 		return(TRUE);
 	}
-
 	if (col1->mtype != col2->mtype) {
-
 		return(FALSE);
 	}
 
 	if (col1->mtype == DATA_INT
 	    && (col1->prtype & DATA_UNSIGNED)
 	    != (col2->prtype & DATA_UNSIGNED)) {
-
 		/* The storage format of an unsigned integer is different
 		from a signed integer: in a signed integer we OR
 		0x8000... to the value of positive integers. */
-
 		return(FALSE);
 	}
 
 	return(col1->mtype != DATA_INT || col1->len == col2->len);
 }
 
-/*************************************************************//**
-Innobase uses this function to compare two data fields for which the
-data type is such that we must compare whole fields or call the client
-to do the comparison
-@return	1, 0, -1, if a is greater, equal, less than b, respectively */
-static
-int
-cmp_whole_field(
-/*============*/
-	void*		cmp_ctx,	/*!< in: client compare context */
-	ulint		mtype,		/*!< in: main type */
-	ib_u16_t	prtype,		/*!< in: precise type */
-	const byte*	a,		/*!< in: data field */
-	unsigned int	a_length,	/*!< in: data field length,
-					not IB_SQL_NULL */
-	const byte*	b,		/*!< in: data field */
-	unsigned int	b_length)	/*!< in: data field length,
-					not IB_SQL_NULL */
+/// \brief Innobase uses this function to compare two data fields for which the data type is such that we must compare whole fields or call the client to do the comparison.
+/// \param [in] cmp_ctx client compare context
+/// \param [in] mtype main type
+/// \param [in] prtype precise type
+/// \param [in] a data field
+/// \param [in] a_length data field length, not IB_SQL_NULL
+/// \param [in] b data field
+/// \param [in] b_length data field length, not IB_SQL_NULL
+/// \return 1, 0, -1, if a is greater, equal, less than b, respectively
+static int cmp_whole_field(void* cmp_ctx, ulint mtype, ib_u16_t prtype, const byte* a, unsigned int a_length, const byte* b, unsigned int b_length)
 {
 	float		f_1;
 	float		f_2;
@@ -180,7 +134,7 @@ cmp_whole_field(
 
 		if (*a == '-') {
 			if (*b != '-') {
-				return(-1);
+				return -1;
 			}
 
 			a++; b++;
@@ -191,7 +145,7 @@ cmp_whole_field(
 
 		} else if (*b == '-') {
 
-			return(1);
+			return 1;
 		}
 
 		while (a_length > 0 && (*a == '+' || *a == '0')) {
@@ -217,7 +171,7 @@ cmp_whole_field(
 
 		if (a_length == 0) {
 
-			return(0);
+			return 0;
 		}
 
 		if (*a > *b) {
@@ -230,24 +184,24 @@ cmp_whole_field(
 		d_2 = mach_double_read(b);
 
 		if (d_1 > d_2) {
-			return(1);
+			return 1;
 		} else if (d_2 > d_1) {
-			return(-1);
+			return -1;
 		}
 
-		return(0);
+		return 0;
 
 	case DATA_FLOAT:
 		f_1 = mach_float_read(a);
 		f_2 = mach_float_read(b);
 
 		if (f_1 > f_2) {
-			return(1);
+			return 1;
 		} else if (f_2 > f_1) {
-			return(-1);
+			return -1;
 		}
 
-		return(0);
+		return 0;
 	case DATA_BLOB:
 		if (prtype & DATA_BINARY_TYPE) {
 
@@ -299,26 +253,19 @@ cmp_whole_field(
 		UT_ERROR;
 	}
 
-	return(0);
+	return 0;
 }
 
-/*************************************************************//**
-This function is used to compare two data fields for which we know the
-data type.
-@return	1, 0, -1, if data1 is greater, equal, less than data2, respectively */
-IB_INTERN
-int
-cmp_data_data_slow(
-/*===============*/
-	void*		cmp_ctx,/*!< in: client compare context */
-	ulint		mtype,	/*!< in: main type */
-	ulint		prtype,	/*!< in: precise type */
-	const byte*	data1,	/*!< in: data field (== a pointer to a memory
-				buffer) */
-	ulint		len1,	/*!< in: data field length or IB_SQL_NULL */
-	const byte*	data2,	/*!< in: data field (== a pointer to a memory
-				buffer) */
-	ulint		len2)	/*!< in: data field length or IB_SQL_NULL */
+/// \brief This function is used to compare two data fields for which we know the data type.
+/// \param [in] cmp_ctx client compare context
+/// \param [in] mtype main type
+/// \param [in] prtype precise type
+/// \param [in] data1 data field (== a pointer to a memory buffer)
+/// \param [in] len1 data field length or IB_SQL_NULL
+/// \param [in] data2 data field (== a pointer to a memory buffer)
+/// \param [in] len2 data field length or IB_SQL_NULL
+/// \return 1, 0, -1, if data1 is greater, equal, less than data2, respectively
+IB_INTERN int cmp_data_data_slow(void* cmp_ctx, ulint mtype, ulint prtype, const byte* data1, ulint len1, const byte* data2, ulint len2)
 {
 	ulint	data1_byte;
 	ulint	data2_byte;
@@ -328,17 +275,17 @@ cmp_data_data_slow(
 
 		if (len1 == len2) {
 
-			return(0);
+			return 0;
 		}
 
 		if (len1 == IB_SQL_NULL) {
 			/* We define the SQL null to be the smallest possible
 			value of a field in the alphabetical order */
 
-			return(-1);
+			return -1;
 		}
 
-		return(1);
+		return 1;
 	}
 
 	if (mtype >= DATA_FLOAT
@@ -361,14 +308,14 @@ cmp_data_data_slow(
 		if (len1 <= cur_bytes) {
 			if (len2 <= cur_bytes) {
 
-				return(0);
+				return 0;
 			}
 
 			data1_byte = dtype_get_pad_char(mtype, prtype);
 
 			if (data1_byte == ULINT_UNDEFINED) {
 
-				return(-1);
+				return -1;
 			}
 		} else {
 			data1_byte = *data1;
@@ -379,7 +326,7 @@ cmp_data_data_slow(
 
 			if (data2_byte == ULINT_UNDEFINED) {
 
-				return(1);
+				return 1;
 			}
 		} else {
 			data2_byte = *data2;
@@ -402,10 +349,10 @@ cmp_data_data_slow(
 
 		if (data1_byte > data2_byte) {
 
-			return(1);
+			return 1;
 		} else if (data1_byte < data2_byte) {
 
-			return(-1);
+			return -1;
 		}
 next_byte:
 		/* Next byte */
@@ -414,38 +361,19 @@ next_byte:
 		data2++;
 	}
 
-	return(0);		/* Not reached */
+	return 0;		/* Not reached */
 }
 
-/*************************************************************//**
-This function is used to compare a data tuple to a physical record.
-Only dtuple->n_fields_cmp first fields are taken into account for
-the data tuple! If we denote by n = n_fields_cmp, then rec must
-have either m >= n fields, or it must differ from dtuple in some of
-the m fields rec has. If rec has an externally stored field we do not
-compare it but return with value 0 if such a comparison should be
-made.
-@return 1, 0, -1, if dtuple is greater, equal, less than rec,
-respectively, when only the common first fields are compared, or until
-the first externally stored field in rec */
-IB_INTERN
-int
-cmp_dtuple_rec_with_match(
-/*======================*/
-	void*		cmp_ctx,/*!< in: client compare context */
-	const dtuple_t*	dtuple,	/*!< in: data tuple */
-	const rec_t*	rec,	/*!< in: physical record which differs from
-				dtuple in some of the common fields, or which
-				has an equal number or more fields than
-				dtuple */
-	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
-	ulint*		matched_fields, /*!< in/out: number of already completely
-				matched fields; when function returns,
-				contains the value for current comparison */
-	ulint*		matched_bytes) /*!< in/out: number of already matched
-				bytes within the first field not completely
-				matched; when function returns, contains the
-				value for current comparison */
+/// \brief This function is used to compare a data tuple to a physical record.
+/// \details Only dtuple->n_fields_cmp first fields are taken into account for the data tuple! If we denote by n = n_fields_cmp, then rec must have either m >= n fields, or it must differ from dtuple in some of the m fields rec has. If rec has an externally stored field we do not compare it but return with value 0 if such a comparison should be made.
+/// \param [in] cmp_ctx client compare context
+/// \param [in] dtuple data tuple
+/// \param [in] rec physical record which differs from dtuple in some of the common fields, or which has an equal number or more fields than dtuple
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \param [in,out] matched_fields number of already completely matched fields; when function returns, contains the value for current comparison
+/// \param [in,out] matched_bytes number of already matched bytes within the first field not completely matched; when function returns, contains the value for current comparison
+/// \return 1, 0, -1, if dtuple is greater, equal, less than rec, respectively, when only the common first fields are compared, or until the first externally stored field in rec
+IB_INTERN int cmp_dtuple_rec_with_match(void* cmp_ctx, const dtuple_t* dtuple, const rec_t* rec, const ulint* offsets, ulint* matched_fields, ulint* matched_bytes)
 {
 	const dfield_t*	dtuple_field;	/* current field in logical record */
 	ulint		dtuple_f_len;	/* the length of the current field
@@ -790,9 +718,9 @@ cmp_rec_rec_simple(
 				smallest possible value of a field
 				in the alphabetical order */
 
-				return(1);
+				return 1;
 			} else {
-				return(-1);
+				return -1;
 			}
 		}
 
@@ -828,7 +756,7 @@ cmp_rec_rec_simple(
 				rec2_byte = dtype_get_pad_char(mtype, prtype);
 
 				if (rec2_byte == ULINT_UNDEFINED) {
-					return(1);
+					return 1;
 				}
 			} else {
 				rec2_byte = *rec2_b_ptr;
@@ -838,7 +766,7 @@ cmp_rec_rec_simple(
 				rec1_byte = dtype_get_pad_char(mtype, prtype);
 
 				if (rec1_byte == ULINT_UNDEFINED) {
-					return(-1);
+					return -1;
 				}
 			} else {
 				rec1_byte = *rec1_b_ptr;
@@ -861,9 +789,9 @@ cmp_rec_rec_simple(
 			}
 
 			if (rec1_byte < rec2_byte) {
-				return(-1);
+				return -1;
 			} else if (rec1_byte > rec2_byte) {
-				return(1);
+				return 1;
 			}
 		}
 next_field:
@@ -871,7 +799,7 @@ next_field:
 	}
 
 	/* If we ran out of fields, rec1 was equal to rec2. */
-	return(0);
+	return 0;
 }
 
 /*************************************************************//**
