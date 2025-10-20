@@ -1,40 +1,31 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/********************************************************************//**
-@file include/rem0rec.ic
-Record manager
-
-Created 5/30/1994 Heikki Tuuri
-*************************************************************************/
+/// \file rem_rec.inl
+/// \brief Record manager
+/// \details Originally created by Heikki Tuuri on 5/30/1994
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "mach_data.hpp"
 #include "ut_byte.hpp"
 #include "dict_dict.hpp"
 
-/* Compact flag ORed to the extra size returned by rec_get_offsets() */
-#define REC_OFFS_COMPACT	((ulint) 1 << 31)
-/* SQL NULL flag in offsets returned by rec_get_offsets() */
-#define REC_OFFS_SQL_NULL	((ulint) 1 << 31)
-/* External flag in offsets returned by rec_get_offsets() */
-#define REC_OFFS_EXTERNAL	((ulint) 1 << 30)
-/* Mask for offsets returned by rec_get_offsets() */
-#define REC_OFFS_MASK		(REC_OFFS_EXTERNAL - 1)
+constinit ulint REC_OFFS_COMPACT = ((ulint) 1 << 31);
+constinit ulint REC_OFFS_SQL_NULL = ((ulint) 1 << 31);
+constinit ulint REC_OFFS_EXTERNAL = ((ulint) 1 << 30);
+constinit ulint REC_OFFS_MASK = (REC_OFFS_EXTERNAL - 1);
 
 /* Offsets of the bit-fields in an old-style record. NOTE! In the table the
 most significant bytes and bits are written below less significant.
@@ -84,49 +75,49 @@ most significant bytes and bits are written below less significant.
 /* We list the byte offsets from the origin of the record, the mask,
 and the shift needed to obtain each bit-field of the record. */
 
-#define REC_NEXT		2
-#define REC_NEXT_MASK		0xFFFFUL
-#define REC_NEXT_SHIFT		0
+constinit ulint REC_NEXT = 2;
+constinit ulint REC_NEXT_MASK = 0xFFFFUL;
+constinit ulint REC_NEXT_SHIFT = 0;
 
-#define REC_OLD_SHORT		3	/* This is single byte bit-field */
-#define REC_OLD_SHORT_MASK	0x1UL
-#define REC_OLD_SHORT_SHIFT	0
+constinit ulint REC_OLD_SHORT = 3;	/* This is single byte bit-field */
+constinit ulint REC_OLD_SHORT_MASK = 0x1UL;
+constinit ulint REC_OLD_SHORT_SHIFT = 0;
 
-#define REC_OLD_N_FIELDS	4
-#define REC_OLD_N_FIELDS_MASK	0x7FEUL
-#define REC_OLD_N_FIELDS_SHIFT	1
+constinit ulint REC_OLD_N_FIELDS = 4;
+constinit ulint REC_OLD_N_FIELDS_MASK = 0x7FEUL;
+constinit ulint REC_OLD_N_FIELDS_SHIFT = 1;
 
-#define REC_NEW_STATUS		3	/* This is single byte bit-field */
-#define REC_NEW_STATUS_MASK	0x7UL
-#define REC_NEW_STATUS_SHIFT	0
+constinit ulint REC_NEW_STATUS = 3;	/* This is single byte bit-field */
+constinit ulint REC_NEW_STATUS_MASK = 0x7UL;
+constinit ulint REC_NEW_STATUS_SHIFT = 0;
 
-#define REC_OLD_HEAP_NO		5
-#define REC_HEAP_NO_MASK	0xFFF8UL
+constinit ulint REC_OLD_HEAP_NO = 5;
+constinit ulint REC_HEAP_NO_MASK = 0xFFF8UL;
 #if 0 /* defined in rem0rec.h for use of page0zip.c */
-#define REC_NEW_HEAP_NO		4
-#define	REC_HEAP_NO_SHIFT	3
+constinit ulint REC_NEW_HEAP_NO = 4;
+constinit ulint REC_HEAP_NO_SHIFT = 3;
 #endif
 
-#define REC_OLD_N_OWNED		6	/* This is single byte bit-field */
-#define REC_NEW_N_OWNED		5	/* This is single byte bit-field */
-#define	REC_N_OWNED_MASK	0xFUL
-#define REC_N_OWNED_SHIFT	0
+constinit ulint REC_OLD_N_OWNED = 6;	/* This is single byte bit-field */
+constinit ulint REC_NEW_N_OWNED = 5;	/* This is single byte bit-field */
+constinit ulint REC_N_OWNED_MASK = 0xFUL;
+constinit ulint REC_N_OWNED_SHIFT = 0;
 
-#define REC_OLD_INFO_BITS	6	/* This is single byte bit-field */
-#define REC_NEW_INFO_BITS	5	/* This is single byte bit-field */
-#define	REC_INFO_BITS_MASK	0xF0UL
-#define REC_INFO_BITS_SHIFT	0
+constinit ulint REC_OLD_INFO_BITS = 6;	/* This is single byte bit-field */
+constinit ulint REC_NEW_INFO_BITS = 5;	/* This is single byte bit-field */
+constinit ulint REC_INFO_BITS_MASK = 0xF0UL;
+constinit ulint REC_INFO_BITS_SHIFT = 0;
 
 /* The following masks are used to filter the SQL null bit from
 one-byte and two-byte offsets */
 
-#define REC_1BYTE_SQL_NULL_MASK	0x80UL
-#define REC_2BYTE_SQL_NULL_MASK	0x8000UL
+constinit ulint REC_1BYTE_SQL_NULL_MASK = 0x80UL;
+constinit ulint REC_2BYTE_SQL_NULL_MASK = 0x8000UL;
 
 /* In a 2-byte offset the second most significant bit denotes
 a field stored to another page: */
 
-#define REC_2BYTE_EXTERN_MASK	0x4000UL
+constinit ulint REC_2BYTE_EXTERN_MASK = 0x4000UL;
 
 #if REC_OLD_SHORT_MASK << (8 * (REC_OLD_SHORT - 3)) \
 		^ REC_OLD_N_FIELDS_MASK << (8 * (REC_OLD_N_FIELDS - 4)) \
@@ -146,33 +137,25 @@ a field stored to another page: */
 
 /***********************************************************//**
 Sets the value of the ith field SQL null bit of an old-style record. */
-IB_INTERN
-void
-rec_set_nth_field_null_bit(
-/*=======================*/
-	rec_t*	rec,	/*!< in: record */
-	ulint	i,	/*!< in: ith field */
-	ibool	val);	/*!< in: value to set */
-/***********************************************************//**
-Sets an old-style record field to SQL null.
-The physical size of the field is not changed. */
-IB_INTERN
-void
-rec_set_nth_field_sql_null(
-/*=======================*/
-	rec_t*	rec,	/*!< in: record */
-	ulint	n);	/*!< in: index of the field */
+/// \brief Sets the value of the ith field SQL null bit of an old-style record.
+/// \param [in] rec record
+/// \param [in] i ith field
+/// \param [in] val value to set
+IB_INTERN void rec_set_nth_field_null_bit(rec_t* rec, ulint i, ibool val);
 
-/******************************************************//**
-Gets a bit field from within 1 byte. */
-IB_INLINE
-ulint
-rec_get_bit_field_1(
-/*================*/
-	const rec_t*	rec,	/*!< in: pointer to record origin */
-	ulint		offs,	/*!< in: offset from the origin down */
-	ulint		mask,	/*!< in: mask used to filter bits */
-	ulint		shift)	/*!< in: shift right applied after masking */
+/// \brief Sets an old-style record field to SQL null.
+/// \details The physical size of the field is not changed.
+/// \param [in] rec record
+/// \param [in] n index of the field
+IB_INTERN void rec_set_nth_field_sql_null(rec_t* rec, ulint n);
+
+/// \brief Gets a bit field from within 1 byte.
+/// \param [in] rec pointer to record origin
+/// \param [in] offs offset from the origin down
+/// \param [in] mask mask used to filter bits
+/// \param [in] shift shift right applied after masking
+/// \return bit field value
+IB_INLINE ulint rec_get_bit_field_1(const rec_t* rec, ulint offs, ulint mask, ulint shift)
 {
 	ut_ad(rec);
 

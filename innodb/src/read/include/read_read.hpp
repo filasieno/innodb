@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+/// \file read_read.hpp
+/// \brief Cursor read
+/// \details Originally created by Heikki Tuuri on 2/16/1997
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/read0read.h
-Cursor read
-
-Created 2/16/1997 Heikki Tuuri
-*******************************************************/
-
-#ifndef read0read_h
-#define read0read_h
+#pragma once
 
 #include "univ.i"
 
@@ -34,91 +28,42 @@ Created 2/16/1997 Heikki Tuuri
 #include "trx_trx.hpp"
 #include "read_types.hpp"
 
-/*********************************************************************//**
-Opens a read view where exactly the transactions serialized before this
-point in time are seen in the view.
-@return	own: read view struct */
-IB_INTERN
-read_view_t*
-read_view_open_now(
-/*===============*/
-	trx_id_t	cr_trx_id,	/*!< in: trx_id of creating
-					transaction, or ut_dulint_zero
-					used in purge */
-	mem_heap_t*	heap);		/*!< in: memory heap from which
-					allocated */
-/*********************************************************************//**
-Makes a copy of the oldest existing read view, or opens a new. The view
-must be closed with ..._close.
-@return	own: read view struct */
-IB_INTERN
-read_view_t*
-read_view_oldest_copy_or_open_new(
-/*==============================*/
-	trx_id_t	cr_trx_id,	/*!< in: trx_id of creating
-					transaction, or ut_dulint_zero
-					used in purge */
-	mem_heap_t*	heap);		/*!< in: memory heap from which
-					allocated */
-/*********************************************************************//**
-Closes a read view. */
-IB_INTERN
-void
-read_view_close(
-/*============*/
-	read_view_t*	view);	/*!< in: read view */
-/*********************************************************************//**
-Closes a consistent read view for client. This function is called at an SQL
-statement end if the trx isolation level is <= TRX_ISO_READ_COMMITTED. */
-IB_INTERN
-void
-read_view_close_for_read_committed(
-/*===============================*/
-	trx_t*	trx);	/*!< in: trx which has a read view */
-/*********************************************************************//**
-Checks if a read view sees the specified transaction.
-@return	TRUE if sees */
-IB_INLINE
-ibool
-read_view_sees_trx_id(
-/*==================*/
-	const read_view_t*	view,	/*!< in: read view */
-	trx_id_t		trx_id);/*!< in: trx id */
-/*********************************************************************//**
-Prints a read view to stderr. */
-IB_INTERN
-void
-read_view_print(
-/*============*/
-	const read_view_t*	view);	/*!< in: read view */
-/*********************************************************************//**
-Create a consistent cursor view to be used in cursors. In this
-consistent read view modifications done by the creating transaction or future
-transactions are not visible. */
-IB_INTERN
-cursor_view_t*
-read_cursor_view_create(
-/*====================*/
-	trx_t*		cr_trx);/*!< in: trx where cursor view is created */
-/*********************************************************************//**
-Close a given consistent cursor view and restore global read view
-back to a transaction read view. */
-IB_INTERN
-void
-read_cursor_view_close(
-/*===================*/
-	trx_t*		trx,		/*!< in: trx */
-	cursor_view_t*	curview);	/*!< in: cursor view to be closed */
-/*********************************************************************//**
-This function sets a given consistent cursor view to a transaction
-read view if given consistent cursor view is not NULL. Otherwise, function
-restores a global read view to a transaction read view. */
-IB_INTERN
-void
-read_cursor_set(
-/*============*/
-	trx_t*		trx,	/*!< in: transaction where cursor is set */
-	cursor_view_t*	curview);/*!< in: consistent cursor view to be set */
+/// \brief Opens a read view where exactly the transactions serialized before this point in time are seen in the view.
+/// \param [in] cr_trx_id trx_id of creating transaction, or ut_dulint_zero used in purge
+/// \param [in] heap memory heap from which allocated
+/// \return own: read view struct
+IB_INTERN read_view_t* read_view_open_now(trx_id_t cr_trx_id, mem_heap_t* heap);
+/// \brief Makes a copy of the oldest existing read view, or opens a new. The view must be closed with ..._close.
+/// \param [in] cr_trx_id trx_id of creating transaction, or ut_dulint_zero used in purge
+/// \param [in] heap memory heap from which allocated
+/// \return own: read view struct
+IB_INTERN read_view_t* read_view_oldest_copy_or_open_new(trx_id_t cr_trx_id, mem_heap_t* heap);
+/// \brief Closes a read view.
+/// \param [in] view read view
+IB_INTERN void read_view_close(read_view_t* view);
+/// \brief Closes a consistent read view for client. This function is called at an SQL statement end if the trx isolation level is <= TRX_ISO_READ_COMMITTED.
+/// \param [in] trx trx which has a read view
+IB_INTERN void read_view_close_for_read_committed(trx_t* trx);
+/// \brief Checks if a read view sees the specified transaction.
+/// \param [in] view read view
+/// \param [in] trx_id trx id
+/// \return TRUE if sees
+IB_INLINE ibool read_view_sees_trx_id(const read_view_t* view, trx_id_t trx_id);
+/// \brief Prints a read view to stderr.
+/// \param [in] view read view
+IB_INTERN void read_view_print(const read_view_t* view);
+/// \brief Create a consistent cursor view to be used in cursors. In this consistent read view modifications done by the creating transaction or future transactions are not visible.
+/// \param [in] cr_trx trx where cursor view is created
+/// \return cursor view
+IB_INTERN cursor_view_t* read_cursor_view_create(trx_t* cr_trx);
+/// \brief Close a given consistent cursor view and restore global read view back to a transaction read view.
+/// \param [in] trx trx
+/// \param [in] curview cursor view to be closed
+IB_INTERN void read_cursor_view_close(trx_t* trx, cursor_view_t* curview);
+/// \brief This function sets a given consistent cursor view to a transaction read view if given consistent cursor view is not NULL. Otherwise, function restores a global read view to a transaction read view.
+/// \param [in] trx transaction where cursor is set
+/// \param [in] curview consistent cursor view to be set
+IB_INTERN void read_cursor_set(trx_t* trx, cursor_view_t* curview);
 
 /** Read view lists the trx ids of those transactions for which a consistent
 read should not see the modifications to the database. */
@@ -189,6 +134,4 @@ struct cursor_view_struct{
 
 #ifndef IB_DO_NOT_INLINE
 #include "read0read.inl"
-#endif
-
 #endif

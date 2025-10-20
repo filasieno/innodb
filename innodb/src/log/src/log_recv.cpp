@@ -12,17 +12,16 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-/**
- * @file log/log0recv.c
- * @brief Recovery
- *
- * Created 9/20/1997 Heikki Tuuri
- */
+/// \file log_recv.cpp
+/// \brief Recovery implementation
+/// \details Originally created by Heikki Tuuri on 9/20/1997
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "log_recv.hpp"
 
 #ifdef IB_DO_NOT_INLINE
-#include "log0recv.inl"
+	#include "log_recv.inl"
 #endif
 
 #include "btr_btr.hpp"
@@ -38,21 +37,24 @@
 #include "page_zip.hpp"
 #include "trx_rec.hpp"
 #include "trx_undo.hpp"
+
 #ifndef IB_HOTBACKUP
-#include "buf0rea.h"
-#include "ddl0ddl.h"
-#include "srv0srv.h"
-#include "srv0start.h"
-#include "sync0sync.h"
-#include "trx0roll.h"
-#else	 // !IB_HOTBACKUP
+	#include "buf_rea.h"
+	#include "ddl_ddl.h"
+	#include "srv_srv.h"
+	#include "srv_start.h"
+	#include "sync_sync.h"
+	#include "trx_roll.h"
+#else	 // ! IB_HOTBACKUP
+
 #include "btr_btr.hpp"
 
 /** This is set to FALSE if the backup was originally taken with the
 ibbackup --include regexp option: then we do not want to create tables in
 directories which were not included */
 IB_INTERN ibool recv_replay_file_ops = TRUE;
-#endif	  // !IB_HOTBACKUP
+
+#endif	  // ! IB_HOTBACKUP
 
 /** Log records are stored in the hash table in chunks at most of this size;
 this must be less than IB_PAGE_SIZE as it is stored in the buffer pool */
@@ -67,9 +69,10 @@ IB_INTERN recv_sys_t *recv_sys = NULL;
 otherwise.  Note that this is FALSE while a background thread is
 rolling back incomplete transactions. */
 IB_INTERN ibool recv_recovery_on;
+
 #ifdef IB_LOG_ARCHIVE
-/** TRUE when applying redo log records from an archived log file */
-IB_INTERN ibool recv_recovery_from_backup_on;
+	// TRUE when applying redo log records from an archived log file
+	IB_INTERN ibool recv_recovery_from_backup_on;
 #endif	  // IB_LOG_ARCHIVE
 
 #ifndef IB_HOTBACKUP
@@ -111,16 +114,16 @@ TRUE means that recovery is running and no operations on the log files
 are allowed yet: the variable name is misleading. */
 IB_INTERN ibool recv_no_ibuf_operations;
 /** TRUE when the redo log is being backed up */
-#define recv_is_making_a_backup FALSE
+constinit ibool recv_is_making_a_backup = FALSE;
 /** TRUE when recovering from a backed up redo log file */
-#define recv_is_from_backup FALSE
+constinit ibool recv_is_from_backup = FALSE;
 #else	 // !IB_HOTBACKUP
-#define recv_needed_recovery FALSE
+constinit ibool recv_needed_recovery = FALSE;
 /** TRUE when the redo log is being backed up */
 IB_INTERN ibool recv_is_making_a_backup = FALSE;
 /** TRUE when recovering from a backed up redo log file */
 IB_INTERN ibool recv_is_from_backup = FALSE;
-#define buf_pool_get_curr_size() (5 * 1024 * 1024)
+constinit ulint buf_pool_get_curr_size = (5 * 1024 * 1024);
 #endif	  // !IB_HOTBACKUP
 /** The following counter is used to decide when to print info on
 log scan */
@@ -152,19 +155,14 @@ IB_INTERN ib_uint64_t recv_max_page_lsn;
 // prototypes
 
 #ifndef IB_HOTBACKUP
-/*******************************************************/ /**
-Initialize crash recovery environment. Can be called iff
-recv_needed_recovery == FALSE. */
-static void recv_start_crash_recovery(
-	// ======================
-	ib_recovery_t recovery
-);		  // !< in: recovery flag
+/// \brief Initialize crash recovery environment.
+/// \details Can be called iff recv_needed_recovery == FALSE.
+/// \param recovery recovery flag
+static void recv_start_crash_recovery(ib_recovery_t recovery);
 #endif	  // !IB_HOTBACKUP
 
-/********************************************************/ /**
-Reset the state of the recovery system variables. */
-IB_INTERN
-void recv_sys_var_init(void)
+/// \brief Reset the state of the recovery system variables.
+IB_INTERN void recv_sys_var_init(void)
 // ===================
 {
 	recv_sys = NULL;
@@ -203,10 +201,8 @@ void recv_sys_var_init(void)
 	recv_max_page_lsn = 0;
 }
 
-/************************************************************
-Creates the recovery system. */
-IB_INTERN
-void recv_sys_create(void)
+/// \brief Creates the recovery system.
+IB_INTERN void recv_sys_create(void)
 // =================
 {
 	if (recv_sys != NULL) {
@@ -223,8 +219,7 @@ void recv_sys_create(void)
 	recv_sys->addr_hash = NULL;
 }
 
-/********************************************************/ /**
-Release recovery system mutexes. */
+/// \brief Release recovery system mutexes.
 IB_INTERN
 void recv_sys_close(void)
 // ===============
@@ -235,8 +230,7 @@ void recv_sys_close(void)
 	}
 }
 
-/************************************************************
-Frees the recovery system memory. */
+/// \brief Frees the recovery system memory.
 IB_INTERN
 void recv_sys_mem_free(void)
 // ===================
@@ -263,8 +257,8 @@ void recv_sys_mem_free(void)
 	}
 }
 
-/************************************************************
-Inits the recovery system for a recovery operation. */
+/// \brief Inits the recovery system for a recovery operation.
+/// \param available_memory available memory in bytes
 IB_INTERN
 void recv_sys_init(
 	// ==========
@@ -317,8 +311,7 @@ void recv_sys_init(
 	mutex_exit(&(recv_sys->mutex));
 }
 
-/********************************************************/ /**
-Empties the hash table when it has been fully processed. */
+/// \brief Empties the hash table when it has been fully processed.
 static void recv_sys_empty_hash(void)
 // =====================
 {
@@ -345,8 +338,7 @@ static void recv_sys_empty_hash(void)
 
 #ifndef IB_HOTBACKUP
 #ifndef IB_LOG_DEBUG
-/********************************************************/ /**
-Frees the recovery system. */
+/// \brief Frees the recovery system.
 static void recv_sys_debug_free(void)
 // =====================
 {
@@ -369,20 +361,20 @@ static void recv_sys_debug_free(void)
 }
 #endif	  // IB_LOG_DEBUG
 
-/********************************************************/ /**
-Truncates possible corrupted or extra records from a log group. */
+/// \brief Truncates possible corrupted or extra records from a log group.
+/// \param group log group
+/// \param recovered_lsn recovery succeeded up to this lsn
+/// \param limit_lsn this was the limit for recovery
+/// \param checkpoint_lsn recovery was started from this checkpoint
+/// \param archived_lsn the log has been archived up to this lsn
 static void recv_truncate_group(
-	// ================
 	log_group_t *group,			// !< in: log group
-	ib_uint64_t recovered_lsn,	/*!< in: recovery succeeded up to this
-					lsn */
-	ib_uint64_t limit_lsn,		/*!< in: this was the limit for
-					recovery */
-	ib_uint64_t checkpoint_lsn, /*!< in: recovery was started from this
-					checkpoint */
-	ib_uint64_t archived_lsn
-) /*!< in: the log has been archived up to
-					this lsn */
+	ib_uint64_t recovered_lsn,	/*!< in: recovery succeeded up to this lsn */
+	ib_uint64_t limit_lsn,		/*!< in: this was the limit for recovery */
+	ib_uint64_t checkpoint_lsn, /*!< in: recovery was started from this checkpoint */
+	ib_uint64_t archived_lsn    /*!< in: the log has been archived up to this lsn */
+) 
+					
 {
 	ib_uint64_t start_lsn;
 	ib_uint64_t end_lsn;
@@ -460,9 +452,11 @@ static void recv_truncate_group(
 	}
 }
 
-/********************************************************/ /**
-Copies the log segment between group->recovered_lsn and recovered_lsn from the
-most up-to-date log group to group, so that it contains the latest log data. */
+/// \brief Copies the log segment between group->recovered_lsn and recovered_lsn from the
+/// most up-to-date log group to group, so that it contains the latest log data.
+/// \param up_to_date_group the most up-to-date log group
+/// \param group copy to this log group
+/// \param recovered_lsn recovery succeeded up to this lsn
 static void recv_copy_group(
 	// ============
 	log_group_t *up_to_date_group, /*!< in: the most up-to-date log
@@ -507,11 +501,11 @@ static void recv_copy_group(
 	}
 }
 
-/********************************************************/ /**
-Copies a log segment from the most up-to-date log group to the other log
-groups, so that they all contain the latest log data. Also writes the info
-about the latest checkpoint to the groups, and inits the fields in the group
-memory structs to up-to-date values. */
+/// \brief Copies a log segment from the most up-to-date log group to the other log
+/// groups, so that they all contain the latest log data. Also writes the info
+/// about the latest checkpoint to the groups, and inits the fields in the group
+/// memory structs to up-to-date values.
+/// \param up_to_date_group the most up-to-date log group
 static void recv_synchronize_groups(
 	// ====================
 	log_group_t *up_to_date_group
@@ -572,9 +566,8 @@ static void recv_synchronize_groups(
 }
 #endif	  // !IB_HOTBACKUP
 
-/***********************************************************************/ /**
-Checks the consistency of the checkpoint info
-@return	TRUE if ok */
+/// \brief Checks the consistency of the checkpoint info.
+/// \return TRUE if ok
 static ibool recv_check_cp_is_consistent(
 	// ========================
 	const byte *buf
@@ -765,12 +758,11 @@ ibool recv_read_cp_info_for_backup(
 }
 #endif	  // !IB_HOTBACKUP
 
-/******************************************************/ /**
-Checks the 4-byte checksum to the trailer checksum field of a log
-block.  We also accept a log block in the old format before
-InnoDB-3.23.52 where the checksum field contains the log block number.
-@return TRUE if ok, or if the log block may be in the format of InnoDB
-version predating 3.23.52 */
+/// \brief Checks the 4-byte checksum to the trailer checksum field of a log
+/// block. We also accept a log block in the old format before
+/// InnoDB-3.23.52 where the checksum field contains the log block number.
+/// \return TRUE if ok, or if the log block may be in the format of InnoDB
+/// version predating 3.23.52
 static ibool log_block_checksum_is_ok_or_old_format(
 	// ===================================
 	const byte *block
@@ -885,10 +877,9 @@ void recv_scan_log_seg_for_backup(
 }
 #endif	  // IB_HOTBACKUP
 
-/*******************************************************************/ /**
-Tries to parse a single log record body and also applies it to a page if
-specified. File ops are parsed, but not applied in this function.
-@return	log record end, NULL if not a complete record */
+/// \brief Tries to parse a single log record body and also applies it to a page if
+/// specified. File ops are parsed, but not applied in this function.
+/// \return log record end, NULL if not a complete record
 static byte *recv_parse_or_apply_log_rec_body(
 	// =============================
 	byte type,			// !< in: type
@@ -1172,10 +1163,9 @@ static byte *recv_parse_or_apply_log_rec_body(
 	return (ptr);
 }
 
-/*********************************************************************/ /**
-Calculates the fold value of a page file address: used in inserting or
-searching for a log record in the hash table.
-@return	folded value */
+/// \brief Calculates the fold value of a page file address: used in inserting or
+/// searching for a log record in the hash table.
+/// \return folded value
 IB_INLINE
 ulint recv_fold(
 	// ======
@@ -1186,10 +1176,9 @@ ulint recv_fold(
 	return (ut_fold_ulint_pair(space, page_no));
 }
 
-/*********************************************************************/ /**
-Calculates the hash value of a page file address: used in inserting or
-searching for a log record in the hash table.
-@return	folded value */
+/// \brief Calculates the hash value of a page file address: used in inserting or
+/// searching for a log record in the hash table.
+/// \return folded value
 IB_INLINE
 ulint recv_hash(
 	// ======
@@ -1200,9 +1189,8 @@ ulint recv_hash(
 	return (hash_calc_hash(recv_fold(space, page_no), recv_sys->addr_hash));
 }
 
-/*********************************************************************/ /**
-Gets the hashed file address struct for a page.
-@return	file address struct, NULL if not found from the hash table */
+/// \brief Gets the hashed file address struct for a page.
+/// \return file address struct, NULL if not found from the hash table
 static recv_addr_t *recv_get_fil_addr_struct(
 	// =====================
 	ulint space,	// !< in: space id
@@ -1224,8 +1212,7 @@ static recv_addr_t *recv_get_fil_addr_struct(
 	return (recv_addr);
 }
 
-/*******************************************************************/ /**
-Adds a new log record to the hash table of log records. */
+/// \brief Adds a new log record to the hash table of log records.
 static void recv_add_to_hash_table(
 	// ===================
 	byte type,				  // !< in: log record type
@@ -1305,8 +1292,7 @@ static void recv_add_to_hash_table(
 	*prev_field = NULL;
 }
 
-/*********************************************************************/ /**
-Copies the log record body from recv to buf. */
+/// \brief Copies the log record body from recv to buf.
 static void recv_data_copy_to_buf(
 	// ==================
 	byte *buf,	  // !< in: buffer of length at least recv->len
@@ -1547,10 +1533,9 @@ void recv_recover_page_func(
 }
 
 #ifndef IB_HOTBACKUP
-/*******************************************************************/ /**
-Reads in pages which have hashed log records, from an area around a given
-page number.
-@return	number of pages found */
+/// \brief Reads in pages which have hashed log records, from an area around a given
+/// page number.
+/// \return number of pages found
 static ulint recv_read_in_area(
 	// ==============
 	ulint space,	   // !< in: space
@@ -1860,9 +1845,8 @@ void recv_apply_log_recs_for_backup(void)
 }
 #endif	  // !IB_HOTBACKUP
 
-/*******************************************************************/ /**
-Tries to parse a single log record and returns its length.
-@return	length of the record, or 0 if the record was not complete */
+/// \brief Tries to parse a single log record and returns its length.
+/// \return length of the record, or 0 if the record was not complete
 static ulint recv_parse_log_rec(
 	// ===============
 	byte *ptr,		   // !< in: pointer to a buffer
@@ -1929,8 +1913,7 @@ static ulint recv_parse_log_rec(
 	return (new_ptr - ptr);
 }
 
-/*******************************************************/ /**
-Calculates the new value for lsn when more data is added to the log. */
+/// \brief Calculates the new value for lsn when more data is added to the log.
 static ib_uint64_t recv_calc_lsn_on_data_add(
 	// ======================
 	ib_uint64_t lsn,	// !< in: old lsn
@@ -1950,9 +1933,8 @@ static ib_uint64_t recv_calc_lsn_on_data_add(
 }
 
 #ifdef IB_LOG_DEBUG
-/*******************************************************/ /**
-Checks that the parser recognizes incomplete initial segments of a log
-record as incomplete. */
+/// \brief Checks that the parser recognizes incomplete initial segments of a log
+/// record as incomplete.
 static void recv_check_incomplete_log_recs(
 	// ===========================
 	byte *ptr,	  // !< in: pointer to a complete log record
@@ -1971,8 +1953,7 @@ static void recv_check_incomplete_log_recs(
 }
 #endif	  // IB_LOG_DEBUG
 
-/*******************************************************/ /**
-Prints diagnostic info of corrupt log. */
+/// \brief Prints diagnostic info of corrupt log.
 static void recv_report_corrupt_log(
 	// ====================
 	byte *ptr,		// !< in: pointer to corrupt log record
@@ -2035,10 +2016,9 @@ static void recv_report_corrupt_log(
 	);
 }
 
-/*******************************************************/ /**
-Parses log records from a buffer and stores them to a hash table to wait
-merging to file pages.
-@return	currently always returns FALSE */
+/// \brief Parses log records from a buffer and stores them to a hash table to wait
+/// merging to file pages.
+/// \return currently always returns FALSE
 static ibool recv_parse_log_recs(
 	// ================
 	ibool store_to_hash
@@ -2254,10 +2234,9 @@ loop:
 	goto loop;
 }
 
-/*******************************************************/ /**
-Adds data from a new log block to the parsing buffer of recv_sys if
-recv_sys->parse_start_lsn is non-zero.
-@return	TRUE if more data added */
+/// \brief Adds data from a new log block to the parsing buffer of recv_sys if
+/// recv_sys->parse_start_lsn is non-zero.
+/// \return TRUE if more data added
 static ibool recv_sys_add_to_parsing_buf(
 	// ========================
 	const byte *log_block,	  // !< in: log block
@@ -2327,8 +2306,7 @@ static ibool recv_sys_add_to_parsing_buf(
 	return (TRUE);
 }
 
-/*******************************************************/ /**
-Moves the parsing buffer data left to the buffer start. */
+/// \brief Moves the parsing buffer data left to the buffer start.
 static void recv_sys_justify_left_parsing_buf(void)
 // ===================================
 {
@@ -2339,13 +2317,12 @@ static void recv_sys_justify_left_parsing_buf(void)
 	recv_sys->recovered_offset = 0;
 }
 
-/*******************************************************/ /**
-Scans log from a buffer and stores new log data to the parsing buffer.
-Parses and hashes the log records if new data found.  Unless
-IB_HOTBACKUP is defined, this function will apply log records
-automatically when the hash table becomes full.
-@return TRUE if limit_lsn has been reached, or not able to scan any
-more in this log group */
+/// \brief Scans log from a buffer and stores new log data to the parsing buffer.
+/// Parses and hashes the log records if new data found. Unless
+/// IB_HOTBACKUP is defined, this function will apply log records
+/// automatically when the hash table becomes full.
+/// \return TRUE if limit_lsn has been reached, or not able to scan any
+/// more in this log group
 IB_INTERN
 ibool recv_scan_log_recs(
 	// ===============
@@ -2567,9 +2544,8 @@ ibool recv_scan_log_recs(
 }
 
 #ifndef IB_HOTBACKUP
-/*******************************************************/ /**
-Scans log from a buffer and stores new log data to the parsing buffer. Parses
-and hashes the log records if new data found. */
+/// \brief Scans log from a buffer and stores new log data to the parsing buffer. Parses
+/// and hashes the log records if new data found.
 static void recv_group_scan_log_recs(
 	// =====================
 	ib_recovery_t recovery,		 // !< in: recovery flag
@@ -2611,9 +2587,9 @@ static void recv_group_scan_log_recs(
 #endif	  // IB_DEBUG
 }
 
-/*******************************************************/ /**
-Initialize crash recovery environment. Can be called iff
-recv_needed_recovery == FALSE. */
+/// \brief Initialize crash recovery environment. Can be called iff
+/// recv_needed_recovery == FALSE.
+/// \param recovery recovery flag
 static void recv_start_crash_recovery(
 	// ======================
 	ib_recovery_t recovery
@@ -2656,8 +2632,8 @@ static void recv_start_crash_recovery(
 	}
 }
 
-/********************************************************/ /**
-Recover form ibbackup log file. */
+/// \brief Recover form ibbackup log file.
+/// \param max_cp_group log group that contains the maximum consistent checkpoint
 static void recv_recover_from_ibbackup(
 	// =======================
 	log_group_t *max_cp_group
@@ -2696,9 +2672,12 @@ static void recv_recover_from_ibbackup(
 	}
 }
 
-/************************************************************
-Compare the checkpoint lsn with the lsn recorded in the data files
-and start crash recovery if required. */
+/// \brief Compare the checkpoint lsn with the lsn recorded in the data files
+/// and start crash recovery if required.
+/// \param recovery recovery flag
+/// \param checkpoint_lsn checkpoint lsn
+/// \param min_flushed_lsn min flushed lsn from data files
+/// \param max_flushed_lsn max flushed lsn from data files
 static void recv_init_crash_recovery(
 	// =====================
 	ib_recovery_t recovery,		   // !< in: recovery flag

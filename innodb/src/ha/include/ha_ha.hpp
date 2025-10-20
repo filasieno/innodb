@@ -43,26 +43,28 @@ IB_INTERN void ha_search_and_update_if_found_func(hash_table_t* table, ulint fol
 	void* new_data);
 
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
-/** Looks for an element when we know the pointer to the data and
-updates the pointer to data if found.
-@param table		in/out: hash table
-@param fold		in: folded value of the searched data
-@param data		in: pointer to the data
-@param new_block	in: block containing new_data
-@param new_data		in: new pointer to the data */
-# define ha_search_and_update_if_found(table,fold,data,new_block,new_data) \
-	ha_search_and_update_if_found_func(table,fold,data,new_block,new_data)
+	/** Looks for an element when we know the pointer to the data and
+	updates the pointer to data if found.
+	@param table		in/out: hash table
+	@param fold		in: folded value of the searched data
+	@param data		in: pointer to the data
+	@param new_block	in: block containing new_data
+	@param new_data		in: new pointer to the data */
+
+	# define ha_search_and_update_if_found(table,fold,data,new_block,new_data) ha_search_and_update_if_found_func(table,fold,data,new_block,new_data)
+
 #else /* IB_AHI_DEBUG || IB_DEBUG */
-/** Looks for an element when we know the pointer to the data and
-updates the pointer to data if found.
-@param table		in/out: hash table
-@param fold		in: folded value of the searched data
-@param data		in: pointer to the data
-@param new_block	ignored: block containing new_data
-@param new_data		in: new pointer to the data */
-# define ha_search_and_update_if_found(table,fold,data,new_block,new_data) \
-	ha_search_and_update_if_found_func(table,fold,data,new_data)
+	/** Looks for an element when we know the pointer to the data and
+	updates the pointer to data if found.
+	@param table		in/out: hash table
+	@param fold		in: folded value of the searched data
+	@param data		in: pointer to the data
+	@param new_block	ignored: block containing new_data
+	@param new_data		in: new pointer to the data */
+	# define ha_search_and_update_if_found(table,fold,data,new_block,new_data) ha_search_and_update_if_found_func(table,fold,data,new_data)
+
 #endif /* IB_AHI_DEBUG || IB_DEBUG */
+
 /// \brief Creates a hash table with at least n array cells. The actual number of cells is chosen to be a prime number slightly bigger than n.
 /// \return own: created table
 /// \param [in] n number of array cells
@@ -110,28 +112,32 @@ IB_INTERN ibool ha_insert_for_fold_func(hash_table_t* table, ulint fold,
 	void* data);
 
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
-/**
-Inserts an entry into a hash table. If an entry with the same fold number
-is found, its node is updated to point to the new data, and no new node
-is inserted.
-@return	TRUE if succeed, FALSE if no more memory could be allocated
-@param t	in: hash table
-@param f	in: folded value of data
-@param b	in: buffer block containing the data
-@param d	in: data, must not be NULL */
-# define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,b,d)
-#else /* IB_AHI_DEBUG || IB_DEBUG */
-/**
-Inserts an entry into a hash table. If an entry with the same fold number
-is found, its node is updated to point to the new data, and no new node
-is inserted.
-@return	TRUE if succeed, FALSE if no more memory could be allocated
-@param t	in: hash table
-@param f	in: folded value of data
-@param b	ignored: buffer block containing the data
-@param d	in: data, must not be NULL */
-# define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,d)
-#endif /* IB_AHI_DEBUG || IB_DEBUG */
+
+	/**
+	Inserts an entry into a hash table. If an entry with the same fold number
+	is found, its node is updated to point to the new data, and no new node
+	is inserted.
+	@return	TRUE if succeed, FALSE if no more memory could be allocated
+	@param t	in: hash table
+	@param f	in: folded value of data
+	@param b	in: buffer block containing the data
+	@param d	in: data, must not be NULL */
+	#define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,b,d)
+
+#else // IB_AHI_DEBUG || IB_DEBUG
+
+	/**
+	Inserts an entry into a hash table. If an entry with the same fold number
+	is found, its node is updated to point to the new data, and no new node
+	is inserted.
+	@return	TRUE if succeed, FALSE if no more memory could be allocated
+	@param t	in: hash table
+	@param f	in: folded value of data
+	@param b	ignored: buffer block containing the data
+	@param d	in: data, must not be NULL */
+	#define ha_insert_for_fold(t,f,b,d) ha_insert_for_fold_func(t,f,d)
+
+#endif // IB_AHI_DEBUG || IB_DEBUG
 
 /// \brief Looks for an element when we know the pointer to the data and deletes it from the hash table if found.
 /// \return TRUE if found
@@ -139,28 +145,34 @@ is inserted.
 /// \param [in] fold folded value of the searched data
 /// \param [in] data pointer to the data
 IB_INLINE ibool ha_search_and_delete_if_found(hash_table_t* table, ulint fold, void* data);
+
+
 #ifndef IB_HOTBACKUP
+
 /// \brief Removes from the chain determined by fold all nodes whose data pointer points to the page given.
 /// \param [in] table hash table
 /// \param [in] fold fold value
 /// \param [in] page buffer page
 IB_INTERN void ha_remove_all_nodes_to_page(hash_table_t* table, ulint fold, const page_t* page);
+
 /// \brief Validates a given range of the cells in hash table.
 /// \return TRUE if ok
 /// \param [in] table hash table
 /// \param [in] start_index start index
 /// \param [in] end_index end index
 IB_INTERN ibool ha_validate(hash_table_t* table, ulint start_index, ulint end_index);
+
 /// \brief Prints info of a hash table.
 /// \param [in] state->stream stream where to print
 /// \param [in] table hash table
 IB_INTERN void ha_print_info(ib_stream_t state->stream, hash_table_t* table);
-#endif /* !IB_HOTBACKUP */
 
-/** The hash table external chain node */
+#endif // !IB_HOTBACKUP
+
+/// The hash table external chain node
 typedef struct ha_node_struct ha_node_t;
 
-/** The hash table external chain node */
+/// \brief The hash table external chain node
 struct ha_node_struct {
 	ha_node_t*	next;	/*!< next chain node or NULL if none */
 #if defined IB_AHI_DEBUG || defined IB_DEBUG
@@ -171,20 +183,19 @@ struct ha_node_struct {
 };
 
 #ifndef IB_HOTBACKUP
-/** Assert that the current thread is holding the mutex protecting a
-hash bucket corresponding to a fold value.
-@param table	in: hash table
-@param fold	in: fold value */
-# define ASSERT_HASH_MUTEX_OWN(table, fold)				\
-	ut_ad(!(table)->mutexes || mutex_own(hash_get_mutex(table, fold)))
-#else /* !IB_HOTBACKUP */
-/** Assert that the current thread is holding the mutex protecting a
-hash bucket corresponding to a fold value.
-@param table	in: hash table
-@param fold	in: fold value */
-# define ASSERT_HASH_MUTEX_OWN(table, fold) ((void) 0)
-#endif /* !IB_HOTBACKUP */
+	/** Assert that the current thread is holding the mutex protecting a
+	hash bucket corresponding to a fold value.
+	@param table	in: hash table
+	@param fold	in: fold value */
+	# define ASSERT_HASH_MUTEX_OWN(table, fold) ut_ad(!(table)->mutexes || mutex_own(hash_get_mutex(table, fold)))
+#else // !IB_HOTBACKUP 
+	/** Assert that the current thread is holding the mutex protecting a
+	hash bucket corresponding to a fold value.
+	@param table	in: hash table
+	@param fold	in: fold value */
+	#define ASSERT_HASH_MUTEX_OWN(table, fold) ((void) 0)
+#endif // !IB_HOTBACKUP
 
 #ifndef IB_DO_NOT_INLINE
-#include "ha0ha.inl"
+	#include "ha_ha.inl"
 #endif

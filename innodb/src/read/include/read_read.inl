@@ -1,67 +1,50 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+/// \file read_read.inl
+/// \brief Cursor read
+/// \details Originally created by Heikki Tuuri on 2/16/1997
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/read0read.ic
-Cursor read
-
-Created 2/16/1997 Heikki Tuuri
-*******************************************************/
-
-/*********************************************************************//**
-Gets the nth trx id in a read view.
-@return	trx id */
-IB_INLINE
-trx_id_t
-read_view_get_nth_trx_id(
-/*=====================*/
-	const read_view_t*	view,	/*!< in: read view */
-	ulint			n)	/*!< in: position */
+/// \brief Gets the nth trx id in a read view.
+/// \param [in] view read view
+/// \param [in] n position
+/// \return trx id
+IB_INLINE trx_id_t read_view_get_nth_trx_id(const read_view_t* view, ulint n)
 {
 	ut_ad(n < view->n_trx_ids);
 
-	return(*(view->trx_ids + n));
+	return *(view->trx_ids + n);
 }
 
-/*********************************************************************//**
-Sets the nth trx id in a read view. */
-IB_INLINE
-void
-read_view_set_nth_trx_id(
-/*=====================*/
-	read_view_t*	view,	/*!< in: read view */
-	ulint		n,	/*!< in: position */
-	trx_id_t	trx_id)	/*!< in: trx id to set */
+/// \brief Sets the nth trx id in a read view.
+/// \param [in] view read view
+/// \param [in] n position
+/// \param [in] trx_id trx id to set
+IB_INLINE void read_view_set_nth_trx_id(read_view_t* view, ulint n, trx_id_t trx_id)
 {
 	ut_ad(n < view->n_trx_ids);
 
 	*(view->trx_ids + n) = trx_id;
 }
 
-/*********************************************************************//**
-Checks if a read view sees the specified transaction.
-@return	TRUE if sees */
-IB_INLINE
-ibool
-read_view_sees_trx_id(
-/*==================*/
-	const read_view_t*	view,	/*!< in: read view */
-	trx_id_t		trx_id)	/*!< in: trx id */
+/// \brief Checks if a read view sees the specified transaction.
+/// \param [in] view read view
+/// \param [in] trx_id trx id
+/// \return TRUE if sees
+IB_INLINE ibool read_view_sees_trx_id(const read_view_t* view, trx_id_t trx_id)
 {
 	ulint	n_ids;
 	int	cmp;
@@ -69,30 +52,25 @@ read_view_sees_trx_id(
 
 	if (ut_dulint_cmp(trx_id, view->up_limit_id) < 0) {
 
-		return(TRUE);
+		return TRUE;
 	}
 
 	if (ut_dulint_cmp(trx_id, view->low_limit_id) >= 0) {
 
-		return(FALSE);
+		return FALSE;
 	}
 
-	/* We go through the trx ids in the array smallest first: this order
-	may save CPU time, because if there was a very long running
-	transaction in the trx id array, its trx id is looked at first, and
-	the first two comparisons may well decide the visibility of trx_id. */
+	/* We go through the trx ids in the array smallest first: this order may save CPU time, because if there was a very long running transaction in the trx id array, its trx id is looked at first, and the first two comparisons may well decide the visibility of trx_id. */
 
 	n_ids = view->n_trx_ids;
 
 	for (i = 0; i < n_ids; i++) {
 
-		cmp = ut_dulint_cmp(
-			trx_id,
-			read_view_get_nth_trx_id(view, n_ids - i - 1));
+		cmp = ut_dulint_cmp(trx_id, read_view_get_nth_trx_id(view, n_ids - i - 1));
 		if (cmp <= 0) {
-			return(cmp < 0);
+			return cmp < 0;
 		}
 	}
 
-	return(TRUE);
+	return TRUE;
 }

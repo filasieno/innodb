@@ -32,23 +32,23 @@
 #include "ut_lst.hpp"
 
 // A table lock.
-typedef struct lock_table_struct	lock_table_t;
+typedef struct lock_table_struct lock_table_t;
 // A table lock.
 struct lock_table_struct {
-	dict_table_t*	table;		/*!< database table in dictionary
+	dict_table_t* table;         /*!< database table in dictionary
 					cache */
 	UT_LIST_NODE_T(ib_lock_t)
-			locks;		/*!< list of locks on the same
+		locks;         /*!< list of locks on the same
 					table */
 };
 
 // Record lock for a page.
-typedef struct lock_rec_struct		lock_rec_t;
+typedef struct lock_rec_struct lock_rec_t;
 // Record lock for a page.
 struct lock_rec_struct {
-	ulint	space;			/*!< space id */
-	ulint	page_no;		/*!< page number */
-	ulint	n_bits;			/*!< number of bits in the lock
+	ulint space;          /*!< space id */
+	ulint page_no;        /*!< page number */
+	ulint n_bits;         /*!< number of bits in the lock
 					bitmap; NOTE: the lock bitmap is
 					placed immediately after the
 					lock struct */
@@ -56,22 +56,22 @@ struct lock_rec_struct {
 
 // Lock struct.
 struct lock_struct {
-	trx_t*		trx;		/*!< transaction owning the
+	trx_t* trx;              /*!< transaction owning the
 					lock */
 	UT_LIST_NODE_T(ib_lock_t)
-			trx_locks;	/*!< list of the locks of the
+		trx_locks;      /*!< list of the locks of the
 					transaction */
-	ulint		type_mode;	/*!< lock type, mode, LOCK_GAP or
+	ulint type_mode;         /*!< lock type, mode, LOCK_GAP or
 					LOCK_REC_NOT_GAP,
 					LOCK_INSERT_INTENTION,
 					wait flag, ORed */
-	hash_node_t	hash;		/*!< hash chain node for a record
+	hash_node_t hash;        /*!< hash chain node for a record
 					lock */
-	ib_dict_index_t*	index;		/*!< index for a record lock */
+	ib_dict_index_t* index;  /*!< index for a record lock */
 	union {
-		lock_table_t	tab_lock;/*!< table lock */
-		lock_rec_t	rec_lock;/*!< record lock */
-	} un_member;			/*!< lock details */
+		lock_table_t tab_lock; /*!< table lock */
+		lock_rec_t rec_lock;   /*!< record lock */
+	} un_member;              /*!< lock details */
 };
 
 /// \brief Gets the type of a lock.
@@ -83,7 +83,8 @@ IB_INLINE ulint lock_get_type_low(const ib_lock_t* lock);
 /// \param [in] in_lock record lock
 /// \param [in] heap_no heap number of the record
 IB_INTERN const ib_lock_t* lock_rec_get_prev(const ib_lock_t* in_lock, ulint heap_no);
+
 #ifndef IB_DO_NOT_INLINE
-#include "lock0priv.inl"
+	#include "lock_priv.inl"
 #endif
 

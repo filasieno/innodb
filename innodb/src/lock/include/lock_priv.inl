@@ -18,10 +18,8 @@
 /// \author Fabio N. Filasieno
 /// \date 2025-10-20
 
-/* This file contains only methods which are used in
-lock/lock0* files, other than lock/lock0lock.c.
-I.e. lock/lock0lock.c contains more internal inline
-methods but they are used only in that file. */
+// This file contains only methods which are used in lock/lock0* files, other than lock/lock_lock.c.
+// ie. lock_lock.c contains more internal inline methods but they are used only in that file.
 
 #ifndef LOCK_MODULE_IMPLEMENTATION
 	#error Do not include lock_priv.inl outside of the lock/ module
@@ -34,5 +32,3 @@ IB_INLINE ulint lock_get_type_low(const ib_lock_t* lock)
 	ut_ad(lock);
 	return(lock->type_mode & LOCK_TYPE_MASK);
 }
-
-// vim: set filetype=c:
