@@ -18,175 +18,132 @@
 /// \date 18/10/2025
 
 #include "hash_hash.hpp"
+
 #ifdef IB_DO_NOT_INLINE
-#include "hash0hash.inl"
+	#include "hash0hash.inl"
 #endif
 
 #include "mem_mem.hpp"
 
 #ifndef IB_HOTBACKUP
-/************************************************************//**
-Reserves the mutex for a fold value in a hash table. */
-IB_INTERN
-void
-hash_mutex_enter(
-/*=============*/
-	hash_table_t*	table,	/*!< in: hash table */
-	ulint		fold)	/*!< in: fold */
+/// \brief Reserves the mutex for a fold value in a hash table.
+/// \param [in] table hash table
+/// \param [in] fold fold
+IB_INTERN void hash_mutex_enter(hash_table_t* table, ulint fold)
 {
 	mutex_enter(hash_get_mutex(table, fold));
 }
 
-/************************************************************//**
-Releases the mutex for a fold value in a hash table. */
-IB_INTERN
-void
-hash_mutex_exit(
-/*============*/
-	hash_table_t*	table,	/*!< in: hash table */
-	ulint		fold)	/*!< in: fold */
+/// \brief Releases the mutex for a fold value in a hash table.
+/// \param [in] table hash table
+/// \param [in] fold fold
+IB_INTERN void hash_mutex_exit(hash_table_t* table, ulint fold)
 {
 	mutex_exit(hash_get_mutex(table, fold));
 }
 
-/************************************************************//**
-Reserves all the mutexes of a hash table, in an ascending order. */
-IB_INTERN
-void
-hash_mutex_enter_all(
-/*=================*/
-	hash_table_t*	table)	/*!< in: hash table */
+/// \brief Reserves all the mutexes of a hash table, in an ascending order.
+/// \param [in] table hash table
+IB_INTERN void hash_mutex_enter_all(hash_table_t* table)
 {
-	ulint	i;
-
-	for (i = 0; i < table->n_mutexes; i++) {
-
-		mutex_enter(table->mutexes + i);
-	}
+    for (ulint i = 0; i < table->n_mutexes; i++) {
+        mutex_enter(table->mutexes + i);
+    }
 }
 
-/************************************************************//**
-Releases all the mutexes of a hash table. */
-IB_INTERN
-void
-hash_mutex_exit_all(
-/*================*/
-	hash_table_t*	table)	/*!< in: hash table */
+/// \brief Releases all the mutexes of a hash table.
+/// \param [in] table hash table
+IB_INTERN void hash_mutex_exit_all(hash_table_t* table)
 {
-	ulint	i;
-
-	for (i = 0; i < table->n_mutexes; i++) {
-
-		mutex_exit(table->mutexes + i);
-	}
+    for (ulint i = 0; i < table->n_mutexes; i++) {
+        mutex_exit(table->mutexes + i);
+    }
 }
 #endif /* !IB_HOTBACKUP */
 
-/*************************************************************//**
-Creates a hash table with >= n array cells. The actual number of cells is
-chosen to be a prime number slightly bigger than n.
-@return	own: created table */
-IB_INTERN
-hash_table_t*
-hash_create(
-/*========*/
-	ulint	n)	/*!< in: number of array cells */
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
+
+/// \brief Creates a hash table with >= n array cells.
+/// \details The actual number of cells is chosen to be a prime number slightly bigger than n.
+/// \param [in] n number of array cells
+/// \return own: created table
+IB_INTERN hash_table_t* hash_create(ulint n)
 {
-	hash_cell_t*	array;
-	ulint		prime;
-	hash_table_t*	table;
+    ulint prime = ut_find_prime(n);
+    hash_table_t* table = mem_alloc(sizeof(hash_table_t));
+    hash_cell_t* array = ut_malloc(sizeof(hash_cell_t) * prime);
 
-	prime = ut_find_prime(n);
-
-	table = mem_alloc(sizeof(hash_table_t));
-
-	array = ut_malloc(sizeof(hash_cell_t) * prime);
-
-	table->array = array;
-	table->n_cells = prime;
+    table->array = array;
+    table->n_cells = prime;
 #ifndef IB_HOTBACKUP
 # if defined IB_AHI_DEBUG || defined IB_DEBUG
-	table->adaptive = FALSE;
+    table->adaptive = FALSE;
 # endif /* IB_AHI_DEBUG || IB_DEBUG */
-	table->n_mutexes = 0;
-	table->mutexes = NULL;
-	table->heaps = NULL;
+    table->n_mutexes = 0;
+    table->mutexes = NULL;
+    table->heaps = NULL;
 #endif /* !IB_HOTBACKUP */
-	table->heap = NULL;
-	ut_d(table->magic_n = HASH_TABLE_MAGIC_N);
+    table->heap = NULL;
+    ut_d(table->magic_n = HASH_TABLE_MAGIC_N);
 
-	/* Initialize the cell array */
-	hash_table_clear(table);
-
-	return(table);
+    hash_table_clear(table);
+    return table;
 }
 
-/*************************************************************//**
-Frees a hash table. */
-IB_INTERN
-void
-hash_table_free(
-/*============*/
-	hash_table_t*	table)	/*!< in, own: hash table */
+/// \brief Frees a hash table.
+/// \param [in,own] table hash table
+IB_INTERN void hash_table_free(hash_table_t* table)
 {
-	ut_ad(table);
-	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
+    ut_ad(table);
+    ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
 #ifndef IB_HOTBACKUP
-	ut_a(table->mutexes == NULL);
+    ut_a(table->mutexes == NULL);
 #endif /* !IB_HOTBACKUP */
 
-	ut_free(table->array);
-	mem_free(table);
+    ut_free(table->array);
+    mem_free(table);
 }
 
 #ifndef IB_HOTBACKUP
-/*************************************************************//**
-Creates a mutex array to protect a hash table. */
-IB_INTERN
-void
-hash_create_mutexes_func(
-/*=====================*/
-	hash_table_t*	table,		/*!< in: hash table */
+/// \brief Creates a mutex array to protect a hash table.
+/// \param [in] table hash table
 #ifdef IB_SYNC_DEBUG
-	ulint		sync_level,	/*!< in: latching order level of the
-					mutexes: used in the debug version */
+/// \param [in] sync_level latching order level of the mutexes: used in the debug version
 #endif /* IB_SYNC_DEBUG */
-	ulint		n_mutexes)	/*!< in: number of mutexes, must be a
-					power of 2 */
+/// \param [in] n_mutexes number of mutexes, must be a power of 2
+IB_INTERN void hash_create_mutexes_func(hash_table_t* table,
+#ifdef IB_SYNC_DEBUG
+    ulint sync_level,
+#endif /* IB_SYNC_DEBUG */
+    ulint n_mutexes)
 {
-	ulint	i;
+    ut_ad(table);
+    ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
+    ut_a(n_mutexes > 0);
+    ut_a(ut_is_2pow(n_mutexes));
 
-	ut_ad(table);
-	ut_ad(table->magic_n == HASH_TABLE_MAGIC_N);
-	ut_a(n_mutexes > 0);
-	ut_a(ut_is_2pow(n_mutexes));
+    table->mutexes = mem_alloc(n_mutexes * sizeof(mutex_t));
 
-	table->mutexes = mem_alloc(n_mutexes * sizeof(mutex_t));
+    for (ulint i = 0; i < n_mutexes; i++) {
+        mutex_create(table->mutexes + i, sync_level);
+    }
 
-	for (i = 0; i < n_mutexes; i++) {
-		mutex_create(table->mutexes + i, sync_level);
-	}
-
-	table->n_mutexes = n_mutexes;
+    table->n_mutexes = n_mutexes;
 }
 
-/*****************************************************************
-Frees a mutex array created with hash_create_mutexes_func(). */
-IB_INTERN
-void
-hash_free_mutexes_func(
-/*===================*/
-	hash_table_t*	table)		/*!< in,own: hash table */
+/// \brief Frees a mutex array created with hash_create_mutexes_func().
+/// \param [in,own] table hash table
+IB_INTERN void hash_free_mutexes_func(hash_table_t* table)
 {
-	ulint	i;
-
-	for (i = 0; i < table->n_mutexes; i++) {
-		mutex_free(&table->mutexes[i]);
+    for (ulint i = 0; i < table->n_mutexes; i++) {
+        mutex_free(&table->mutexes[i]);
 #ifdef IB_DEBUG
-		memset(&table->mutexes[i], 0x0, sizeof(table->mutexes[i]));
+        memset(&table->mutexes[i], 0x0, sizeof(table->mutexes[i]));
 #endif
-	}
+    }
 
-	mem_free(table->mutexes);
+    mem_free(table->mutexes);
 }
 #endif /* !IB_HOTBACKUP */

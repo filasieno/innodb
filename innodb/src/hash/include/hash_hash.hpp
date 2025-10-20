@@ -132,11 +132,11 @@ do {\
 } while (0)
 
 #ifdef IB_HASH_DEBUG
-# define HASH_ASSERT_VALID(DATA) ut_a((void*) (DATA) != (void*) -1)
-# define HASH_INVALIDATE(DATA, NAME) DATA->NAME = (void*) -1
+	#define HASH_ASSERT_VALID(DATA) ut_a((void*) (DATA) != (void*) -1)
+	#define HASH_INVALIDATE(DATA, NAME) DATA->NAME = (void*) -1
 #else
-# define HASH_ASSERT_VALID(DATA) do {} while (0)
-# define HASH_INVALIDATE(DATA, NAME) do {} while (0)
+	#define HASH_ASSERT_VALID(DATA) do {} while (0)
+	#define HASH_INVALIDATE(DATA, NAME) do {} while (0)
 #endif
 
 /*******************************************************************//**
@@ -450,7 +450,7 @@ struct hash_table_struct {
 };
 
 #ifndef IB_DO_NOT_INLINE
-#include "hash0hash.inl"
+	#include "hash_hash.inl"
 #endif
 
 #endif
