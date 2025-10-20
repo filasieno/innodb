@@ -1,7 +1,4 @@
-
 #pragma once
-
-
 
 // Types Moved:
 //   - Error code enum (db_err)
@@ -546,10 +543,8 @@ typedef int (*ib_client_cmp_t)(const ib_col_meta_t* col_meta, const ib_byte_t* p
 /// \brief The maximum length of a table name (plus database name).
 #define IB_MAX_TABLE_IB_NAME_LEN (64 * 3)
 
-
 /// \brief Callback function to compare InnoDB key columns in an index.
 extern ib_client_cmp_t ib_client_compare;
-
 
 /// \brief Type of callback in the event of INNODB panicing. Your callback should
 /// call exit() rather soon, as continuing after a panic will lead to errors

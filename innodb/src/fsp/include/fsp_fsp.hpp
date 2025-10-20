@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "univ.i"
+#include "defs.hpp"
 
 #include "mtr_mtr.hpp"
 #include "fut_lst.hpp"
@@ -153,6 +153,7 @@ IB_INTERN ibool fsp_validate(ulint space);
 /// \brief Prints info of a file space.
 /// \param [in] space space id
 IB_INTERN void fsp_print(ulint space);
+
 #ifdef IB_DEBUG
 /// \brief Validates a segment.
 /// \return TRUE if ok
@@ -160,13 +161,16 @@ IB_INTERN void fsp_print(ulint space);
 /// \param [in] mtr mtr
 IB_INTERN ibool fseg_validate(fseg_header_t* header, mtr_t* mtr);
 #endif /* IB_DEBUG */
+
 #ifdef IB_BTR_PRINT
+
 /// \brief Writes info of a segment.
 /// \param [in] header segment header
 /// \param [in] mtr mtr
 IB_INTERN void fseg_print(fseg_header_t* header, mtr_t* mtr);
+
 #endif /* IB_BTR_PRINT */
 
 #ifndef IB_DO_NOT_INLINE
-#include "fsp0fsp.inl"
+    #include "fsp_fsp.inl"
 #endif
