@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file read/read0read.c
-Cursor read
-
-Created 2/16/1997 Heikki Tuuri
-*******************************************************/
+/// \file read_read.cpp
+/// \brief Cursor read
+/// \details Originally created by Heikki Tuuri on 2/16/1997
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "read_read.hpp"
 
@@ -31,6 +26,26 @@ Created 2/16/1997 Heikki Tuuri
 
 #include "srv_srv.hpp"
 #include "trx_sys.hpp"
+
+// -----------------------------------------------------------------------------------------
+// type definitions
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 
 /*
 -------------------------------------------------------------------------------
@@ -137,72 +152,40 @@ TODO: proof this
 
 */
 
-/*********************************************************************//**
-Creates a read view object.
-@return	own: read view struct */
-IB_INLINE
-read_view_t*
-read_view_create_low(
-/*=================*/
-	ulint		n,	/*!< in: number of cells in the trx_ids array */
-	mem_heap_t*	heap)	/*!< in: memory heap from which allocated */
+/// \brief Creates a read view object.
+/// \param [in] n number of cells in the trx_ids array
+/// \param [in] heap memory heap from which allocated
+/// \return own: read view struct
+IB_INLINE read_view_t* read_view_create_low(ulint n, mem_heap_t* heap)
 {
-	read_view_t*	view;
-
-	view = mem_heap_alloc(heap, sizeof(read_view_t));
-
+	read_view_t* view = mem_heap_alloc(heap, sizeof(read_view_t));
 	view->n_trx_ids = n;
 	view->trx_ids = mem_heap_alloc(heap, n * sizeof *view->trx_ids);
-
-	return(view);
+	return view;
 }
 
-/*********************************************************************//**
-Makes a copy of the oldest existing read view, with the exception that also
-the creating trx of the oldest view is set as not visible in the 'copied'
-view. Opens a new view if no views currently exist. The view must be closed
-with ..._close. This is used in purge.
-@return	own: read view struct */
-IB_INTERN
-read_view_t*
-read_view_oldest_copy_or_open_new(
-/*==============================*/
-	trx_id_t	cr_trx_id,	/*!< in: trx_id of creating
-					transaction, or ut_dulint_zero
-					used in purge */
-	mem_heap_t*	heap)		/*!< in: memory heap from which
-					allocated */
+/// \brief Makes a copy of the oldest existing read view, with the exception that also the creating trx of the oldest view is set as not visible in the 'copied' view. Opens a new view if no views currently exist. The view must be closed with ..._close. This is used in purge.
+/// \param [in] cr_trx_id trx_id of creating transaction, or ut_dulint_zero used in purge
+/// \param [in] heap memory heap from which allocated
+/// \return own: read view struct
+IB_INTERN read_view_t* read_view_oldest_copy_or_open_new(trx_id_t cr_trx_id, mem_heap_t* heap)
 {
-	read_view_t*	old_view;
-	read_view_t*	view_copy;
-	ibool		needs_insert	= TRUE;
-	ulint		insert_done	= 0;
-	ulint		n;
-	ulint		i;
-
+	ibool needs_insert = TRUE;
+	ulint insert_done = 0;
 	ut_ad(mutex_own(&kernel_mutex));
-
-	old_view = UT_LIST_GET_LAST(trx_sys->view_list);
-
+	read_view_t* old_view = UT_LIST_GET_LAST(trx_sys->view_list);
 	if (old_view == NULL) {
-
-		return(read_view_open_now(cr_trx_id, heap));
+		return read_view_open_now(cr_trx_id, heap);
 	}
-
-	n = old_view->n_trx_ids;
-
+	ulint n = old_view->n_trx_ids;
 	if (!ut_dulint_is_zero(old_view->creator_trx_id)) {
 		n++;
 	} else {
 		needs_insert = FALSE;
 	}
-
-	view_copy = read_view_create_low(n, heap);
-
-	/* Insert the id of the creator in the right place of the descending
-	array of ids, if needs_insert is TRUE: */
-
-	i = 0;
+	read_view_t* view_copy = read_view_create_low(n, heap);
+	/* Insert the id of the creator in the right place of the descending array of ids, if needs_insert is TRUE: */
+	ulint i = 0;
 	while (i < n) {
 		if (needs_insert
 		    && (i >= old_view->n_trx_ids
@@ -210,15 +193,11 @@ read_view_oldest_copy_or_open_new(
 					 read_view_get_nth_trx_id(old_view, i))
 			> 0)) {
 
-			read_view_set_nth_trx_id(view_copy, i,
-						 old_view->creator_trx_id);
+			read_view_set_nth_trx_id(view_copy, i, old_view->creator_trx_id);
 			needs_insert = FALSE;
 			insert_done = 1;
 		} else {
-			read_view_set_nth_trx_id(view_copy, i,
-						 read_view_get_nth_trx_id(
-							 old_view,
-							 i - insert_done));
+			read_view_set_nth_trx_id(view_copy, i, read_view_get_nth_trx_id(old_view, i - insert_done));
 		}
 
 		i++;
@@ -232,8 +211,7 @@ read_view_oldest_copy_or_open_new(
 
 	if (n > 0) {
 		/* The last active transaction has the smallest id: */
-		view_copy->up_limit_id = read_view_get_nth_trx_id(
-			view_copy, n - 1);
+		view_copy->up_limit_id = read_view_get_nth_trx_id(view_copy, n - 1);
 	} else {
 		view_copy->up_limit_id = old_view->up_limit_id;
 	}
@@ -243,27 +221,17 @@ read_view_oldest_copy_or_open_new(
 	return(view_copy);
 }
 
-/*********************************************************************//**
-Opens a read view where exactly the transactions serialized before this
-point in time are seen in the view.
-@return	own: read view struct */
-IB_INTERN
-read_view_t*
-read_view_open_now(
-/*===============*/
-	trx_id_t	cr_trx_id,	/*!< in: trx_id of creating
-					transaction, or ut_dulint_zero
-					used in purge */
-	mem_heap_t*	heap)		/*!< in: memory heap from which
-					allocated */
+/// \brief Opens a read view where exactly the transactions serialized before this point in time are seen in the view.
+/// \param [in] cr_trx_id trx_id of creating transaction, or ut_dulint_zero used in purge
+/// \param [in] heap memory heap from which allocated
+/// \return own: read view struct
+IB_INTERN read_view_t* read_view_open_now(trx_id_t cr_trx_id, mem_heap_t* heap)
 {
-	read_view_t*	view;
-	trx_t*		trx;
-	ulint		n;
-
 	ut_ad(mutex_own(&kernel_mutex));
 
-	view = read_view_create_low(UT_LIST_GET_LEN(trx_sys->trx_list), heap);
+	read_view_t* view = read_view_create_low(UT_LIST_GET_LEN(trx_sys->trx_list), heap);
+	trx_t* trx = UT_LIST_GET_FIRST(trx_sys->trx_list);
+	ulint n = 0;
 
 	view->creator_trx_id = cr_trx_id;
 	view->type = VIEW_NORMAL;
@@ -273,9 +241,6 @@ read_view_open_now(
 
 	view->low_limit_no = trx_sys->max_trx_id;
 	view->low_limit_id = view->low_limit_no;
-
-	n = 0;
-	trx = UT_LIST_GET_FIRST(trx_sys->trx_list);
 
 	/* No active transaction should be visible, except cr_trx */
 
@@ -289,11 +254,7 @@ read_view_open_now(
 
 			n++;
 
-			/* NOTE that a transaction whose trx number is <
-			trx_sys->max_trx_id can still be active, if it is
-			in the middle of its commit! Note that when a
-			transaction starts, we initialize trx->no to
-			ut_dulint_max. */
+			/* NOTE that a transaction whose trx number is < trx_sys->max_trx_id can still be active, if it is in the middle of its commit! Note that when a transaction starts, we initialize trx->no to ut_dulint_max. */
 
 			if (ut_dulint_cmp(view->low_limit_no, trx->no) > 0) {
 
@@ -316,7 +277,7 @@ read_view_open_now(
 
 	UT_LIST_ADD_FIRST(view_list, trx_sys->view_list, view);
 
-	return(view);
+	return view;
 }
 
 /*********************************************************************//**
@@ -332,14 +293,9 @@ read_view_close(
 	UT_LIST_REMOVE(view_list, trx_sys->view_list, view);
 }
 
-/*********************************************************************//**
-Closes a consistent read view for the client. This function is called at
-an SQL statement end if the trx isolation level is <= TRX_ISO_READ_COMMITTED. */
-IB_INTERN
-void
-read_view_close_for_read_committed(
-/*===============================*/
-	trx_t*	trx)		/*!< in: trx which has a read view */
+/// \brief Closes a consistent read view for the client. This function is called at an SQL statement end if the trx isolation level is <= TRX_ISO_READ_COMMITTED.
+/// \param [in] trx trx which has a read view
+IB_INTERN void read_view_close_for_read_committed(trx_t* trx)
 {
 	ut_a(trx->global_read_view);
 
@@ -355,13 +311,9 @@ read_view_close_for_read_committed(
 	mutex_exit(&kernel_mutex);
 }
 
-/*********************************************************************//**
-Prints a read view to state->stream. */
-IB_INTERN
-void
-read_view_print(
-/*============*/
-	const read_view_t*	view)	/*!< in: read view */
+/// \brief Prints a read view to state->stream.
+/// \param [in] view read view
+IB_INTERN void read_view_print(const read_view_t* view)
 {
 	ulint	n_ids;
 	ulint	i;
@@ -396,16 +348,10 @@ read_view_print(
 	}
 }
 
-/*********************************************************************//**
-Create a high-granularity consistent cursor view to be used
-in cursors. In this consistent read view modifications done by the
-creating transaction after the cursor is created or future transactions
-are not visible. */
-IB_INTERN
-cursor_view_t*
-read_cursor_view_create(
-/*====================*/
-	trx_t*	cr_trx)	/*!< in: trx where cursor view is created */
+/// \brief Create a high-granularity consistent cursor view to be used in cursors. In this consistent read view modifications done by the creating transaction after the cursor is created or future transactions are not visible.
+/// \param [in] cr_trx trx where cursor view is created
+/// \return cursor view
+IB_INTERN cursor_view_t* read_cursor_view_create(trx_t* cr_trx)
 {
 	cursor_view_t*	curview;
 	read_view_t*	view;
@@ -485,18 +431,13 @@ read_cursor_view_create(
 
 	mutex_exit(&kernel_mutex);
 
-	return(curview);
+	return curview;
 }
 
-/*********************************************************************//**
-Close a given consistent cursor view and restore global read view
-back to a transaction read view. */
-IB_INTERN
-void
-read_cursor_view_close(
-/*===================*/
-	trx_t*		trx,	/*!< in: trx */
-	cursor_view_t*	curview)/*!< in: cursor view to be closed */
+/// \brief Close a given consistent cursor view and restore global read view back to a transaction read view.
+/// \param [in] trx trx
+/// \param [in] curview cursor view to be closed
+IB_INTERN void read_cursor_view_close(trx_t* trx, cursor_view_t* curview)
 {
 	ut_a(curview);
 	ut_a(curview->read_view);
@@ -516,16 +457,10 @@ read_cursor_view_close(
 	mem_heap_free(curview->heap);
 }
 
-/*********************************************************************//**
-This function sets a given consistent cursor view to a transaction
-read view if given consistent cursor view is not NULL. Otherwise, function
-restores a global read view to a transaction read view. */
-IB_INTERN
-void
-read_cursor_set(
-/*============*/
-	trx_t*		trx,	/*!< in: transaction where cursor is set */
-	cursor_view_t*	curview)/*!< in: consistent cursor view to be set */
+/// \brief This function sets a given consistent cursor view to a transaction read view if given consistent cursor view is not NULL. Otherwise, function restores a global read view to a transaction read view.
+/// \param [in] trx transaction where cursor is set
+/// \param [in] curview consistent cursor view to be set
+IB_INTERN void read_cursor_set(trx_t* trx, cursor_view_t* curview)
 {
 	ut_a(trx);
 
@@ -539,3 +474,7 @@ read_cursor_set(
 
 	mutex_exit(&kernel_mutex);
 }
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
