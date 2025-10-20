@@ -1,37 +1,35 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/ibuf0ibuf.ic
-Insert buffer
-
-Created 7/19/1997 Heikki Tuuri
-*******************************************************/
+/// \file ibuf_ibuf.inl
+/// \brief Insert buffer inline functions
+/// \details Originally created by Heikki Tuuri in 7/19/1997
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "page_page.hpp"
+
 #ifdef WITH_ZIP
-#include "page_zip.hpp"
-#endif /* WITH_ZIP */
+	#include "page_zip.hpp"
+#endif // WITH_ZIP
+
 #ifndef IB_HOTBACKUP
+
 #include "buf_lru.hpp"
 
-/** Counter for ibuf_should_try() */
-extern ulint	ibuf_flush_count;
+// \brief Counter for ibuf_should_try()
+extern ulint ibuf_flush_count;
 
 /** An index page must contain at least IB_PAGE_SIZE /
 IBUF_PAGE_SIZE_PER_FREE_SPACE bytes of free space for ibuf to try to
