@@ -28,14 +28,14 @@
 #include <string.h>
 #include <assert.h>
 
-#define	ut_malloc	malloc
-#define	ut_free		free
-#define	ulint		unsigned long
-#define	ut_a(c)		assert(c)
-#define UT_ERROR	assert(0)
-#define	ibool		unsigned int
-#define	TRUE		1
-#define	FALSE		0
+#define ut_malloc malloc
+#define ut_free   free
+#define ulint     unsigned long
+#define ut_a(c)   assert(c)
+#define UT_ERROR  assert(0)
+#define ibool     unsigned int
+#define TRUE      1
+#define FALSE     0
 #endif
 
 /// \brief Red black tree typedefs
@@ -90,7 +90,7 @@ struct ib_rbt_node_struct {
 /// \var ulint ib_rbt_struct::sizeof_value
 /// \brief Sizeof the item in bytes
 
-struct	ib_rbt_struct {
+struct ib_rbt_struct {
 	ib_rbt_node_t* nil;
 	ib_rbt_node_t* root;
 	ulint          n_nodes;
@@ -112,209 +112,141 @@ struct ib_rbt_bound_struct {
 };
 
 /// \brief Size in elements (t is an rb tree instance)
-#define rbt_size(t)	(t->n_nodes)
+#define rbt_size(t) (t->n_nodes)
 
-/* Check whether the rb tree is empty (t is an rb tree instance) */
-#define rbt_empty(t)	(rbt_size(t) == 0)
+/// \brief Check whether the rb tree is empty (t is an rb tree instance)
+#define rbt_empty(t) (rbt_size(t) == 0)
 
-/* Get data value (t is the data type, n is an rb tree node instance) */
+/// \brief Get data value (t is the data type, n is an rb tree node instance)
 #define rbt_value(t, n) ((t*) &n->value[0])
 
-/* Compare a key with the node value (t is tree, k is key, n is node)*/
+/// \brief Compare a key with the node value (t is tree, k is key, n is node)
 #define rbt_compare(t, k, n) (t->compare(k, n->value))
 
-/****************************************************************//**
-Free an instance of  a red black tree */
-IB_INTERN
-void
-rbt_free(
-/*=====*/
-	ib_rbt_t*	tree);		/*!< in: rb tree to free */
-/****************************************************************//**
-Create an instance of a red black tree
-@return	rb tree instance */
-IB_INTERN
-ib_rbt_t*
-rbt_create(
-/*=======*/
-	size_t		sizeof_value,	/*!< in: size in bytes */
-	ib_rbt_compare	compare);	/*!< in: comparator */
-/****************************************************************//**
-Delete a node from the red black tree, identified by key.
-@return TRUE if success FALSE if not found */
-IB_INTERN
-ibool
-rbt_delete(
-/*=======*/
-	ib_rbt_t*	tree,		/*!< in: rb tree */
-	const void*	key);		/*!< in: key to delete */
-/****************************************************************//**
-Remove a node from the rb tree, the node is not free'd, that is the
-callers responsibility.
-@return	the deleted node with the const. */
-IB_INTERN
-ib_rbt_node_t*
-rbt_remove_node(
-/*============*/
-	ib_rbt_t*	tree,		/*!< in: rb tree */
-	const ib_rbt_node_t*
-			node);		/*!< in: node to delete, this
-					is a fudge and declared const
-					because the caller has access
-					only to const nodes.*/
-/****************************************************************//**
-Find a matching node in the rb tree.
-@return	node if found else return NULL */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_lookup(
-/*=======*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree to search */
-	const void*	key);		/*!< in: key to lookup */
-/****************************************************************//**
-Generic insert of a value in the rb tree.
-@return	inserted node */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_insert(
-/*=======*/
-	ib_rbt_t*	tree,		/*!< in: rb tree */
-	const void*	key,		/*!< in: key for ordering */
-	const void*	value);		/*!< in: data that will be
-					copied to the node.*/
-/****************************************************************//**
-Add a new node to the tree, useful for data that is pre-sorted.
-@return	appended node */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_add_node(
-/*=========*/
-	ib_rbt_t*	tree,		/*!< in: rb tree */
-	ib_rbt_bound_t*	parent,		/*!< in: parent */
-	const void*	value);		/*!< in: this value is copied
-					to the node */
-/****************************************************************//**
-Return the left most data node in the tree
-@return	left most node */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_first(
-/*======*/
-	const ib_rbt_t*	tree);		/*!< in: rb tree */
-/****************************************************************//**
-Return the right most data node in the tree
-@return	right most node */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_last(
-/*=====*/
-	const ib_rbt_t*	tree);		/*!< in: rb tree */
-/****************************************************************//**
-Return the next node from current.
-@return	successor node to current that is passed in. */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_next(
-/*=====*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree */
-	const ib_rbt_node_t*		/*!< in: current node */
-			current);
-/****************************************************************//**
-Return the prev node from current.
-@return	precedessor node to current that is passed in */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_prev(
-/*=====*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree */
-	const ib_rbt_node_t*		/*!< in: current node */
-			current);
-/****************************************************************//**
-Find the node that has the lowest key that is >= key.
-@return	node that satisfies the lower bound constraint or NULL */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_lower_bound(
-/*============*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree */
-	const void*	key);		/*!< in: key to search */
-/****************************************************************//**
-Find the node that has the greatest key that is <= key.
-@return	node that satisifies the upper bound constraint or NULL */
-IB_INTERN
-const ib_rbt_node_t*
-rbt_upper_bound(
-/*============*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree */
-	const void*	key);		/*!< in: key to search */
-/****************************************************************//**
-Search for the key, a node will be retuned in parent.last, whether it
-was found or not. If not found then parent.last will contain the
-parent node for the possibly new key otherwise the matching node.
-@return	result of last comparison */
-IB_INTERN
-int
-rbt_search(
-/*=======*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree */
-	ib_rbt_bound_t*	parent,		/*!< in: search bounds */
-	const void*	key);		/*!< in: key to search */
-/****************************************************************//**
-Search for the key, a node will be retuned in parent.last, whether it
-was found or not. If not found then parent.last will contain the
-parent node for the possibly new key otherwise the matching node.
-@return	result of last comparison */
-IB_INTERN
-int
-rbt_search_cmp(
-/*===========*/
-	const ib_rbt_t*	tree,		/*!< in: rb tree */
-	ib_rbt_bound_t*	parent,		/*!< in: search bounds */
-	const void*	key,		/*!< in: key to search */
-	ib_rbt_compare	compare);	/*!< in: comparator */
-/****************************************************************//**
-Clear the tree, deletes (and free's) all the nodes. */
-IB_INTERN
-void
-rbt_clear(
-/*======*/
-	ib_rbt_t*	tree);		/*!< in: rb tree */
-/****************************************************************//**
-Merge the node from dst into src. Return the number of nodes merged.
-@return	no. of recs merged */
-IB_INTERN
-ulint
-rbt_merge_uniq(
-/*===========*/
-	ib_rbt_t*	dst,		/*!< in: dst rb tree */
-	const ib_rbt_t*	src);		/*!< in: src rb tree */
-/****************************************************************//**
-Merge the node from dst into src. Return the number of nodes merged.
-Delete the nodes from src after copying node to dst. As a side effect
-the duplicates will be left untouched in the src, since we don't support
-duplicates (yet). NOTE: src and dst must be similar, the function doesn't
-check for this condition (yet).
-@return	no. of recs merged */
-IB_INTERN
-ulint
-rbt_merge_uniq_destructive(
-/*=======================*/
-	ib_rbt_t*	dst,		/*!< in: dst rb tree */
-	ib_rbt_t*	src);		/*!< in: src rb tree */
-/****************************************************************//**
-Verify the integrity of the RB tree. For debugging. 0 failure else height
-of tree (in count of black nodes).
-@return	TRUE if OK FALSE if tree invalid. */
-IB_INTERN
-ibool
-rbt_validate(
-/*=========*/
-	const ib_rbt_t*	tree);		/*!< in: tree to validate */
-/****************************************************************//**
-Iterate over the tree in depth first order. */
-IB_INTERN
-void
-rbt_print(
-/*======*/
-	const ib_rbt_t*		tree,	/*!< in: tree to traverse */
-	ib_rbt_print_node	print);	/*!< in: print function */
+/// \brief Free an instance of  a red black tree
+/// \param[in] tree rb tree to free
+IB_INTERN void rbt_free(ib_rbt_t* tree);
+
+/// \brief Create an instance of a red black tree
+/// \param[in] sizeof_value size in bytes
+/// \param[in] compare      comparator
+/// \return rb tree instance
+IB_INTERN ib_rbt_t* rbt_create(size_t sizeof_value, ib_rbt_compare compare);
+
+/// \brief Delete a node from the red black tree, identified by key.
+/// \param[in] tree rb tree
+/// \param[in] key  key to delete
+/// \return TRUE if success FALSE if not found
+IB_INTERN ibool rbt_delete(ib_rbt_t* tree, const void* key);
+
+/// \brief Remove a node from the rb tree, the node is not free'd, that is the callers responsibility.
+/// \param[in] tree rb tree
+/// \param[in] node node to delete, this is a fudge and declared const because the caller has access only to const nodes
+/// @return the deleted node with the const.
+IB_INTERN ib_rbt_node_t* rbt_remove_node(ib_rbt_t* tree, const ib_rbt_node_t* node);
+
+/// \brief Find a matching node in the rb tree.
+/// \param[in] tree rb tree to search
+/// \param[in] key  key to lookup
+/// \return node if found else return NULL
+IB_INTERN const ib_rbt_node_t* rbt_lookup(const ib_rbt_t* tree, const void* key);    
+
+/// \brief Generic insert of a value in the rb tree.
+/// \param[in] tree  rb tree
+/// \param[in] key   key for ordering
+/// \param[in] value data that will be copied to the node
+/// @return inserted node
+IB_INTERN const ib_rbt_node_t* rbt_insert(ib_rbt_t* tree, const void* key, const void* value); 
+
+/// \brief Add a new node to the tree, useful for data that is pre-sorted.
+/// \param[in] tree   rb tree
+/// \param[in] parent parent
+/// \param[in] value  this value is copied to the node
+/// \return appended node
+IB_INTERN const ib_rbt_node_t* rbt_add_node(ib_rbt_t* tree, ib_rbt_bound_t* parent, const void* value);
+
+/// \brief Return the left most data node in the tree
+/// \param[in] tree rb tree
+/// \return left most node
+IB_INTERN const ib_rbt_node_t* rbt_first(const ib_rbt_t* tree);
+
+/// \brief Return the right most data node in the tree
+/// \param[in] rb tree
+/// \return right most node
+IB_INTERN const ib_rbt_node_t* rbt_last(const ib_rbt_t* tree);
+
+/// \brief Return the next node from current.
+/// \param[in] tree     rb tree
+/// \param[in] current  current node
+/// \return successor node to current that is passed in.
+IB_INTERN const ib_rbt_node_t* rbt_next(const ib_rbt_t* tree, const ib_rbt_node_t* current);
+
+/// \brief Return the prev node from current.
+/// \param[in] tree    rb tree
+/// \param[in] current current node
+/// \return precedessor node to current that is passed in
+IB_INTERN const ib_rbt_node_t* rbt_prev(const ib_rbt_t* tree, const ib_rbt_node_t* current);
+
+/// \brief Find the node that has the lowest key that is >= key.
+/// \param[in] tree  rb tree
+/// \param[in] key   key to search
+/// \return node that satisfies the lower bound constraint or NULL
+IB_INTERN const ib_rbt_node_t* rbt_lower_bound(const ib_rbt_t* tree, const void* key);
+
+/// \brief Find the node that has the greatest key that is <= key.
+/// \param[in] tree rb tree
+/// \param[in] key  key to search
+/// \return node that satisifies the upper bound constraint or NULL
+IB_INTERN const ib_rbt_node_t* rbt_upper_bound(const ib_rbt_t* tree, const void* key);    
+
+/// \details Search for the key, a node will be retuned in parent.last, whether it
+/// was found or not. If not found then parent.last will contain the
+/// parent node for the possibly new key otherwise the matching node.
+/// \param[in] tree   rb tree
+/// \param[in] parent search bounds
+/// \param[in] key    key to search
+/// \return result of last comparison
+IB_INTERN int rbt_search(const ib_rbt_t* tree, ib_rbt_bound_t* parent, const void* key);
+
+/// \details Search for the key, a node will be retuned in parent.last, whether it
+/// was found or not. If not found then parent.last will contain the
+/// parent node for the possibly new key otherwise the matching node.
+/// \param[in] tree    rb tree
+/// \param[in] parent  search bounds
+/// \param[in] key     key to search
+/// \param[in] compare comparator
+/// \return result of last comparison
+IB_INTERN int rbt_search_cmp(const ib_rbt_t* tree, ib_rbt_bound_t* parent, const void* key, ib_rbt_compare compare);
+
+
+/// \brief Clear the tree, deletes (and free's) all the nodes.
+/// \param[in] tree rb tree
+IB_INTERN void rbt_clear(ib_rbt_t* tree);
+
+/// \brief Merge the node from dst into src. Return the number of nodes merged.
+/// \param[in] dst dst rb tree
+/// \param[in] src rb tree
+/// \return no. of recs merged
+IB_INTERN ulint rbt_merge_uniq(ib_rbt_t* dst, const ib_rbt_t* src);
+
+/// \brief Merge the node from dst into src.
+/// \details Return the number of nodes merged.
+/// Delete the nodes from src after copying node to dst. As a side effect
+/// the duplicates will be left untouched in the src, since we don't support
+/// duplicates (yet).
+/// \note src and dst must be similar, the function doesn't check for this condition (yet).
+/// \param[in] dst dst rb tree
+/// \param[in] src src rb tree
+/// \return no. of recs merged
+IB_INTERN ulint rbt_merge_uniq_destructive( ib_rbt_t* dst, ib_rbt_t* src);
+
+/// \brief Verify the integrity of the RB tree.
+/// \details For debugging. 0 failure else height of tree (in count of black nodes).
+/// \param[in] tree tree to validate
+/// \return TRUE if OK FALSE if tree invalid.
+IB_INTERN ibool rbt_validate(const ib_rbt_t* tree);
+
+/// \brief Iterate over the tree in depth first order.
+/// \param[in] tree   tree to traverse
+/// \param[in] print  print function
+IB_INTERN void rbt_print(const ib_rbt_t* tree, ib_rbt_print_node print);
