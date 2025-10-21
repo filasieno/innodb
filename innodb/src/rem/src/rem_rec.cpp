@@ -28,6 +28,24 @@
 #include "mtr_log.hpp"
 
 // -----------------------------------------------------------------------------------------
+// type definitions
+// -----------------------------------------------------------------------------------------
+
+// < TYPE DEFINITIONS HERE >
+
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+// < MACRO CONSTANTS HERE >
+
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
+// < BOTH STATIC AND NON STATIC >
+
+// -----------------------------------------------------------------------------------------
 // Static helper routine declarations
 // -----------------------------------------------------------------------------------------
 
@@ -41,6 +59,29 @@ static ibool rec_validate_old(const rec_t* rec);
 /// \param [in] index record descriptor
 /// \param [in,out] offsets array of offsets; in: n=rec_offs_n_fields(offsets)
 static void rec_init_offsets(const rec_t* rec, const dict_index_t* index, ulint* offsets);
+
+/// \brief Builds an old-style physical record out of a data tuple.
+/// \param [in] buf start address of the physical record
+/// \param [in] dtuple data tuple
+/// \param [in] n_ext number of externally stored columns
+/// \return pointer to the origin of physical record
+static rec_t* rec_convert_dtuple_to_rec_old(byte* buf, const dtuple_t* dtuple, ulint n_ext);
+
+/// \brief Builds a new-style physical record out of a data tuple.
+/// \param [in] buf start address of the physical record
+/// \param [in] index record descriptor
+/// \param [in] dtuple data tuple
+/// \return pointer to the origin of physical record
+static rec_t* rec_convert_dtuple_to_rec_new(byte* buf, const dict_index_t* index, const dtuple_t* dtuple);
+
+/// \brief Copies the first n fields of an old-style record to a buffer.
+/// \param [in] rec physical record
+/// \param [in] n_fields number of fields to copy
+/// \param [in] area_end end of the prefix data
+/// \param [in,out] buf memory buffer for the copied prefix, or NULL
+/// \param [in,out] buf_size buffer size
+/// \return copied record pointer inside buf
+static rec_t* rec_copy_prefix_to_buf_old(const rec_t* rec, ulint n_fields, ulint area_end, byte** buf, ulint* buf_size);
 
 // -----------------------------------------------------------------------------------------
 // routine definitions
@@ -141,8 +182,7 @@ the position of each field insert in the string
 the 'character' <FIELD-END>, except that after an SQL-null field
 insert <NULL-FIELD-END>. Now the ordinal position of each
 byte in this canonical string is its canonical coordinate.
-So, for the record ("AA", SQL-NULL, "BB", ""), the canonical
-string is "AA<FIELD_END><NULL-FIELD-END>BB<FIELD-END><FIELD-END>".
+So, for the record ("AA", SQL-NULL, "BB", ""), the canonical string is "AA<FIELD_END><NULL-FIELD-END>BB<FIELD-END><FIELD-END>".
 We identify prefixes (= initial segments) of a record
 with prefixes of the canonical string. The canonical
 length of the prefix is the length of the corresponding
@@ -187,13 +227,13 @@ IB_INTERN ulint rec_get_n_extern_new(const rec_t* rec, dict_index_t* index, ulin
 	n_extern = 0;
 	i = 0;
 
-	/* read the lengths of fields 0..n */
+	// read the lengths of fields 0..n
 	do {
 		ulint	len;
 
 		field = dict_index_get_nth_field(index, i);
 		if (!(dict_field_get_col(field)->prtype & DATA_NOT_NULL)) {
-			/* nullable field => read the null flag */
+			// nullable field => read the null flag
 
 			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
@@ -202,14 +242,14 @@ IB_INTERN ulint rec_get_n_extern_new(const rec_t* rec, dict_index_t* index, ulin
 
 			if (*nulls & null_mask) {
 				null_mask <<= 1;
-				/* No length is stored for NULL fields. */
+				// No length is stored for NULL fields.
 				continue;
 			}
 			null_mask <<= 1;
 		}
 
 		if (IB_UNLIKELY(!field->fixed_len)) {
-			/* Variable-length field: read the length */
+			// Variable-length field: read the length
 			const dict_col_t*	col
 				= dict_field_get_col(field);
 			len = *lens--;
@@ -223,7 +263,7 @@ IB_INTERN ulint rec_get_n_extern_new(const rec_t* rec, dict_index_t* index, ulin
 			if (IB_UNLIKELY(col->len > 255)
 			    || IB_UNLIKELY(col->mtype == DATA_BLOB)) {
 				if (len & 0x80) {
-					/* 1exxxxxxx xxxxxxxx */
+					// 1exxxxxxx xxxxxxxx
 					if (len & 0x40) {
 						n_extern++;
 					}
@@ -233,7 +273,7 @@ IB_INTERN ulint rec_get_n_extern_new(const rec_t* rec, dict_index_t* index, ulin
 		}
 	} while (++i < n);
 
-	return(n_extern);
+return n_extern;
 }
 
 /// \brief Determine the offset to each field in a leaf-page record in ROW_FORMAT=COMPACT.
@@ -257,7 +297,7 @@ IB_INTERN void rec_init_offsets_comp_ordinary(const rec_t* rec, ulint extra, con
 		switch (IB_EXPECT(status, REC_STATUS_ORDINARY)) {
 		case REC_STATUS_INFIMUM:
 		case REC_STATUS_SUPREMUM:
-			/* the field is 8 bytes long */
+			// the field is 8 bytes long
 			rec_offs_base(offsets)[0]
 				= REC_N_NEW_EXTRA_BYTES | REC_OFFS_COMPACT;
 			rec_offs_base(offsets)[1] = 8;
@@ -278,7 +318,7 @@ IB_INTERN void rec_init_offsets_comp_ordinary(const rec_t* rec, ulint extra, con
 		ulint offs = 0;
 		ulint null_mask = 1;
 
-		/* read the lengths of fields 0..n */
+		// read the lengths of fields 0..n
 		do {
 			ulint	len;
 			if (IB_UNLIKELY(i == n_node_ptr_field)) {
@@ -289,7 +329,7 @@ IB_INTERN void rec_init_offsets_comp_ordinary(const rec_t* rec, ulint extra, con
 			field = dict_index_get_nth_field(index, i);
 			if (!(dict_field_get_col(field)->prtype
 			      & DATA_NOT_NULL)) {
-				/* nullable field => read the null flag */
+				// nullable field => read the null flag
 
 				if (IB_UNLIKELY(!(byte) null_mask)) {
 					nulls--;
@@ -309,7 +349,7 @@ IB_INTERN void rec_init_offsets_comp_ordinary(const rec_t* rec, ulint extra, con
 			}
 
 			if (IB_UNLIKELY(!field->fixed_len)) {
-				/* Variable-length field: read the length */
+				// Variable-length field: read the length
 				const dict_col_t*	col
 					= dict_field_get_col(field);
 				len = *lens--;
@@ -326,7 +366,7 @@ IB_INTERN void rec_init_offsets_comp_ordinary(const rec_t* rec, ulint extra, con
 				    || IB_UNLIKELY(col->mtype
 						     == DATA_BLOB)) {
 					if (len & 0x80) {
-						/* 1exxxxxxx xxxxxxxx */
+						// 1exxxxxxx xxxxxxxx
 
 						len <<= 8;
 						len |= *lens--;
@@ -354,12 +394,12 @@ resolved:
 		*rec_offs_base(offsets)
 			= (rec - (lens + 1)) | REC_OFFS_COMPACT;
 	} else {
-		/* Old-style record: determine extra size and end offsets */
+		// Old-style record: determine extra size and end offsets
 		offs = REC_N_OLD_EXTRA_BYTES;
 		if (rec_get_1byte_offs_flag(rec)) {
 			offs += rec_offs_n_fields(offsets);
 			*rec_offs_base(offsets) = offs;
-			/* Determine offsets to fields */
+			// Determine offsets to fields
 			do {
 				offs = rec_1_get_field_end_info(rec, i);
 				if (offs & REC_1BYTE_SQL_NULL_MASK) {
@@ -371,7 +411,7 @@ resolved:
 		} else {
 			offs += 2 * rec_offs_n_fields(offsets);
 			*rec_offs_base(offsets) = offs;
-			/* Determine offsets to fields */
+			// Determine offsets to fields
 			do {
 				offs = rec_2_get_field_end_info(rec, i);
 				if (offs & REC_2BYTE_SQL_NULL_MASK) {
@@ -389,26 +429,17 @@ resolved:
 	}
 }
 
-/******************************************************//**
-The following function determines the offsets to each field
-in the record.	It can reuse a previously returned array.
-@return	the new offsets */
-IB_INTERN
-ulint*
-rec_get_offsets_func(
-/*=================*/
-	const rec_t*		rec,	/*!< in: physical record */
-	const dict_index_t*	index,	/*!< in: record descriptor */
-	ulint*			offsets,/*!< in/out: array consisting of
-					offsets[0] allocated elements,
-					or an array from rec_get_offsets(),
-					or NULL */
-	ulint			n_fields,/*!< in: maximum number of
-					initialized fields
-					 (ULINT_UNDEFINED if all fields) */
-	mem_heap_t**		heap,	/*!< in/out: memory heap */
-	const char*		file,	/*!< in: file name where called */
-	ulint			line)	/*!< in: line number where called */
+/// \brief The following function determines the offsets to each field in the record.
+/// \details It can reuse a previously returned array.
+/// \param [in] rec physical record
+/// \param [in] index record descriptor
+/// \param [in,out] offsets array consisting of offsets[0] allocated elements, or an array from rec_get_offsets(), or NULL
+/// \param [in] n_fields maximum number of initialized fields (ULINT_UNDEFINED if all fields)
+/// \param [in,out] heap memory heap
+/// \param [in] file file name where called
+/// \param [in] line line number where called
+/// \return the new offsets
+IB_INTERN ulint* rec_get_offsets_func(const rec_t* rec, const dict_index_t* index, ulint* offsets, ulint n_fields, mem_heap_t** heap, const char* file, ulint line)
 {
 	ulint	n;
 	ulint	size;
@@ -428,12 +459,12 @@ rec_get_offsets_func(
 			break;
 		case REC_STATUS_INFIMUM:
 		case REC_STATUS_SUPREMUM:
-			/* infimum or supremum record */
+			// infimum or supremum record
 			n = 1;
 			break;
 		default:
-			UT_ERROR;
-			return(NULL);
+            UT_ERROR;
+            return NULL;
 		}
 	} else {
 		n = rec_get_n_fields_old(rec);
@@ -458,25 +489,16 @@ rec_get_offsets_func(
 
 	rec_offs_set_n_fields(offsets, n);
 	rec_init_offsets(rec, index, offsets);
-	return(offsets);
+    return offsets;
 }
 
-/******************************************************//**
-The following function determines the offsets to each field
-in the record.  It can reuse a previously allocated array. */
-IB_INTERN
-void
-rec_get_offsets_reverse(
-/*====================*/
-	const byte*		extra,	/*!< in: the extra bytes of a
-					compact record in reverse order,
-					excluding the fixed-size
-					REC_N_NEW_EXTRA_BYTES */
-	const dict_index_t*	index,	/*!< in: record descriptor */
-	ulint			node_ptr,/*!< in: nonzero=node pointer,
-					0=leaf node */
-	ulint*			offsets)/*!< in/out: array consisting of
-					offsets[0] allocated elements */
+/// \brief Determines the offsets to each field in the record from reversed extra bytes.
+/// \details The extra bytes of a compact record are provided in reverse order, excluding the fixed-size REC_N_NEW_EXTRA_BYTES.
+/// \param [in] extra the extra bytes of a compact record in reverse order, excluding the fixed-size REC_N_NEW_EXTRA_BYTES
+/// \param [in] index record descriptor
+/// \param [in] node_ptr nonzero=node pointer, 0=leaf node
+/// \param [in,out] offsets array consisting of offsets[0] allocated elements
+IB_INTERN void rec_get_offsets_reverse(const byte* extra, const dict_index_t* index, ulint node_ptr, ulint* offsets)
 {
 	ulint		n;
 	ulint		i;
@@ -510,7 +532,7 @@ rec_get_offsets_reverse(
 	null_mask = 1;
 	any_ext = 0;
 
-	/* read the lengths of fields 0..n */
+	// read the lengths of fields 0..n
 	do {
 		ulint	len;
 		if (IB_UNLIKELY(i == n_node_ptr_field)) {
@@ -520,7 +542,7 @@ rec_get_offsets_reverse(
 
 		field = dict_index_get_nth_field(index, i);
 		if (!(dict_field_get_col(field)->prtype & DATA_NOT_NULL)) {
-			/* nullable field => read the null flag */
+			// nullable field => read the null flag
 
 			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls++;
@@ -540,7 +562,7 @@ rec_get_offsets_reverse(
 		}
 
 		if (IB_UNLIKELY(!field->fixed_len)) {
-			/* Variable-length field: read the length */
+			// Variable-length field: read the length
 			const dict_col_t*	col
 				= dict_field_get_col(field);
 			len = *lens++;
@@ -554,7 +576,7 @@ rec_get_offsets_reverse(
 			if (IB_UNLIKELY(col->len > 255)
 			    || IB_UNLIKELY(col->mtype == DATA_BLOB)) {
 				if (len & 0x80) {
-					/* 1exxxxxxx xxxxxxxx */
+					// 1exxxxxxx xxxxxxxx
 					len <<= 8;
 					len |= *lens++;
 
@@ -583,18 +605,12 @@ resolved:
 		| REC_OFFS_COMPACT | any_ext;
 }
 
-/************************************************************//**
-The following function is used to get the offset to the nth
-data field in an old-style record.
-@return	offset to the field */
-IB_INTERN
-ulint
-rec_get_nth_field_offs_old(
-/*=======================*/
-	const rec_t*	rec,	/*!< in: record */
-	ulint		n,	/*!< in: index of the field */
-	ulint*		len)	/*!< out: length of the field;
-				IB_SQL_NULL if SQL null */
+/// \brief The following function is used to get the offset to the nth data field in an old-style record.
+/// \param [in] rec record
+/// \param [in] n index of the field
+/// \param [out] len length of the field; IB_SQL_NULL if SQL null
+/// \return offset to the field
+IB_INTERN ulint rec_get_nth_field_offs_old(const rec_t* rec, ulint n, ulint* len)
 {
 	ulint	os;
 	ulint	next_os;
@@ -611,7 +627,7 @@ rec_get_nth_field_offs_old(
 		if (next_os & REC_1BYTE_SQL_NULL_MASK) {
 			*len = IB_SQL_NULL;
 
-			return(os);
+            return os;
 		}
 
 		next_os = next_os & ~REC_1BYTE_SQL_NULL_MASK;
@@ -623,7 +639,7 @@ rec_get_nth_field_offs_old(
 		if (next_os & REC_2BYTE_SQL_NULL_MASK) {
 			*len = IB_SQL_NULL;
 
-			return(os);
+            return os;
 		}
 
 		next_os = next_os & ~(REC_2BYTE_SQL_NULL_MASK
@@ -634,23 +650,16 @@ rec_get_nth_field_offs_old(
 
 	ut_ad(*len < IB_PAGE_SIZE);
 
-	return(os);
+return os;
 }
 
-/**********************************************************//**
-Determines the size of a data tuple prefix in ROW_FORMAT=COMPACT.
-@return	total size */
-IB_INTERN
-ulint
-rec_get_converted_size_comp_prefix(
-/*===============================*/
-	const dict_index_t*	index,	/*!< in: record descriptor;
-					dict_table_is_comp() is
-					assumed to hold, even if
-					it does not */
-	const dfield_t*		fields,	/*!< in: array of data fields */
-	ulint			n_fields,/*!< in: number of data fields */
-	ulint*			extra)	/*!< out: extra size */
+/// \brief Determines the size of a data tuple prefix in ROW_FORMAT=COMPACT.
+/// \param [in] index record descriptor; dict_table_is_comp() is assumed to hold, even if it does not
+/// \param [in] fields array of data fields
+/// \param [in] n_fields number of data fields
+/// \param [out] extra extra size
+/// \return total size
+IB_INTERN ulint rec_get_converted_size_comp_prefix(const dict_index_t* index, const dfield_t* fields, ulint n_fields, ulint* extra)
 {
 	ulint	extra_size;
 	ulint	data_size;
@@ -664,7 +673,7 @@ rec_get_converted_size_comp_prefix(
 		+ UT_BITS_IN_BYTES(index->n_nullable);
 	data_size = 0;
 
-	/* read the lengths of fields 0..n */
+	// read the lengths of fields 0..n
 	for (i = 0; i < n_fields; i++) {
 		const dict_field_t*	field;
 		ulint			len;
@@ -678,7 +687,7 @@ rec_get_converted_size_comp_prefix(
 						 dfield_get_type(&fields[i])));
 
 		if (dfield_is_null(&fields[i])) {
-			/* No length is stored for NULL fields. */
+			// No length is stored for NULL fields.
 			ut_ad(!(col->prtype & DATA_NOT_NULL));
 			continue;
 		}
@@ -694,7 +703,7 @@ rec_get_converted_size_comp_prefix(
 
 		if (field->fixed_len) {
 			ut_ad(len == field->fixed_len);
-			/* dict_index_add_col() should guarantee this */
+			// dict_index_add_col() should guarantee this
 			ut_ad(!field->prefix_len
 			      || field->fixed_len == field->prefix_len);
 		} else if (dfield_is_ext(&fields[i])) {
@@ -717,7 +726,7 @@ rec_get_converted_size_comp_prefix(
 		*extra = extra_size;
 	}
 
-	return(extra_size + data_size);
+    return extra_size + data_size;
 }
 
 /// \brief Determines the size of a data tuple in ROW_FORMAT=COMPACT.
@@ -743,33 +752,28 @@ IB_INTERN ulint rec_get_converted_size_comp(const dict_index_t* index, ulint sta
 		n_fields--;
 		ut_ad(n_fields == dict_index_get_n_unique_in_tree(index));
 		ut_ad(dfield_get_len(&fields[n_fields]) == REC_NODE_PTR_SIZE);
-		size = REC_NODE_PTR_SIZE; /* child page number */
+		size = REC_NODE_PTR_SIZE; // child page number
 		break;
 	case REC_STATUS_INFIMUM:
 	case REC_STATUS_SUPREMUM:
-		/* infimum or supremum record, 8 data bytes */
+		// infimum or supremum record, 8 data bytes
 		if (IB_LIKELY_NULL(extra)) {
 			*extra = REC_N_NEW_EXTRA_BYTES;
 		}
-		return(REC_N_NEW_EXTRA_BYTES + 8);
+        return REC_N_NEW_EXTRA_BYTES + 8;
 	default:
 		UT_ERROR;
-		return(ULINT_UNDEFINED);
+        return ULINT_UNDEFINED;
 	}
 
-	return(size + rec_get_converted_size_comp_prefix(index, fields,
-							 n_fields, extra));
+	return size + rec_get_converted_size_comp_prefix(index, fields, n_fields, extra);
 }
 
-/***********************************************************//**
-Sets the value of the ith field SQL null bit of an old-style record. */
-IB_INTERN
-void
-rec_set_nth_field_null_bit(
-/*=======================*/
-	rec_t*	rec,	/*!< in: record */
-	ulint	i,	/*!< in: ith field */
-	ibool	val)	/*!< in: value to set */
+/// \brief Sets the value of the ith field SQL null bit of an old-style record.
+/// \param [in] rec record
+/// \param [in] i ith field
+/// \param [in] val value to set
+IB_INTERN void rec_set_nth_field_null_bit(rec_t* rec, ulint i, ibool val)
 {
 	ulint	info;
 
@@ -821,106 +825,71 @@ IB_INTERN void rec_set_nth_field_sql_null(rec_t* rec, ulint n)
 /// \return pointer to the origin of physical record
 static rec_t* rec_convert_dtuple_to_rec_old(byte* buf, const dtuple_t* dtuple, ulint n_ext)
 {
-	const dfield_t*	field;
-	ulint		n_fields;
-	ulint		data_size;
-	rec_t*		rec;
-	ulint		end_offset;
-	ulint		ored_offset;
-	ulint		len;
-	ulint		i;
-
 	ut_ad(buf && dtuple);
 	ut_ad(dtuple_validate(dtuple));
 	ut_ad(dtuple_check_typed(dtuple));
 
-	n_fields = dtuple_get_n_fields(dtuple);
-	data_size = dtuple_get_data_size(dtuple, 0);
-
+	ulint n_fields = dtuple_get_n_fields(dtuple);
+	ulint data_size = dtuple_get_data_size(dtuple, 0);
 	ut_ad(n_fields > 0);
 
-	/* Calculate the offset of the origin in the physical record */
-
-	rec = buf + rec_get_converted_extra_size(data_size, n_fields, n_ext);
+	// Calculate the offset of the origin in the physical record
+	rec_t* rec = buf + rec_get_converted_extra_size(data_size, n_fields, n_ext);
 #ifdef IB_DEBUG
-	/* Suppress Valgrind warnings of ut_ad()
-	in mach_write_to_1(), mach_write_to_2() et al. */
+	// Suppress Valgrind warnings of ut_ad() in mach_write_to_1(), mach_write_to_2() et al.
 	memset(buf, 0xff, rec - buf + data_size);
-#endif /* IB_DEBUG */
-	/* Store the number of fields */
+#endif // IB_DEBUG
+	// Store the number of fields
 	rec_set_n_fields_old(rec, n_fields);
-
-	/* Set the info bits of the record */
-	rec_set_info_bits_old(rec, dtuple_get_info_bits(dtuple)
-			      & REC_INFO_BITS_MASK);
-
-	/* Store the data and the offsets */
-
-	end_offset = 0;
+	// Set the info bits of the record
+	rec_set_info_bits_old(rec, dtuple_get_info_bits(dtuple) & REC_INFO_BITS_MASK);
+	// Store the data and the offsets
+	ulint end_offset = 0;
 
 	if (!n_ext && data_size <= REC_1BYTE_OFFS_LIMIT) {
-
 		rec_set_1byte_offs_flag(rec, TRUE);
-
-		for (i = 0; i < n_fields; i++) {
-
-			field = dtuple_get_nth_field(dtuple, i);
-
+		for (ulint i = 0; i < n_fields; i++) {
+			const dfield_t* field = dtuple_get_nth_field(dtuple, i);
+			ulint len;
+			ulint ored_offset;
 			if (dfield_is_null(field)) {
-				len = dtype_get_sql_null_size(
-					dfield_get_type(field), 0);
+				len = dtype_get_sql_null_size(dfield_get_type(field), 0);
 				data_write_sql_null(rec + end_offset, len);
-
 				end_offset += len;
-				ored_offset = end_offset
-					| REC_1BYTE_SQL_NULL_MASK;
+				ored_offset = end_offset | REC_1BYTE_SQL_NULL_MASK;
 			} else {
-				/* If the data is not SQL null, store it */
+				// If the data is not SQL null, store it
 				len = dfield_get_len(field);
-
-				memcpy(rec + end_offset,
-				       dfield_get_data(field), len);
-
+				memcpy(rec + end_offset, dfield_get_data(field), len);
 				end_offset += len;
 				ored_offset = end_offset;
 			}
-
 			rec_1_set_field_end_info(rec, i, ored_offset);
 		}
 	} else {
 		rec_set_1byte_offs_flag(rec, FALSE);
-
-		for (i = 0; i < n_fields; i++) {
-
-			field = dtuple_get_nth_field(dtuple, i);
-
+		for (ulint i = 0; i < n_fields; i++) {
+			const dfield_t* field = dtuple_get_nth_field(dtuple, i);
+			ulint len;
+			ulint ored_offset;
 			if (dfield_is_null(field)) {
-				len = dtype_get_sql_null_size(
-					dfield_get_type(field), 0);
+				len = dtype_get_sql_null_size(dfield_get_type(field), 0);
 				data_write_sql_null(rec + end_offset, len);
-
 				end_offset += len;
-				ored_offset = end_offset
-					| REC_2BYTE_SQL_NULL_MASK;
+				ored_offset = end_offset | REC_2BYTE_SQL_NULL_MASK;
 			} else {
-				/* If the data is not SQL null, store it */
+				// If the data is not SQL null, store it
 				len = dfield_get_len(field);
-
-				memcpy(rec + end_offset,
-				       dfield_get_data(field), len);
-
+				memcpy(rec + end_offset, dfield_get_data(field), len);
 				end_offset += len;
 				ored_offset = end_offset;
-
 				if (dfield_is_ext(field)) {
 					ored_offset |= REC_2BYTE_EXTERN_MASK;
 				}
 			}
-
 			rec_2_set_field_end_info(rec, i, ored_offset);
 		}
 	}
-
 	return rec;
 }
 
@@ -933,16 +902,7 @@ static rec_t* rec_convert_dtuple_to_rec_old(byte* buf, const dtuple_t* dtuple, u
 /// \param [in] n_fields number of data fields
 IB_INTERN void rec_convert_dtuple_to_rec_comp(rec_t* rec, ulint extra, const dict_index_t* index, ulint status, const dfield_t* fields, ulint n_fields)
 {
-	const dfield_t*	field;
-	const dtype_t*	type;
-	byte*		end;
-	byte*		nulls;
-	byte*		lens;
-	ulint		len;
-	ulint		i;
-	ulint		n_node_ptr_field;
-	ulint		fixed_len;
-	ulint		null_mask	= 1;
+	ulint n_node_ptr_field;
 	ut_ad(extra == 0 || dict_table_is_comp(index->table));
 	ut_ad(extra == 0 || extra == REC_N_NEW_EXTRA_BYTES);
 	ut_ad(n_fields > 0);
@@ -966,20 +926,17 @@ IB_INTERN void rec_convert_dtuple_to_rec_comp(rec_t* rec, ulint extra, const dic
 		return;
 	}
 
-	end = rec;
-	nulls = rec - (extra + 1);
-	lens = nulls - UT_BITS_IN_BYTES(index->n_nullable);
-	/* clear the SQL-null flags */
+	byte* end = rec;
+	byte* nulls = rec - (extra + 1);
+	byte* lens = nulls - UT_BITS_IN_BYTES(index->n_nullable);
+	// clear the SQL-null flags
 	memset(lens + 1, 0, nulls - lens);
-
-	/* Store the data and the offsets */
-
-	for (i = 0, field = fields; i < n_fields; i++, field++) {
-		const dict_field_t*	ifield;
-
-		type = dfield_get_type(field);
-		len = dfield_get_len(field);
-
+	// Store the data and the offsets
+	ulint null_mask = 1;
+	for (ulint i = 0; i < n_fields; i++) {
+		const dfield_t* field = &fields[i];
+		const dtype_t* type = dfield_get_type(field);
+		ulint len = dfield_get_len(field);
 		if (IB_UNLIKELY(i == n_node_ptr_field)) {
 			ut_ad(dtype_get_prtype(type) & DATA_NOT_NULL);
 			ut_ad(len == 4);
@@ -987,55 +944,38 @@ IB_INTERN void rec_convert_dtuple_to_rec_comp(rec_t* rec, ulint extra, const dic
 			end += 4;
 			break;
 		}
-
 		if (!(dtype_get_prtype(type) & DATA_NOT_NULL)) {
-			/* nullable field */
+			// nullable field
 			ut_ad(index->n_nullable > 0);
-
 			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
 				null_mask = 1;
 			}
-
 			ut_ad(*nulls < null_mask);
-
-			/* set the null flag if necessary */
+			// set the null flag if necessary
 			if (dfield_is_null(field)) {
 				*nulls |= null_mask;
 				null_mask <<= 1;
 				continue;
 			}
-
 			null_mask <<= 1;
 		}
-		/* only nullable fields can be null */
+		// only nullable fields can be null
 		ut_ad(!dfield_is_null(field));
-
-		ifield = dict_index_get_nth_field(index, i);
-		fixed_len = ifield->fixed_len;
-		/* If the maximum length of a variable-length field
-		is up to 255 bytes, the actual length is always stored
-		in one byte. If the maximum length is more than 255
-		bytes, the actual length is stored in one byte for
-		0..127.  The length will be encoded in two bytes when
-		it is 128 or more, or when the field is stored externally. */
+		const dict_field_t* ifield = dict_index_get_nth_field(index, i);
+		ulint fixed_len = ifield->fixed_len;
+		// If the maximum length of a variable-length field is up to 255 bytes, the actual length is always stored in one byte. If the maximum length is more than 255 bytes, the actual length is stored in one byte for 0..127. The length will be encoded in two bytes when it is 128 or more, or when the field is stored externally.
 		if (fixed_len) {
 			ut_ad(len == fixed_len);
 			ut_ad(!dfield_is_ext(field));
 		} else if (dfield_is_ext(field)) {
-			ut_ad(ifield->col->len >= 256
-			      || ifield->col->mtype == DATA_BLOB);
-			ut_ad(len <= REC_MAX_INDEX_COL_LEN
-			      + BTR_EXTERN_FIELD_REF_SIZE);
+			ut_ad(ifield->col->len >= 256 || ifield->col->mtype == DATA_BLOB);
+			ut_ad(len <= REC_MAX_INDEX_COL_LEN + BTR_EXTERN_FIELD_REF_SIZE);
 			*lens-- = (byte) (len >> 8) | 0xc0;
 			*lens-- = (byte) len;
 		} else {
-			ut_ad(len <= dtype_get_len(type)
-			      || dtype_get_mtype(type) == DATA_BLOB);
-			if (len < 128
-			    || (dtype_get_len(type) < 256
-				&& dtype_get_mtype(type) != DATA_BLOB)) {
-
+			ut_ad(len <= dtype_get_len(type) || dtype_get_mtype(type) == DATA_BLOB);
+			if (len < 128 || (dtype_get_len(type) < 256 && dtype_get_mtype(type) != DATA_BLOB)) {
 				*lens-- = (byte) len;
 			} else {
 				ut_ad(len < 16384);
@@ -1043,7 +983,6 @@ IB_INTERN void rec_convert_dtuple_to_rec_comp(rec_t* rec, ulint extra, const dic
 				*lens-- = (byte) len;
 			}
 		}
-
 		memcpy(end, dfield_get_data(field), len);
 		end += len;
 	}
@@ -1066,11 +1005,9 @@ static rec_t* rec_convert_dtuple_to_rec_new(byte* buf, const dict_index_t* index
 				    &extra_size);
 	rec = buf + extra_size;
 
-	rec_convert_dtuple_to_rec_comp(
-		rec, REC_N_NEW_EXTRA_BYTES, index, status,
-		dtuple->fields, dtuple->n_fields);
+rec_convert_dtuple_to_rec_comp(rec, REC_N_NEW_EXTRA_BYTES, index, status, dtuple->fields, dtuple->n_fields);
 
-	/* Set the info bits of the record */
+	// Set the info bits of the record
 	rec_set_info_and_status_bits(rec, dtuple_get_info_bits(dtuple));
 
 	return rec;
@@ -1119,7 +1056,7 @@ IB_INTERN rec_t* rec_convert_dtuple_to_rec(byte* buf, const dict_index_t* index,
 			mem_heap_free(heap);
 		}
 	}
-#endif /* IB_DEBUG */
+#endif // IB_DEBUG
 	return rec;
 }
 
@@ -1216,10 +1153,7 @@ IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* in
 
 	if (!dict_table_is_comp(index->table)) {
 		ut_ad(rec_validate_old(rec));
-		return(rec_copy_prefix_to_buf_old(
-			       rec, n_fields,
-			       rec_get_field_start_offs(rec, n_fields),
-			       buf, buf_size));
+		return rec_copy_prefix_to_buf_old(rec, n_fields, rec_get_field_start_offs(rec, n_fields), buf, buf_size);
 	}
 
 	status = rec_get_status(rec);
@@ -1229,15 +1163,15 @@ IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* in
 		ut_ad(n_fields <= dict_index_get_n_fields(index));
 		break;
 	case REC_STATUS_NODE_PTR:
-		/* it doesn't make sense to copy the child page number field */
+		// it doesn't make sense to copy the child page number field
 		ut_ad(n_fields <= dict_index_get_n_unique_in_tree(index));
 		break;
 	case REC_STATUS_INFIMUM:
 	case REC_STATUS_SUPREMUM:
-		/* infimum or supremum record: no sense to copy anything */
+		// infimum or supremum record: no sense to copy anything
 	default:
 		UT_ERROR;
-		return(NULL);
+        return NULL;
 	}
 
 	nulls = rec - (REC_N_NEW_EXTRA_BYTES + 1);
@@ -1246,7 +1180,7 @@ IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* in
 	prefix_len = 0;
 	null_mask = 1;
 
-	/* read the lengths of fields 0..n */
+	// read the lengths of fields 0..n
 	for (i = 0; i < n_fields; i++) {
 		const dict_field_t*	field;
 		const dict_col_t*	col;
@@ -1255,7 +1189,7 @@ IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* in
 		col = dict_field_get_col(field);
 
 		if (!(col->prtype & DATA_NOT_NULL)) {
-			/* nullable field => read the null flag */
+			// nullable field => read the null flag
 			if (IB_UNLIKELY(!(byte) null_mask)) {
 				nulls--;
 				null_mask = 1;
@@ -1282,7 +1216,7 @@ IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* in
 			more, or when the column is stored externally. */
 			if (col->len > 255 || col->mtype == DATA_BLOB) {
 				if (len & 0x80) {
-					/* 1exxxxxx */
+					// 1exxxxxx
 					len &= 0x3f;
 					len <<= 8;
 					len |= *lens--;
@@ -1328,7 +1262,7 @@ static ibool rec_validate_old(const rec_t* rec)
 	if ((n_fields == 0) || (n_fields > REC_MAX_N_FIELDS)) {
 		ib_log(state, "InnoDB: Error: record has %lu fields\n",
 			(ulong) n_fields);
-		return(FALSE);
+		return FALSE;
 	}
 
 	for (i = 0; i < n_fields; i++) {
@@ -1339,7 +1273,7 @@ static ibool rec_validate_old(const rec_t* rec)
 				"InnoDB: Error: record field %lu len %lu\n",
 				(ulong) i,
 				(ulong) len);
-			return(FALSE);
+			return FALSE;
 		}
 
 		if (len != IB_SQL_NULL) {
@@ -1358,10 +1292,10 @@ static ibool rec_validate_old(const rec_t* rec)
 			"InnoDB: Error: record len should be %lu, len %lu\n",
 			(ulong) len_sum,
 			rec_get_data_size_old(rec));
-		return(FALSE);
+		return FALSE;
 	}
 
-	return(TRUE);
+    return TRUE;
 }
 
 /// \brief Validates the consistency of a physical record.
@@ -1383,7 +1317,7 @@ IB_INTERN ibool rec_validate(const rec_t* rec, const ulint* offsets)
 	if ((n_fields == 0) || (n_fields > REC_MAX_N_FIELDS)) {
 		ib_log(state, "InnoDB: Error: record has %lu fields\n",
 			(ulong) n_fields);
-		return(FALSE);
+		return FALSE;
 	}
 
 	ut_a(rec_offs_comp(offsets) || n_fields <= rec_get_n_fields_old(rec));
@@ -1396,7 +1330,7 @@ IB_INTERN ibool rec_validate(const rec_t* rec, const ulint* offsets)
 				"InnoDB: Error: record field %lu len %lu\n",
 				(ulong) i,
 				(ulong) len);
-			return(FALSE);
+			return FALSE;
 		}
 
 		if (len != IB_SQL_NULL) {
@@ -1415,14 +1349,14 @@ IB_INTERN ibool rec_validate(const rec_t* rec, const ulint* offsets)
 			"InnoDB: Error: record len should be %lu, len %lu\n",
 			(ulong) len_sum,
 			(ulong) rec_offs_data_size(offsets));
-		return(FALSE);
+		return FALSE;
 	}
 
 	if (!rec_offs_comp(offsets)) {
 		ut_a(rec_validate_old(rec));
 	}
 
-	return(TRUE);
+    return TRUE;
 }
 
 /// \brief Prints an old-style physical record.
@@ -1552,4 +1486,4 @@ IB_INTERN void rec_print(ib_stream_t state->stream, const rec_t* rec, dict_index
 		}
 	}
 }
-#endif /* !IB_HOTBACKUP */
+#endif // !IB_HOTBACKUP

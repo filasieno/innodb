@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+/// \file page_cur.hpp
+/// \brief The page cursor
+/// \details Originally created on 10/4/1994 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/********************************************************************//**
-@file include/page0cur.h
-The page cursor
-
-Created 10/4/1994 Heikki Tuuri
-*************************************************************************/
-
-#ifndef page0cur_h
-#define page0cur_h
+#pragma once
 
 #include "univ.i"
 
@@ -35,15 +29,15 @@ Created 10/4/1994 Heikki Tuuri
 #include "mtr_mtr.hpp"
 
 
-#define PAGE_CUR_ADAPT
+constinit ulint PAGE_CUR_ADAPT = 0;
 
 /* Page cursor search modes; the values must be in this order! */
 
-#define	PAGE_CUR_UNSUPP	0
-#define	PAGE_CUR_G	1
-#define	PAGE_CUR_GE	2
-#define	PAGE_CUR_L	3
-#define	PAGE_CUR_LE	4
+constinit ulint PAGE_CUR_UNSUPP = 0;
+constinit ulint PAGE_CUR_G = 1;
+constinit ulint PAGE_CUR_GE = 2;
+constinit ulint PAGE_CUR_L = 3;
+constinit ulint PAGE_CUR_LE = 4;
 /*#define PAGE_CUR_LE_OR_EXTENDS 5*/ /* This is a search mode used in
 				 "column LIKE 'abc%' ORDER BY column DESC";
 				 we have to find strings which are <= 'abc' or

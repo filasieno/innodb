@@ -1,26 +1,15 @@
-/*****************************************************************************
-Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
-Copyright (c) 2008, Google Inc.
-Portions of this file contain modifications contributed and copyrighted by
-Google, Inc. Those modifications are gratefully acknowledged and are described
-briefly in the InnoDB documentation. The contributions by Google are
-incorporated with their permission, and subject to the conditions contained in
-the file COPYING.Google.
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-*****************************************************************************/
-/**************************************************//**
-@file sync/sync0sync.c
-Mutex, the basic synchronization primitive
-Created 9/5/1995 Heikki Tuuri
-*******************************************************/
+// Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2008, Google Inc.
+// Portions of this file contain modifications contributed and copyrighted by Google, Inc. Those modifications are gratefully acknowledged and are described briefly in the InnoDB documentation. The contributions by Google are incorporated with their permission, and subject to the conditions contained in the file COPYING.Google.
+// This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+/// \file sync_sync.cpp
+/// \brief Mutex, the basic synchronization primitive
+/// \details Originally created by Heikki Tuuri in 9/5/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 #include "sync_sync.hpp"
 #ifdef IB_DO_NOT_INLINE
 #include "sync0sync.inl"
@@ -172,7 +161,7 @@ struct sync_thread_struct{
 	sync_level_t* levels;	/*!< level array for this thread; if this is NULL this slot is unused */
 };
 /** Number of slots reserved for each OS thread in the sync level array */
-#define SYNC_THREAD_N_LEVELS 10000
+constinit ulint SYNC_THREAD_N_LEVELS = 10000;
 /** An acquired mutex or rw-lock and its level in the latching order */
 struct sync_level_struct{
 	void*	latch;	/*!< pointer to a mutex or an rw-lock; NULL means that the slot is empty */
@@ -197,21 +186,21 @@ IB_INTERN void sync_var_init(void)
 	sync_order_checks_on    = FALSE;
 #endif /* IB_SYNC_DEBUG */
 }
-/**********************************************************************
-Creates, or rather, initializes a mutex object in a specified memory
-location (which must be appropriately aligned). The mutex is initialized
-in the reset state. Explicit freeing of the mutex with mutex_free is
-necessary only if the memory block containing it is freed. */
-IB_INTERN void mutex_create_func(
-	mutex_t*	mutex,		/*!< in: pointer to memory */
+/// \brief Creates, or rather, initializes a mutex object in a specified memory location (which must be appropriately aligned).
+/// \param mutex pointer to memory
+/// \param cmutex_name mutex name (debug builds only)
+/// \param level level (debug builds only)
+/// \param cfile_name file name where created
+/// \param cline file line where created
+/// \details The mutex is initialized in the reset state. Explicit freeing of the mutex with mutex_free is necessary only if the memory block containing it is freed.
+IB_INTERN void mutex_create_func(mutex_t* mutex,
 #ifdef IB_DEBUG
-	const char*	cmutex_name,	/*!< in: mutex name */
+                                 const char* cmutex_name,
 # ifdef IB_SYNC_DEBUG
-	ulint		level,		/*!< in: level */
+                                 ulint level,
 # endif /* IB_SYNC_DEBUG */
 #endif /* IB_DEBUG */
-	const char*	cfile_name,	/*!< in: file name where created */
-	ulint		cline)		/*!< in: file line where created */
+                                 const char* cfile_name, ulint cline)
 {
 #if defined(IB_HAVE_ATOMIC_BUILTINS)
 	mutex_reset_lock_word(mutex);

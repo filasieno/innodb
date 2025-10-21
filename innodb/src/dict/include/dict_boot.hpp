@@ -129,15 +129,12 @@ IB_INTERN void dict_create(void);
 /* The following is a secondary index on SYS_TABLES */
 #define DICT_TABLE_IDS_ID	ut_dulint_create(0, 5)
 
-constinit ulint DICT_HDR_FIRST_ID = 10;	/* the ids for tables etc. start
-					from this number, except for basic
-					system tables and their above defined
-					indexes; ibuf tables and indexes are
-					assigned as the id the number
-					DICT_IBUF_ID_MIN plus the space id */
+/// \brief The ids for tables etc. start from this number, except for basic system tables and their above defined indexes; ibuf tables and indexes are assigned as the id the number DICT_IBUF_ID_MIN plus the space id
+constinit ulint DICT_HDR_FIRST_ID = 10;	
+
 #define DICT_IBUF_ID_MIN	ut_dulint_create(0xFFFFFFFFUL, 0)
 
-/* The offset of the dictionary header on the page */
+// The offset of the dictionary header on the page 
 #define	DICT_HDR		FSEG_PAGE_DATA
 
 #ifndef IB_DO_NOT_INLINE

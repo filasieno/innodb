@@ -1,40 +1,37 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2025, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2008, Google Inc.
+// Copyright (c) 2009, Percona Inc.
+//
+// Portions of this file contain modifications contributed and copyrighted by
+// Google, Inc. Those modifications are gratefully acknowledged and are described
+// briefly in the InnoDB documentation. The contributions by Google are
+// incorporated with their permission, and subject to the conditions contained in
+// the file COPYING.Google.
+//
+// Portions of this file contain modifications contributed and copyrighted
+// by Percona Inc.. Those modifications are
+// gratefully acknowledged and are described briefly in the InnoDB
+// documentation. The contributions by Percona Inc. are incorporated with
+// their permission, and subject to the conditions contained in the file
+// COPYING.Percona.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2025, Innobase Oy. All Rights Reserved.
-Copyright (c) 2008, Google Inc.
-Copyright (c) 2009, Percona Inc.
-
-Portions of this file contain modifications contributed and copyrighted by
-Google, Inc. Those modifications are gratefully acknowledged and are described
-briefly in the InnoDB documentation. The contributions by Google are
-incorporated with their permission, and subject to the conditions contained in
-the file COPYING.Google.
-
-Portions of this file contain modifications contributed and copyrighted
-by Percona Inc.. Those modifications are
-gratefully acknowledged and are described briefly in the InnoDB
-documentation. The contributions by Percona Inc. are incorporated with
-their permission, and subject to the conditions contained in the file
-COPYING.Percona.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/// @file srv_start.cpp
+/// \file srv_start.cpp
 /// \brief Starts the InnoDB database server
-///
-/// Created 2/16/1996 Heikki Tuuri
+/// \details Originally created by Heikki Tuuri in 2/16/1996
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "ut_mem.hpp"
 #include "mem_mem.hpp"
@@ -162,22 +159,20 @@ os_thread_event_wait().
 @return TRUE if all threads exited. */
 static ibool srv_threads_shutdown(void);
 
-#define SRV_N_PENDING_IOS_PER_THREAD OS_AIO_N_PENDING_IOS_PER_THREAD
-#define SRV_MAX_N_PENDING_SYNC_IOS  100
+constinit ulint SRV_N_PENDING_IOS_PER_THREAD = OS_AIO_N_PENDING_IOS_PER_THREAD;
+constinit ulint SRV_MAX_N_PENDING_SYNC_IOS = 100;
 
-/**
-Convert a numeric string that optionally ends in G or M, to a number
-containing megabytes.
-@return next character in string */
-static char* srv_parse_megabytes(
-	char* str, /*!< in: string containing a quantity in bytes */
-	ulint* megs) /*!< out: the number in megabytes */
+/// \brief Convert a numeric string that optionally ends in G or M, to a number containing megabytes.
+/// \param [in] str string containing a quantity in bytes
+/// \param [out] megs the number in megabytes
+/// \return next character in string
+static char* srv_parse_megabytes(char* str, ulint* megs)
 {
-    ulint size = strtoul(str, &endp, 10);
+	ulint size = strtoul(str, &endp, 10);
 	char* str = endp;
 	switch (*str) {
 	case 'G': case 'g':
-		size *= 1024; 
+		size *= 1024;
 		// fall through
 	case 'M': case 'm':
 		str++;
@@ -191,11 +186,9 @@ static char* srv_parse_megabytes(
 	return str;
 }
 
-/**
-Adds a slash or a backslash to the end of a string if it is missing
-and the string is not empty.
-@return string which has the separator if the string is not empty */
-/*!< in: null-terminated character string */
+/// \brief Adds a slash or a backslash to the end of a string if it is missing and the string is not empty.
+/// \param [in] str null-terminated character string
+/// \return string which has the separator if the string is not empty
 static char* srv_add_path_separator_if_needed(char* str)
 {
 	char* out_str;
@@ -209,13 +202,12 @@ static char* srv_add_path_separator_if_needed(char* str)
 		out_str[len + 1] = 0;
 	}
 
-	return(out_str);
+	return out_str;
 }
 
-/**
-Reads the data files and their sizes from a character string.
-@return TRUE if ok, FALSE on parse error */
-/*!< in/out: the data file path string */
+/// \brief Reads the data files and their sizes from a character string.
+/// \param [in,out] usr_str the data file path string
+/// \return TRUE if ok, FALSE on parse error
 IB_INTERN ibool srv_parse_data_file_paths_and_sizes(const char* usr_str)
 {
 	char* str;
@@ -354,10 +346,10 @@ IB_INTERN ibool srv_parse_data_file_paths_and_sizes(const char* usr_str)
 	return(TRUE);
 }
 
-/*********************************************************************//**
-Reads log group home directories from a character string.
-@return TRUE if ok, FALSE on parse error */
-IB_INTERN ibool srv_parse_log_group_home_dirs(const char* usr_str)/*!< in: character string */
+/// \brief Reads log group home directories from a character string.
+/// \param [in] usr_str character string
+/// \return TRUE if ok, FALSE on parse error
+IB_INTERN ibool srv_parse_log_group_home_dirs(const char* usr_str)
 {
 ulint i;
 char* str;
@@ -425,9 +417,7 @@ char* input_str;
 	return(TRUE);
 }
 
-/**
-Frees the memory allocated by srv_parse_data_file_paths_and_sizes()
-and srv_parse_log_group_home_dirs(). */
+/// \brief Frees the memory allocated by srv_parse_data_file_paths_and_sizes() and srv_parse_log_group_home_dirs().
 IB_INTERN void srv_free_paths_and_sizes()
 {
 	if (srv_data_file_names != NULL) {
@@ -918,13 +908,11 @@ IB_INTERN ib_err_t innobase_start_or_create(void)
 	file_per_table) until this function has returned. */
 	srv_file_per_table = FALSE;
 #ifdef IB_DEBUG
-	ib_log(state,
-		"InnoDB: !!!!!!!! IB_DEBUG switched on !!!!!!!!!\n");
+	ib_log(state, "InnoDB: !!!!!!!! IB_DEBUG switched on !!!!!!!!!\n");
 #endif
 
 #ifdef IB_IBUF_DEBUG
-	ib_log(state,
-		"InnoDB: !!!!!!!! IB_IBUF_DEBUG switched on !!!!!!!!!\n"
+	ib_log(state, "InnoDB: !!!!!!!! IB_IBUF_DEBUG switched on !!!!!!!!!\n"
 # ifdef IB_IBUF_COUNT_DEBUG
 		"InnoDB: !!!!!!!! IB_IBUF_COUNT_DEBUG switched on !!!!!!!!!\n"
 		"InnoDB: Crash recovery will fail with IB_IBUF_COUNT_DEBUG\n"
@@ -933,31 +921,25 @@ IB_INTERN ib_err_t innobase_start_or_create(void)
 #endif
 
 #ifdef IB_SYNC_DEBUG
-	ib_log(state,
-		"InnoDB: !!!!!!!! IB_SYNC_DEBUG switched on !!!!!!!!!\n");
+	ib_log(state, "InnoDB: !!!!!!!! IB_SYNC_DEBUG switched on !!!!!!!!!\n");
 #endif
 
 #ifdef IB_SEARCH_DEBUG
-	ib_log(state,
-		"InnoDB: !!!!!!!! IB_SEARCH_DEBUG switched on !!!!!!!!!\n");
+	ib_log(state, "InnoDB: !!!!!!!! IB_SEARCH_DEBUG switched on !!!!!!!!!\n");
 #endif
 
 #ifdef IB_LOG_LSN_DEBUG
-	ib_log(state,
-		"InnoDB: !!!!!!!! IB_LOG_LSN_DEBUG switched on !!!!!!!!!\n");
+	ib_log(state, "InnoDB: !!!!!!!! IB_LOG_LSN_DEBUG switched on !!!!!!!!!\n");
 #endif /* IB_LOG_LSN_DEBUG */
 #ifdef IB_MEM_DEBUG
-	ib_log(state,
-		"InnoDB: !!!!!!!! IB_MEM_DEBUG switched on !!!!!!!!!\n");
+	ib_log(state, "InnoDB: !!!!!!!! IB_MEM_DEBUG switched on !!!!!!!!!\n");
 #endif
 
 	if (IB_LIKELY(srv_use_sys_malloc)) {
-		ib_log(state,
-			"InnoDB: The InnoDB memory heap is disabled\n");
+		ib_log(state, "InnoDB: The InnoDB memory heap is disabled\n");
 	}
 
-	ib_log(state,
-		  "InnoDB: " IB_ATOMICS_STARTUP_MSG
+	ib_log(state, "InnoDB: " IB_ATOMICS_STARTUP_MSG
 #ifdef IB_HAVE_ZIP
 		  "\nInnoDB: Compressed tables use zlib " ZLIB_VERSION
 # ifdef IB_ZIP_DEBUG
@@ -974,10 +956,8 @@ IB_INTERN ib_err_t innobase_start_or_create(void)
 	second time while it's already in state running. */
 	if (srv_was_started && srv_start_has_been_called) {
 		ib_log(state,
-			"InnoDB: Error: startup called second time"
-			" during the process lifetime.\n"
-			"InnoDB: more than once during"
-			" the process lifetime.\n");
+			"InnoDB: Error: startup called second time during the process lifetime.\n"
+			"InnoDB: more than once during the process lifetime.\n");
 	}
 
 	srv_start_has_been_called = TRUE;

@@ -1,34 +1,15 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2009, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2008, Google Inc.
+// Portions of this file contain modifications contributed and copyrighted by Google, Inc. Those modifications are gratefully acknowledged and are described briefly in the InnoDB documentation. The contributions by Google are incorporated with their permission, and subject to the conditions contained in the file COPYING.Google.
+// This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2009, Innobase Oy. All Rights Reserved.
-Copyright (c) 2008, Google Inc.
-
-Portions of this file contain modifications contributed and copyrighted by
-Google, Inc. Those modifications are gratefully acknowledged and are described
-briefly in the InnoDB documentation. The contributions by Google are
-incorporated with their permission, and subject to the conditions contained in
-the file COPYING.Google.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file sync/sync0rw.c
-The read-write lock (for thread synchronization)
-
-Created 9/11/1995 Heikki Tuuri
-*******************************************************/
+/// \file sync_rw.cpp
+/// \brief The read-write lock (for thread synchronization)
+/// \details Originally created by Heikki Tuuri in 9/11/1995
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "sync_rw.hpp"
 #ifdef IB_DO_NOT_INLINE
@@ -131,8 +112,11 @@ wait_ex_event:	A thread may only wait on the wait_ex_event after it has
 		These restrictions force the above ordering.
 		Immediately before sending the wake-up signal, we should:
 		   Verify lock_word == 0 (waiting thread holds x_lock)
-*/
+}
 
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
 
 /** number of spin waits on rw-latches,
 resulted during shared (read) locks */
@@ -180,49 +164,24 @@ IB_INTERN os_event_t		rw_lock_debug_event;
 /* This is set to TRUE, if there may be waiters for the event */
 IB_INTERN ibool		rw_lock_debug_waiters;
 
-/******************************************************************//**
-Creates a debug info struct. */
-static
-rw_lock_debug_t*
-rw_lock_debug_create(void);
-/*======================*/
-/******************************************************************//**
-Frees a debug info struct. */
-static
-void
-rw_lock_debug_free(
-/*===============*/
-	rw_lock_debug_t* info);
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
 
-/******************************************************************//**
-Creates a debug info struct.
-@return	own: debug info struct */
-static
-rw_lock_debug_t*
-rw_lock_debug_create(void)
-/*======================*/
-{
-	return((rw_lock_debug_t*) mem_alloc(sizeof(rw_lock_debug_t)));
-}
+/// \brief Creates a debug info struct.
+/// \return own: debug info struct
+static rw_lock_debug_t* rw_lock_debug_create(void);
+/// \brief Frees a debug info struct.
+/// \param info debug info struct
+static void rw_lock_debug_free(rw_lock_debug_t* info);
 
-/******************************************************************//**
-Frees a debug info struct. */
-static
-void
-rw_lock_debug_free(
-/*===============*/
-	rw_lock_debug_t* info)
-{
-	mem_free(info);
-}
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 #endif /* IB_SYNC_DEBUG */
 
-/******************************************************************//**
-Reset the variables. */
-IB_INTERN
-void
-rw_lock_var_init(void)
-/*==================*/
+/// \brief Reset the variables.
+IB_INTERN void rw_lock_var_init(void)
 {
 	rw_s_spin_wait_count	= 0;
 	rw_s_os_wait_count	= 0;
@@ -241,24 +200,21 @@ rw_lock_var_init(void)
 #endif
 }
 
-/**********************************************************************
-Creates, or rather, initializes an rw-lock object in a specified memory
-location (which must be appropriately aligned). The rw-lock is initialized
-to the non-locked state. Explicit freeing of the rw-lock with rw_lock_free
-is necessary only if the memory block containing it is freed. */
-IB_INTERN
-void
-rw_lock_create_func(
-/*================*/
-	rw_lock_t*	lock,		/*!< in: pointer to memory */
+/// \brief Creates, or rather, initializes an rw-lock object in a specified memory location (which must be appropriately aligned).
+/// \param lock pointer to memory
+/// \param level level (debug builds only)
+/// \param cmutex_name mutex name (debug builds only)
+/// \param cfile_name file name where created
+/// \param cline file line where created
+/// \details The rw-lock is initialized to the non-locked state. Explicit freeing of the rw-lock with rw_lock_free is necessary only if the memory block containing it is freed.
+IB_INTERN void rw_lock_create_func(rw_lock_t* lock,
 #ifdef IB_DEBUG
 # ifdef IB_SYNC_DEBUG
-	ulint		level,		/*!< in: level */
+                                   ulint level,
 # endif /* IB_SYNC_DEBUG */
-	const char*	cmutex_name, 	/*!< in: mutex name */
+                                   const char* cmutex_name,
 #endif /* IB_DEBUG */
-	const char*	cfile_name,	/*!< in: file name where created */
-	ulint		cline)		/*!< in: file line where created */
+                                   const char* cfile_name, ulint cline)
 {
 	/* If this is the very first time a synchronization object is
 	created, then the following call initializes the sync system. */
@@ -316,15 +272,10 @@ rw_lock_create_func(
 	mutex_exit(&rw_lock_list_mutex);
 }
 
-/******************************************************************//**
-Calling this function is obligatory only if the memory buffer containing
-the rw-lock is freed. Removes an rw-lock object from the global list. The
-rw-lock is checked to be in the non-locked state. */
-IB_INTERN
-void
-rw_lock_free(
-/*=========*/
-	rw_lock_t*	lock)	/*!< in: rw-lock */
+/// \brief Calling this function is obligatory only if the memory buffer containing the rw-lock is freed.
+/// \param lock rw-lock
+/// \details Removes an rw-lock object from the global list. The rw-lock is checked to be in the non-locked state.
+IB_INTERN void rw_lock_free(rw_lock_t* lock)
 {
 	ut_ad(rw_lock_validate(lock));
 	ut_a(lock->lock_word == X_LOCK_DECR);
@@ -353,15 +304,10 @@ rw_lock_free(
 }
 
 #ifdef IB_DEBUG
-/******************************************************************//**
-Checks that the rw-lock has been initialized and that there are no
-simultaneous shared and exclusive locks.
-@return	TRUE */
-IB_INTERN
-ibool
-rw_lock_validate(
-/*=============*/
-	rw_lock_t*	lock)	/*!< in: rw-lock */
+/// \brief Checks that the rw-lock has been initialized and that there are no simultaneous shared and exclusive locks.
+/// \param lock rw-lock
+/// \return TRUE
+IB_INTERN ibool rw_lock_validate(rw_lock_t* lock)
 {
 	ut_a(lock);
 
@@ -376,132 +322,81 @@ rw_lock_validate(
 }
 #endif /* IB_DEBUG */
 
-/******************************************************************//**
-Lock an rw-lock in shared mode for the current thread. If the rw-lock is
-locked in exclusive mode, or there is an exclusive lock request waiting,
-the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting
-for the lock, before suspending the thread. */
-IB_INTERN
-void
-rw_lock_s_lock_spin(
-/*================*/
-	rw_lock_t*	lock,	/*!< in: pointer to rw-lock */
-	ulint		pass,	/*!< in: pass value; != 0, if the lock
-				will be passed to another thread to unlock */
-	const char*	file_name, /*!< in: file name where lock requested */
-	ulint		line)	/*!< in: line where requested */
+/// \brief Lock an rw-lock in shared mode for the current thread.
+/// \param lock pointer to rw-lock
+/// \param pass pass value; != 0, if the lock will be passed to another thread to unlock
+/// \param file_name file name where lock requested
+/// \param line line where requested
+/// \details If the rw-lock is locked in exclusive mode, or there is an exclusive lock request waiting, the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting for the lock, before suspending the thread.
+IB_INTERN void rw_lock_s_lock_spin(rw_lock_t* lock, ulint pass, const char* file_name, ulint line)
 {
-	ulint	 index;	/* index of the reserved wait cell */
-	ulint	 i = 0;	/* spin round count */
-
-	ut_ad(rw_lock_validate(lock));
-
-	rw_s_spin_wait_count++;	/*!< Count calls to this function */
+    ulint i = 0; // spin round count
+    ut_ad(rw_lock_validate(lock));
+    rw_s_spin_wait_count++; // Count calls to this function
 lock_loop:
+    // Spin waiting for the writer field to become free
+    while (i < state->srv.n_spin_wait_rounds && lock->lock_word <= 0) {
+        if (srv_spin_wait_delay) {
+            ut_delay(ut_rnd_interval(0, srv_spin_wait_delay));
+        }
+        i++;
+    }
+    if (i == state->srv.n_spin_wait_rounds) {
+        os_thread_yield();
+    }
 
-	/* Spin waiting for the writer field to become free */
-	while (i < state->srv.n_spin_wait_rounds && lock->lock_word <= 0) {
-		if (srv_spin_wait_delay) {
-			ut_delay(ut_rnd_interval(0, srv_spin_wait_delay));
-		}
-
-		i++;
-	}
-
-	if (i == state->srv.n_spin_wait_rounds) {
-		os_thread_yield();
-	}
-
-	if (srv_print_latch_waits) {
-		ib_log(state,
-			"Thread %lu spin wait rw-s-lock at %p"
-			" cfile %s cline %lu rnds %lu\n",
-			(ulong) os_thread_pf(os_thread_get_curr_id()),
-			(void*) lock,
-			lock->cfile_name, (ulong) lock->cline, (ulong) i);
-	}
-
-	/* We try once again to obtain the lock */
-	if (TRUE == rw_lock_s_lock_low(lock, pass, file_name, line)) {
-		rw_s_spin_round_count += i;
-
-		return; /* Success */
-	} else {
-
-		if (i < state->srv.n_spin_wait_rounds) {
-			goto lock_loop;
-		}
-
-		rw_s_spin_round_count += i;
-
-		sync_array_reserve_cell(sync_primary_wait_array,
-					lock, RW_LOCK_SHARED,
-					file_name, line,
-					&index);
-
-		/* Set waiters before checking lock_word to ensure wake-up
-                signal is sent. This may lead to some unnecessary signals. */
-		rw_lock_set_waiter_flag(lock);
-
-		if (TRUE == rw_lock_s_lock_low(lock, pass, file_name, line)) {
-			sync_array_free_cell(sync_primary_wait_array, index);
-			return; /* Success */
-		}
-
-		if (srv_print_latch_waits) {
-			ib_log(state,
-				"Thread %lu OS wait rw-s-lock at %p"
-				" cfile %s cline %lu\n",
-				os_thread_pf(os_thread_get_curr_id()),
-				(void*) lock, lock->cfile_name,
-				(ulong) lock->cline);
-		}
-
-		/* these stats may not be accurate */
-		lock->count_os_wait++;
-		rw_s_os_wait_count++;
-
-		sync_array_wait_event(sync_primary_wait_array, index);
-
-		i = 0;
-		goto lock_loop;
-	}
+    if (srv_print_latch_waits) {
+        ib_log(state, "Thread %lu spin wait rw-s-lock at %p cfile %s cline %lu rnds %lu\n", (ulong) os_thread_pf(os_thread_get_curr_id()), (void*) lock, lock->cfile_name, (ulong) lock->cline, (ulong) i);
+    }
+    // We try once again to obtain the lock
+    if (TRUE == rw_lock_s_lock_low(lock, pass, file_name, line)) {
+        rw_s_spin_round_count += i;
+        return; // Success
+    } else {
+        if (i < state->srv.n_spin_wait_rounds) {
+            goto lock_loop;
+        }
+        rw_s_spin_round_count += i;
+        ulint index; // index of the reserved wait cell
+        sync_array_reserve_cell(sync_primary_wait_array, lock, RW_LOCK_SHARED, file_name, line, &index);
+        // Set waiters before checking lock_word to ensure wake-up signal is sent. This may lead to some unnecessary signals.
+        rw_lock_set_waiter_flag(lock);
+        if (TRUE == rw_lock_s_lock_low(lock, pass, file_name, line)) {
+            sync_array_free_cell(sync_primary_wait_array, index);
+            return; // Success
+        }
+        if (srv_print_latch_waits) {
+            ib_log(state, "Thread %lu OS wait rw-s-lock at %p cfile %s cline %lu\n", os_thread_pf(os_thread_get_curr_id()), (void*) lock, lock->cfile_name, (ulong) lock->cline);
+        }
+        // these stats may not be accurate
+        lock->count_os_wait++;
+        rw_s_os_wait_count++;
+        sync_array_wait_event(sync_primary_wait_array, index);
+        i = 0;
+        goto lock_loop;
+    }
 }
 
-/******************************************************************//**
-This function is used in the insert buffer to move the ownership of an
-x-latch on a buffer frame to the current thread. The x-latch was set by
-the buffer read operation and it protected the buffer frame while the
-read was done. The ownership is moved because we want that the current
-thread is able to acquire a second x-latch which is stored in an mtr.
-This, in turn, is needed to pass the debug checks of index page
-operations. */
-IB_INTERN
-void
-rw_lock_x_lock_move_ownership(
-/*==========================*/
-	rw_lock_t*	lock)	/*!< in: lock which was x-locked in the
-				buffer read */
+/// \brief This function is used in the insert buffer to move the ownership of an x-latch on a buffer frame to the current thread.
+/// \param lock lock which was x-locked in the buffer read
+/// \details The x-latch was set by the buffer read operation and it protected the buffer frame while the read was done. The ownership is moved because we want that the current thread is able to acquire a second x-latch which is stored in an mtr. This, in turn, is needed to pass the debug checks of index page operations.
+IB_INTERN void rw_lock_x_lock_move_ownership(rw_lock_t* lock)
 {
-	ut_ad(rw_lock_is_locked(lock, RW_LOCK_EX));
-
-	rw_lock_set_writer_id_and_recursion_flag(lock, TRUE);
+    ut_ad(rw_lock_is_locked(lock, RW_LOCK_EX));
+    rw_lock_set_writer_id_and_recursion_flag(lock, TRUE);
 }
 
-/******************************************************************//**
-Function for the next writer to call. Waits for readers to exit.
-The caller must have already decremented lock_word by X_LOCK_DECR. */
-IB_INLINE
-void
-rw_lock_x_lock_wait(
-/*================*/
-	rw_lock_t*	lock,	/*!< in: pointer to rw-lock */
+/// \brief Function for the next writer to call. Waits for readers to exit.
+/// \param [in] lock pointer to rw-lock
+/// \param [in] pass pass value; != 0, if the lock will be passed to another thread to unlock
+/// \param [in] file_name file name where lock requested
+/// \param [in] line line where requested
+/// \details The caller must have already decremented lock_word by X_LOCK_DECR.
+IB_INLINE void rw_lock_x_lock_wait(rw_lock_t* lock,
 #ifdef IB_SYNC_DEBUG
-	ulint		pass,	/*!< in: pass value; != 0, if the lock will
-				be passed to another thread to unlock */
+                                   ulint pass,
 #endif
-	const char*	file_name,/*!< in: file name where lock requested */
-	ulint		line)	/*!< in: line where requested */
+                                   const char* file_name, ulint line)
 {
 	ulint index;
 	ulint i = 0;
@@ -556,18 +451,13 @@ rw_lock_x_lock_wait(
 	rw_x_spin_round_count += i;
 }
 
-/******************************************************************//**
-Low-level function for acquiring an exclusive lock.
-@return	RW_LOCK_NOT_LOCKED if did not succeed, RW_LOCK_EX if success. */
-IB_INLINE
-ibool
-rw_lock_x_lock_low(
-/*===============*/
-	rw_lock_t*	lock,	/*!< in: pointer to rw-lock */
-	ulint		pass,	/*!< in: pass value; != 0, if the lock will
-				be passed to another thread to unlock */
-	const char*	file_name,/*!< in: file name where lock requested */
-	ulint		line)	/*!< in: line where requested */
+/// \brief Low-level function for acquiring an exclusive lock.
+/// \param [in] lock pointer to rw-lock
+/// \param [in] pass pass value; != 0, if the lock will be passed to another thread to unlock
+/// \param [in] file_name file name where lock requested
+/// \param [in] line line where requested
+/// \return RW_LOCK_NOT_LOCKED if did not succeed, RW_LOCK_EX if success.
+IB_INLINE ibool rw_lock_x_lock_low(rw_lock_t* lock, ulint pass, const char* file_name, ulint line)
 {
 	os_thread_id_t	curr_thread	= os_thread_get_curr_id();
 
@@ -610,55 +500,33 @@ rw_lock_x_lock_low(
 	return(TRUE);
 }
 
-/******************************************************************//**
-NOTE! Use the corresponding macro, not directly this function! Lock an
-rw-lock in exclusive mode for the current thread. If the rw-lock is locked
-in shared or exclusive mode, or there is an exclusive lock request waiting,
-the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting
-for the lock before suspending the thread. If the same thread has an x-lock
-on the rw-lock, locking succeed, with the following exception: if pass != 0,
-only a single x-lock may be taken on the lock. NOTE: If the same thread has
-an s-lock, locking does not succeed! */
-IB_INTERN
-void
-rw_lock_x_lock_func(
-/*================*/
-	rw_lock_t*	lock,	/*!< in: pointer to rw-lock */
-	ulint		pass,	/*!< in: pass value; != 0, if the lock will
-				be passed to another thread to unlock */
-	const char*	file_name,/*!< in: file name where lock requested */
-	ulint		line)	/*!< in: line where requested */
+/// \brief Lock an rw-lock in exclusive mode for the current thread.
+/// \param [in] lock pointer to rw-lock
+/// \param [in] pass pass value; != 0, if the lock will be passed to another thread to unlock
+/// \param [in] file_name file name where lock requested
+/// \param [in] line line where requested
+/// \details NOTE! Use the corresponding macro, not directly this function! If the rw-lock is locked in shared or exclusive mode, or there is an exclusive lock request waiting, the function spins a preset time (controlled by state->srv.n_spin_wait_rounds), waiting for the lock before suspending the thread. If the same thread has an x-lock on the rw-lock, locking succeed, with the following exception: if pass != 0, only a single x-lock may be taken on the lock. NOTE: If the same thread has an s-lock, locking does not succeed!
+IB_INTERN void rw_lock_x_lock_func(rw_lock_t* lock, ulint pass, const char* file_name, ulint line)
 {
-	ulint	index;	/*!< index of the reserved wait cell */
-	ulint	i;	/*!< spin round count */
-	ibool   spinning = FALSE;
-
+	ulint index;
+	ibool spinning = FALSE;
 	ut_ad(rw_lock_validate(lock));
-
-	i = 0;
-
+	ulint i = 0;
 lock_loop:
-
 	if (rw_lock_x_lock_low(lock, pass, file_name, line)) {
 		rw_x_spin_round_count += i;
-
 		return;	/* Locking succeeded */
-
 	} else {
-
                 if (!spinning) {
                         spinning = TRUE;
                         rw_x_spin_wait_count++;
 		}
-
 		/* Spin waiting for the lock_word to become free */
 		while (i < state->srv.n_spin_wait_rounds
 		       && lock->lock_word <= 0) {
 			if (srv_spin_wait_delay) {
-				ut_delay(ut_rnd_interval(0,
-							 srv_spin_wait_delay));
+				ut_delay(ut_rnd_interval(0, srv_spin_wait_delay));
 			}
-
 			i++;
 		}
 		if (i == state->srv.n_spin_wait_rounds) {
@@ -667,61 +535,33 @@ lock_loop:
 			goto lock_loop;
 		}
 	}
-
 	rw_x_spin_round_count += i;
-
 	if (srv_print_latch_waits) {
-		ib_log(state,
-			"Thread %lu spin wait rw-x-lock at %p"
-			" cfile %s cline %lu rnds %lu\n",
-			os_thread_pf(os_thread_get_curr_id()), (void*) lock,
-			lock->cfile_name, (ulong) lock->cline, (ulong) i);
+		ib_log(state, "Thread %lu spin wait rw-x-lock at %p cfile %s cline %lu rnds %lu\n", os_thread_pf(os_thread_get_curr_id()), (void*) lock, lock->cfile_name, (ulong) lock->cline, (ulong) i);
 	}
-
-	sync_array_reserve_cell(sync_primary_wait_array,
-				lock,
-				RW_LOCK_EX,
-				file_name, line,
-				&index);
-
+	sync_array_reserve_cell(sync_primary_wait_array, lock, RW_LOCK_EX, file_name, line, &index);
 	/* Waiters must be set before checking lock_word, to ensure signal
 	is sent. This could lead to a few unnecessary wake-up signals. */
 	rw_lock_set_waiter_flag(lock);
-
 	if (rw_lock_x_lock_low(lock, pass, file_name, line)) {
 		sync_array_free_cell(sync_primary_wait_array, index);
 		return; /* Locking succeeded */
 	}
-
 	if (srv_print_latch_waits) {
-		ib_log(state,
-			"Thread %lu OS wait for rw-x-lock at %p"
-			" cfile %s cline %lu\n",
-			os_thread_pf(os_thread_get_curr_id()), (void*) lock,
-			lock->cfile_name, (ulong) lock->cline);
+		ib_log(state, "Thread %lu OS wait for rw-x-lock at %p cfile %s cline %lu\n", os_thread_pf(os_thread_get_curr_id()), (void*) lock, lock->cfile_name, (ulong) lock->cline);
 	}
-
 	/* these stats may not be accurate */
 	lock->count_os_wait++;
 	rw_x_os_wait_count++;
-
 	sync_array_wait_event(sync_primary_wait_array, index);
-
 	i = 0;
 	goto lock_loop;
 }
 
 #ifdef IB_SYNC_DEBUG
-/******************************************************************//**
-Acquires the debug mutex. We cannot use the mutex defined in sync0sync,
-because the debug mutex is also acquired in sync0arr while holding the OS
-mutex protecting the sync array, and the ordinary mutex_enter might
-recursively call routines in sync0arr, leading to a deadlock on the OS
-mutex. */
-IB_INTERN
-void
-rw_lock_debug_mutex_enter(void)
-/*==========================*/
+/// \brief Acquires the debug mutex.
+/// \details We cannot use the mutex defined in sync0sync, because the debug mutex is also acquired in sync0arr while holding the OS mutex protecting the sync array, and the ordinary mutex_enter might recursively call routines in sync0arr, leading to a deadlock on the OS mutex.
+IB_INTERN void rw_lock_debug_mutex_enter(void)
 {
 loop:
 	if (0 == mutex_enter_nowait(&rw_lock_debug_mutex)) {
@@ -741,12 +581,8 @@ loop:
 	goto loop;
 }
 
-/******************************************************************//**
-Releases the debug mutex. */
-IB_INTERN
-void
-rw_lock_debug_mutex_exit(void)
-/*==========================*/
+/// \brief Releases the debug mutex.
+IB_INTERN void rw_lock_debug_mutex_exit(void)
 {
 	mutex_exit(&rw_lock_debug_mutex);
 
@@ -756,17 +592,13 @@ rw_lock_debug_mutex_exit(void)
 	}
 }
 
-/******************************************************************//**
-Inserts the debug information for an rw-lock. */
-IB_INTERN
-void
-rw_lock_add_debug_info(
-/*===================*/
-	rw_lock_t*	lock,		/*!< in: rw-lock */
-	ulint		pass,		/*!< in: pass value */
-	ulint		lock_type,	/*!< in: lock type */
-	const char*	file_name,	/*!< in: file where requested */
-	ulint		line)		/*!< in: line where requested */
+/// \brief Inserts the debug information for an rw-lock.
+/// \param [in] lock rw-lock
+/// \param [in] pass pass value
+/// \param [in] lock_type lock type
+/// \param [in] file_name file where requested
+/// \param [in] line line where requested
+IB_INTERN void rw_lock_add_debug_info(rw_lock_t* lock, ulint pass, ulint lock_type, const char* file_name, ulint line)
 {
 	rw_lock_debug_t*	info;
 
@@ -792,15 +624,11 @@ rw_lock_add_debug_info(
 	}
 }
 
-/******************************************************************//**
-Removes a debug information struct for an rw-lock. */
-IB_INTERN
-void
-rw_lock_remove_debug_info(
-/*======================*/
-	rw_lock_t*	lock,		/*!< in: rw-lock */
-	ulint		pass,		/*!< in: pass value */
-	ulint		lock_type)	/*!< in: lock type */
+/// \brief Removes a debug information struct for an rw-lock.
+/// \param [in] lock rw-lock
+/// \param [in] pass pass value
+/// \param [in] lock_type lock type
+IB_INTERN void rw_lock_remove_debug_info(rw_lock_t* lock, ulint pass, ulint lock_type)
 {
 	rw_lock_debug_t*	info;
 
@@ -838,17 +666,11 @@ rw_lock_remove_debug_info(
 #endif /* IB_SYNC_DEBUG */
 
 #ifdef IB_SYNC_DEBUG
-/******************************************************************//**
-Checks if the thread has locked the rw-lock in the specified mode, with
-the pass value == 0.
-@return	TRUE if locked */
-IB_INTERN
-ibool
-rw_lock_own(
-/*========*/
-	rw_lock_t*	lock,		/*!< in: rw-lock */
-	ulint		lock_type)	/*!< in: lock type: RW_LOCK_SHARED,
-					RW_LOCK_EX */
+/// \brief Checks if the thread has locked the rw-lock in the specified mode, with the pass value == 0.
+/// \param [in] lock rw-lock
+/// \param [in] lock_type lock type: RW_LOCK_SHARED, RW_LOCK_EX
+/// \return TRUE if locked
+IB_INTERN ibool rw_lock_own(rw_lock_t* lock, ulint lock_type)
 {
 	rw_lock_debug_t*	info;
 
@@ -879,16 +701,11 @@ rw_lock_own(
 }
 #endif /* IB_SYNC_DEBUG */
 
-/******************************************************************//**
-Checks if somebody has locked the rw-lock in the specified mode.
-@return	TRUE if locked */
-IB_INTERN
-ibool
-rw_lock_is_locked(
-/*==============*/
-	rw_lock_t*	lock,		/*!< in: rw-lock */
-	ulint		lock_type)	/*!< in: lock type: RW_LOCK_SHARED,
-					RW_LOCK_EX */
+/// \brief Checks if somebody has locked the rw-lock in the specified mode.
+/// \param [in] lock rw-lock
+/// \param [in] lock_type lock type: RW_LOCK_SHARED, RW_LOCK_EX
+/// \return TRUE if locked
+IB_INTERN ibool rw_lock_is_locked(rw_lock_t* lock, ulint lock_type)
 {
 	ibool	ret	= FALSE;
 
@@ -907,17 +724,13 @@ rw_lock_is_locked(
 		UT_ERROR;
 	}
 
-	return(ret);
+	return ret;
 }
 
 #ifdef IB_SYNC_DEBUG
-/***************************************************************//**
-Prints debug info of currently locked rw-locks. */
-IB_INTERN
-void
-rw_lock_list_print_info(
-/*====================*/
-	ib_stream_t	state->stream)	/*!< in: stream where to print */
+/// \brief Prints debug info of currently locked rw-locks.
+/// \param [in] stream stream where to print
+IB_INTERN void rw_lock_list_print_info(ib_stream_t stream)
 {
 	rw_lock_t*	lock;
 	ulint		count		= 0;
@@ -967,13 +780,9 @@ rw_lock_list_print_info(
 	mutex_exit(&rw_lock_list_mutex);
 }
 
-/***************************************************************//**
-Prints debug info of an rw-lock. */
-IB_INTERN
-void
-rw_lock_print(
-/*==========*/
-	rw_lock_t*	lock)	/*!< in: rw-lock */
+/// \brief Prints debug info of an rw-lock.
+/// \param [in] lock rw-lock
+IB_INTERN void rw_lock_print(rw_lock_t* lock)
 {
 	rw_lock_debug_t* info;
 
@@ -1006,13 +815,9 @@ rw_lock_print(
 	}
 }
 
-/*********************************************************************//**
-Prints info of a debug struct. */
-IB_INTERN
-void
-rw_lock_debug_print(
-/*================*/
-	rw_lock_debug_t*	info)	/*!< in: debug struct */
+/// \brief Prints info of a debug struct.
+/// \param [in] info debug struct
+IB_INTERN void rw_lock_debug_print(rw_lock_debug_t* info)
 {
 	ulint	rwt;
 
@@ -1036,14 +841,9 @@ rw_lock_debug_print(
 	ib_log(state, "\n", state->stream);
 }
 
-/***************************************************************//**
-Returns the number of currently locked rw-locks. Works only in the debug
-version.
-@return	number of locked rw-locks */
-IB_INTERN
-ulint
-rw_lock_n_locked(void)
-/*==================*/
+/// \brief Returns the number of currently locked rw-locks. Works only in the debug version.
+/// \return number of locked rw-locks
+IB_INTERN ulint rw_lock_n_locked(void)
 {
 	rw_lock_t*	lock;
 	ulint		count		= 0;
@@ -1063,6 +863,26 @@ rw_lock_n_locked(void)
 
 	mutex_exit(&rw_lock_list_mutex);
 
-	return(count);
+	return count;
+}
+#endif /* IB_SYNC_DEBUG */
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
+
+#ifdef IB_SYNC_DEBUG
+/// \brief Creates a debug info struct.
+/// \return own: debug info struct
+static rw_lock_debug_t* rw_lock_debug_create(void)
+{
+	return((rw_lock_debug_t*) mem_alloc(sizeof(rw_lock_debug_t)));
+}
+
+/// \brief Frees a debug info struct.
+/// \param info debug info struct
+static void rw_lock_debug_free(rw_lock_debug_t* info)
+{
+	mem_free(info);
 }
 #endif /* IB_SYNC_DEBUG */

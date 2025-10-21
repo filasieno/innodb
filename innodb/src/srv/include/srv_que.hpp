@@ -16,23 +16,18 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 *****************************************************************************/
 
-/// @file srv_que.hpp
+/// \file srv_que.hpp
 /// \brief Server query execution
 ///
-/// Created 6/5/1996 Heikki Tuuri
+/// \details Created 6/5/1996 Heikki Tuuri
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-#ifndef srv0que_h
-#define srv0que_h
+#pragma once
 
-#include "univ.i"
+#include "defs.hpp"
 #include "que_types.hpp"
 
-/// \brief Enqueues a task to server task queue and releases a worker thread, if there
-/// is a suspended one.
+/// \brief Enqueues a task to server task queue and releases a worker thread, if there is a suspended one.
 /// \param thr Query thread.
-IB_INTERN
-void
-srv_que_task_enqueue_low(que_thr_t* thr);
-
-#endif
-
+IB_INTERN void srv_que_task_enqueue_low(que_thr_t* thr);

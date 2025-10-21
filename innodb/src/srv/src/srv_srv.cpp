@@ -1,65 +1,39 @@
-/*****************************************************************************
+// Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2008, 2009 Google Inc.
+// Copyright (c) 2009, Percona Inc.
+//
+// Portions of this file contain modifications contributed and copyrighted by
+// Google, Inc. Those modifications are gratefully acknowledged and are described
+// briefly in the InnoDB documentation. The contributions by Google are
+// incorporated with their permission, and subject to the conditions contained in
+// the file COPYING.Google.
+//
+// Portions of this file contain modifications contributed and copyrighted
+// by Percona Inc.. Those modifications are
+// gratefully acknowledged and are described briefly in the InnoDB
+// documentation. The contributions by Percona Inc. are incorporated with
+// their permission, and subject to the conditions contained in the file
+// COPYING.Percona.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1995, 2010, Innobase Oy. All Rights Reserved.
-Copyright (c) 2008, 2009 Google Inc.
-Copyright (c) 2009, Percona Inc.
-
-Portions of this file contain modifications contributed and copyrighted by
-Google, Inc. Those modifications are gratefully acknowledged and are described
-briefly in the InnoDB documentation. The contributions by Google are
-incorporated with their permission, and subject to the conditions contained in
-the file COPYING.Google.
-
-Portions of this file contain modifications contributed and copyrighted
-by Percona Inc.. Those modifications are
-gratefully acknowledged and are described briefly in the InnoDB
-documentation. The contributions by Percona Inc. are incorporated with
-their permission, and subject to the conditions contained in the file
-COPYING.Percona.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file srv/srv0srv.c
-The database server main program
-
-NOTE: SQL Server 7 uses something which the documentation
-calls user mode scheduled threads (UMS threads). One such
-thread is usually allocated per processor. Win32
-documentation does not know any UMS threads, which suggests
-that the concept is internal to SQL Server 7. It may mean that
-SQL Server 7 does all the scheduling of threads itself, even
-in i/o waits. We should maybe modify InnoDB to use the same
-technique, because thread switches within NT may be too slow.
-
-SQL Server 7 also mentions fibers, which are cooperatively
-scheduled threads. They can boost performance by 5 %,
-according to the Delaney and Soukup's book.
-
-Windows 2000 will have something called thread pooling
-(see msdn website), which we could possibly use.
-
-Another possibility could be to use some very fast user space
-thread library. This might confuse NT though.
-
-Created 10/8/1995 Heikki Tuuri
-*******************************************************/
+/// \file srv_srv.cpp
+/// \brief The database server main program
+/// \details NOTE: SQL Server 7 uses something which the documentation calls user mode scheduled threads (UMS threads). One such thread is usually allocated per processor. Win32 documentation does not know any UMS threads, which suggests that the concept is internal to SQL Server 7. It may mean that SQL Server 7 does all the scheduling of threads itself, even in i/o waits. We should maybe modify InnoDB to use the same technique, because thread switches within NT may be too slow. SQL Server 7 also mentions fibers, which are cooperatively scheduled threads. They can boost performance by 5 %, according to the Delaney and Soukup's book. Windows 2000 will have something called thread pooling (see msdn website), which we could possibly use. Another possibility could be to use some very fast user space thread library. This might confuse NT though.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "univ.i"
-
-/* Dummy comment */
 #include "srv_srv.hpp"
 
 #include "ut_mem.hpp"
@@ -89,144 +63,122 @@ Created 10/8/1995 Heikki Tuuri
 #include "page_zip.hpp"
 #include "os_sync.hpp" /* for IB_HAVE_ATOMIC_BUILTINS */
 
-/* FIXME: When we setup the session variables infrastructure. */
-#define sess_lock_wait_timeout(t)	(ses_lock_wait_timeout)
-IB_INTERN ulint	ses_lock_wait_timeout   = 1024 * 1024 * 1024;
+// FIXME: When we setup the session variables infrastructure.
+#define sess_lock_wait_timeout(t) (ses_lock_wait_timeout)
+IB_INTERN ulint ses_lock_wait_timeout = 1024 * 1024 * 1024;
 
-IB_INTERN ibool	srv_lower_case_table_names	= FALSE;
+IB_INTERN ibool srv_lower_case_table_names = FALSE;
 
-/** The following counter is incremented whenever there is some user activity
-in the server */
-IB_INTERN ulint	srv_activity_count	= 0;
+// The following counter is incremented whenever there is some user activity in the server
+IB_INTERN ulint srv_activity_count = 0;
 
-/** The following is the maximum allowed duration of a lock wait. */
-IB_INTERN ulint	srv_fatal_semaphore_wait_threshold = 600;
+// The following is the maximum allowed duration of a lock wait.
+IB_INTERN ulint srv_fatal_semaphore_wait_threshold = 600;
 
-/** How much data manipulation language (DML) statements need to be delayed,
-in microseconds, in order to reduce the lagging of the purge thread. */
-IB_INTERN ulint	srv_dml_needed_delay = 0;
+// How much data manipulation language (DML) statements need to be delayed, in microseconds, in order to reduce the lagging of the purge thread.
+IB_INTERN ulint srv_dml_needed_delay = 0;
 
-IB_INTERN ibool	srv_lock_timeout_active = FALSE;
-IB_INTERN ibool	srv_monitor_active = FALSE;
-IB_INTERN ibool	srv_error_monitor_active = FALSE;
+IB_INTERN ibool srv_lock_timeout_active = FALSE;
+IB_INTERN ibool srv_monitor_active = FALSE;
+IB_INTERN ibool srv_error_monitor_active = FALSE;
 
 IB_INTERN const char* srv_main_thread_op_info = "";
 
-/* Server parameters which are read from the initfile */
+// Server parameters which are read from the initfile
 
-/* The following three are dir paths which are catenated before file
-names, where the file name itself may also contain a path */
+// The following three are dir paths which are catenated before file names, where the file name itself may also contain a path
 
-IB_INTERN char*	srv_data_home	= NULL;
+IB_INTERN char* srv_data_home = NULL;
 
-/** We copy the argument passed to ib_cfg_set_text("log_group_home_dir")
-because srv_parse_log_group_home_dirs() parses it's input argument
-destructively. The copy is done using ut_malloc(). */
-IB_INTERN char*	srv_log_group_home_dir = NULL;
+// We copy the argument passed to ib_cfg_set_text("log_group_home_dir") because srv_parse_log_group_home_dirs() parses it's input argument destructively. The copy is done using ut_malloc().
+IB_INTERN char* srv_log_group_home_dir = NULL;
 
 #ifdef IB_LOG_ARCHIVE
-IB_INTERN char*	srv_arch_dir	= NULL;
+IB_INTERN char* srv_arch_dir = NULL;
 #endif /* IB_LOG_ARCHIVE */
 
-/** store to its own file each table created by an user; data
-dictionary tables are in the system tablespace 0 */
-IB_INTERN ibool	srv_file_per_table;
-/** The file format to use on new *.ibd files. */
-IB_INTERN ulint	srv_file_format = 0;
-/** Whether to check file format during startup a value of
-DICT_TF_FORMAT_MAX + 1 means no checking ie. FALSE.  The default is to
-set it to the highest format we support. */
-IB_INTERN ulint	srv_check_file_format_at_startup = DICT_TF_FORMAT_MAX;
+// store to its own file each table created by an user; data dictionary tables are in the system tablespace 0
+IB_INTERN ibool srv_file_per_table;
+// The file format to use on new *.ibd files.
+IB_INTERN ulint srv_file_format = 0;
+// Whether to check file format during startup a value of DICT_TF_FORMAT_MAX + 1 means no checking ie. FALSE. The default is to set it to the highest format we support.
+IB_INTERN ulint srv_check_file_format_at_startup = DICT_TF_FORMAT_MAX;
 
 #if DICT_TF_FORMAT_51
 # error "DICT_TF_FORMAT_51 must be 0!"
 #endif
-IB_INTERN ulint	srv_n_data_files = 0;
-/** Size in database pages */
-IB_INTERN ulint*	srv_data_file_sizes = NULL;
+IB_INTERN ulint srv_n_data_files = 0;
+// Size in database pages
+IB_INTERN ulint* srv_data_file_sizes = NULL;
 
-/** If TRUE, then we auto-extend the last data file */
-IB_INTERN ibool	srv_auto_extend_last_data_file	= FALSE;
-/* if != 0, this tells the max size auto-extending may increase the
-last data file size */
-IB_INTERN ulint	srv_last_file_size_max	= 0;
-/** If the last data file is auto-extended, we add this
-many pages to it at a time */
-IB_INTERN ulong	srv_auto_extend_increment = 8;
-IB_INTERN ulint*	srv_data_file_is_raw_partition = NULL;
+// If TRUE, then we auto-extend the last data file
+IB_INTERN ibool srv_auto_extend_last_data_file = FALSE;
+// if != 0, this tells the max size auto-extending may increase the last data file size
+IB_INTERN ulint srv_last_file_size_max = 0;
+// If the last data file is auto-extended, we add this many pages to it at a time
+IB_INTERN ulong srv_auto_extend_increment = 8;
+IB_INTERN ulint* srv_data_file_is_raw_partition = NULL;
 
-/* If the following is TRUE we do not allow inserts etc. This protects
-the user from forgetting the 'newraw' keyword. */
+// If the following is TRUE we do not allow inserts etc. This protects the user from forgetting the 'newraw' keyword.
 
-IB_INTERN ibool	srv_created_new_raw	= FALSE;
+IB_INTERN ibool srv_created_new_raw = FALSE;
 
-IB_INTERN ulint	srv_n_log_files		= ULINT_MAX;
-/** Size in database pages */
-IB_INTERN ulint	srv_log_file_size	= ULINT_MAX;
-IB_INTERN ulint	srv_log_file_curr_size	= ULINT_MAX;
-/** Size in database pages */
-IB_INTERN ulint	srv_log_buffer_size	= ULINT_MAX;
-IB_INTERN ulint	srv_log_buffer_curr_size = ULINT_MAX;
-IB_INTERN ulong	srv_flush_log_at_trx_commit = 1;
+IB_INTERN ulint srv_n_log_files = ULINT_MAX;
+// Size in database pages
+IB_INTERN ulint srv_log_file_size = ULINT_MAX;
+IB_INTERN ulint srv_log_file_curr_size = ULINT_MAX;
+// Size in database pages
+IB_INTERN ulint srv_log_buffer_size = ULINT_MAX;
+IB_INTERN ulint srv_log_buffer_curr_size = ULINT_MAX;
+IB_INTERN ulong srv_flush_log_at_trx_commit = 1;
 
-/** Try to flush dirty pages so as to avoid IO bursts at
-the checkpoints. */
-IB_INTERN ibool	srv_adaptive_flushing	= TRUE;
+// Try to flush dirty pages so as to avoid IO bursts at the checkpoints.
+IB_INTERN ibool srv_adaptive_flushing = TRUE;
 
-/** Use os/external memory allocator */
-IB_INTERN ibool	srv_use_sys_malloc      = FALSE;
+// Use os/external memory allocator
+IB_INTERN ibool srv_use_sys_malloc = FALSE;
 
-/** Maximum number of times allowed to conditionally acquire
-mutex before switching to blocking wait on the mutex */
-#define MAX_MUTEX_NOWAIT	20
+// Maximum number of times allowed to conditionally acquire mutex before switching to blocking wait on the mutex
+#define MAX_MUTEX_NOWAIT 20
 
-/** Check whether the number of failed nonblocking mutex
-acquisition attempts exceeds maximum allowed value. If so,
-srv_printf_innodb_monitor() will request mutex acquisition
-with mutex_enter(), which will wait until it gets the mutex. */
-#define MUTEX_NOWAIT(mutex_skipped)	((mutex_skipped) < MAX_MUTEX_NOWAIT)
+// Check whether the number of failed nonblocking mutex acquisition attempts exceeds maximum allowed value. If so, srv_printf_innodb_monitor() will request mutex acquisition with mutex_enter(), which will wait until it gets the mutex.
+#define MUTEX_NOWAIT(mutex_skipped) ((mutex_skipped) < MAX_MUTEX_NOWAIT)
 
-/** Requested size in kilobytes of the buffer pool. */
-IB_INTERN ulint	srv_buf_pool_size	= ULINT_MAX;
-/** previously requested size of the buffer pool. */
-IB_INTERN ulint	srv_buf_pool_old_size;
-/** Current size in kilobytes of the buffer pool. */
-IB_INTERN ulint	srv_buf_pool_curr_size	= 0;
-/** Memory pool size in bytes */
-IB_INTERN ulint	srv_mem_pool_size	= ULINT_MAX;
-IB_INTERN ulint	srv_lock_table_size	= ULINT_MAX;
+// Requested size in kilobytes of the buffer pool.
+IB_INTERN ulint srv_buf_pool_size = ULINT_MAX;
+// previously requested size of the buffer pool.
+IB_INTERN ulint srv_buf_pool_old_size;
+// Current size in kilobytes of the buffer pool.
+IB_INTERN ulint srv_buf_pool_curr_size = 0;
+// Memory pool size in bytes
+IB_INTERN ulint srv_mem_pool_size = ULINT_MAX;
+IB_INTERN ulint srv_lock_table_size = ULINT_MAX;
 
-/** This parameter is deprecated. Use srv_n_io_[read|write]_threads
-instead. */
-IB_INTERN ulint	srv_n_file_io_threads	= ULINT_MAX;
-IB_INTERN ulint	srv_n_read_io_threads	= ULINT_MAX;
-IB_INTERN ulint	srv_n_write_io_threads	= ULINT_MAX;
+// This parameter is deprecated. Use srv_n_io_[read|write]_threads instead.
+IB_INTERN ulint srv_n_file_io_threads = ULINT_MAX;
+IB_INTERN ulint srv_n_read_io_threads = ULINT_MAX;
+IB_INTERN ulint srv_n_write_io_threads = ULINT_MAX;
 
-/** User settable value of the number of pages that must be present
-in the buffer cache and accessed sequentially for InnoDB to trigger a
-readahead request. */
-IB_INTERN ulong	srv_read_ahead_threshold	= 56;
+// User settable value of the number of pages that must be present in the buffer cache and accessed sequentially for InnoDB to trigger a readahead request.
+IB_INTERN ulong srv_read_ahead_threshold = 56;
 
 #ifdef IB_LOG_ARCHIVE
-IB_INTERN ibool	srv_log_archive_on	= FALSE;
-IB_INTERN ibool	srv_archive_recovery	= 0;
-IB_INTERN ib_uint64_t	srv_archive_recovery_limit_lsn;
+IB_INTERN ibool srv_log_archive_on = FALSE;
+IB_INTERN ibool srv_archive_recovery = 0;
+IB_INTERN ib_uint64_t srv_archive_recovery_limit_lsn;
 #endif /* IB_LOG_ARCHIVE */
 
-IB_INTERN ulint	srv_unix_file_flush_method = SRV_UNIX_FSYNC;
-IB_INTERN ulint	srv_win_file_flush_method = SRV_WIN_IO_UNBUFFERED;
+IB_INTERN ulint srv_unix_file_flush_method = SRV_UNIX_FSYNC;
+IB_INTERN ulint srv_win_file_flush_method = SRV_WIN_IO_UNBUFFERED;
 
-IB_INTERN ulint	srv_max_n_open_files	  = 300;
+IB_INTERN ulint srv_max_n_open_files = 300;
 
-/** Number of IO operations per second the server can do */
-IB_INTERN ulong	srv_io_capacity         = 200;
+// Number of IO operations per second the server can do
+IB_INTERN ulong srv_io_capacity = 200;
 
-/** The InnoDB main thread tries to keep the ratio of modified pages
-in the buffer pool to all database pages in the buffer pool smaller than
-the following number. But it is not guaranteed that the value stays below
-that during a time of heavy update/insert activity. */
+// The InnoDB main thread tries to keep the ratio of modified pages in the buffer pool to all database pages in the buffer pool smaller than the following number. But it is not guaranteed that the value stays below that during a time of heavy update/insert activity.
 
-IB_INTERN ulong	srv_max_buf_pool_modified_pct	= 75;
+IB_INTERN ulong srv_max_buf_pool_modified_pct = 75;
 
 /** Variable counts amount of data read in total (in bytes) */
 IB_INTERN ulint	srv_data_read = 0;
@@ -797,19 +749,14 @@ srv_get_n_threads(void)
 	return(n_threads);
 }
 
-/*********************************************************************//**
-Reserves a slot in the thread table for the current thread. Also creates the
-thread local storage struct for the current thread. NOTE! The server mutex
-has to be reserved by the caller!
-@return	reserved slot index */
-static
-ulint
-srv_table_reserve_slot(
-/*===================*/
-	enum srv_thread_type	type)	/*!< in: type of the thread */
+/// \brief Reserves a slot in the thread table for the current thread. Also creates the thread local storage struct for the current thread.
+/// \param [in] type of the thread
+/// \return reserved slot index
+/// \details NOTE! The server mutex has to be reserved by the caller!
+static ulint srv_table_reserve_slot(enum srv_thread_type type)
 {
-	srv_slot_t*	slot;
-	ulint		i;
+	srv_slot_t* slot;
+	ulint i;
 
 	ut_a(type > 0);
 	ut_a(type <= SRV_MASTER);
@@ -834,22 +781,18 @@ srv_table_reserve_slot(
 
 	thr_local_set_slot_no(os_thread_get_curr_id(), i);
 
-	return(i);
+	return i;
 }
 
-/*********************************************************************//**
-Suspends the calling thread to wait for the event in its thread slot.
-NOTE! The server mutex has to be reserved by the caller!
-@return	event for the calling thread to wait */
-static
-os_event_t
-srv_suspend_thread(void)
-/*====================*/
+/// \brief Suspends the calling thread to wait for the event in its thread slot.
+/// \return event for the calling thread to wait
+/// \details NOTE! The server mutex has to be reserved by the caller!
+static os_event_t srv_suspend_thread(void)
 {
-	srv_slot_t*		slot;
-	os_event_t		event;
-	ulint			slot_no;
-	enum srv_thread_type	type;
+	srv_slot_t* slot;
+	os_event_t event;
+	ulint slot_no;
+	enum srv_thread_type type;
 
 	ut_ad(mutex_own(&kernel_mutex));
 
@@ -878,24 +821,19 @@ srv_suspend_thread(void)
 
 	os_event_reset(event);
 
-	return(event);
+	return event;
 }
 
-/*********************************************************************//**
-Releases threads of the type given from suspension in the thread table.
-NOTE! The server mutex has to be reserved by the caller!
-@return number of threads released: this may be less than n if not
-enough threads were suspended at the moment */
-IB_INTERN
-ulint
-srv_release_threads(
-/*================*/
-	enum srv_thread_type	type,	/*!< in: thread type */
-	ulint			n)	/*!< in: number of threads to release */
+/// \brief Releases threads of the type given from suspension in the thread table.
+/// \param [in] type thread type
+/// \param [in] n number of threads to release
+/// \return number of threads released: this may be less than n if not enough threads were suspended at the moment
+/// \details NOTE! The server mutex has to be reserved by the caller!
+IB_INTERN ulint srv_release_threads(enum srv_thread_type type, ulint n)
 {
-	srv_slot_t*	slot;
-	ulint		i;
-	ulint		count	= 0;
+	srv_slot_t* slot;
+	ulint i;
+	ulint count = 0;
 
 	ut_ad(type >= SRV_WORKER);
 	ut_ad(type <= SRV_MASTER);
@@ -903,11 +841,9 @@ srv_release_threads(
 	ut_ad(mutex_own(&kernel_mutex));
 
 	for (i = 0; i < OS_THREAD_MAX_N; i++) {
-
 		slot = srv_table_get_nth_slot(i);
 
 		if (slot->in_use && slot->type == type && slot->suspended) {
-
 			slot->suspended = FALSE;
 
 			srv_n_threads_active[type]++;
@@ -930,7 +866,7 @@ srv_release_threads(
 		}
 	}
 
-	return(count);
+	return count;
 }
 
 /*********************************************************************//**
