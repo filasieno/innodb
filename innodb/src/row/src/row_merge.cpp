@@ -1,30 +1,32 @@
-/*****************************************************************************
+// Copyright (c) 2005, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 2005, 2010, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file row/row0merge.c
-New index creation routines using a merge sort
-
-Created 12/4/2005 Jan Lindstrom
-Completed by Sunny Bains and Marko Makela
-*******************************************************/
+/// \file row_merge.cpp
+/// \brief New index creation routines using a merge sort
+/// \details Originally created on 12/4/2005 by Jan Lindstrom, completed by Sunny Bains and Marko Makela. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "row_merge.hpp"
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 #include "row_ext.hpp"
 #include "row_row.hpp"
 #include "row_upd.hpp"

@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+/// \file row_types.hpp
+/// \brief Row operation global types
+/// \details Originally created on 12/27/1996 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/row0types.h
-Row operation global types
-
-Created 12/27/1996 Heikki Tuuri
-*******************************************************/
-
-#ifndef row0types_h
-#define row0types_h
+#pragma once
 
 typedef struct plan_struct plan_t;
 
@@ -57,7 +51,7 @@ typedef void* table_handle_t;
 
 typedef struct row_prebuilt_struct row_prebuilt_t;
 
-/* Insert node types */
+/// Insert node types
 typedef enum ib_ins_mode_enum {
 					/* The first two modes are only
 					used by the internal SQL parser */
@@ -66,7 +60,7 @@ typedef enum ib_ins_mode_enum {
 	INS_DIRECT			/* Insert the row directly */
 } ib_ins_mode_t;
 
-/* Node execution states */
+/// Node execution states
 typedef enum ib_ins_state_enum {
 	INS_NODE_SET_IX_LOCK = 1,	/* we should set an IX lock on table */
 	INS_NODE_ALLOC_ROW_ID,		/* row id should be allocated */
@@ -74,14 +68,14 @@ typedef enum ib_ins_state_enum {
 					inserted */
 } ib_ins_state_t;
 
-/* Flags for positioning the cursor. */
+/// Flags for positioning the cursor.
 typedef enum ib_cur_op_enum {
 	ROW_SEL_MOVETO,			/* required when openeing a cursor */
 	ROW_SEL_NEXT,			/* move to next record */
 	ROW_SEL_PREV			/* move to previous record */
 } ib_cur_op_t;
 
-/* Various match modes when fetching a record from a table. */
+/// Various match modes when fetching a record from a table.
 typedef enum ib_match_enum {
 	ROW_SEL_DEFAULT,		/* closest match possible */
 	ROW_SEL_EXACT,			/* search using a complete key value */
@@ -91,5 +85,3 @@ typedef enum ib_match_enum {
 					last field in prefix may be just
 					a prefix of a fixed length column) */
 } ib_match_t;
-
-#endif

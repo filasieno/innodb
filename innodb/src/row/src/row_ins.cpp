@@ -1,33 +1,46 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2010, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file row/row0ins.c
-Insert into a table
-
-Created 4/20/1996 Heikki Tuuri
-*******************************************************/
+/// \file row_ins.cpp
+/// \brief Insert into a table
+/// \details Originally created on 4/20/1996 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "row_ins.hpp"
 
 #ifdef IB_DO_NOT_INLINE
-#include "row0ins.inl"
+#include "row_ins.inl"
 #endif
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+static void row_ins_alloc_sys_fields(ins_node_t* node);
+static void row_ins_set_new_row_sys_fields(ins_node_t* node, dtuple_t* row, const dict_table_t* table);
+static ulint row_ins_sec_index_entry_by_modify(ulint mode, btr_cur_t* cursor, const dtuple_t* entry, que_thr_t* thr, mtr_t* mtr);
+static ulint row_ins_clust_index_entry_by_modify(ulint mode, btr_cur_t* cursor, mem_heap_t** heap, big_rec_t** big_rec, const dtuple_t* entry, que_thr_t* thr, mtr_t* mtr);
+static ibool row_ins_cascade_ancestor_updates_table(ins_node_t* node, dict_table_t* table);
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
 
 #include "dict_dict.hpp"
 #include "dict_boot.hpp"
@@ -48,205 +61,117 @@ Created 4/20/1996 Heikki Tuuri
 #include "buf_lru.hpp"
 #include "api_misc.hpp"
 
-#define	ROW_INS_PREV	1
-#define	ROW_INS_NEXT	2
+constinit ulint ROW_INS_PREV = 1;
+constinit ulint ROW_INS_NEXT = 2;
 
 
-/*********************************************************************//**
-Creates an insert node struct.
-@return	own: insert node struct */
-IB_INTERN
-ins_node_t*
-row_ins_node_create(
-/*================*/
-	ib_ins_mode_t	ins_type,	/*!< in: INS_VALUES, ... */
-	dict_table_t*	table,		/*!< in: table where to insert */
-	mem_heap_t*	heap)		/*!< in: mem heap where created */
+IB_INTERN ins_node_t* row_ins_node_create(ib_ins_mode_t ins_type, dict_table_t* table, mem_heap_t* heap)
 {
-	ins_node_t*	node;
-
-	node = mem_heap_alloc(heap, sizeof(ins_node_t));
-
+	ins_node_t*	node = mem_heap_alloc(heap, sizeof(ins_node_t));
 	node->common.type = QUE_NODE_INSERT;
-
 	node->ins_type = ins_type;
-
 	node->state = INS_NODE_SET_IX_LOCK;
 	node->table = table;
 	node->index = NULL;
 	node->entry = NULL;
-
 	node->select = NULL;
-
 	node->trx_id = ut_dulint_zero;
-
 	node->entry_sys_heap = mem_heap_create(128);
-
 	node->magic_n = INS_NODE_MAGIC_N;
-
-	return(node);
+	return node;
 }
 
-/***********************************************************//**
-Creates an entry template for each index of a table. */
-IB_INTERN
-void
-row_ins_node_create_entry_list(
-/*=======================*/
-	ins_node_t*	node)	/*!< in: row insert node */
+IB_INTERN void row_ins_node_create_entry_list(ins_node_t* node)
 {
 	dict_index_t*	index;
-	dtuple_t*	entry;
-
 	ut_ad(node->entry_sys_heap);
-
 	UT_LIST_INIT(node->entry_list);
-
 	index = dict_table_get_first_index(node->table);
-
 	while (index != NULL) {
-		entry = row_build_index_entry(
-			node->row, NULL, index, node->entry_sys_heap);
-
+		dtuple_t*	entry = row_build_index_entry(node->row, NULL, index, node->entry_sys_heap);
 		UT_LIST_ADD_LAST(tuple_list, node->entry_list, entry);
-
 		index = dict_table_get_next_index(index);
 	}
 }
 
-/*****************************************************************//**
-Adds system field buffers to a row. */
+// Adds system field buffers to a row.
 static
 void
 row_ins_alloc_sys_fields(
-/*=====================*/
-	ins_node_t*	node)	/*!< in: insert node */
+	ins_node_t*	node)
 {
-	dtuple_t*		row;
-	dict_table_t*		table;
-	mem_heap_t*		heap;
+	dtuple_t*		row = node->row;
+	dict_table_t*		table = node->table;
+	mem_heap_t*		heap = node->entry_sys_heap;
 	const dict_col_t*	col;
 	dfield_t*		dfield;
 	byte*			ptr;
-
-	row = node->row;
-	table = node->table;
-	heap = node->entry_sys_heap;
-
 	ut_ad(row && table && heap);
 	ut_ad(dtuple_get_n_fields(row) == dict_table_get_n_cols(table));
 
-	/* 1. Allocate buffer for row id */
-
+	// 1. Allocate buffer for row id
 	col = dict_table_get_sys_col(table, DATA_ROW_ID);
-
 	dfield = dtuple_get_nth_field(row, dict_col_get_no(col));
-
 	ptr = mem_heap_zalloc(heap, DATA_ROW_ID_LEN);
-
 	dfield_set_data(dfield, ptr, DATA_ROW_ID_LEN);
-
 	node->row_id_buf = ptr;
 
-	/* 3. Allocate buffer for trx id */
-
+	// 3. Allocate buffer for trx id
 	col = dict_table_get_sys_col(table, DATA_TRX_ID);
-
 	dfield = dtuple_get_nth_field(row, dict_col_get_no(col));
 	ptr = mem_heap_zalloc(heap, DATA_TRX_ID_LEN);
-
 	dfield_set_data(dfield, ptr, DATA_TRX_ID_LEN);
-
 	node->trx_id_buf = ptr;
 
-	/* 4. Allocate buffer for roll ptr */
-
+	// 4. Allocate buffer for roll ptr
 	col = dict_table_get_sys_col(table, DATA_ROLL_PTR);
-
 	dfield = dtuple_get_nth_field(row, dict_col_get_no(col));
 	ptr = mem_heap_zalloc(heap, DATA_ROLL_PTR_LEN);
-
 	dfield_set_data(dfield, ptr, DATA_ROLL_PTR_LEN);
 }
 
-/*********************************************************************//**
-Sets a new row to insert for an INS_DIRECT node. This function is only used
-if we have constructed the row separately, which is a rare case; this
-function is quite slow. */
-IB_INTERN
-void
-row_ins_node_set_new_row(
-/*=====================*/
-	ins_node_t*	node,	/*!< in: insert node */
-	dtuple_t*	row)	/*!< in: new row (or first row) for the node */
+IB_INTERN void row_ins_node_set_new_row(ins_node_t* node, dtuple_t* row)
 {
 	node->state = INS_NODE_SET_IX_LOCK;
 	node->index = NULL;
 	node->entry = NULL;
-
 	node->row = row;
-
 	mem_heap_empty(node->entry_sys_heap);
 
-	/* Create templates for index entries */
-
+	// Create templates for index entries
 	row_ins_node_create_entry_list(node);
 
-	/* Allocate from entry_sys_heap buffers for sys fields */
-
+	// Allocate from entry_sys_heap buffers for sys fields
 	row_ins_alloc_sys_fields(node);
 
-	/* As we allocated a new trx id buf, the trx id should be written
-	there again: */
-
+	// As we allocated a new trx id buf, the trx id should be written there again:
 	node->trx_id = ut_dulint_zero;
 }
 
-/*******************************************************************//**
-Does an insert operation by updating a delete-marked existing record
-in the index. This situation can occur if the delete-marked record is
-kept in the index for consistent reads.
-@return	DB_SUCCESS or error code */
+// Does an insert operation by updating a delete-marked existing record in the index. This situation can occur if the delete-marked record is kept in the index for consistent reads. Returns DB_SUCCESS or error code
 static
 ulint
 row_ins_sec_index_entry_by_modify(
-/*==============================*/
-	ulint		mode,	/*!< in: BTR_MODIFY_LEAF or BTR_MODIFY_TREE,
-				depending on whether mtr holds just a leaf
-				latch or also a tree latch */
-	btr_cur_t*	cursor,	/*!< in: B-tree cursor */
-	const dtuple_t*	entry,	/*!< in: index entry to insert */
-	que_thr_t*	thr,	/*!< in: query thread */
-	mtr_t*		mtr)	/*!< in: mtr; must be committed before
-				latching any further pages */
+	ulint		mode,
+	btr_cur_t*	cursor,
+	const dtuple_t*	entry,
+	que_thr_t*	thr,
+	mtr_t*		mtr)
 {
 	big_rec_t*	dummy_big_rec;
 	mem_heap_t*	heap;
 	upd_t*		update;
-	rec_t*		rec;
+	rec_t*		rec = btr_cur_get_rec(cursor);
 	ulint		err;
-
-	rec = btr_cur_get_rec(cursor);
-
 	ut_ad(!dict_index_is_clust(cursor->index));
-	ut_ad(rec_get_deleted_flag(rec,
-				   dict_table_is_comp(cursor->index->table)));
+	ut_ad(rec_get_deleted_flag(rec, dict_table_is_comp(cursor->index->table)));
 
-	/* We know that in the alphabetical ordering, entry and rec are
-	identified. But in their binary form there may be differences if
-	there are char fields in them. Therefore we have to calculate the
-	difference. */
-
+	// We know that in the alphabetical ordering, entry and rec are identified. But in their binary form there may be differences if there are char fields in them. Therefore we have to calculate the difference.
 	heap = mem_heap_create(1024);
-
-	update = row_upd_build_sec_rec_difference_binary(
-		cursor->index, entry, rec, thr_get_trx(thr), heap);
+	update = row_upd_build_sec_rec_difference_binary(cursor->index, entry, rec, thr_get_trx(thr), heap);
 	if (mode == BTR_MODIFY_LEAF) {
-		/* Try an optimistic updating of the record, keeping changes
-		within the page */
-
-		err = btr_cur_optimistic_update(BTR_KEEP_SYS_FLAG, cursor,
-						update, 0, thr, mtr);
+		// Try an optimistic updating of the record, keeping changes within the page
+		err = btr_cur_optimistic_update(BTR_KEEP_SYS_FLAG, cursor, update, 0, thr, mtr);
 		switch (err) {
 		case DB_OVERFLOW:
 		case DB_UNDERFLOW:
@@ -256,74 +181,44 @@ row_ins_sec_index_entry_by_modify(
 	} else {
 		ut_a(mode == BTR_MODIFY_TREE);
 		if (buf_LRU_buf_pool_running_out()) {
-
 			err = DB_LOCK_TABLE_FULL;
-
 			goto func_exit;
 		}
-
-		err = btr_cur_pessimistic_update(BTR_KEEP_SYS_FLAG, cursor,
-						 &heap, &dummy_big_rec, update,
-						 0, thr, mtr);
+		err = btr_cur_pessimistic_update(BTR_KEEP_SYS_FLAG, cursor, &heap, &dummy_big_rec, update, 0, thr, mtr);
 		ut_ad(!dummy_big_rec);
 	}
 func_exit:
 	mem_heap_free(heap);
-
-	return(err);
+	return err;
 }
 
-/*******************************************************************//**
-Does an insert operation by delete unmarking and updating a delete marked
-existing record in the index. This situation can occur if the delete marked
-record is kept in the index for consistent reads.
-@return	DB_SUCCESS, DB_FAIL, or error code */
+// Does an insert operation by delete unmarking and updating a delete marked existing record in the index. This situation can occur if the delete marked record is kept in the index for consistent reads. Returns DB_SUCCESS, DB_FAIL, or error code
 static
 ulint
 row_ins_clust_index_entry_by_modify(
-/*================================*/
-	ulint		mode,	/*!< in: BTR_MODIFY_LEAF or BTR_MODIFY_TREE,
-				depending on whether mtr holds just a leaf
-				latch or also a tree latch */
-	btr_cur_t*	cursor,	/*!< in: B-tree cursor */
-	mem_heap_t**	heap,	/*!< in/out: pointer to memory heap, or NULL */
-	big_rec_t**	big_rec,/*!< out: possible big rec vector of fields
-				which have to be stored externally by the
-				caller */
-	const dtuple_t*	entry,	/*!< in: index entry to insert */
-	que_thr_t*	thr,	/*!< in: query thread */
-	mtr_t*		mtr)	/*!< in: mtr; must be committed before
-				latching any further pages */
+	ulint		mode,
+	btr_cur_t*	cursor,
+	mem_heap_t**	heap,
+	big_rec_t**	big_rec,
+	const dtuple_t*	entry,
+	que_thr_t*	thr,
+	mtr_t*		mtr)
 {
-	rec_t*		rec;
+	rec_t*		rec = btr_cur_get_rec(cursor);
 	upd_t*		update;
 	ulint		err;
-
 	ut_ad(dict_index_is_clust(cursor->index));
-
 	*big_rec = NULL;
-
-	rec = btr_cur_get_rec(cursor);
-
-	ut_ad(rec_get_deleted_flag(rec,
-				   dict_table_is_comp(cursor->index->table)));
-
+	ut_ad(rec_get_deleted_flag(rec, dict_table_is_comp(cursor->index->table)));
 	if (!*heap) {
 		*heap = mem_heap_create(1024);
 	}
 
-	/* Build an update vector containing all the fields to be modified;
-	NOTE that this vector may NOT contain system columns trx_id or
-	roll_ptr */
-
-	update = row_upd_build_difference_binary(cursor->index, entry, rec,
-						 thr_get_trx(thr), *heap);
+	// Build an update vector containing all the fields to be modified; NOTE that this vector may NOT contain system columns trx_id or roll_ptr
+	update = row_upd_build_difference_binary(cursor->index, entry, rec, thr_get_trx(thr), *heap);
 	if (mode == BTR_MODIFY_LEAF) {
-		/* Try optimistic updating of the record, keeping changes
-		within the page */
-
-		err = btr_cur_optimistic_update(0, cursor, update, 0, thr,
-						mtr);
+		// Try optimistic updating of the record, keeping changes within the page
+		err = btr_cur_optimistic_update(0, cursor, update, 0, thr, mtr);
 		switch (err) {
 		case DB_OVERFLOW:
 		case DB_UNDERFLOW:
@@ -337,45 +232,30 @@ row_ins_clust_index_entry_by_modify(
 			return(DB_LOCK_TABLE_FULL);
 
 		}
-		err = btr_cur_pessimistic_update(0, cursor,
-						 heap, big_rec, update,
-						 0, thr, mtr);
+		err = btr_cur_pessimistic_update(0, cursor, heap, big_rec, update, 0, thr, mtr);
 	}
 
-	return(err);
+	return err;
 }
 
-/*********************************************************************//**
-Returns TRUE if in a cascaded update/delete an ancestor node of node
-updates (not DELETE, but UPDATE) table.
-@return	TRUE if an ancestor updates table */
+// Returns TRUE if in a cascaded update/delete an ancestor node of node updates (not DELETE, but UPDATE) table.
 static
 ibool
 row_ins_cascade_ancestor_updates_table(
-/*===================================*/
-	que_node_t*	node,	/*!< in: node in a query graph */
-	dict_table_t*	table)	/*!< in: table */
+	que_node_t*	node,
+	dict_table_t*	table)
 {
-	que_node_t*	parent;
+	que_node_t*	parent = que_node_get_parent(node);
 	upd_node_t*	upd_node;
-
-	parent = que_node_get_parent(node);
-
 	while (que_node_get_type(parent) == QUE_NODE_UPDATE) {
-
 		upd_node = parent;
-
 		if (upd_node->table == table && upd_node->is_delete == FALSE) {
-
-			return(TRUE);
+			return TRUE;
 		}
-
 		parent = que_node_get_parent(parent);
-
 		ut_a(parent);
 	}
-
-	return(FALSE);
+	return FALSE;
 }
 
 /*********************************************************************//**

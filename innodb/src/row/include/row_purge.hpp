@@ -1,32 +1,26 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+/// \file row_purge.hpp
+/// \brief Purge obsolete records
+/// \details Originally created on 3/14/1997 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
+#pragma once
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/row0purge.h
-Purge obsolete records
-
-Created 3/14/1997 Heikki Tuuri
-*******************************************************/
-
-#ifndef row0purge_h
-#define row0purge_h
-
-#include "univ.i"
+#include "defs.hpp
 #include "data_data.hpp"
 #include "btr_types.hpp"
 #include "btr_pcur.hpp"
@@ -35,26 +29,19 @@ Created 3/14/1997 Heikki Tuuri
 #include "que_types.hpp"
 #include "row_types.hpp"
 
-/********************************************************************//**
-Creates a purge node to a query graph.
-@return	own: purge node */
-IB_INTERN
-purge_node_t*
-row_purge_node_create(
-/*==================*/
-	que_thr_t*	parent,	/*!< in: parent node, i.e., a thr node */
-	mem_heap_t*	heap);	/*!< in: memory heap where created */
-/***********************************************************//**
-Does the purge operation for a single undo log record. This is a high-level
-function used in an SQL execution graph.
-@return	query thread to run next or NULL */
-IB_INTERN
-que_thr_t*
-row_purge_step(
-/*===========*/
-	que_thr_t*	thr);	/*!< in: query thread */
+/// \brief Creates a purge node to a query graph.
+/// \param [in] parent parent node, i.e., a thr node
+/// \param [in] heap memory heap where created
+/// \return own: purge node
+IB_INTERN purge_node_t* row_purge_node_create(que_thr_t* parent, mem_heap_t* heap);
 
-/* Purge node structure */
+/// \brief Does the purge operation for a single undo log record.
+/// \details This is a high-level function used in an SQL execution graph.
+/// \param [in] thr query thread
+/// \return query thread to run next or NULL
+IB_INTERN que_thr_t* row_purge_step(que_thr_t* thr);
+
+/// Purge node structure
 
 struct purge_node_struct{
 	que_common_t	common;	/*!< node type: QUE_NODE_PURGE */
@@ -90,7 +77,5 @@ struct purge_node_struct{
 };
 
 #ifndef IB_DO_NOT_INLINE
-#include "row0purge.inl"
-#endif
-
+	#include "row_purge.inl"
 #endif

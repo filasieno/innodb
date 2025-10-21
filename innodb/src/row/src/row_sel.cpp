@@ -1,41 +1,44 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2010, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2008, Google Inc.
+//
+// Portions of this file contain modifications contributed and copyrighted by
+// Google, Inc. Those modifications are gratefully acknowledged and are described
+// briefly in the InnoDB documentation. The contributions by Google are
+// incorporated with their permission, and subject to the conditions contained in
+// the file COPYING.Google.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2010, Innobase Oy. All Rights Reserved.
-Copyright (c) 2008, Google Inc.
-
-Portions of this file contain modifications contributed and copyrighted by
-Google, Inc. Those modifications are gratefully acknowledged and are described
-briefly in the InnoDB documentation. The contributions by Google are
-incorporated with their permission, and subject to the conditions contained in
-the file COPYING.Google.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/***************************************************//**
-@file row/row0sel.c
-Select
-
-Created 12/19/1997 Heikki Tuuri
-*******************************************************/
+/// \file row_sel.cpp
+/// \brief Select
+/// \details Originally created on 12/19/1997 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "row_sel.hpp"
 #include "row_prebuilt.hpp"
 
 #ifdef IB_DO_NOT_INLINE
-#include "row0sel.inl"
+#include "row_sel.inl"
 #endif
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 
 #include "dict_dict.hpp"
 #include "dict_boot.hpp"
@@ -241,34 +244,16 @@ func_exit:
 	return(is_equal);
 }
 
-/*********************************************************************//**
-Creates a select node struct.
-@return	own: select node struct */
-IB_INTERN
-sel_node_t*
-sel_node_create(
-/*============*/
-	mem_heap_t*	heap)	/*!< in: memory heap where created */
+IB_INTERN sel_node_t* sel_node_create(mem_heap_t* heap)
 {
-	sel_node_t*	node;
-
-	node = mem_heap_alloc(heap, sizeof(sel_node_t));
+	sel_node_t*	node = mem_heap_alloc(heap, sizeof(sel_node_t));
 	node->common.type = QUE_NODE_SELECT;
 	node->state = SEL_NODE_OPEN;
-
 	node->plans = NULL;
-
-	return(node);
+	return node;
 }
 
-/*********************************************************************//**
-Frees the memory private to a select node when a query graph is freed,
-does not free the heap where the node was originally created. */
-IB_INTERN
-void
-sel_node_free_private(
-/*==================*/
-	sel_node_t*	node)	/*!< in: select node struct */
+IB_INTERN void sel_node_free_private(sel_node_t* node)
 {
 	ulint	i;
 	plan_t*	plan;
@@ -483,20 +468,13 @@ sel_col_prefetch_buf_alloc(
 /*********************************************************************//**
 Frees a prefetch buffer for a column, including the dynamically allocated
 memory for data stored there. */
-IB_INTERN
-void
-sel_col_prefetch_buf_free(
-/*======================*/
-	sel_buf_t*	prefetch_buf)	/*!< in, own: prefetch buffer */
+IB_INTERN void sel_col_prefetch_buf_free(sel_buf_t* prefetch_buf)
 {
 	sel_buf_t*	sel_buf;
 	ulint		i;
-
 	for (i = 0; i < SEL_MAX_N_PREFETCH; i++) {
 		sel_buf = prefetch_buf + i;
-
 		if (sel_buf->val_buf_size > 0) {
-
 			mem_free(sel_buf->data);
 		}
 	}

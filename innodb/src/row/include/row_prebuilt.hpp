@@ -1,19 +1,24 @@
 // Copyright (c) 1997, 2010, Innobase Oy. All Rights Reserved.
+//
 // This program is free software; you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation; version 2 of the License.
+//
 // This program is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-// Row select prebuilt structure definition.
-// Created 02/03/2009 Sunny Bains
+/// \file row_prebuilt.hpp
+/// \brief Row select prebuilt structure definition.
+/// \details Originally created on 02/03/2009 by Sunny Bains. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-#ifndef row0prebuilt_h
-#define row0prebuilt_h
+#pragma once
 
 #include "lock_types.hpp"
 #include "row_sel.hpp"
@@ -45,20 +50,20 @@ IB_INTERN
 void
 row_prebuilt_update_trx(row_prebuilt_t* prebuilt, trx_t* trx);
 
-#define FETCH_CACHE_SIZE		16
+constinit ulint FETCH_CACHE_SIZE = 16;
 // After fetching this many rows, we start caching them in fetch_cache
-#define FETCH_CACHE_THRESHOLD		4
+constinit ulint FETCH_CACHE_THRESHOLD = 4;
 
 // Values for hint_need_to_fetch_extra_cols
-#define ROW_RETRIEVE_PRIMARY_KEY	1
-#define ROW_RETRIEVE_ALL_COLS		2
+constinit ulint ROW_RETRIEVE_PRIMARY_KEY = 1;
+constinit ulint ROW_RETRIEVE_ALL_COLS = 2;
 
-#define ROW_PREBUILT_ALLOCATED		78540783
-#define ROW_PREBUILT_FREED		26423527
+constinit ulint ROW_PREBUILT_ALLOCATED = 78540783;
+constinit ulint ROW_PREBUILT_FREED = 26423527;
 
-#define ROW_PREBUILT_FETCH_MAGIC_N	465765687
+constinit ulint ROW_PREBUILT_FETCH_MAGIC_N = 465765687;
 
-/* An InnoDB cached row. */
+/// An InnoDB cached row.
 typedef struct ib_cached_row_struct {
 	ulint		max_len;	/* max len of rec if not NULL */
 	ulint		rec_len;	/* length of valid data in rec */
@@ -67,7 +72,7 @@ typedef struct ib_cached_row_struct {
 	byte*		ptr;		/* pointer to start of record */
 } ib_cached_row_t;
 
-// Cache for rows fetched when positioning the cursor.
+/// Cache for rows fetched when positioning the cursor.
 typedef struct ib_row_cache_struct {
 	mem_heap_t*	heap;		/* memory heap for cached rows */
 
@@ -86,9 +91,7 @@ typedef struct ib_row_cache_struct {
 	ib_cur_op_t	direction;	/* ROW_SEL_NEXT or ROW_SEL_PREV */
 } ib_row_cache_t;
 
-/* A struct for (sometimes lazily) prebuilt structures in an Innobase table
-handle used within the API; these are used to save CPU time. */
-
+/// A struct for (sometimes lazily) prebuilt structures in an Innobase table handle used within the API; these are used to save CPU time.
 struct row_prebuilt_struct {
 	ulint		magic_n;	/* this magic number is set to
 					ROW_PREBUILT_ALLOCATED when created,
@@ -165,5 +168,3 @@ struct row_prebuilt_struct {
 	ulint		magic_n2;	/* this should be the same as
 					magic_n */
 };
-
-#endif /* row0prebuilt_h */

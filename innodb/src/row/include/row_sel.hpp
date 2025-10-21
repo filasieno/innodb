@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2010, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2010, Innobase Oy. All Rights Reserved.
+/// \file row_sel.hpp
+/// \brief Select
+/// \details Originally created on 12/19/1997 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/row0sel.h
-Select
-
-Created 12/19/1997 Heikki Tuuri
-*******************************************************/
-
-#ifndef row0sel_h
-#define row0sel_h
+#pragma once
 
 #include "univ.i"
 #include "data_data.hpp"
@@ -38,22 +32,13 @@ Created 12/19/1997 Heikki Tuuri
 #include "read_read.hpp"
 #include "api_api.hpp"
 
-/*********************************************************************//**
-Creates a select node struct.
-@return	own: select node struct */
-IB_INTERN
-sel_node_t*
-sel_node_create(
-/*============*/
-	mem_heap_t*	heap);	/*!< in: memory heap where created */
-/*********************************************************************//**
-Frees the memory private to a select node when a query graph is freed,
-does not free the heap where the node was originally created. */
-IB_INTERN
-void
-sel_node_free_private(
-/*==================*/
-	sel_node_t*	node);	/*!< in: select node struct */
+/// \brief Creates a select node struct.
+/// \param [in] heap memory heap where created
+/// \return own: select node struct
+IB_INTERN sel_node_t* sel_node_create(mem_heap_t* heap);
+/// \brief Frees the memory private to a select node when a query graph is freed, does not free the heap where the node was originally created.
+/// \param [in] node select node struct
+IB_INTERN void sel_node_free_private(sel_node_t* node);
 /*********************************************************************//**
 Frees a prefetch buffer for a column, including the dynamically allocated
 memory for data stored there. */

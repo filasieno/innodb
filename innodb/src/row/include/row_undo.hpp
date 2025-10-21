@@ -1,30 +1,24 @@
-/*****************************************************************************
+// Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1997, 2009, Innobase Oy. All Rights Reserved.
+/// \file row_undo.hpp
+/// \brief Row undo
+/// \details Originally created on 1/8/1997 by Heikki Tuuri. Refactored to modern documentation and style while preserving original authorship information.
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/row0undo.h
-Row undo
-
-Created 1/8/1997 Heikki Tuuri
-*******************************************************/
-
-#ifndef row0undo_h
-#define row0undo_h
+#pragma once
 
 #include "univ.i"
 #include "mtr_mtr.hpp"
@@ -65,7 +59,6 @@ in SQL execution graphs.
 IB_INTERN
 que_thr_t*
 row_undo_step(
-/*==========*/
 	que_thr_t*	thr);	/*!< in: query thread */
 
 /* A single query thread will try to perform the undo for all successive
@@ -136,7 +129,5 @@ struct undo_node_struct{
 
 
 #ifndef IB_DO_NOT_INLINE
-#include "row0undo.inl"
-#endif
-
+#include "row_undo.inl"
 #endif
