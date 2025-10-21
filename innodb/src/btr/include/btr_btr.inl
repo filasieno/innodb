@@ -218,14 +218,11 @@ IB_INLINE void btr_page_set_prev(page_t* page, page_zip_des_t* page_zip, ulint p
 }
 
 /// \brief Gets the child node file address in a node pointer.
-/// \details The offsets array must contain all offsets for the record since
-/// we read the last field according to offsets and assume that it contains
-/// the child page number. In other words offsets must have been retrieved
-/// with rec_get_offsets(n_fields=ULINT_UNDEFINED).
+/// \details The offsets array must contain all offsets for the record since we read the last field according to offsets and assume that it contains
+/// the child page number. In other words offsets must have been retrieved with rec_get_offsets(n_fields=ULINT_UNDEFINED).
 /// \param rec node pointer record
 /// \param offsets array returned by rec_get_offsets()
 /// \return child node address
-
 IB_INLINE ulint btr_node_ptr_get_child_page_no(const rec_t* rec, const ulint* offsets)
 {
 	const byte*	field;

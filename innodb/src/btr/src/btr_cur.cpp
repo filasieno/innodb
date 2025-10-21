@@ -1,43 +1,41 @@
-/*****************************************************************************
-Copyright (c) 1994, 2010, Innobase Oy. All Rights Reserved.
-Copyright (c) 2008, Google Inc.
-Portions of this file contain modifications contributed and copyrighted by
-Google, Inc. Those modifications are gratefully acknowledged and are described
-briefly in the InnoDB documentation. The contributions by Google are
-incorporated with their permission, and subject to the conditions contained in
-the file COPYING.Google.
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-*****************************************************************************/
-/**************************************************//**
-@file btr/btr0cur.c
-The index tree cursor
-All changes that row operations make to a B-tree or the records
-there must go through this module! Undo log records are written here
-of every modify or insert of a clustered index record.
-			NOTE!!!
-To make sure we do not run out of disk space during a pessimistic
-insert or update, we have to reserve 2 x the height of the index tree
-many pages in the tablespace before we start the operation, because
-if leaf splitting has been started, it is difficult to undo, except
-by crashing the database and doing a roll-forward.
-Created 10/16/1994 Heikki Tuuri
-*******************************************************/
-#include "univ.i"
+// Copyright (c) 1994, 2010, Innobase Oy. All Rights Reserved.
+// Copyright (c) 2008, Google Inc.
+//
+// Portions of this file contain modifications contributed and copyrighted by
+// Google, Inc. Those modifications are gratefully acknowledged and are described
+// briefly in the InnoDB documentation. The contributions by Google are
+// incorporated with their permission, and subject to the conditions contained in
+// the file COPYING.Google.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
+
+/// \file btr_cur.hpp
+/// \brief The index tree cursor
+/// \details All changes that row operations make to a B-tree or the records there must go through this module! Undo log records are written here of every modify or insert of a clustered index record. NOTE!!! To make sure we do not run out of disk space during a pessimistic insert or update, we have to reserve 2 x the height of the index tree many pages in the tablespace before we start the operation, because if leaf splitting has been started, it is difficult to undo, except by crashing the database and doing a roll-forward. Originally created by Heikki Tuuri on 10/16/1994.
+/// \author Fabio N. Filasieno
+/// \date 21/10/2025
+
+#include "defs.i"
 #include <zlib.h>
 #include "btr_cur.hpp"
+
 #ifdef IB_DO_NOT_INLINE
-#include "btr0cur.inl"
+	#include "btr_cur.inl"
 #endif
+
 #include "row_upd.hpp"
+
 #ifndef IB_HOTBACKUP
+
 #include "mtr_log.hpp"
 #include "page_page.hpp"
 #include "page_zip.hpp"
@@ -53,6 +51,7 @@ Created 10/16/1994 Heikki Tuuri
 #include "srv_srv.hpp"
 #include "ibuf_ibuf.hpp"
 #include "lock_lock.hpp"
+
 #ifdef IB_DEBUG
 /** If the following is set to TRUE, this module prints a lot of
 trace information of individual record operations */
@@ -73,16 +72,16 @@ srv_printf_innodb_monitor(). */
 IB_INTERN ulint	btr_cur_n_sea_old	= 0;
 /** In the optimistic insert, if the insert does not fit, but this much space
 can be released by page reorganize, then it is reorganized */
-#define BTR_CUR_PAGE_REORGANIZE_LIMIT	(IB_PAGE_SIZE / 32)
+constinit ulint BTR_CUR_PAGE_REORGANIZE_LIMIT = (IB_PAGE_SIZE / 32);
 /** The structure of a BLOB part header */
 /* @{ */
 /*--------------------------------------*/
-#define BTR_BLOB_HDR_PART_LEN		0	/*!< BLOB part len on this
+constinit ulint BTR_BLOB_HDR_PART_LEN = 0;	/*!< BLOB part len on this
 						page */
-#define BTR_BLOB_HDR_NEXT_PAGE_NO	4	/*!< next BLOB part page no,
+constinit ulint BTR_BLOB_HDR_NEXT_PAGE_NO = 4;	/*!< next BLOB part page no,
 						FIL_NULL if none */
 /*--------------------------------------*/
-#define BTR_BLOB_HDR_SIZE		8	/*!< Size of a BLOB
+constinit ulint BTR_BLOB_HDR_SIZE = 8;	/*!< Size of a BLOB
 						part header, in bytes */
 /* @} */
 #endif /* !IB_HOTBACKUP */
@@ -91,48 +90,28 @@ Initially, BLOB field references are set to zero, in
 dtuple_convert_big_rec(). */
 IB_INTERN const byte field_ref_zero[BTR_EXTERN_FIELD_REF_SIZE];
 #ifndef IB_HOTBACKUP
-/*******************************************************************//**
-Marks all extern fields in a record as owned by the record. This function
-should be called if the delete mark of a record is removed: a not delete
-marked record always owns all its extern fields. */
-static
-void
-btr_cur_unmark_extern_fields(
-/*=========================*/
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose uncompressed
-				part will be updated, or NULL */
-	rec_t*		rec,	/*!< in/out: record in a clustered index */
-	dict_index_t*	index,	/*!< in: index of the page */
-	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
-	mtr_t*		mtr);	/*!< in: mtr, or NULL if not logged */
-/*******************************************************************//**
-Adds path information to the cursor for the current page, for which
-the binary search has been performed. */
-static
-void
-btr_cur_add_path_info(
-/*==================*/
-	btr_cur_t*	cursor,		/*!< in: cursor positioned on a page */
-	ulint		height,		/*!< in: height of the page in tree;
-					0 means leaf node */
-	ulint		root_height);	/*!< in: root node height in tree */
-/***********************************************************//**
-Frees the externally stored fields for a record, if the field is mentioned
-in the update vector. */
-static
-void
-btr_rec_free_updated_extern_fields(
-/*===============================*/
-	dict_index_t*	index,	/*!< in: index of rec; the index tree MUST be
-				X-latched */
-	rec_t*		rec,	/*!< in: record */
-	page_zip_des_t*	page_zip,/*!< in: compressed page whose uncompressed
-				part will be updated, or NULL */
-	const ulint*	offsets,/*!< in: rec_get_offsets(rec, index) */
-	const upd_t*	update,	/*!< in: update vector */
-	enum trx_rb_ctx	rb_ctx,	/*!< in: rollback context */
-	mtr_t*		mtr);	/*!< in: mini-transaction handle which contains
-				an X-latch to record page and to the tree */
+/// \brief Marks all extern fields in a record as owned by the record.
+/// \param [in/out] page_zip compressed page whose uncompressed part will be updated, or NULL
+/// \param [in/out] rec record in a clustered index
+/// \param [in] index index of the page
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \param [in] mtr mtr, or NULL if not logged
+/// \details This function should be called if the delete mark of a record is removed: a not delete marked record always owns all its extern fields.
+static void btr_cur_unmark_extern_fields(page_zip_des_t* page_zip, rec_t* rec, dict_index_t* index, const ulint* offsets, mtr_t* mtr);
+/// \brief Adds path information to the cursor for the current page, for which the binary search has been performed.
+/// \param [in] cursor cursor positioned on a page
+/// \param [in] height height of the page in tree; 0 means leaf node
+/// \param [in] root_height root node height in tree
+static void btr_cur_add_path_info(btr_cur_t* cursor, ulint height, ulint root_height);
+/// \brief Frees the externally stored fields for a record, if the field is mentioned in the update vector.
+/// \param [in] index index of rec; the index tree MUST be X-latched
+/// \param [in] rec record
+/// \param [in] page_zip compressed page whose uncompressed part will be updated, or NULL
+/// \param [in] offsets rec_get_offsets(rec, index)
+/// \param [in] update update vector
+/// \param [in] rb_ctx rollback context
+/// \param [in] mtr mini-transaction handle which contains an X-latch to record page and to the tree
+static void btr_rec_free_updated_extern_fields(dict_index_t* index, rec_t* rec, page_zip_des_t* page_zip, const ulint* offsets, const upd_t* update, enum trx_rb_ctx rb_ctx, mtr_t* mtr);
 /***********************************************************//**
 Frees the externally stored fields for a record. */
 static
@@ -159,15 +138,11 @@ btr_rec_get_externally_stored_len(
 	rec_t*		rec,	/*!< in: record */
 	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
 #endif /* !IB_HOTBACKUP */
-/******************************************************//**
-The following function is used to set the deleted bit of a record. */
-IB_INLINE
-void
-btr_rec_set_deleted_flag(
-/*=====================*/
-	rec_t*		rec,	/*!< in/out: physical record */
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page (or NULL) */
-	ulint		flag)	/*!< in: nonzero if delete marked */
+/// \brief The following function is used to set the deleted bit of a record.
+/// \param [in/out] rec physical record
+/// \param [in/out] page_zip compressed page (or NULL)
+/// \param [in] flag nonzero if delete marked
+IB_INLINE void btr_rec_set_deleted_flag(rec_t* rec, page_zip_des_t* page_zip, ulint flag)
 {
 	if (page_rec_is_comp(rec)) {
 		rec_set_deleted_flag_new(rec, page_zip, flag);
@@ -178,154 +153,112 @@ btr_rec_set_deleted_flag(
 }
 #ifndef IB_HOTBACKUP
 /*==================== B-TREE SEARCH =========================*/
-/********************************************************************//**
-Reset global configuration variables. */
-IB_INTERN
-void
-btr_cur_var_init(void)
-/*==================*/
+/// \brief Reset global configuration variables.
+IB_INTERN void btr_cur_var_init(void)
 {
-	btr_cur_n_non_sea	= 0;
-	btr_cur_n_sea		= 0;
-	btr_cur_n_non_sea_old	= 0;
-	btr_cur_n_sea_old	= 0;
+    btr_cur_n_non_sea = 0;
+    btr_cur_n_sea = 0;
+    btr_cur_n_non_sea_old = 0;
+    btr_cur_n_sea_old = 0;
 #ifdef IB_DEBUG
-	btr_cur_print_record_ops = FALSE;
+    btr_cur_print_record_ops = FALSE;
 #endif /* IB_DEBUG */
 }
-/************************************************************************
-Latches the leaf page or pages requested. */
-static
-void
-btr_cur_latch_leaves(
-/*=================*/
-	page_t*		page,		/*!< in: leaf page where the search
-					converged */
-	ulint		space,		/*!< in: space id */
-	ulint		zip_size,	/*!< in: compressed page size in bytes
-					or 0 for uncompressed pages */
-	ulint		page_no,	/*!< in: page number of the leaf */
-	ulint		latch_mode,	/*!< in: BTR_SEARCH_LEAF, ... */
-	btr_cur_t*	cursor,		/*!< in: cursor */
-	mtr_t*		mtr)		/*!< in: mtr */
+/// \brief Latches the leaf page or pages requested.
+/// \param [in] page leaf page where the search converged
+/// \param [in] space space id
+/// \param [in] zip_size compressed page size in bytes or 0 for uncompressed pages
+/// \param [in] page_no page number of the leaf
+/// \param [in] latch_mode BTR_SEARCH_LEAF, ...
+/// \param [in] cursor cursor
+/// \param [in] mtr mtr
+static void btr_cur_latch_leaves(page_t* page, ulint space, ulint zip_size, ulint page_no, ulint latch_mode, btr_cur_t* cursor, mtr_t* mtr)
 {
-	ulint		mode;
-	ulint		left_page_no;
-	ulint		right_page_no;
-	buf_block_t*	get_block;
 	ut_ad(page && mtr);
 	switch (latch_mode) {
 	case BTR_SEARCH_LEAF:
 	case BTR_MODIFY_LEAF:
-		mode = latch_mode == BTR_SEARCH_LEAF ? RW_S_LATCH : RW_X_LATCH;
-		get_block = btr_block_get(space, zip_size, page_no, mode, mtr);
+		{
+			ulint mode = latch_mode == BTR_SEARCH_LEAF ? RW_S_LATCH : RW_X_LATCH;
+			buf_block_t* get_block = btr_block_get(space, zip_size, page_no, mode, mtr);
 #ifdef IB_BTR_DEBUG
 		ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
 #endif /* IB_BTR_DEBUG */
 		get_block->check_index_page_at_flush = TRUE;
 		return;
+		}
 	case BTR_MODIFY_TREE:
 		/* x-latch also brothers from left to right */
-		left_page_no = btr_page_get_prev(page, mtr);
-		if (left_page_no != FIL_NULL) {
-			get_block = btr_block_get(space, zip_size,
-						  left_page_no,
-						  RW_X_LATCH, mtr);
+		{
+			ulint left_page_no = btr_page_get_prev(page, mtr);
+			if (left_page_no != FIL_NULL) {
+				buf_block_t* get_block = btr_block_get(space, zip_size, left_page_no, RW_X_LATCH, mtr);
 #ifdef IB_BTR_DEBUG
-			ut_a(page_is_comp(get_block->frame)
-			     == page_is_comp(page));
-			ut_a(btr_page_get_next(get_block->frame, mtr)
-			     == page_get_page_no(page));
+				ut_a(page_is_comp(get_block->frame)
+				     == page_is_comp(page));
+				ut_a(btr_page_get_next(get_block->frame, mtr)
+				     == page_get_page_no(page));
+#endif /* IB_BTR_DEBUG */
+				get_block->check_index_page_at_flush = TRUE;
+			}
+			buf_block_t* get_block = btr_block_get(space, zip_size, page_no, RW_X_LATCH, mtr);
+#ifdef IB_BTR_DEBUG
+			ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
 #endif /* IB_BTR_DEBUG */
 			get_block->check_index_page_at_flush = TRUE;
-		}
-		get_block = btr_block_get(space, zip_size, page_no,
-					  RW_X_LATCH, mtr);
+			ulint right_page_no = btr_page_get_next(page, mtr);
+			if (right_page_no != FIL_NULL) {
+				buf_block_t* get_block = btr_block_get(space, zip_size, right_page_no, RW_X_LATCH, mtr);
 #ifdef IB_BTR_DEBUG
-		ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
+				ut_a(page_is_comp(get_block->frame)
+				     == page_is_comp(page));
+				ut_a(btr_page_get_prev(get_block->frame, mtr)
+				     == page_get_page_no(page));
 #endif /* IB_BTR_DEBUG */
-		get_block->check_index_page_at_flush = TRUE;
-		right_page_no = btr_page_get_next(page, mtr);
-		if (right_page_no != FIL_NULL) {
-			get_block = btr_block_get(space, zip_size,
-						  right_page_no,
-						  RW_X_LATCH, mtr);
-#ifdef IB_BTR_DEBUG
-			ut_a(page_is_comp(get_block->frame)
-			     == page_is_comp(page));
-			ut_a(btr_page_get_prev(get_block->frame, mtr)
-			     == page_get_page_no(page));
-#endif /* IB_BTR_DEBUG */
-			get_block->check_index_page_at_flush = TRUE;
+				get_block->check_index_page_at_flush = TRUE;
+			}
 		}
 		return;
 	case BTR_SEARCH_PREV:
 	case BTR_MODIFY_PREV:
-		mode = latch_mode == BTR_SEARCH_PREV ? RW_S_LATCH : RW_X_LATCH;
-		/* latch also left brother */
-		left_page_no = btr_page_get_prev(page, mtr);
-		if (left_page_no != FIL_NULL) {
-			get_block = btr_block_get(space, zip_size,
-						  left_page_no, mode, mtr);
-			cursor->left_block = get_block;
+		{
+			ulint mode = latch_mode == BTR_SEARCH_PREV ? RW_S_LATCH : RW_X_LATCH;
+			/* latch also left brother */
+			ulint left_page_no = btr_page_get_prev(page, mtr);
+			if (left_page_no != FIL_NULL) {
+				buf_block_t* get_block = btr_block_get(space, zip_size, left_page_no, mode, mtr);
+				cursor->left_block = get_block;
 #ifdef IB_BTR_DEBUG
-			ut_a(page_is_comp(get_block->frame)
-			     == page_is_comp(page));
-			ut_a(btr_page_get_next(get_block->frame, mtr)
-			     == page_get_page_no(page));
+				ut_a(page_is_comp(get_block->frame)
+				     == page_is_comp(page));
+				ut_a(btr_page_get_next(get_block->frame, mtr)
+				     == page_get_page_no(page));
+#endif /* IB_BTR_DEBUG */
+				get_block->check_index_page_at_flush = TRUE;
+			}
+			buf_block_t* get_block = btr_block_get(space, zip_size, page_no, mode, mtr);
+#ifdef IB_BTR_DEBUG
+			ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
 #endif /* IB_BTR_DEBUG */
 			get_block->check_index_page_at_flush = TRUE;
 		}
-		get_block = btr_block_get(space, zip_size, page_no, mode, mtr);
-#ifdef IB_BTR_DEBUG
-		ut_a(page_is_comp(get_block->frame) == page_is_comp(page));
-#endif /* IB_BTR_DEBUG */
-		get_block->check_index_page_at_flush = TRUE;
 		return;
 	}
 	UT_ERROR;
 }
-/********************************************************************//**
-Searches an index tree and positions a tree cursor on a given level.
-NOTE: n_fields_cmp in tuple must be set so that it cannot be compared
-to node pointer page number fields on the upper levels of the tree!
-Note that if mode is PAGE_CUR_LE, which is used in inserts, then
-cursor->up_match and cursor->low_match both will have sensible values.
-If mode is PAGE_CUR_GE, then up_match will a have a sensible value.
-If mode is PAGE_CUR_LE , cursor is left at the place where an insert of the
-search tuple should be performed in the B-tree. InnoDB does an insert
-immediately after the cursor. Thus, the cursor may end up on a user record,
-or on a page infimum record. */
-IB_INTERN
-void
-btr_cur_search_to_nth_level(
-/*========================*/
-	dict_index_t*	dict_index,	/*!< in: index */
-	ulint		level,	/*!< in: the tree level of search */
-	const dtuple_t*	tuple,	/*!< in: data tuple; NOTE: n_fields_cmp in
-				tuple must be set so that it cannot get
-				compared to the node ptr page number field! */
-	ulint		mode,	/*!< in: PAGE_CUR_L, ...;
-				Inserts should always be made using
-				PAGE_CUR_LE to search the position! */
-	ulint		latch_mode, /*!< in: BTR_SEARCH_LEAF, ..., ORed with
-				BTR_INSERT and BTR_ESTIMATE;
-				cursor->left_block is used to store a pointer
-				to the left neighbor page, in the cases
-				BTR_SEARCH_PREV and BTR_MODIFY_PREV;
-				NOTE that if has_search_latch
-				is != 0, we maybe do not have a latch set
-				on the cursor page, we assume
-				the caller uses his search latch
-				to protect the record! */
-	btr_cur_t*	cursor, /*!< in/out: tree cursor; the cursor page is
-				s- or x-latched, but see also above! */
-	ulint		has_search_latch,/*!< in: info on the latch mode the
-				caller currently has on btr_search_latch:
-				RW_S_LATCH, or 0 */
-	const char*	file,	/*!< in: file name */
-	ulint		line,	/*!< in: line where called */
-	mtr_t*		mtr)	/*!< in: mtr */
+/// \brief Searches an index tree and positions a tree cursor on a given level.
+/// \details NOTE: n_fields_cmp in tuple must be set so that it cannot be compared to node pointer page number fields on the upper levels of the tree! Note that if mode is PAGE_CUR_LE, which is used in inserts, then cursor->up_match and cursor->low_match both will have sensible values. If mode is PAGE_CUR_GE, then up_match will a have a sensible value. If mode is PAGE_CUR_LE , cursor is left at the place where an insert of the search tuple should be performed in the B-tree. InnoDB does an insert immediately after the cursor. Thus, the cursor may end up on a user record, or on a page infimum record.
+/// \param [in] dict_index index
+/// \param [in] level the tree level of search
+/// \param [in] tuple data tuple; NOTE: n_fields_cmp in tuple must be set so that it cannot get compared to the node ptr page number field!
+/// \param [in] mode PAGE_CUR_L, ...; Inserts should always be made using PAGE_CUR_LE to search the position!
+/// \param [in] latch_mode BTR_SEARCH_LEAF, ..., ORed with BTR_INSERT and BTR_ESTIMATE; cursor->left_block is used to store a pointer to the left neighbor page, in the cases BTR_SEARCH_PREV and BTR_MODIFY_PREV; NOTE that if has_search_latch is != 0, we maybe do not have a latch set on the cursor page, we assume the caller uses his search latch to protect the record!
+/// \param [in/out] cursor tree cursor; the cursor page is s- or x-latched, but see also above!
+/// \param [in] has_search_latch info on the latch mode the caller currently has on btr_search_latch: RW_S_LATCH, or 0
+/// \param [in] file file name
+/// \param [in] line line where called
+/// \param [in] mtr mtr
+IB_INTERN void btr_cur_search_to_nth_level(dict_index_t* dict_index, ulint level, const dtuple_t* tuple, ulint mode, ulint latch_mode, btr_cur_t* cursor, ulint has_search_latch, const char* file, ulint line, mtr_t* mtr)
 {
 	page_cur_t*	page_cursor;
 	page_t*		page;
