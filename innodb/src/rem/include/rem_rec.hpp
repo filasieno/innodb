@@ -13,6 +13,7 @@
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
 /// \file rem_rec.hpp
+
 /// \brief Record manager
 /// \details Originally created by Heikki Tuuri on 5/30/1994
 /// \author Fabio N. Filasieno
@@ -202,8 +203,7 @@ IB_INTERN ulint rec_get_n_extern_new(const rec_t* rec, dict_index_t* index, ulin
 /// \return the new offsets
 IB_INTERN ulint* rec_get_offsets_func(const rec_t* rec, const dict_index_t* index, ulint* offsets, ulint n_fields, mem_heap_t** heap, const char* file, ulint line);
 
-#define rec_get_offsets(rec,index,offsets,n,heap)	\
-	rec_get_offsets_func(rec,index,offsets,n,heap,__FILE__,__LINE__)
+#define rec_get_offsets(rec,index,offsets,n,heap)	rec_get_offsets_func(rec,index,offsets,n,heap,__FILE__,__LINE__)
 
 /// \brief Determines the offset to each field in a leaf-page record in ROW_FORMAT=COMPACT.
 /// \details This is a special case of rec_init_offsets() and rec_get_offsets_func().
@@ -237,322 +237,233 @@ IB_INLINE void rec_offs_make_valid(const rec_t* rec, const dict_index_t* index, 
 /// \brief Gets the offset to the nth data field in an old-style record.
 /// \return offset to the field
 IB_INTERN ulint rec_get_nth_field_offs_old(const rec_t* rec, ulint n, ulint* len);
-#define rec_get_nth_field_old(rec, n, len) \
-((rec) + rec_get_nth_field_offs_old(rec, n, len))
+#define rec_get_nth_field_old(rec, n, len) ((rec) + rec_get_nth_field_offs_old(rec, n, len))
+
 /// \brief Gets the physical size of an old-style field.
 /// \details Also an SQL null may have a field of size > 0, if the data type is of a fixed size.
 /// \return field size in bytes
 IB_INLINE ulint rec_get_nth_field_size(const rec_t* rec, ulint n);
+
 /// \brief Gets an offset to the nth data field in a record.
 /// \return offset from the origin of rec
 IB_INLINE ulint rec_get_nth_field_offs(const ulint* offsets, ulint n, ulint* len);
-#define rec_get_nth_field(rec, offsets, n, len) \
-((rec) + rec_get_nth_field_offs(offsets, n, len))
+
+#define rec_get_nth_field(rec, offsets, n, len) ((rec) + rec_get_nth_field_offs(offsets, n, len))
+
 /// \brief Determines if the offsets are for a record in the new compact format.
 /// \return nonzero if compact format
 IB_INLINE ulint rec_offs_comp(const ulint* offsets);
+
 /// \brief Determines if the offsets are for a record containing externally stored columns.
 /// \return nonzero if externally stored
 IB_INLINE ulint rec_offs_any_extern(const ulint* offsets);
+
 /// \brief Returns nonzero if the extern bit is set in nth field of rec.
 /// \return nonzero if externally stored
 IB_INLINE ulint rec_offs_nth_extern(const ulint* offsets, ulint n);
+
 /// \brief Returns nonzero if the SQL NULL bit is set in nth field of rec.
 /// \return nonzero if SQL NULL
 IB_INLINE ulint rec_offs_nth_sql_null(const ulint* offsets, ulint n);
-/******************************************************//**
-Gets the physical size of a field.
-@return	length of field */
-IB_INLINE
-ulint
-rec_offs_nth_size(
-/*==============*/
-	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
-	ulint		n);	/*!< in: nth field */
 
-/******************************************************//**
-Returns the number of extern bits set in a record.
-@return	number of externally stored fields */
-IB_INLINE
-ulint
-rec_offs_n_extern(
-/*==============*/
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/***********************************************************//**
-This is used to modify the value of an already existing field in a record.
-The previous value must have exactly the same size as the new value. If len
-is IB_SQL_NULL then the field is treated as an SQL null.
-For records in ROW_FORMAT=COMPACT (new-style records), len must not be
-IB_SQL_NULL unless the field already is SQL null. */
-IB_INLINE
-void
-rec_set_nth_field(
-/*==============*/
-	rec_t*		rec,	/*!< in: record */
-	const ulint*	offsets,/*!< in: array returned by rec_get_offsets() */
-	ulint		n,	/*!< in: index number of the field */
-	const void*	data,	/*!< in: pointer to the data if not SQL null */
-	ulint		len);	/*!< in: length of the data or IB_SQL_NULL */
-/**********************************************************//**
-The following function returns the data size of an old-style physical
-record, that is the sum of field lengths. SQL null fields
-are counted as length 0 fields. The value returned by the function
-is the distance from record origin to record end in bytes.
-@return	size */
-IB_INLINE
-ulint
-rec_get_data_size_old(
-/*==================*/
-	const rec_t*	rec);	/*!< in: physical record */
-/**********************************************************//**
-The following function returns the number of allocated elements
-for an array of offsets.
-@return	number of elements */
-IB_INLINE
-ulint
-rec_offs_get_n_alloc(
-/*=================*/
-	const ulint*	offsets);/*!< in: array for rec_get_offsets() */
-/**********************************************************//**
-The following function sets the number of allocated elements
-for an array of offsets. */
-IB_INLINE
-void
-rec_offs_set_n_alloc(
-/*=================*/
-	ulint*	offsets,	/*!< out: array for rec_get_offsets(),
-				must be allocated */
-	ulint	n_alloc);	/*!< in: number of elements */
+/// \brief Gets the physical size of a field.
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \param [in] n nth field
+/// \return length of field
+IB_INLINE ulint rec_offs_nth_size(const ulint* offsets, ulint n);
+
+
+/// \brief Returns the number of extern bits set in a record.
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return number of externally stored fields
+IB_INLINE ulint rec_offs_n_extern(const ulint* offsets);
+
+/// \brief This is used to modify the value of an already existing field in a record.
+/// \details The previous value must have exactly the same size as the new value. If len is IB_SQL_NULL then the field is treated as an SQL null. For records in ROW_FORMAT=COMPACT (new-style records), len must not be IB_SQL_NULL unless the field already is SQL null.
+/// \param [in] rec record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \param [in] n index number of the field
+/// \param [in] data pointer to the data if not SQL null
+/// \param [in] len length of the data or IB_SQL_NULL
+IB_INLINE void rec_set_nth_field(rec_t* rec, const ulint* offsets, ulint n, const void* data, ulint len);
+
+/// \brief The following function returns the data size of an old-style physical record, that is the sum of field lengths.
+/// \details SQL null fields are counted as length 0 fields. The value returned by the function is the distance from record origin to record end in bytes.
+/// \param [in] rec physical record
+/// \return size
+IB_INLINE ulint rec_get_data_size_old(const rec_t* rec);
+
+/// \brief The following function returns the number of allocated elements for an array of offsets.
+/// \param [in] offsets array for rec_get_offsets()
+/// \return number of elements
+IB_INLINE ulint rec_offs_get_n_alloc(const ulint* offsets);
+
+/// \brief The following function sets the number of allocated elements for an array of offsets.
+/// \param [out] offsets array for rec_get_offsets(), must be allocated
+/// \param [in] n_alloc number of elements
+IB_INLINE void rec_offs_set_n_alloc(ulint* offsets, ulint n_alloc);
 #define rec_offs_init(offsets) \
 	rec_offs_set_n_alloc(offsets, (sizeof offsets) / sizeof *offsets)
-/**********************************************************//**
-The following function returns the number of fields in a record.
-@return	number of fields */
-IB_INLINE
-ulint
-rec_offs_n_fields(
-/*==============*/
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/**********************************************************//**
-The following function returns the data size of a physical
-record, that is the sum of field lengths. SQL null fields
-are counted as length 0 fields. The value returned by the function
-is the distance from record origin to record end in bytes.
-@return	size */
-IB_INLINE
-ulint
-rec_offs_data_size(
-/*===============*/
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/**********************************************************//**
-Returns the total size of record minus data size of record.
-The value returned by the function is the distance from record
-start to record origin in bytes.
-@return	size */
-IB_INLINE
-ulint
-rec_offs_extra_size(
-/*================*/
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/**********************************************************//**
-Returns the total size of a physical record.
-@return	size */
-IB_INLINE
-ulint
-rec_offs_size(
-/*==========*/
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/**********************************************************//**
-Returns a pointer to the start of the record.
-@return	pointer to start */
-IB_INLINE
-byte*
-rec_get_start(
-/*==========*/
-	rec_t*		rec,	/*!< in: pointer to record */
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/**********************************************************//**
-Returns a pointer to the end of the record.
-@return	pointer to end */
-IB_INLINE
-byte*
-rec_get_end(
-/*========*/
-	rec_t*		rec,	/*!< in: pointer to record */
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-/***************************************************************//**
-Copies a physical record to a buffer.
-@return	pointer to the origin of the copy */
-IB_INLINE
-rec_t*
-rec_copy(
-/*=====*/
-	void*		buf,	/*!< in: buffer */
-	const rec_t*	rec,	/*!< in: physical record */
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
-#ifndef IB_HOTBACKUP
-/**************************************************************//**
-Copies the first n fields of a physical record to a new physical record in
-a buffer.
-@return	own: copied record */
-IB_INTERN
-rec_t*
-rec_copy_prefix_to_buf(
-/*===================*/
-	const rec_t*		rec,		/*!< in: physical record */
-	const dict_index_t*	index,		/*!< in: record descriptor */
-	ulint			n_fields,	/*!< in: number of fields
-						to copy */
-	byte**			buf,		/*!< in/out: memory buffer
-						for the copied prefix,
-						or NULL */
-	ulint*			buf_size);	/*!< in/out: buffer size */
-/************************************************************//**
-Folds a prefix of a physical record to a ulint.
-@return	the folded value */
-IB_INLINE
-ulint
-rec_fold(
-/*=====*/
-	const rec_t*	rec,		/*!< in: the physical record */
-	const ulint*	offsets,	/*!< in: array returned by rec_get_offsets() */
-	ulint		n_fields,	/*!< in: number of complete
-					fields to fold */
-	ulint		n_bytes,	/*!< in: number of bytes to fold
-					in an incomplete last field */
-	dulint		tree_id)	/*!< in: index tree id */
-	__attribute__((pure));
-#endif /* !IB_HOTBACKUP */
-/*********************************************************//**
-Builds a ROW_FORMAT=COMPACT record out of a data tuple. */
-IB_INTERN
-void
-rec_convert_dtuple_to_rec_comp(
-	rec_t*			rec,	/*!< in: origin of record */
-	ulint			extra,	/*!< in: number of bytes to reserve between the record header and the data payload (normally REC_N_NEW_EXTRA_BYTES) */
-	const dict_index_t*	index,	/*!< in: record descriptor */
-	ulint			status,	/*!< in: status bits of the record */
-	const dfield_t*		fields,	/*!< in: array of data fields */
-	ulint			n_fields);/*!< in: number of data fields */
-/*********************************************************//**
-Builds a physical record out of a data tuple and
-stores it into the given buffer.
-@return	pointer to the origin of physical record */
-IB_INTERN
-rec_t*
-rec_convert_dtuple_to_rec(
-	byte*			buf,	/*!< in: start address of the physical record */
-	const dict_index_t*	index,	/*!< in: record descriptor */
-	const dtuple_t*		dtuple,	/*!< in: data tuple */
-	ulint			n_ext);	/*!< in: number of externally stored columns */
-/**********************************************************//**
-Returns the extra size of an old-style physical record if we know its
-data size and number of fields.
-@return	extra size */
-IB_INLINE
-ulint
-rec_get_converted_extra_size(
-	ulint	data_size,	/*!< in: data size */
-	ulint	n_fields,	/*!< in: number of fields */
-	ulint	n_ext)		/*!< in: number of externally stored columns */
-		__attribute__((const));
 
-		/**
-Determines the size of a data tuple prefix in ROW_FORMAT=COMPACT.
-@return	total size */
-IB_INTERN
-ulint
-rec_get_converted_size_comp_prefix(
-	const dict_index_t*	index,	/*!< in: record descriptor; dict_table_is_comp() is assumed to hold, even if it does not */
-	const dfield_t*		fields,	/*!< in: array of data fields */
-	ulint			n_fields,/*!< in: number of data fields */
-	ulint*			extra);	/*!< out: extra size */
+	/// \brief The following function returns the number of fields in a record.
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return number of fields
+IB_INLINE ulint rec_offs_n_fields(const ulint* offsets);
 
-	/**
-Determines the size of a data tuple in ROW_FORMAT=COMPACT.
-@return	total size */
-IB_INTERN
-ulint
-rec_get_converted_size_comp(
-	const dict_index_t*	index,	/*!< in: record descriptor;
-					dict_table_is_comp() is
-					assumed to hold, even if
-					it does not */
-	ulint			status,	/*!< in: status bits of the record */
-	const dfield_t*		fields,	/*!< in: array of data fields */
-	ulint			n_fields,/*!< in: number of data fields */
-	ulint*			extra);	/*!< out: extra size */
-/**********************************************************//**
-The following function returns the size of a data tuple when converted to
-a physical record.
-@return	size */
-IB_INLINE
-ulint
-rec_get_converted_size(
-	dict_index_t*	index,	/*!< in: record descriptor */
-	const dtuple_t*	dtuple,	/*!< in: data tuple */
-	ulint		n_ext);	/*!< in: number of externally stored columns */
+/// \brief The following function returns the data size of a physical record, that is the sum of field lengths.
+/// \details SQL null fields are counted as length 0 fields. The value returned by the function is the distance from record origin to record end in bytes.
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return size
+IB_INLINE ulint rec_offs_data_size(const ulint* offsets);
+
+/// \brief Returns the total size of record minus data size of record.
+/// \details The value returned by the function is the distance from record start to record origin in bytes.
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return size
+IB_INLINE ulint rec_offs_extra_size(const ulint* offsets);
+
+/// \brief Returns the total size of a physical record.
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return size
+IB_INLINE ulint rec_offs_size(const ulint* offsets);
+
+/// \brief Returns a pointer to the start of the record.
+/// \param [in] rec pointer to record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return pointer to start
+IB_INLINE byte* rec_get_start(rec_t* rec, const ulint* offsets);
+
+/// \brief Returns a pointer to the end of the record.
+/// \param [in] rec pointer to record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return pointer to end
+IB_INLINE byte* rec_get_end(rec_t* rec, const ulint* offsets);
+
+/// \brief Copies a physical record to a buffer.
+/// \param [in] buf buffer
+/// \param [in] rec physical record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return pointer to the origin of the copy
+IB_INLINE rec_t* rec_copy(void* buf, const rec_t* rec, const ulint* offsets);
+
 #ifndef IB_HOTBACKUP
-/**************************************************************//**
-Copies the first n fields of a physical record to a data tuple.
-The fields are copied to the memory heap. */
-IB_INTERN
-void
-rec_copy_prefix_to_dtuple(
-	dtuple_t*		tuple,		/*!< out: data tuple */
-	const rec_t*		rec,		/*!< in: physical record */
-	const dict_index_t*	index,		/*!< in: record descriptor */
-	ulint			n_fields,	/*!< in: number of fields
-						to copy */
-	mem_heap_t*		heap);		/*!< in: memory heap */
+
+/// \brief Copies the first n fields of a physical record to a new physical record in a buffer.
+/// \param [in] rec physical record
+/// \param [in] index record descriptor
+/// \param [in] n_fields number of fields to copy
+/// \param [in/out] buf memory buffer for the copied prefix, or NULL
+/// \param [in/out] buf_size buffer size
+/// \return own: copied record
+IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* index, ulint n_fields, byte** buf, ulint* buf_size);
+
+/// \brief Folds a prefix of a physical record to a ulint.
+/// \param [in] rec the physical record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \param [in] n_fields number of complete fields to fold
+/// \param [in] n_bytes number of bytes to fold in an incomplete last field
+/// \param [in] tree_id index tree id
+/// \return the folded value
+IB_INLINE ulint rec_fold(const rec_t* rec, const ulint* offsets, ulint n_fields, ulint n_bytes, dulint tree_id) __attribute__((pure));
+
+#endif // !IB_HOTBACKUP
+
+/// \brief Builds a ROW_FORMAT=COMPACT record out of a data tuple.
+/// \param [in] rec origin of record
+/// \param [in] extra number of bytes to reserve between the record header and the data payload (normally REC_N_NEW_EXTRA_BYTES)
+/// \param [in] index record descriptor
+/// \param [in] status status bits of the record
+/// \param [in] fields array of data fields
+/// \param [in] n_fields number of data fields
+IB_INTERN void rec_convert_dtuple_to_rec_comp(rec_t* rec, ulint extra, const dict_index_t* index, ulint status, const dfield_t* fields, ulint n_fields);
+
+/// \brief Builds a physical record out of a data tuple and stores it into the given buffer.
+/// \param [in] buf start address of the physical record
+/// \param [in] index record descriptor
+/// \param [in] dtuple data tuple
+/// \param [in] n_ext number of externally stored columns
+/// \return pointer to the origin of physical record
+IB_INTERN rec_t* rec_convert_dtuple_to_rec(byte* buf, const dict_index_t* index, const dtuple_t* dtuple, ulint n_ext);
+
+/// \brief Returns the extra size of an old-style physical record if we know its data size and number of fields.
+/// \param [in] data_size data size
+/// \param [in] n_fields number of fields
+/// \param [in] n_ext number of externally stored columns
+/// \return extra size
+IB_INLINE ulint rec_get_converted_extra_size(ulint data_size, ulint n_fields, ulint n_ext) __attribute__((const));
+
+
+/// \brief Determines the size of a data tuple prefix in ROW_FORMAT=COMPACT.
+/// \param [in] index record descriptor; dict_table_is_comp() is assumed to hold, even if it does not
+/// \param [in] fields array of data fields
+/// \param [in] n_fields number of data fields
+/// \param [out] extra extra size
+/// \return total size
+IB_INTERN ulint rec_get_converted_size_comp_prefix(const dict_index_t* index, const dfield_t* fields, ulint n_fields, ulint* extra);
+
+
+/// \brief Determines the size of a data tuple in ROW_FORMAT=COMPACT.
+/// \param [in] index record descriptor; dict_table_is_comp() is assumed to hold, even if it does not
+/// \param [in] status status bits of the record
+/// \param [in] fields array of data fields
+/// \param [in] n_fields number of data fields
+/// \param [out] extra extra size
+/// \return total size
+IB_INTERN ulint rec_get_converted_size_comp(const dict_index_t* index, ulint status, const dfield_t* fields, ulint n_fields, ulint* extra);
+
+/// \brief The following function returns the size of a data tuple when converted to a physical record.
+/// \param [in] index record descriptor
+/// \param [in] dtuple data tuple
+/// \param [in] n_ext number of externally stored columns
+/// \return size
+IB_INLINE ulint rec_get_converted_size(dict_index_t* index, const dtuple_t* dtuple, ulint n_ext);
+#ifndef IB_HOTBACKUP
+
+/// \brief Copies the first n fields of a physical record to a data tuple.
+/// \details The fields are copied to the memory heap.
+/// \param [out] tuple data tuple
+/// \param [in] rec physical record
+/// \param [in] index record descriptor
+/// \param [in] n_fields number of fields to copy
+/// \param [in] heap memory heap
+IB_INTERN void rec_copy_prefix_to_dtuple(dtuple_t* tuple, const rec_t* rec, const dict_index_t* index, ulint n_fields, mem_heap_t* heap);
 #endif /* !IB_HOTBACKUP */
-/***************************************************************//**
-Validates the consistency of a physical record.
-@return	TRUE if ok */
-IB_INTERN
-ibool
-rec_validate(
-	const rec_t*	rec,	/*!< in: physical record */
-	const ulint*	offsets);/*!< in: array returned by rec_get_offsets() */
+
+/// \brief Validates the consistency of a physical record.
+/// \param [in] rec physical record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return TRUE if ok
+IB_INTERN ibool rec_validate(const rec_t* rec, const ulint* offsets);
 	
-/***************************************************************//**
-Prints an old-style physical record. */
-IB_INTERN
-void
-rec_print_old(
-	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	const rec_t*	rec);		/*!< in: physical record */
+
+/// \brief Prints an old-style physical record.
+/// \param [in] state->stream stream where to print
+/// \param [in] rec physical record
+IB_INTERN void rec_print_old(innodb_state* state, const rec_t* rec);
 
 #ifndef IB_HOTBACKUP
-/***************************************************************//**
-Prints a physical record in ROW_FORMAT=COMPACT.  Ignores the
-record header. */
-IB_INTERN
-void
-rec_print_comp(
-	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	const rec_t*	rec,		/*!< in: physical record */
-	const ulint*	offsets);	/*!< in: array returned by
-					rec_get_offsets() */
 
-/***************************************************************//**
-Prints a physical record. */
-IB_INTERN
-void
-rec_print_new(
-	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	const rec_t*	rec,		/*!< in: physical record */
-	const ulint*	offsets);	/*!< in: array returned by
-					rec_get_offsets() */
-/***************************************************************//**
-Prints a physical record. */
-IB_INTERN
-void
-rec_print(
-	ib_stream_t	state->stream,	/*!< in: stream where to print */
-	const rec_t*	rec,		/*!< in: physical record */
-	dict_index_t*	index);		/*!< in: record descriptor */
-#endif /* IB_HOTBACKUP */
+/// \brief Prints a physical record in ROW_FORMAT=COMPACT.
+/// \details Ignores the record header.
+/// \param [in] state->stream stream where to print
+/// \param [in] rec physical record
+/// \param [in] offsets array returned by rec_get_offsets()
+IB_INTERN void rec_print_comp(innodb_state* state, const rec_t* rec, const ulint* offsets);
+
+
+/// \brief Prints a physical record.
+/// \param [in] state->stream stream where to print
+/// \param [in] rec physical record
+/// \param [in] offsets array returned by rec_get_offsets()
+IB_INTERN void rec_print_new(innodb_state* state, const rec_t* rec, const ulint* offsets);
+
+/// \brief Prints a physical record.
+/// \param [in] state->stream stream where to print
+/// \param [in] rec physical record
+/// \param [in] index record descriptor
+IB_INTERN void rec_print(innodb_state* state, const rec_t* rec, dict_index_t* index);
+
+#endif // IB_HOTBACKUP
 
 constinit ulint REC_INFO_BITS = 6;
 
