@@ -22,7 +22,6 @@
 
 #include "univ.i"
 
-
 #include "ut_byte.hpp"
 #include "ut_lst.hpp"
 #include "trx_trx.hpp"
@@ -33,33 +32,41 @@
 /// \param [in] heap memory heap from which allocated
 /// \return own: read view struct
 IB_INTERN read_view_t* read_view_open_now(trx_id_t cr_trx_id, mem_heap_t* heap);
+
 /// \brief Makes a copy of the oldest existing read view, or opens a new. The view must be closed with ..._close.
 /// \param [in] cr_trx_id trx_id of creating transaction, or ut_dulint_zero used in purge
 /// \param [in] heap memory heap from which allocated
 /// \return own: read view struct
 IB_INTERN read_view_t* read_view_oldest_copy_or_open_new(trx_id_t cr_trx_id, mem_heap_t* heap);
+
 /// \brief Closes a read view.
 /// \param [in] view read view
 IB_INTERN void read_view_close(read_view_t* view);
+
 /// \brief Closes a consistent read view for client. This function is called at an SQL statement end if the trx isolation level is <= TRX_ISO_READ_COMMITTED.
 /// \param [in] trx trx which has a read view
 IB_INTERN void read_view_close_for_read_committed(trx_t* trx);
+
 /// \brief Checks if a read view sees the specified transaction.
 /// \param [in] view read view
 /// \param [in] trx_id trx id
 /// \return TRUE if sees
 IB_INLINE ibool read_view_sees_trx_id(const read_view_t* view, trx_id_t trx_id);
+
 /// \brief Prints a read view to stderr.
 /// \param [in] view read view
 IB_INTERN void read_view_print(const read_view_t* view);
+
 /// \brief Create a consistent cursor view to be used in cursors. In this consistent read view modifications done by the creating transaction or future transactions are not visible.
 /// \param [in] cr_trx trx where cursor view is created
 /// \return cursor view
 IB_INTERN cursor_view_t* read_cursor_view_create(trx_t* cr_trx);
+
 /// \brief Close a given consistent cursor view and restore global read view back to a transaction read view.
 /// \param [in] trx trx
 /// \param [in] curview cursor view to be closed
 IB_INTERN void read_cursor_view_close(trx_t* trx, cursor_view_t* curview);
+
 /// \brief This function sets a given consistent cursor view to a transaction read view if given consistent cursor view is not NULL. Otherwise, function restores a global read view to a transaction read view.
 /// \param [in] trx transaction where cursor is set
 /// \param [in] curview consistent cursor view to be set
