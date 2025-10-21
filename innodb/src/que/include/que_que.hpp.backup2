@@ -103,109 +103,191 @@ IB_INTERN void que_fork_error_handle(trx_t* trx, que_t* fork);
 /// \param [in] thr query thread in the QUE_THR_LOCK_WAIT, or QUE_THR_PROCEDURE_WAIT, or QUE_THR_SIG_REPLY_WAIT state
 /// \param [in,out] next_thr next query thread to run; if the value which is passed in is a pointer to a NULL pointer, then the calling function can start running a new query thread
 IB_INTERN void que_thr_end_wait(que_thr_t* thr, que_thr_t** next_thr);
+/**********************************************************************//**
+Same as que_thr_end_wait, but no parameter next_thr available. */
+IB_INTERN
+void
+que_thr_end_wait_no_next_thr(
+/*=========================*/
+	que_thr_t*	thr);		/*!< in: query thread in the
+					QUE_THR_LOCK_WAIT,
+					or QUE_THR_PROCEDURE_WAIT, or
+					QUE_THR_SIG_REPLY_WAIT state */
+/**********************************************************************//**
+Starts execution of a command in a query fork. Picks a query thread which
+is not in the QUE_THR_RUNNING state and moves it to that state. If none
+can be chosen, a situation which may arise in parallelized fetches, NULL
+is returned.
+@return a query thread of the graph moved to QUE_THR_RUNNING state, or
+NULL; the query thread should be executed by que_run_threads by the
+caller */
+IB_INTERN
+que_thr_t*
+que_fork_start_command(
+/*===================*/
+	que_fork_t*	fork);	/*!< in: a query fork */
+/***********************************************************************//**
+Gets the trx of a query thread. */
+IB_INLINE
+trx_t*
+thr_get_trx(
+/*========*/
+	que_thr_t*	thr);	/*!< in: query thread */
+/*******************************************************************//**
+Determines if this thread is rolling back an incomplete transaction
+in crash recovery.
+@return TRUE if thr is rolling back an incomplete transaction in crash
+recovery */
+IB_INLINE
+ibool
+thr_is_recv(
+/*========*/
+	const que_thr_t*	thr);	/*!< in: query thread */
+/***********************************************************************//**
+Gets the type of a graph node. */
+IB_INLINE
+ulint
+que_node_get_type(
+/*==============*/
+	que_node_t*	node);	/*!< in: graph node */
+/***********************************************************************//**
+Gets pointer to the value data type field of a graph node. */
+IB_INLINE
+dtype_t*
+que_node_get_data_type(
+/*===================*/
+	que_node_t*	node);	/*!< in: graph node */
+/***********************************************************************//**
+Gets pointer to the value dfield of a graph node. */
+IB_INLINE
+dfield_t*
+que_node_get_val(
+/*=============*/
+	que_node_t*	node);	/*!< in: graph node */
+/***********************************************************************//**
+Gets the value buffer size of a graph node.
+@return	val buffer size, not defined if val.data == NULL in node */
+IB_INLINE
+ulint
+que_node_get_val_buf_size(
+/*======================*/
+	que_node_t*	node);	/*!< in: graph node */
+/***********************************************************************//**
+Sets the value buffer size of a graph node. */
+IB_INLINE
+void
+que_node_set_val_buf_size(
+/*======================*/
+	que_node_t*	node,	/*!< in: graph node */
+	ulint		size);	/*!< in: size */
+/*********************************************************************//**
+Gets the next list node in a list of query graph nodes. */
+IB_INLINE
+que_node_t*
+que_node_get_next(
+/*==============*/
+	que_node_t*	node);	/*!< in: node in a list */
+/*********************************************************************//**
+Gets the parent node of a query graph node.
+@return	parent node or NULL */
+IB_INLINE
+que_node_t*
+que_node_get_parent(
+/*================*/
+	que_node_t*	node);	/*!< in: node */
+/****************************************************************//**
+Get the first containing loop node (e.g. while_node_t or for_node_t) for the
+given node, or NULL if the node is not within a loop.
+@return	containing loop node, or NULL. */
+IB_INTERN
+que_node_t*
+que_node_get_containing_loop_node(
+/*==============================*/
+	que_node_t*	node);	/*!< in: node */
+/*********************************************************************//**
+Catenates a query graph node to a list of them, possible empty list.
+@return	one-way list of nodes */
+IB_INLINE
+que_node_t*
+que_node_list_add_last(
+/*===================*/
+	que_node_t*	node_list,	/*!< in: node list, or NULL */
+	que_node_t*	node);		/*!< in: node */
+/*********************************************************************//**
+Gets a query graph node list length.
+@return	length, for NULL list 0 */
+IB_INLINE
+ulint
+que_node_list_get_len(
+/*==================*/
+	que_node_t*	node_list);	/*!< in: node list, or NULL */
+/**********************************************************************//**
+Checks if graph, trx, or session is in a state where the query thread should
+be stopped.
+@return TRUE if should be stopped; NOTE that if the peek is made
+without reserving the kernel mutex, then another peek with the mutex
+reserved is necessary before deciding the actual stopping */
+IB_INLINE
+ibool
+que_thr_peek_stop(
+/*==============*/
+	que_thr_t*	thr);	/*!< in: query thread */
+/***********************************************************************//**
+Returns TRUE if the query graph is for a SELECT statement.
+@return	TRUE if a select */
+IB_INLINE
+ibool
+que_graph_is_select(
+/*================*/
+	que_t*		graph);		/*!< in: graph */
+/**********************************************************************//**
+Prints info of an SQL query graph node. */
+IB_INTERN
+void
+que_node_print_info(
+/*================*/
+	que_node_t*	node);	/*!< in: query graph node */
+/*********************************************************************//**
+Evaluate the given SQL
+@return	error code or DB_SUCCESS */
+IB_INTERN
+ulint
+que_eval_sql(
+/*=========*/
+	pars_info_t*	info,	/*!< in: info struct, or NULL */
+	const char*	sql,	/*!< in: SQL string */
+	ibool		reserve_dict_mutex,
+				/*!< in: if TRUE, acquire/release
+				dict_sys->mutex around call to pars_sql. */
+	trx_t*		trx);	/*!< in: trx */
+/************************************************************************//**
+Moves a thread from another state to the QUE_THR_RUNNING state. Increments
+the n_active_thrs counters of the query graph and transaction if thr was
+not active.
+***NOTE***: This is the only functions in which such a transition is
+allowed to happen! */
+IB_INTERN
+void
+que_thr_move_to_run_state(
+/*======================*/
+	que_thr_t*	thr);	/*!< in: an query thread */
 
-/// \brief Same as que_thr_end_wait, but no parameter next_thr available.
-/// \param [in] thr query thread in the QUE_THR_LOCK_WAIT, or QUE_THR_PROCEDURE_WAIT, or QUE_THR_SIG_REPLY_WAIT state
-IB_INTERN void que_thr_end_wait_no_next_thr(que_thr_t* thr);
+/************************************************************************//**
+A patch for a client used to 'stop' a dummy query thread used in client
+select, when there is no error or lock wait.
 
-/// \brief Starts execution of a command in a query fork.
-/// \details Picks a query thread which is not in the QUE_THR_RUNNING state and moves it to that state. If none can be chosen, a situation which may arise in parallelized fetches, NULL is returned.
-/// \return a query thread of the graph moved to QUE_THR_RUNNING state, or NULL; the query thread should be executed by que_run_threads by the caller
-/// \param [in] fork a query fork
-IB_INTERN que_thr_t* que_fork_start_command(que_fork_t* fork);
-
-/// \brief Gets the trx of a query thread.
-/// \param [in] thr query thread
-IB_INLINE trx_t* thr_get_trx(que_thr_t* thr);
-
-/// \brief Determines if this thread is rolling back an incomplete transaction in crash recovery.
-/// \return TRUE if thr is rolling back an incomplete transaction in crash recovery
-/// \param [in] thr query thread
-IB_INLINE ibool thr_is_recv(const que_thr_t* thr);
-
-/// \brief Gets the type of a graph node.
-/// \param [in] node graph node
-IB_INLINE ulint que_node_get_type(que_node_t* node);
-
-/// \brief Gets pointer to the value data type field of a graph node.
-/// \param [in] node graph node
-IB_INLINE dtype_t* que_node_get_data_type(que_node_t* node);
-
-/// \brief Gets pointer to the value dfield of a graph node.
-/// \param [in] node graph node
-IB_INLINE dfield_t* que_node_get_val(que_node_t* node);
-
-/// \brief Gets the value buffer size of a graph node.
-/// \return val buffer size, not defined if val.data == NULL in node
-/// \param [in] node graph node
-IB_INLINE ulint que_node_get_val_buf_size(que_node_t* node);
-
-/// \brief Sets the value buffer size of a graph node.
-/// \param [in] node graph node
-/// \param [in] size size
-IB_INLINE void que_node_set_val_buf_size(que_node_t* node, ulint size);
-
-/// \brief Gets the next list node in a list of query graph nodes.
-/// \param [in] node node in a list
-IB_INLINE que_node_t* que_node_get_next(que_node_t* node);
-
-/// \brief Gets the parent node of a query graph node.
-/// \return parent node or NULL
-/// \param [in] node node
-IB_INLINE que_node_t* que_node_get_parent(que_node_t* node);
-
-/// \brief Get the first containing loop node (e.g. while_node_t or for_node_t) for the given node, or NULL if the node is not within a loop.
-/// \return containing loop node, or NULL.
-/// \param [in] node node
-IB_INTERN que_node_t* que_node_get_containing_loop_node(que_node_t* node);
-
-/// \brief Catenates a query graph node to a list of them, possible empty list.
-/// \return one-way list of nodes
-/// \param [in] node_list node list, or NULL
-/// \param [in] node node
-IB_INLINE que_node_t* que_node_list_add_last(que_node_t* node_list, que_node_t* node);
-
-/// \brief Gets a query graph node list length.
-/// \return length, for NULL list 0
-/// \param [in] node_list node list, or NULL
-IB_INLINE ulint que_node_list_get_len(que_node_t* node_list);
-
-/// \brief Checks if graph, trx, or session is in a state where the query thread should be stopped.
-/// \return TRUE if should be stopped; NOTE that if the peek is made without reserving the kernel mutex, then another peek with the mutex reserved is necessary before deciding the actual stopping
-/// \param [in] thr query thread
-IB_INLINE ibool que_thr_peek_stop(que_thr_t* thr);
-
-/// \brief Returns TRUE if the query graph is for a SELECT statement.
-/// \return TRUE if a select
-/// \param [in] graph graph
-IB_INLINE ibool que_graph_is_select(que_t* graph);
-
-/// \brief Prints info of an SQL query graph node.
-/// \param [in] node query graph node
-IB_INTERN void que_node_print_info(que_node_t* node);
-
-/// \brief Evaluate the given SQL
-/// \return error code or DB_SUCCESS
-/// \param [in] info info struct, or NULL
-/// \param [in] sql SQL string
-/// \param [in] reserve_dict_mutex if TRUE, acquire/release dict_sys->mutex around call to pars_sql.
-/// \param [in] trx trx
-IB_INTERN ulint que_eval_sql(pars_info_t* info, const char* sql, ibool reserve_dict_mutex, trx_t* trx);
-
-/// \brief Moves a thread from another state to the QUE_THR_RUNNING state. Increments the n_active_thrs counters of the query graph and transaction if thr was not active.
-/// \details ***NOTE***: This is the only functions in which such a transition is allowed to happen!
-/// \param [in] thr an query thread
-IB_INTERN void que_thr_move_to_run_state(que_thr_t* thr);
-
-
-/// \brief A patch for a client used to 'stop' a dummy query thread used in client select, when there is no error or lock wait.
-/// \details TODO: Currently only called from row0merge, needs to be removed.
-/// \param [in] thr query thread
-/// \param [in] trx transaction
-IB_INTERN void que_thr_stop_for_client_no_error(que_thr_t* thr, trx_t* trx);
-
-/// \brief Reset the variables.
-IB_INTERN void que_var_init(void);
+TODO: Currently only called from row0merge, needs to be removed. */
+IB_INTERN
+void
+que_thr_stop_for_client_no_error(
+/*=============================*/
+	que_thr_t*	thr,	/*!< in: query thread */
+	trx_t*		trx);	/*!< in: transaction */
+/*************************************************************************//**
+Reset the variables. */
+IB_INTERN
+void
+que_var_init(void);
 
 /*==============*/
 /* Query graph query thread node: the fields are protected by the kernel mutex with the exceptions named below */
