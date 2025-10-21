@@ -184,7 +184,7 @@ static ibool page_dir_slot_check(page_dir_slot_t* slot);
 		ut_a(n_owned <= PAGE_DIR_SLOT_MAX_N_OWNED);
 	}
 
-	return TRUE;
+	return(TRUE);
 }
 
 /// \brief Sets the max trx id field value.
@@ -249,10 +249,10 @@ IB_INTERN byte* page_mem_alloc_heap(page_t* page, page_zip_des_t* page_zip, ulin
 
 		page_dir_set_n_heap(page, page_zip, 1 + *heap_no);
 
-		return block;
+		return(block);
 	}
 
-	return NULL;
+	return(NULL);
 }
 
 #ifndef IB_HOTBACKUP
@@ -287,7 +287,7 @@ IB_INTERN byte* page_parse_create(byte* ptr, byte* end_ptr, ulint comp, buf_bloc
 		page_create(block, mtr, comp);
 	}
 
-	return ptr;
+	return(ptr);
 }
 
 /// \brief The index page creation function.
@@ -435,18 +435,23 @@ static page_t* page_create_low(buf_block_t* block, ulint comp);
 		rec_set_next_offs_old(supremum_rec, 0);
 	}
 
-	return page;
+	return(page);
 }
 
-/// \brief Create an uncompressed B-tree index page.
-/// \return pointer to the page
-/// \param [in] block a buffer block where the page is created
-/// \param [in] mtr mini-transaction handle
-/// \param [in] comp nonzero=compact page format
-IB_INTERN page_t* page_create(buf_block_t* block, mtr_t* mtr, ulint comp);
+/**********************************************************//**
+Create an uncompressed B-tree index page.
+@return	pointer to the page */
+IB_INTERN
+page_t*
+page_create(
+/*========*/
+	buf_block_t*	block,		/*!< in: a buffer block where the
+					page is created */
+	mtr_t*		mtr,		/*!< in: mini-transaction handle */
+	ulint		comp)		/*!< in: nonzero=compact page format */
 {
 	page_create_write_log(buf_block_get_frame(block), mtr, comp);
-	return page_create_low(block, comp);
+	return(page_create_low(block, comp));
 }
 
 /// \brief Create a compressed B-tree index page.
@@ -474,16 +479,21 @@ IB_INTERN page_t* page_create_zip(buf_block_t* block, dict_index_t* index, ulint
 		UT_ERROR;
 	}
 
-	return page;
+	return(page);
 }
 
-/// \brief Differs from page_copy_rec_list_end, because this function does not touch the lock table and max trx id on page or compress the page.
-/// \param [in] new_block index page to copy to
-/// \param [in] block index page of rec
-/// \param [in] rec record on page
-/// \param [in] index record descriptor
-/// \param [in] mtr mtr
-IB_INTERN void page_copy_rec_list_end_no_locks(buf_block_t* new_block, buf_block_t* block, rec_t* rec, dict_index_t* index, mtr_t* mtr);
+/*************************************************************//**
+Differs from page_copy_rec_list_end, because this function does not
+touch the lock table and max trx id on page or compress the page. */
+IB_INTERN
+void
+page_copy_rec_list_end_no_locks(
+/*============================*/
+	buf_block_t*	new_block,	/*!< in: index page to copy to */
+	buf_block_t*	block,		/*!< in: index page of rec */
+	rec_t*		rec,		/*!< in: record on page */
+	dict_index_t*	index,		/*!< in: record descriptor */
+	mtr_t*		mtr)		/*!< in: mtr */
 {
 	page_t*		new_page	= buf_block_get_frame(new_block);
 	page_cur_t	cur1;
@@ -544,15 +554,21 @@ IB_INTERN void page_copy_rec_list_end_no_locks(buf_block_t* new_block, buf_block
 }
 
 #ifndef IB_HOTBACKUP
-/// \brief Copies records from page to new_page, from a given record onward, including that record.
-/// \details Infimum and supremum records are not copied. The records are copied to the start of the record list on new_page.
-/// \return pointer to the original successor of the infimum record on new_page, or NULL on zip overflow (new_block will be decompressed)
-/// \param [in,out] new_block index page to copy to
-/// \param [in] block index page containing rec
-/// \param [in] rec record on page
-/// \param [in] index record descriptor
-/// \param [in] mtr mtr
-IB_INTERN rec_t* page_copy_rec_list_end(buf_block_t* new_block, buf_block_t* block, rec_t* rec, dict_index_t* index, mtr_t* mtr);
+/*************************************************************//**
+Copies records from page to new_page, from a given record onward,
+including that record. Infimum and supremum records are not copied.
+The records are copied to the start of the record list on new_page.
+@return pointer to the original successor of the infimum record on
+new_page, or NULL on zip overflow (new_block will be decompressed) */
+IB_INTERN
+rec_t*
+page_copy_rec_list_end(
+/*===================*/
+	buf_block_t*	new_block,	/*!< in/out: index page to copy to */
+	buf_block_t*	block,		/*!< in: index page containing rec */
+	rec_t*		rec,		/*!< in: record on page */
+	dict_index_t*	index,		/*!< in: record descriptor */
+	mtr_t*		mtr)		/*!< in: mtr */
 {
 	page_t*		new_page	= buf_block_get_frame(new_block);
 	page_zip_des_t*	new_page_zip	= buf_block_get_page_zip(new_block);
@@ -624,7 +640,7 @@ IB_INTERN rec_t* page_copy_rec_list_end(buf_block_t* new_block, buf_block_t* blo
 					UT_ERROR;
 				}
 				ut_ad(page_validate(new_page, index));
-				return NULL;
+				return(NULL);
 			} else {
 				/* The page was reorganized:
 				Seek to ret_pos. */
@@ -646,15 +662,21 @@ IB_INTERN rec_t* page_copy_rec_list_end(buf_block_t* new_block, buf_block_t* blo
 	return(ret);
 }
 
-/// \brief Copies records from page to new_page, up to the given record, NOT including that record.
-/// \details Infimum and supremum records are not copied. The records are copied to the end of the record list on new_page.
-/// \return pointer to the original predecessor of the supremum record on new_page, or NULL on zip overflow (new_block will be decompressed)
-/// \param [in,out] new_block index page to copy to
-/// \param [in] block index page containing rec
-/// \param [in] rec record on page
-/// \param [in] index record descriptor
-/// \param [in] mtr mtr
-IB_INTERN rec_t* page_copy_rec_list_start(buf_block_t* new_block, buf_block_t* block, rec_t* rec, dict_index_t* index, mtr_t* mtr);
+/*************************************************************//**
+Copies records from page to new_page, up to the given record,
+NOT including that record. Infimum and supremum records are not copied.
+The records are copied to the end of the record list on new_page.
+@return pointer to the original predecessor of the supremum record on
+new_page, or NULL on zip overflow (new_block will be decompressed) */
+IB_INTERN
+rec_t*
+page_copy_rec_list_start(
+/*=====================*/
+	buf_block_t*	new_block,	/*!< in/out: index page to copy to */
+	buf_block_t*	block,		/*!< in: index page containing rec */
+	rec_t*		rec,		/*!< in: record on page */
+	dict_index_t*	index,		/*!< in: record descriptor */
+	mtr_t*		mtr)		/*!< in: mtr */
 {
 	page_t*		new_page	= buf_block_get_frame(new_block);
 	page_zip_des_t*	new_page_zip	= buf_block_get_page_zip(new_block);
@@ -736,7 +758,7 @@ IB_INTERN rec_t* page_copy_rec_list_start(buf_block_t* new_block, buf_block_t* b
 					UT_ERROR;
 				}
 				ut_ad(page_validate(new_page, index));
-				return NULL;
+				return(NULL);
 			} else {
 				/* The page was reorganized:
 				Seek to ret_pos. */
@@ -758,7 +780,7 @@ IB_INTERN rec_t* page_copy_rec_list_start(buf_block_t* new_block, buf_block_t* b
 	return(ret);
 }
 
-********************************************************/
+/**********************************************************//**
 Writes a log record of a record list end or start deletion. */
 IB_INLINE
 void
@@ -787,9 +809,9 @@ page_delete_rec_list_write_log(
 # define page_delete_rec_list_write_log(rec,index,type,mtr) ((void) 0)
 #endif /* !IB_HOTBACKUP */
 
-********************************************************/
+/**********************************************************//**
 Parses a log record of a record list end or start deletion.
-\return	end of log record or NULL */
+@return	end of log record or NULL */
 IB_INTERN
 byte*
 page_parse_delete_rec_list(
@@ -816,7 +838,7 @@ page_parse_delete_rec_list(
 
 	if (end_ptr < ptr + 2) {
 
-		return NULL;
+		return(NULL);
 	}
 
 	offset = mach_read_from_2(ptr);
@@ -824,7 +846,7 @@ page_parse_delete_rec_list(
 
 	if (!block) {
 
-		return ptr;
+		return(ptr);
 	}
 
 	page = buf_block_get_frame(block);
@@ -840,10 +862,10 @@ page_parse_delete_rec_list(
 		page_delete_rec_list_start(page + offset, block, index, mtr);
 	}
 
-	return ptr;
+	return(ptr);
 }
 
-***********************************************************/
+/*************************************************************//**
 Deletes records from a page from a given record onward, including that record.
 The infimum and supremum records are not deleted. */
 IB_INTERN
@@ -1019,7 +1041,7 @@ page_delete_rec_list_end(
 			      (ulint)(page_get_n_recs(page) - n_recs));
 }
 
-***********************************************************/
+/*************************************************************//**
 Deletes records from page, up to the given record, NOT including
 that record. Infimum and supremum records are not deleted. */
 IB_INTERN
@@ -1092,10 +1114,10 @@ page_delete_rec_list_start(
 }
 
 #ifndef IB_HOTBACKUP
-***********************************************************/
+/*************************************************************//**
 Moves record list end to another page. Moved records include
 split_rec.
-\return TRUE on success; FALSE on compression failure (new_block will
+@return TRUE on success; FALSE on compression failure (new_block will
 be decompressed) */
 IB_INTERN
 ibool
@@ -1143,13 +1165,13 @@ page_move_rec_list_end(
 				 new_n_recs - old_n_recs,
 				 new_data_size - old_data_size, mtr);
 
-	return TRUE;
+	return(TRUE);
 }
 
-***********************************************************/
+/*************************************************************//**
 Moves record list start to another page. Moved records do not include
 split_rec.
-\return	TRUE on success; FALSE on compression failure */
+@return	TRUE on success; FALSE on compression failure */
 IB_INTERN
 ibool
 page_move_rec_list_start(
@@ -1167,10 +1189,10 @@ page_move_rec_list_start(
 
 	page_delete_rec_list_start(split_rec, block, index, mtr);
 
-	return TRUE;
+	return(TRUE);
 }
 
-*********************************************************************/
+/***********************************************************************//**
 This is a low-level operation which is used in a database index creation
 to update the page number of a created B-tree to a data dictionary record. */
 IB_INTERN
@@ -1193,7 +1215,7 @@ page_rec_write_index_page_no(
 }
 #endif /* !IB_HOTBACKUP */
 
-************************************************************/
+/**************************************************************//**
 Used to delete n slots from the directory. This function updates
 also n_owned fields in the records, so that the first slot after
 the deleted ones inherits the records of the deleted slots. */
@@ -1242,7 +1264,7 @@ page_dir_delete_slot(
 	page_header_set_field(page, page_zip, PAGE_N_DIR_SLOTS, n_slots - 1);
 }
 
-************************************************************/
+/**************************************************************//**
 Used to add n slots to the directory. Does not set the record pointers
 in the added slots or update n_owned values: this is the responsibility
 of the caller. */
@@ -1271,7 +1293,7 @@ page_dir_add_slot(
 		(n_slots - 1 - start) * PAGE_DIR_SLOT_SIZE);
 }
 
-**************************************************************/
+/****************************************************************//**
 Splits a directory slot which owns too many records. */
 IB_INTERN
 void
@@ -1332,7 +1354,7 @@ page_dir_split_slot(
 	page_dir_slot_set_n_owned(slot, page_zip, n_owned - (n_owned / 2));
 }
 
-***********************************************************/
+/*************************************************************//**
 Tries to balance the given directory slot with too few records with the upper
 neighbor, so that there are at least the minimum number of records owned by
 the slot; this may result in the merging of two slots. */
@@ -1404,10 +1426,10 @@ page_dir_balance_slot(
 }
 
 #ifndef IB_HOTBACKUP
-**********************************************************/
+/************************************************************//**
 Returns the middle record of the record list. If there are an even number
 of records in the list, returns the first record of the upper half-list.
-\return	middle record */
+@return	middle record */
 IB_INTERN
 rec_t*
 page_get_middle_rec(
@@ -1453,10 +1475,10 @@ page_get_middle_rec(
 }
 #endif /* !IB_HOTBACKUP */
 
-*************************************************************/
+/***************************************************************//**
 Returns the number of records before the given record in chain.
 The number includes infimum and supremum records.
-\return	number of records */
+@return	number of records */
 IB_INTERN
 ulint
 page_rec_get_n_recs_before(
@@ -1518,7 +1540,7 @@ page_rec_get_n_recs_before(
 }
 
 #ifndef IB_HOTBACKUP
-**********************************************************/
+/************************************************************//**
 Prints record contents including the data relevant only in
 the index page context. */
 IB_INTERN
@@ -1548,7 +1570,7 @@ page_rec_print(
 	rec_validate(rec, offsets);
 }
 
-*************************************************************/
+/***************************************************************//**
 This is used to print the contents of the directory for
 debugging purposes. */
 IB_INTERN
@@ -1590,7 +1612,7 @@ page_dir_print(
 		(ulong) (PAGE_HEAP_NO_USER_LOW + page_get_n_recs(page)));
 }
 
-*************************************************************/
+/***************************************************************//**
 This is used to print the contents of the page record list for
 debugging purposes. */
 IB_INTERN
@@ -1661,7 +1683,7 @@ page_print_list(
 	}
 }
 
-*************************************************************/
+/***************************************************************//**
 Prints the info in a page header. */
 IB_INTERN
 void
@@ -1688,7 +1710,7 @@ page_header_print(
 		(ulong) page_header_get_field(page, PAGE_N_DIRECTION));
 }
 
-*************************************************************/
+/***************************************************************//**
 This is used to print the contents of the page for
 debugging purposes. */
 IB_INTERN
@@ -1710,11 +1732,11 @@ page_print(
 }
 #endif /* !IB_HOTBACKUP */
 
-*************************************************************/
+/***************************************************************//**
 The following is used to validate a record on a page. This function
 differs from rec_validate as it can also check the n_owned field and
 the heap_no field.
-\return	TRUE if ok */
+@return	TRUE if ok */
 IB_INTERN
 ibool
 page_rec_validate(
@@ -1755,11 +1777,11 @@ page_rec_validate(
 		return(FALSE);
 	}
 
-	return TRUE;
+	return(TRUE);
 }
 
 #ifndef IB_HOTBACKUP
-*************************************************************/
+/***************************************************************//**
 Checks that the first directory slot points to the infimum record and
 the last to the supremum. This function is intended to track if the
 bug fixed in 4.0.14 has caused corruption to users' databases. */
@@ -1796,11 +1818,11 @@ page_check_dir(
 }
 #endif /* !IB_HOTBACKUP */
 
-*************************************************************/
+/***************************************************************//**
 This function checks the consistency of an index page when we do not
 know the index. This is also resilient so that this should never crash
 even if the page is total garbage.
-\return	TRUE if ok */
+@return	TRUE if ok */
 IB_INTERN
 ibool
 page_simple_validate_old(
@@ -2007,11 +2029,11 @@ func_exit:
 	return(ret);
 }
 
-*************************************************************/
+/***************************************************************//**
 This function checks the consistency of an index page when we do not
 know the index. This is also resilient so that this should never crash
 even if the page is total garbage.
-\return	TRUE if ok */
+@return	TRUE if ok */
 IB_INTERN
 ibool
 page_simple_validate_new(
@@ -2218,9 +2240,9 @@ func_exit:
 	return(ret);
 }
 
-*************************************************************/
+/***************************************************************//**
 This function checks the consistency of an index page.
-\return	TRUE if ok */
+@return	TRUE if ok */
 IB_INTERN
 ibool
 page_validate(
@@ -2508,9 +2530,9 @@ func_exit2:
 }
 
 #ifndef IB_HOTBACKUP
-*************************************************************/
+/***************************************************************//**
 Looks in the page record list for a record with the given heap number.
-\return	record, NULL if not found */
+@return	record, NULL if not found */
 IB_INTERN
 const rec_t*
 page_find_rec_with_heap_no(
@@ -2531,7 +2553,7 @@ page_find_rec_with_heap_no(
 				return(rec);
 			} else if (rec_heap_no == PAGE_HEAP_NO_SUPREMUM) {
 
-				return NULL;
+				return(NULL);
 			}
 
 			rec = page + rec_get_next_offs(rec, TRUE);
@@ -2547,7 +2569,7 @@ page_find_rec_with_heap_no(
 				return(rec);
 			} else if (rec_heap_no == PAGE_HEAP_NO_SUPREMUM) {
 
-				return NULL;
+				return(NULL);
 			}
 
 			rec = page + rec_get_next_offs(rec, FALSE);

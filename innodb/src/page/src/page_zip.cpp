@@ -1,27 +1,19 @@
-/*****************************************************************************
+// Copyright (c) 2005, 2009, Innobase Oy. All Rights Reserved.
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 2005, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file page/page0zip.c
-Compressed page interface
-
-Created June 2005 by Marko Makela
-*******************************************************/
+/// \file page_zip.cpp
+/// \brief Compressed page interface
+/// \details Originally created by Marko Makela in June 2005
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #include "univ.i"
 
@@ -50,275 +42,205 @@ Created June 2005 by Marko Makela
 
 #include <zlib.h>
 
+// -----------------------------------------------------------------------------------------
+// type definitions
+// -----------------------------------------------------------------------------------------
+
+/* Please refer to ../include/page0zip.ic for a description of the compressed page format. */
+
+/* The infimum and supremum records are omitted from the compressed page. On compress, we compare that the records are there, and on uncompress we restore the records. */
+
+// Extra bytes of an infimum record
+static const byte infimum_extra[] = {
+    0x01,           /* info_bits=0, n_owned=1 */
+    0x00, 0x02      /* heap_no=0, status=2 */
+    /* ?, ? */       /* next=(first user rec, or supremum) */
+};
+// Data bytes of an infimum record
+static const byte infimum_data[] = {
+    0x69, 0x6e, 0x66, 0x69,
+    0x6d, 0x75, 0x6d, 0x00  /* "infimum\0" */
+};
+// Extra bytes and data bytes of a supremum record
+static const byte supremum_extra_data[] = {
+    /* 0x0?, */     /* info_bits=0, n_owned=1..8 */
+    0x00, 0x0b,     /* heap_no=1, status=3 */
+    0x00, 0x00,     /* next=0 */
+    0x73, 0x75, 0x70, 0x72,
+    0x65, 0x6d, 0x75, 0x6d  /* "supremum" */
+};
+
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
+// Assert that a block of memory is filled with zero bytes. Compare at most sizeof(field_ref_zero) bytes.
+#define ASSERT_ZERO(b, s) \
+    ut_ad(!memcmp(b, field_ref_zero, ut_min(s, sizeof field_ref_zero)))
+// Assert that a BLOB pointer is filled with zero bytes.
+#define ASSERT_ZERO_BLOB(b) \
+    ut_ad(!memcmp(b, field_ref_zero, sizeof field_ref_zero))
+
+// Enable some extra debugging output. This code can be enabled independently of any IB_ debugging conditions.
+
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
 #ifndef IB_HOTBACKUP
-/** Statistics on compression, indexed by page_zip_des_t::ssize - 1 */
 IB_INTERN page_zip_stat_t page_zip_stat[PAGE_ZIP_NUM_SSIZE - 1];
 #endif /* !IB_HOTBACKUP */
 
-/* Please refer to ../include/page0zip.ic for a description of the
-compressed page format. */
-
-/* The infimum and supremum records are omitted from the compressed page.
-On compress, we compare that the records are there, and on uncompress we
-restore the records. */
-/** Extra bytes of an infimum record */
-static const byte infimum_extra[] = {
-	0x01,			/* info_bits=0, n_owned=1 */
-	0x00, 0x02		/* heap_no=0, status=2 */
-	/* ?, ?	*/		/* next=(first user rec, or supremum) */
-};
-/** Data bytes of an infimum record */
-static const byte infimum_data[] = {
-	0x69, 0x6e, 0x66, 0x69,
-	0x6d, 0x75, 0x6d, 0x00	/* "infimum\0" */
-};
-/** Extra bytes and data bytes of a supremum record */
-static const byte supremum_extra_data[] = {
-	/* 0x0?, */		/* info_bits=0, n_owned=1..8 */
-	0x00, 0x0b,		/* heap_no=1, status=3 */
-	0x00, 0x00,		/* next=0 */
-	0x73, 0x75, 0x70, 0x72,
-	0x65, 0x6d, 0x75, 0x6d	/* "supremum" */
-};
-
-/** Assert that a block of memory is filled with zero bytes.
-Compare at most sizeof(field_ref_zero) bytes.
-@param b	in: memory block
-@param s	in: size of the memory block, in bytes */
-#define ASSERT_ZERO(b, s) \
-	ut_ad(!memcmp(b, field_ref_zero, ut_min(s, sizeof field_ref_zero)))
-/** Assert that a BLOB pointer is filled with zero bytes.
-@param b	in: BLOB pointer */
-#define ASSERT_ZERO_BLOB(b) \
-	ut_ad(!memcmp(b, field_ref_zero, sizeof field_ref_zero))
-
-/* Enable some extra debugging output.  This code can be enabled
-independently of any IB_ debugging conditions. */
 #if defined IB_DEBUG || defined IB_ZIP_DEBUG
-# define page_zip_fail(s, ...) 						\
-{									\
-	state->log(s, "  InnoDB: ");					\
-	state->log(s, __VA_ARGS__);					\
+# define page_zip_fail(s, ...)                      \
+{                                                   \
+    state->log(s, "  InnoDB: ");                \
+    state->log(s, __VA_ARGS__);                 \
 }
 #else /* IB_DEBUG || IB_ZIP_DEBUG */
 # define page_zip_fail(s, ...) /* empty */
 #endif /* IB_DEBUG || IB_ZIP_DEBUG */
 
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
+
+/// \brief Write a log record of compressing an index page
+static void page_zip_compress_write_log(const page_zip_des_t* page_zip, const page_t* page, dict_index_t* index, mtr_t* mtr);
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
+
 #ifndef IB_HOTBACKUP
-/**********************************************************************//**
-Reset variables. */
-IB_INTERN
-void
-page_zip_var_init(void)
-/*===================*/
+/// \brief Reset variables
+IB_INTERN void page_zip_var_init(void)
 {
 #ifdef PAGE_ZIP_COMPRESS_DBG
-	page_zip_compress_dbg = FALSE;
-	page_zip_compress_log = 0;
+    page_zip_compress_dbg = FALSE;
+    page_zip_compress_log = 0;
 #endif
-	memset(page_zip_stat, 0x0, sizeof(page_zip_stat));
+    memset(page_zip_stat, 0x0, sizeof(page_zip_stat));
 }
 
-/**************************************************************************
-Determine the guaranteed free space on an empty page.
-@return	minimum payload size on the page */
-IB_INTERN
-ulint
-page_zip_empty_size(
-/*================*/
-	ulint	n_fields,	/*!< in: number of columns in the index */
-	ulint	zip_size)	/*!< in: compressed page size in bytes */
+/// \brief Determine the guaranteed free space on an empty page
+/// \return minimum payload size on the page
+IB_INTERN ulint page_zip_empty_size(ulint n_fields, ulint zip_size)
 {
-	lint	size = zip_size
-		/* subtract the page header and the longest
-		uncompressed data needed for one record */
-		- (PAGE_DATA
-		   + PAGE_ZIP_DIR_SLOT_SIZE
-		   + DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN
-		   + 1/* encoded heap_no==2 in page_zip_write_rec() */
-		   + 1/* end of modification log */
-		   - REC_N_NEW_EXTRA_BYTES/* omitted bytes */)
-		/* subtract the space for page_zip_fields_encode() */
-		- compressBound(2 * (n_fields + 1));
-	return(size > 0 ? (ulint) size : 0);
+    lint size = zip_size
+        /* subtract the page header and the longest uncompressed data needed for one record */
+        - (PAGE_DATA + PAGE_ZIP_DIR_SLOT_SIZE + DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN + 1/* encoded heap_no==2 in page_zip_write_rec() */ + 1/* end of modification log */ - REC_N_NEW_EXTRA_BYTES/* omitted bytes */)
+        /* subtract the space for page_zip_fields_encode() */
+        - compressBound(2 * (n_fields + 1));
+    return(size > 0 ? (ulint) size : 0);
 }
 #endif /* !IB_HOTBACKUP */
 
-/*************************************************************//**
-Gets the size of the compressed page trailer (the dense page directory),
-including deleted records (the free list).
-@return	length of dense page directory, in bytes */
-IB_INLINE
-ulint
-page_zip_dir_size(
-/*==============*/
-	const page_zip_des_t*	page_zip)	/*!< in: compressed page */
+/// \brief Gets the size of the compressed page trailer (the dense page directory), including deleted records (the free list)
+/// \return length of dense page directory, in bytes
+IB_INLINE ulint page_zip_dir_size(const page_zip_des_t* page_zip)
 {
-	/* Exclude the page infimum and supremum from the record count. */
-	ulint	size = PAGE_ZIP_DIR_SLOT_SIZE
-		* (page_dir_get_n_heap(page_zip->data)
-		   - PAGE_HEAP_NO_USER_LOW);
-	return(size);
+    /* Exclude the page infimum and supremum from the record count. */
+    ulint size = PAGE_ZIP_DIR_SLOT_SIZE * (page_dir_get_n_heap(page_zip->data) - PAGE_HEAP_NO_USER_LOW);
+    return(size);
 }
 
-/*************************************************************//**
-Gets the size of the compressed page trailer (the dense page directory),
-only including user records (excluding the free list).
-@return	length of dense page directory comprising existing records, in bytes */
-IB_INLINE
-ulint
-page_zip_dir_user_size(
-/*===================*/
-	const page_zip_des_t*	page_zip)	/*!< in: compressed page */
+/// \brief Gets the size of the compressed page trailer (the dense page directory), only including user records (excluding the free list)
+/// \return length of dense page directory comprising existing records, in bytes
+IB_INLINE ulint page_zip_dir_user_size(const page_zip_des_t* page_zip)
 {
-	ulint	size = PAGE_ZIP_DIR_SLOT_SIZE
-		* page_get_n_recs(page_zip->data);
-	ut_ad(size <= page_zip_dir_size(page_zip));
-	return(size);
+    ulint size = PAGE_ZIP_DIR_SLOT_SIZE * page_get_n_recs(page_zip->data);
+    ut_ad(size <= page_zip_dir_size(page_zip));
+    return(size);
 }
 
-/*************************************************************//**
-Find the slot of the given record in the dense page directory.
-@return	dense directory slot, or NULL if record not found */
-IB_INLINE
-byte*
-page_zip_dir_find_low(
-/*==================*/
-	byte*	slot,			/*!< in: start of records */
-	byte*	end,			/*!< in: end of records */
-	ulint	offset)			/*!< in: offset of user record */
+/// \brief Find the slot of the given record in the dense page directory
+/// \return dense directory slot, or NULL if record not found
+IB_INLINE byte* page_zip_dir_find_low(byte* slot, byte* end, ulint offset)
 {
-	ut_ad(slot <= end);
-
-	for (; slot < end; slot += PAGE_ZIP_DIR_SLOT_SIZE) {
-		if ((mach_read_from_2(slot) & PAGE_ZIP_DIR_SLOT_MASK)
-		    == offset) {
-			return(slot);
-		}
-	}
-
-	return(NULL);
+    ut_ad(slot <= end);
+    for (; slot < end; slot += PAGE_ZIP_DIR_SLOT_SIZE) {
+        if ((mach_read_from_2(slot) & PAGE_ZIP_DIR_SLOT_MASK) == offset) {
+            return(slot);
+        }
+    }
+    return(NULL);
 }
 
-/*************************************************************//**
-Find the slot of the given non-free record in the dense page directory.
-@return	dense directory slot, or NULL if record not found */
-IB_INLINE
-byte*
-page_zip_dir_find(
-/*==============*/
-	page_zip_des_t*	page_zip,		/*!< in: compressed page */
-	ulint		offset)			/*!< in: offset of user record */
+/// \brief Find the slot of the given non-free record in the dense page directory
+/// \return dense directory slot, or NULL if record not found
+IB_INLINE byte* page_zip_dir_find(page_zip_des_t* page_zip, ulint offset)
 {
-	byte*	end	= page_zip->data + page_zip_get_size(page_zip);
-
-	ut_ad(page_zip_simple_validate(page_zip));
-
-	return(page_zip_dir_find_low(end - page_zip_dir_user_size(page_zip),
-				     end,
-				     offset));
+    byte* end = page_zip->data + page_zip_get_size(page_zip);
+    ut_ad(page_zip_simple_validate(page_zip));
+    return(page_zip_dir_find_low(end - page_zip_dir_user_size(page_zip), end, offset));
 }
 
-/*************************************************************//**
-Find the slot of the given free record in the dense page directory.
-@return	dense directory slot, or NULL if record not found */
-IB_INLINE
-byte*
-page_zip_dir_find_free(
-/*===================*/
-	page_zip_des_t*	page_zip,		/*!< in: compressed page */
-	ulint		offset)			/*!< in: offset of user record */
+/// \brief Find the slot of the given free record in the dense page directory
+/// \return dense directory slot, or NULL if record not found
+IB_INLINE byte* page_zip_dir_find_free(page_zip_des_t* page_zip, ulint offset)
 {
-	byte*	end	= page_zip->data + page_zip_get_size(page_zip);
-
-	ut_ad(page_zip_simple_validate(page_zip));
-
-	return(page_zip_dir_find_low(end - page_zip_dir_size(page_zip),
-				     end - page_zip_dir_user_size(page_zip),
-				     offset));
+    byte* end = page_zip->data + page_zip_get_size(page_zip);
+    ut_ad(page_zip_simple_validate(page_zip));
+    return(page_zip_dir_find_low(end - page_zip_dir_size(page_zip), end - page_zip_dir_user_size(page_zip), offset));
 }
 
-/*************************************************************//**
-Read a given slot in the dense page directory.
-@return record offset on the uncompressed page, possibly ORed with
-PAGE_ZIP_DIR_SLOT_DEL or PAGE_ZIP_DIR_SLOT_OWNED */
-IB_INLINE
-ulint
-page_zip_dir_get(
-/*=============*/
-	const page_zip_des_t*	page_zip,	/*!< in: compressed page */
-	ulint			slot)		/*!< in: slot
-						(0=first user record) */
+/// \brief Read a given slot in the dense page directory
+/// \return record offset on the uncompressed page, possibly ORed with PAGE_ZIP_DIR_SLOT_DEL or PAGE_ZIP_DIR_SLOT_OWNED
+IB_INLINE ulint page_zip_dir_get(const page_zip_des_t* page_zip, ulint slot)
 {
-	ut_ad(page_zip_simple_validate(page_zip));
-	ut_ad(slot < page_zip_dir_size(page_zip) / PAGE_ZIP_DIR_SLOT_SIZE);
-	return(mach_read_from_2(page_zip->data + page_zip_get_size(page_zip)
-				- PAGE_ZIP_DIR_SLOT_SIZE * (slot + 1)));
+    ut_ad(page_zip_simple_validate(page_zip));
+    ut_ad(slot < page_zip_dir_size(page_zip) / PAGE_ZIP_DIR_SLOT_SIZE);
+    return(mach_read_from_2(page_zip->data + page_zip_get_size(page_zip) - PAGE_ZIP_DIR_SLOT_SIZE * (slot + 1)));
 }
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
 
 #ifndef IB_HOTBACKUP
-/**********************************************************************//**
-Write a log record of compressing an index page. */
-static
-void
-page_zip_compress_write_log(
-/*========================*/
-	const page_zip_des_t*	page_zip,/*!< in: compressed page */
-	const page_t*		page,	/*!< in: uncompressed page */
-	dict_index_t*		index,	/*!< in: index of the B-tree node */
-	mtr_t*			mtr)	/*!< in: mini-transaction */
+/// \brief Write a log record of compressing an index page
+static void page_zip_compress_write_log(const page_zip_des_t* page_zip, const page_t* page, dict_index_t* index, mtr_t* mtr)
 {
-	byte*	log_ptr;
-	ulint	trailer_size;
+    byte* log_ptr;
+    ulint trailer_size;
+    ut_ad(!dict_index_is_ibuf(index));
+    log_ptr = mlog_open(mtr, 11 + 2 + 2);
+    if (!log_ptr) {
+        return;
+    }
 
-	ut_ad(!dict_index_is_ibuf(index));
-
-	log_ptr = mlog_open(mtr, 11 + 2 + 2);
-
-	if (!log_ptr) {
-
-		return;
-	}
-
-	/* Read the number of user records. */
-	trailer_size = page_dir_get_n_heap(page_zip->data)
-		- PAGE_HEAP_NO_USER_LOW;
-	/* Multiply by uncompressed of size stored per record */
-	if (!page_is_leaf(page)) {
-		trailer_size *= PAGE_ZIP_DIR_SLOT_SIZE + REC_NODE_PTR_SIZE;
-	} else if (dict_index_is_clust(index)) {
-		trailer_size *= PAGE_ZIP_DIR_SLOT_SIZE
-			+ DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN;
-	} else {
-		trailer_size *= PAGE_ZIP_DIR_SLOT_SIZE;
-	}
-	/* Add the space occupied by BLOB pointers. */
-	trailer_size += page_zip->n_blobs * BTR_EXTERN_FIELD_REF_SIZE;
-	ut_a(page_zip->m_end > PAGE_DATA);
+    /* Read the number of user records. */
+    trailer_size = page_dir_get_n_heap(page_zip->data) - PAGE_HEAP_NO_USER_LOW;
+    /* Multiply by uncompressed of size stored per record */
+    if (!page_is_leaf(page)) {
+        trailer_size *= PAGE_ZIP_DIR_SLOT_SIZE + REC_NODE_PTR_SIZE;
+    } else if (dict_index_is_clust(index)) {
+        trailer_size *= PAGE_ZIP_DIR_SLOT_SIZE + DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN;
+    } else {
+        trailer_size *= PAGE_ZIP_DIR_SLOT_SIZE;
+    }
+    /* Add the space occupied by BLOB pointers. */
+    trailer_size += page_zip->n_blobs * BTR_EXTERN_FIELD_REF_SIZE;
+    ut_a(page_zip->m_end > PAGE_DATA);
 #if FIL_PAGE_DATA > PAGE_DATA
 # error "FIL_PAGE_DATA > PAGE_DATA"
 #endif
-	ut_a(page_zip->m_end + trailer_size <= page_zip_get_size(page_zip));
+    ut_a(page_zip->m_end + trailer_size <= page_zip_get_size(page_zip));
 
-	log_ptr = mlog_write_initial_log_record_fast((page_t*) page,
-						     MLOG_ZIP_PAGE_COMPRESS,
-						     log_ptr, mtr);
-	mach_write_to_2(log_ptr, page_zip->m_end - FIL_PAGE_TYPE);
-	log_ptr += 2;
-	mach_write_to_2(log_ptr, trailer_size);
-	log_ptr += 2;
-	mlog_close(mtr, log_ptr);
-
-	/* Write FIL_PAGE_PREV and FIL_PAGE_NEXT */
-	mlog_catenate_string(mtr, page_zip->data + FIL_PAGE_PREV, 4);
-	mlog_catenate_string(mtr, page_zip->data + FIL_PAGE_NEXT, 4);
-	/* Write most of the page header, the compressed stream and
-	the modification log. */
-	mlog_catenate_string(mtr, page_zip->data + FIL_PAGE_TYPE,
-			     page_zip->m_end - FIL_PAGE_TYPE);
-	/* Write the uncompressed trailer of the compressed page. */
-	mlog_catenate_string(mtr, page_zip->data + page_zip_get_size(page_zip)
-			     - trailer_size, trailer_size);
+    log_ptr = mlog_write_initial_log_record_fast((page_t*) page, MLOG_ZIP_PAGE_COMPRESS, log_ptr, mtr);
+    mach_write_to_2(log_ptr, page_zip->m_end - FIL_PAGE_TYPE);
+    log_ptr += 2;
+    mach_write_to_2(log_ptr, trailer_size);
+    log_ptr += 2;
+    mlog_close(mtr, log_ptr);
+    /* Write FIL_PAGE_PREV and FIL_PAGE_NEXT */
+    mlog_catenate_string(mtr, page_zip->data + FIL_PAGE_PREV, 4);
+    mlog_catenate_string(mtr, page_zip->data + FIL_PAGE_NEXT, 4);
+    /* Write most of the page header, the compressed stream and the modification log. */
+    mlog_catenate_string(mtr, page_zip->data + FIL_PAGE_TYPE, page_zip->m_end - FIL_PAGE_TYPE);
+    /* Write the uncompressed trailer of the compressed page. */
+    mlog_catenate_string(mtr, page_zip->data + page_zip_get_size(page_zip) - trailer_size, trailer_size);
 }
 #endif /* !IB_HOTBACKUP */
 

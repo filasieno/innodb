@@ -1,27 +1,22 @@
-/*****************************************************************************
+// Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1994, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/page0page.ic
-Index page routines
-
-Created 2/2/1994 Heikki Tuuri
-*******************************************************/
+/// \file page_page.inl
+/// \brief Index page routines
+/// \details Originally created by Heikki Tuuri on 2/2/1994
+/// \author Fabio N. Filasieno
+/// \date 21/10/2025
 
 #include "mach_data.hpp"
 #ifdef IB_DEBUG
@@ -40,53 +35,35 @@ Created 2/2/1994 Heikki Tuuri
 #define IB_INLINE
 #endif
 
-/************************************************************//**
-Gets the start of a page.
-@return	start of the page */
-IB_INLINE
-page_t*
-page_align(
-/*=======*/
-	const void*	ptr)	/*!< in: pointer to page frame */
+/// \brief Gets the start of a page.
+/// \return start of the page
+/// \param [in] ptr pointer to page frame
+IB_INLINE page_t* page_align(const void* ptr)
 {
-	return((page_t*) ut_align_down(ptr, IB_PAGE_SIZE));
+	return (page_t*)ut_align_down(ptr, IB_PAGE_SIZE);
 }
-/************************************************************//**
-Gets the offset within a page.
-@return	offset from the start of the page */
-IB_INLINE
-ulint
-page_offset(
-/*========*/
-	const void*	ptr)	/*!< in: pointer to page frame */
+/// \brief Gets the offset within a page.
+/// \return offset from the start of the page
+/// \param [in] ptr pointer to page frame
+IB_INLINE ulint page_offset(const void* ptr)
 {
 	return(ut_align_offset(ptr, IB_PAGE_SIZE));
 }
-/*************************************************************//**
-Returns the max trx id field value. */
-IB_INLINE
-trx_id_t
-page_get_max_trx_id(
-/*================*/
-	const page_t*	page)	/*!< in: page */
+/// \brief Returns the max trx id field value.
+/// \param [in] page page
+IB_INLINE trx_id_t page_get_max_trx_id(const page_t* page)
 {
 	ut_ad(page);
 
 	return(mach_read_from_8(page + PAGE_HEADER + PAGE_MAX_TRX_ID));
 }
 
-/*************************************************************//**
-Sets the max trx id field value if trx_id is bigger than the previous
-value. */
-IB_INLINE
-void
-page_update_max_trx_id(
-/*===================*/
-	buf_block_t*	block,	/*!< in/out: page */
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose
-				uncompressed part will be updated, or NULL */
-	trx_id_t	trx_id,	/*!< in: transaction id */
-	mtr_t*		mtr)	/*!< in/out: mini-transaction */
+/// \brief Sets the max trx id field value if trx_id is bigger than the previous value.
+/// \param [in,out] block page
+/// \param [in,out] page_zip compressed page whose uncompressed part will be updated, or NULL
+/// \param [in] trx_id transaction id
+/// \param [in,out] mtr mini-transaction
+IB_INLINE void page_update_max_trx_id(buf_block_t* block, page_zip_des_t* page_zip, trx_id_t trx_id, mtr_t* mtr)
 {
 	ut_ad(block);
 	ut_ad(mtr_memo_contains(mtr, block, MTR_MEMO_PAGE_X_FIX));
@@ -106,14 +83,7 @@ page_update_max_trx_id(
 	}
 }
 
-/*************************************************************//**
-Reads the given header field. */
-IB_INLINE
-ulint
-page_header_get_field(
-/*==================*/
-	const page_t*	page,	/*!< in: page */
-	ulint		field)	/*!< in: PAGE_LEVEL, ... */
+IB_INLINE ulint page_header_get_field(const page_t* page, ulint field)
 {
 	ut_ad(page);
 	ut_ad(field <= PAGE_INDEX_ID);
@@ -121,17 +91,12 @@ page_header_get_field(
 	return(mach_read_from_2(page + PAGE_HEADER + field));
 }
 
-/*************************************************************//**
-Sets the given header field. */
-IB_INLINE
-void
-page_header_set_field(
-/*==================*/
-	page_t*		page,	/*!< in/out: page */
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose
-				uncompressed part will be updated, or NULL */
-	ulint		field,	/*!< in: PAGE_N_DIR_SLOTS, ... */
-	ulint		val)	/*!< in: value */
+/// \brief Sets the given header field.
+/// \param [in,out] page page
+/// \param [in,out] page_zip compressed page whose uncompressed part will be updated, or NULL
+/// \param [in] field PAGE_N_DIR_SLOTS, ...
+/// \param [in] val value
+IB_INLINE void page_header_set_field(page_t* page, page_zip_des_t* page_zip, ulint field, ulint val)
 {
 	ut_ad(page);
 	ut_ad(field <= PAGE_N_RECS);
@@ -147,15 +112,11 @@ page_header_set_field(
 #endif
 }
 
-/*************************************************************//**
-Returns the offset stored in the given header field.
-@return	offset from the start of the page, or 0 */
-IB_INLINE
-ulint
-page_header_get_offs(
-/*=================*/
-	const page_t*	page,	/*!< in: page */
-	ulint		field)	/*!< in: PAGE_FREE, ... */
+/// \brief Returns the offset stored in the given header field.
+/// \return offset from the start of the page, or 0
+/// \param [in] page page
+/// \param [in] field PAGE_FREE, ...
+IB_INLINE ulint page_header_get_offs(const page_t* page, ulint field)
 {
 	ulint	offs;
 
@@ -171,17 +132,7 @@ page_header_get_offs(
 	return(offs);
 }
 
-/*************************************************************//**
-Sets the pointer stored in the given header field. */
-IB_INLINE
-void
-page_header_set_ptr(
-/*================*/
-	page_t*		page,	/*!< in: page */
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose
-				uncompressed part will be updated, or NULL */
-	ulint		field,	/*!< in: PAGE_FREE, ... */
-	const byte*	ptr)	/*!< in: pointer or NULL*/
+IB_INLINE void page_header_set_ptr(page_t* page, page_zip_des_t* page_zip, ulint field, const byte* ptr)
 {
 	ulint	offs;
 
@@ -202,17 +153,11 @@ page_header_set_ptr(
 }
 
 #ifndef IB_HOTBACKUP
-/*************************************************************//**
-Resets the last insert info field in the page header. Writes to mlog
-about this operation. */
-IB_INLINE
-void
-page_header_reset_last_insert(
-/*==========================*/
-	page_t*		page,	/*!< in/out: page */
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page whose
-				uncompressed part will be updated, or NULL */
-	mtr_t*		mtr)	/*!< in: mtr */
+/// \brief Resets the last insert info field in the page header. Writes to mlog about this operation.
+/// \param [in,out] page page
+/// \param [in,out] page_zip compressed page whose uncompressed part will be updated, or NULL
+/// \param [in] mtr mtr
+IB_INLINE void page_header_reset_last_insert(page_t* page, page_zip_des_t* page_zip, mtr_t* mtr)
 {
 	ut_ad(page && mtr);
 
@@ -232,40 +177,27 @@ page_header_reset_last_insert(
 }
 #endif /* !IB_HOTBACKUP */
 
-/************************************************************//**
-Determine whether the page is in new-style compact format.
-@return nonzero if the page is in compact format, zero if it is in
-old-style format */
-IB_INLINE
-ulint
-page_is_comp(
-/*=========*/
-	const page_t*	page)	/*!< in: index page */
+/// \brief Determine whether the page is in new-style compact format.
+/// \return nonzero if the page is in compact format, zero if it is in old-style format
+/// \param [in] page index page
+IB_INLINE ulint page_is_comp(const page_t* page)
 {
 	return(IB_EXPECT(page_header_get_field(page, PAGE_N_HEAP) & 0x8000,
 			   0x8000));
 }
 
-/************************************************************//**
-TRUE if the record is on a page in compact format.
-@return	nonzero if in compact format */
-IB_INLINE
-ulint
-page_rec_is_comp(
-/*=============*/
-	const rec_t*	rec)	/*!< in: record */
+/// \brief TRUE if the record is on a page in compact format.
+/// \return nonzero if in compact format
+/// \param [in] rec record
+IB_INLINE ulint page_rec_is_comp(const rec_t* rec)
 {
 	return(page_is_comp(page_align(rec)));
 }
 
-/***************************************************************//**
-Returns the heap number of a record.
-@return	heap number */
-IB_INLINE
-ulint
-page_rec_get_heap_no(
-/*=================*/
-	const rec_t*	rec)	/*!< in: the physical record */
+/// \brief Returns the heap number of a record.
+/// \return heap number
+/// \param [in] rec the physical record
+IB_INLINE ulint page_rec_get_heap_no(const rec_t* rec)
 {
 	if (page_rec_is_comp(rec)) {
 		return(rec_get_heap_no_new(rec));
@@ -274,26 +206,18 @@ page_rec_get_heap_no(
 	}
 }
 
-/************************************************************//**
-Determine whether the page is a B-tree leaf.
-@return	TRUE if the page is a B-tree leaf */
-IB_INLINE
-ibool
-page_is_leaf(
-/*=========*/
-	const page_t*	page)	/*!< in: page */
+/// \brief Determine whether the page is a B-tree leaf.
+/// \return TRUE if the page is a B-tree leaf
+/// \param [in] page page
+IB_INLINE ibool page_is_leaf(const page_t* page)
 {
 	return(!*(const ib_uint16_t*) (page + (PAGE_HEADER + PAGE_LEVEL)));
 }
 
-/************************************************************//**
-Gets the offset of the first record on the page.
-@return	offset of the first record in record list, relative from page */
-IB_INLINE
-ulint
-page_get_infimum_offset(
-/*====================*/
-	const page_t*	page)	/*!< in: page which must have record(s) */
+/// \brief Gets the offset of the first record on the page.
+/// \return offset of the first record in record list, relative from page
+/// \param [in] page page which must have record(s)
+IB_INLINE ulint page_get_infimum_offset(const page_t* page)
 {
 	ut_ad(page);
 	ut_ad(!page_offset(page));
@@ -305,14 +229,10 @@ page_get_infimum_offset(
 	}
 }
 
-/************************************************************//**
-Gets the offset of the last record on the page.
-@return	offset of the last record in record list, relative from page */
-IB_INLINE
-ulint
-page_get_supremum_offset(
-/*=====================*/
-	const page_t*	page)	/*!< in: page which must have record(s) */
+/// \brief Gets the offset of the last record on the page.
+/// \return offset of the last record in record list, relative from page
+/// \param [in] page page which must have record(s)
+IB_INLINE ulint page_get_supremum_offset(const page_t* page)
 {
 	ut_ad(page);
 	ut_ad(!page_offset(page));
@@ -591,9 +511,7 @@ page_dir_get_nth_slot(
 {
 	ut_ad(page_dir_get_n_slots(page) > n);
 
-	return((page_dir_slot_t*)
-	       page + IB_PAGE_SIZE - PAGE_DIR
-	       - (n + 1) * PAGE_DIR_SLOT_SIZE);
+	return (page_dir_slot_t*)page + IB_PAGE_SIZE - PAGE_DIR - (n + 1) * PAGE_DIR_SLOT_SIZE;
 }
 #endif /* IB_DEBUG */
 
@@ -692,15 +610,11 @@ page_dir_calc_reserved_space(
 	       / PAGE_DIR_SLOT_MIN_N_OWNED);
 }
 
-/************************************************************//**
-Gets the pointer to the next record on the page.
-@return	pointer to next record */
-IB_INLINE
-const rec_t*
-page_rec_get_next_low(
-/*==================*/
-	const rec_t*	rec,	/*!< in: pointer to record */
-	ulint		comp)	/*!< in: nonzero=compact page layout */
+/// \brief Gets the pointer to the next record on the page.
+/// \return pointer to next record
+/// \param [in] rec pointer to record
+/// \param [in] comp nonzero=compact page layout
+IB_INLINE const rec_t* page_rec_get_next_low(const rec_t* rec, ulint comp)
 {
 	ulint		offs;
 	const page_t*	page;
@@ -712,10 +626,7 @@ page_rec_get_next_low(
 	offs = rec_get_next_offs(rec, comp);
 
 	if (IB_UNLIKELY(offs >= IB_PAGE_SIZE)) {
-		ib_log(state,
-			"InnoDB: Next record offset is nonsensical %lu"
-			" in record at offset %lu\n"
-			"InnoDB: rec address %p, space id %lu, page %lu\n",
+		ib_log(state, "InnoDB: Next record offset is nonsensical %lu in record at offset %lu\nInnoDB: rec address %p, space id %lu, page %lu\n",
 			(ulong)offs, (ulong) page_offset(rec),
 			(void*) rec,
 			(ulong) page_get_space_id(page),
@@ -733,40 +644,26 @@ page_rec_get_next_low(
 	return(page + offs);
 }
 
-/************************************************************//**
-Gets the pointer to the next record on the page.
-@return	pointer to next record */
-IB_INLINE
-rec_t*
-page_rec_get_next(
-/*==============*/
-	rec_t*	rec)	/*!< in: pointer to record */
+/// \brief Gets the pointer to the next record on the page.
+/// \return pointer to next record
+/// \param [in] rec pointer to record
+IB_INLINE rec_t* page_rec_get_next(rec_t* rec)
 {
-	return((rec_t*) page_rec_get_next_low(rec, page_rec_is_comp(rec)));
+	return (rec_t*)page_rec_get_next_low(rec, page_rec_is_comp(rec));
 }
 
-/************************************************************//**
-Gets the pointer to the next record on the page.
-@return	pointer to next record */
-IB_INLINE
-const rec_t*
-page_rec_get_next_const(
-/*====================*/
-	const rec_t*	rec)	/*!< in: pointer to record */
+/// \brief Gets the pointer to the next record on the page.
+/// \return pointer to next record
+/// \param [in] rec pointer to record
+IB_INLINE const rec_t* page_rec_get_next_const(const rec_t* rec)
 {
 	return(page_rec_get_next_low(rec, page_rec_is_comp(rec)));
 }
 
-/************************************************************//**
-Sets the pointer to the next record on the page. */
-IB_INLINE
-void
-page_rec_set_next(
-/*==============*/
-	rec_t*	rec,		/*!< in: pointer to record,
-				must not be page supremum */
-	rec_t*	next)		/*!< in: pointer to next record,
-				must not be page infimum */
+/// \brief Sets the pointer to the next record on the page.
+/// \param [in] rec pointer to record, must not be page supremum
+/// \param [in] next pointer to next record, must not be page infimum
+IB_INLINE void page_rec_set_next(rec_t* rec, rec_t* next)
 {
 	ulint	offs;
 
@@ -790,36 +687,23 @@ page_rec_set_next(
 	}
 }
 
-/************************************************************//**
-Gets the pointer to the previous record.
-@return	pointer to previous record */
-IB_INLINE
-const rec_t*
-page_rec_get_prev_const(
-/*====================*/
-	const rec_t*	rec)	/*!< in: pointer to record, must not be page
-				infimum */
+/// \brief Gets the pointer to the previous record.
+/// \return pointer to previous record
+/// \param [in] rec pointer to record, must not be page infimum
+IB_INLINE const rec_t* page_rec_get_prev_const(const rec_t* rec)
 {
-	const page_dir_slot_t*	slot;
-	ulint			slot_no;
-	const rec_t*		rec2;
-	const rec_t*		prev_rec = NULL;
-	const page_t*		page;
-
+	const page_dir_slot_t* slot;
+	ulint slot_no;
+	const rec_t* rec2;
+	const rec_t* prev_rec = NULL;
+	const page_t* page;
 	ut_ad(page_rec_check(rec));
-
 	page = page_align(rec);
-
 	ut_ad(!page_rec_is_infimum(rec));
-
 	slot_no = page_dir_find_owner_slot(rec);
-
 	ut_a(slot_no != 0);
-
 	slot = page_dir_get_nth_slot(page, slot_no - 1);
-
 	rec2 = page_dir_slot_get_rec(slot);
-
 	if (page_is_comp(page)) {
 		while (rec != rec2) {
 			prev_rec = rec2;
@@ -831,33 +715,22 @@ page_rec_get_prev_const(
 			rec2 = page_rec_get_next_low(rec2, FALSE);
 		}
 	}
-
 	ut_a(prev_rec);
-
 	return(prev_rec);
 }
 
-/************************************************************//**
-Gets the pointer to the previous record.
-@return	pointer to previous record */
-IB_INLINE
-rec_t*
-page_rec_get_prev(
-/*==============*/
-	rec_t*	rec)	/*!< in: pointer to record, must not be page
-			infimum */
+/// \brief Gets the pointer to the previous record.
+/// \return pointer to previous record
+/// \param [in] rec pointer to record, must not be page infimum
+IB_INLINE rec_t* page_rec_get_prev(rec_t* rec)
 {
-	return((rec_t*) page_rec_get_prev_const(rec));
+	return (rec_t*)page_rec_get_prev_const(rec);
 }
 
-/***************************************************************//**
-Looks for the record which owns the given record.
-@return	the owner record */
-IB_INLINE
-rec_t*
-page_rec_find_owner_rec(
-/*====================*/
-	rec_t*	rec)	/*!< in: the physical record */
+/// \brief Looks for the record which owns the given record.
+/// \return the owner record
+/// \param [in] rec the physical record
+IB_INLINE rec_t* page_rec_find_owner_rec(rec_t* rec)
 {
 	ut_ad(page_rec_check(rec));
 
@@ -874,15 +747,11 @@ page_rec_find_owner_rec(
 	return(rec);
 }
 
-/**********************************************************//**
-Returns the base extra size of a physical record.  This is the
-size of the fixed header, independent of the record size.
-@return	REC_N_NEW_EXTRA_BYTES or REC_N_OLD_EXTRA_BYTES */
-IB_INLINE
-ulint
-page_rec_get_base_extra_size(
-/*=========================*/
-	const rec_t*	rec)	/*!< in: physical record */
+/// \brief Returns the base extra size of a physical record.
+/// \details This is the size of the fixed header, independent of the record size.
+/// \return REC_N_NEW_EXTRA_BYTES or REC_N_OLD_EXTRA_BYTES
+/// \param [in] rec physical record
+IB_INLINE ulint page_rec_get_base_extra_size(const rec_t* rec)
 {
 #if REC_N_NEW_EXTRA_BYTES + 1 != REC_N_OLD_EXTRA_BYTES
 # error "REC_N_NEW_EXTRA_BYTES + 1 != REC_N_OLD_EXTRA_BYTES"
@@ -890,43 +759,28 @@ page_rec_get_base_extra_size(
 	return(REC_N_NEW_EXTRA_BYTES + (ulint) !page_rec_is_comp(rec));
 }
 
-/************************************************************//**
-Returns the sum of the sizes of the records in the record list, excluding
-the infimum and supremum records.
-@return	data in bytes */
-IB_INLINE
-ulint
-page_get_data_size(
-/*===============*/
-	const page_t*	page)	/*!< in: index page */
+/// \brief Returns the sum of the sizes of the records in the record list, excluding the infimum and supremum records.
+/// \return data in bytes
+/// \param [in] page index page
+IB_INLINE ulint page_get_data_size(const page_t* page)
 {
-	ulint	ret;
-
+	ulint ret;
 	ret = (ulint)(page_header_get_field(page, PAGE_HEAP_TOP)
 		      - (page_is_comp(page)
 			 ? PAGE_NEW_SUPREMUM_END
 			 : PAGE_OLD_SUPREMUM_END)
 		      - page_header_get_field(page, PAGE_GARBAGE));
-
 	ut_ad(ret < IB_PAGE_SIZE);
-
 	return(ret);
 }
 
 
-/************************************************************//**
-Allocates a block of memory from the free list of an index page. */
-IB_INLINE
-void
-page_mem_alloc_free(
-/*================*/
-	page_t*		page,	/*!< in/out: index page */
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page with enough
-				space available for inserting the record,
-				or NULL */
-	rec_t*		next_rec,/*!< in: pointer to the new head of the
-				free record list */
-	ulint		need)	/*!< in: number of bytes allocated */
+/// \brief Allocates a block of memory from the free list of an index page.
+/// \param [in,out] page index page
+/// \param [in,out] page_zip compressed page with enough space available for inserting the record, or NULL
+/// \param [in] next_rec pointer to the new head of the free record list
+/// \param [in] need number of bytes allocated
+IB_INLINE void page_mem_alloc_free(page_t* page, page_zip_des_t* page_zip, rec_t* next_rec, ulint need)
 {
 	ulint		garbage;
 

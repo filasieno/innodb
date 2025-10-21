@@ -1,20 +1,15 @@
-/*****************************************************************************
-
-Copyright (c) 2005, 2009, Innobase Oy. All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
+// Copyright (c) 2005, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 
 /**************************************************//**
 @file include/page0zip.ic
@@ -98,53 +93,45 @@ In summary, the compressed page looks like this:
   - deleted records (free list) in link order
 */
 
-/** Start offset of the area that will be compressed */
-#define PAGE_ZIP_START		PAGE_NEW_SUPREMUM_END
-/** Size of an compressed page directory entry */
-#define PAGE_ZIP_DIR_SLOT_SIZE	2
-/** Mask of record offsets */
-#define PAGE_ZIP_DIR_SLOT_MASK	0x3fff
-/** 'owned' flag */
-#define PAGE_ZIP_DIR_SLOT_OWNED	0x4000
-/** 'deleted' flag */
-#define PAGE_ZIP_DIR_SLOT_DEL	0x8000
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
 
-/**********************************************************************//**
-Determine the size of a compressed page in bytes.
-@return	size in bytes */
-IB_INLINE
-ulint
-page_zip_get_size(
-/*==============*/
-	const page_zip_des_t*	page_zip)	/*!< in: compressed page */
+constinit ulint PAGE_ZIP_START = PAGE_NEW_SUPREMUM_END;
+constinit ulint PAGE_ZIP_DIR_SLOT_SIZE = 2;
+constinit ulint PAGE_ZIP_DIR_SLOT_MASK = 0x3fff;
+constinit ulint PAGE_ZIP_DIR_SLOT_OWNED = 0x4000;
+constinit ulint PAGE_ZIP_DIR_SLOT_DEL = 0x8000;
+
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
+
+/// \brief Determine the size of a compressed page in bytes.
+/// \return size in bytes
+/// \param [in] page_zip compressed page
+IB_INLINE ulint page_zip_get_size(const page_zip_des_t* page_zip);
 {
-	ulint	size;
-
 	if (IB_UNLIKELY(!page_zip->ssize)) {
-		return(0);
+		return 0;
 	}
 
-	size = (PAGE_ZIP_MIN_SIZE >> 1) << page_zip->ssize;
+	ulint size = (PAGE_ZIP_MIN_SIZE >> 1) << page_zip->ssize;
 
 	ut_ad(size >= PAGE_ZIP_MIN_SIZE);
 	ut_ad(size <= IB_PAGE_SIZE);
 
-	return(size);
+	return size;
 }
-/**********************************************************************//**
-Set the size of a compressed page in bytes. */
-IB_INLINE
-void
-page_zip_set_size(
-/*==============*/
-	page_zip_des_t*	page_zip,	/*!< in/out: compressed page */
-	ulint		size)		/*!< in: size in bytes */
+/// \brief Set the size of a compressed page in bytes.
+/// \param [in,out] page_zip compressed page
+/// \param [in] size size in bytes
+IB_INLINE void page_zip_set_size(page_zip_des_t* page_zip, ulint size);
 {
 	if (size) {
-		int	ssize;
-
 		ut_ad(ut_is_2pow(size));
 
+		int ssize;
 		for (ssize = 1; size > (ulint) (512 << ssize); ssize++) {
 		}
 
@@ -157,18 +144,13 @@ page_zip_set_size(
 }
 
 #ifndef IB_HOTBACKUP
-/**********************************************************************//**
-Determine if a record is so big that it needs to be stored externally.
-@return	FALSE if the entire record can be stored locally on the page */
-IB_INLINE
-ibool
-page_zip_rec_needs_ext(
-/*===================*/
-	ulint	rec_size,	/*!< in: length of the record in bytes */
-	ulint	comp,		/*!< in: nonzero=compact format */
-	ulint	n_fields,	/*!< in: number of fields in the record;
-				ignored if zip_size == 0 */
-	ulint	zip_size)	/*!< in: compressed page size in bytes, or 0 */
+/// \brief Determine if a record is so big that it needs to be stored externally.
+/// \return FALSE if the entire record can be stored locally on the page
+/// \param [in] rec_size length of the record in bytes
+/// \param [in] comp nonzero=compact format
+/// \param [in] n_fields number of fields in the record; ignored if zip_size == 0
+/// \param [in] zip_size compressed page size in bytes, or 0
+IB_INLINE ibool page_zip_rec_needs_ext(ulint rec_size, ulint comp, ulint n_fields, ulint zip_size);
 {
 	ut_ad(rec_size > comp ? REC_N_NEW_EXTRA_BYTES : REC_N_OLD_EXTRA_BYTES);
 	ut_ad(ut_is_2pow(zip_size));
@@ -177,76 +159,54 @@ page_zip_rec_needs_ext(
 #ifdef WITH_ZIP
 #if IB_PAGE_SIZE > REC_MAX_DATA_SIZE
 	if (IB_UNLIKELY(rec_size >= REC_MAX_DATA_SIZE)) {
-		return(TRUE);
+		return TRUE;
 	}
 #endif
 
 	if (IB_UNLIKELY(zip_size)) {
 		ut_ad(comp);
-		/* On a compressed page, there is a two-byte entry in
-		the dense page directory for every record.  But there
-		is no record header.  There should be enough room for
-		one record on an empty leaf page.  Subtract 1 byte for
-		the encoded heap number.  Check also the available space
-		on the uncompressed page. */
-		return(rec_size - (REC_N_NEW_EXTRA_BYTES - 2)
-		       >= (page_zip_empty_size(n_fields, zip_size) - 1)
-		       || rec_size >= page_get_free_space_of_empty(TRUE) / 2);
+		// On a compressed page, there is a two-byte entry in the dense page directory for every record. But there is no record header. There should be enough room for one record on an empty leaf page. Subtract 1 byte for the encoded heap number. Check also the available space on the uncompressed page.
+		return (rec_size - (REC_N_NEW_EXTRA_BYTES - 2) >= (page_zip_empty_size(n_fields, zip_size) - 1) || rec_size >= page_get_free_space_of_empty(TRUE) / 2);
 	}
 #endif /* WITH_ZIP */
 
-	return(rec_size >= page_get_free_space_of_empty(comp) / 2);
+	return (rec_size >= page_get_free_space_of_empty(comp) / 2);
 }
 #endif /* !IB_HOTBACKUP */
 
 #ifdef IB_DEBUG
-/**********************************************************************//**
-Validate a compressed page descriptor.
-@return	TRUE if ok */
-IB_INLINE
-ibool
-page_zip_simple_validate(
-/*=====================*/
-	const page_zip_des_t*	page_zip)/*!< in: compressed page descriptor */
+/// \brief Validate a compressed page descriptor.
+/// \return TRUE if ok
+/// \param [in] page_zip compressed page descriptor
+IB_INLINE ibool page_zip_simple_validate(const page_zip_des_t* page_zip);
 {
 	ut_ad(page_zip);
 	ut_ad(page_zip->data);
 	ut_ad(page_zip->ssize < PAGE_ZIP_NUM_SSIZE);
-	ut_ad(page_zip_get_size(page_zip)
-	      > PAGE_DATA + PAGE_ZIP_DIR_SLOT_SIZE);
+	ut_ad(page_zip_get_size(page_zip) > PAGE_DATA + PAGE_ZIP_DIR_SLOT_SIZE);
 	ut_ad(page_zip->m_start <= page_zip->m_end);
 	ut_ad(page_zip->m_end < page_zip_get_size(page_zip));
-	ut_ad(page_zip->n_blobs
-	      < page_zip_get_size(page_zip) / BTR_EXTERN_FIELD_REF_SIZE);
-	return(TRUE);
+	ut_ad(page_zip->n_blobs < page_zip_get_size(page_zip) / BTR_EXTERN_FIELD_REF_SIZE);
+	return TRUE;
 }
 #endif /* IB_DEBUG */
 
-/**********************************************************************//**
-Determine if the length of the page trailer.
-@return length of the page trailer, in bytes, not including the
-terminating zero byte of the modification log */
-IB_INLINE
-ibool
-page_zip_get_trailer_len(
-/*=====================*/
-	const page_zip_des_t*	page_zip,/*!< in: compressed page */
-	ibool			is_clust,/*!< in: TRUE if clustered index */
-	ulint*			entry_size)/*!< out: size of the uncompressed
-					portion of a user record */
+/// \brief Determine the length of the page trailer.
+/// \return length of the page trailer, in bytes, not including the terminating zero byte of the modification log
+/// \param [in] page_zip compressed page
+/// \param [in] is_clust TRUE if clustered index
+/// \param [out] entry_size size of the uncompressed portion of a user record
+IB_INLINE ibool page_zip_get_trailer_len(const page_zip_des_t* page_zip, ibool is_clust, ulint* entry_size);
 {
-	ulint	uncompressed_size;
-
 	ut_ad(page_zip_simple_validate(page_zip));
 	IB_MEM_ASSERT_RW(page_zip->data, page_zip_get_size(page_zip));
 
+	ulint uncompressed_size;
 	if (IB_UNLIKELY(!page_is_leaf(page_zip->data))) {
-		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE
-			+ REC_NODE_PTR_SIZE;
+		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE + REC_NODE_PTR_SIZE;
 		ut_ad(!page_zip->n_blobs);
 	} else if (IB_UNLIKELY(is_clust)) {
-		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE
-			+ DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN;
+		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE + DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN;
 	} else {
 		uncompressed_size = PAGE_ZIP_DIR_SLOT_SIZE;
 		ut_ad(!page_zip->n_blobs);
@@ -256,135 +216,83 @@ page_zip_get_trailer_len(
 		*entry_size = uncompressed_size;
 	}
 
-	return((page_dir_get_n_heap(page_zip->data) - 2)
-	       * uncompressed_size
-	       + page_zip->n_blobs * BTR_EXTERN_FIELD_REF_SIZE);
+	return ((page_dir_get_n_heap(page_zip->data) - 2) * uncompressed_size + page_zip->n_blobs * BTR_EXTERN_FIELD_REF_SIZE);
 }
 
-/**********************************************************************//**
-Determine how big record can be inserted without recompressing the page.
-@return a positive number indicating the maximum size of a record
-whose insertion is guaranteed to succeed, or zero or negative */
-IB_INLINE
-lint
-page_zip_max_ins_size(
-/*==================*/
-	const page_zip_des_t*	page_zip,/*!< in: compressed page */
-	ibool			is_clust)/*!< in: TRUE if clustered index */
+/// \brief Determine how big record can be inserted without recompressing the page.
+/// \return a positive number indicating the maximum size of a record whose insertion is guaranteed to succeed, or zero or negative
+/// \param [in] page_zip compressed page
+/// \param [in] is_clust TRUE if clustered index
+IB_INLINE lint page_zip_max_ins_size(const page_zip_des_t* page_zip, ibool is_clust);
 {
-	ulint	uncompressed_size;
-	ulint	trailer_len;
+	ulint uncompressed_size;
+	ulint trailer_len = page_zip_get_trailer_len(page_zip, is_clust, &uncompressed_size);
 
-	trailer_len = page_zip_get_trailer_len(page_zip, is_clust,
-					       &uncompressed_size);
-
-	/* When a record is created, a pointer may be added to
-	the dense directory.
-	Likewise, space for the columns that will not be
-	compressed will be allocated from the page trailer.
-	Also the BLOB pointers will be allocated from there, but
-	we may as well count them in the length of the record. */
+	// When a record is created, a pointer may be added to the dense directory. Likewise, space for the columns that will not be compressed will be allocated from the page trailer. Also the BLOB pointers will be allocated from there, but we may as well count them in the length of the record.
 
 	trailer_len += uncompressed_size;
 
-	return((lint) page_zip_get_size(page_zip)
-	       - trailer_len - page_zip->m_end
-	       - (REC_N_NEW_EXTRA_BYTES - 2));
+	return ((lint) page_zip_get_size(page_zip) - trailer_len - page_zip->m_end - (REC_N_NEW_EXTRA_BYTES - 2));
 }
 
-/**********************************************************************//**
-Determine if enough space is available in the modification log.
-@return	TRUE if enough space is available */
-IB_INLINE
-ibool
-page_zip_available(
-/*===============*/
-	const page_zip_des_t*	page_zip,/*!< in: compressed page */
-	ibool			is_clust,/*!< in: TRUE if clustered index */
-	ulint			length,	/*!< in: combined size of the record */
-	ulint			create)	/*!< in: nonzero=add the record to
-					the heap */
+/// \brief Determine if enough space is available in the modification log.
+/// \return TRUE if enough space is available
+/// \param [in] page_zip compressed page
+/// \param [in] is_clust TRUE if clustered index
+/// \param [in] length combined size of the record
+/// \param [in] create nonzero=add the record to the heap
+IB_INLINE ibool page_zip_available(const page_zip_des_t* page_zip, ibool is_clust, ulint length, ulint create);
 {
-	ulint	uncompressed_size;
-	ulint	trailer_len;
-
 	ut_ad(length > REC_N_NEW_EXTRA_BYTES);
 
-	trailer_len = page_zip_get_trailer_len(page_zip, is_clust,
-					       &uncompressed_size);
+	ulint uncompressed_size;
+	ulint trailer_len = page_zip_get_trailer_len(page_zip, is_clust, &uncompressed_size);
 
-	/* Subtract the fixed extra bytes and add the maximum
-	space needed for identifying the record (encoded heap_no). */
+	// Subtract the fixed extra bytes and add the maximum space needed for identifying the record (encoded heap_no).
 	length -= REC_N_NEW_EXTRA_BYTES - 2;
 
 	if (IB_UNLIKELY(create)) {
-		/* When a record is created, a pointer may be added to
-		the dense directory.
-		Likewise, space for the columns that will not be
-		compressed will be allocated from the page trailer.
-		Also the BLOB pointers will be allocated from there, but
-		we may as well count them in the length of the record. */
+		// When a record is created, a pointer may be added to the dense directory. Likewise, space for the columns that will not be compressed will be allocated from the page trailer. Also the BLOB pointers will be allocated from there, but we may as well count them in the length of the record.
 
 		trailer_len += uncompressed_size;
 	}
 
-	return(IB_LIKELY(length
-			   + trailer_len
-			   + page_zip->m_end
-			   < page_zip_get_size(page_zip)));
+	return (IB_LIKELY(length + trailer_len + page_zip->m_end < page_zip_get_size(page_zip)));
 }
 
-/**********************************************************************//**
-Initialize a compressed page descriptor. */
-IB_INLINE
-void
-page_zip_des_init(
-/*==============*/
-	page_zip_des_t*	page_zip)	/*!< in/out: compressed page
-					descriptor */
+/// \brief Initialize a compressed page descriptor.
+/// \param [in,out] page_zip compressed page descriptor
+IB_INLINE void page_zip_des_init(page_zip_des_t* page_zip);
 {
 	memset(page_zip, 0, sizeof *page_zip);
 }
 
-/**********************************************************************//**
-Write a log record of writing to the uncompressed header portion of a page. */
-IB_INTERN
-void
-page_zip_write_header_log(
-/*======================*/
-	const byte*	data,/*!< in: data on the uncompressed page */
-	ulint		length,	/*!< in: length of the data */
-	mtr_t*		mtr);	/*!< in: mini-transaction */
+/// \brief Write a log record of writing to the uncompressed header portion of a page.
+/// \param [in] data data on the uncompressed page
+/// \param [in] length length of the data
+/// \param [in] mtr mini-transaction
+IB_INTERN void page_zip_write_header_log(const byte* data, ulint length, mtr_t* mtr);
 
-/**********************************************************************//**
-Write data to the uncompressed header portion of a page.  The data must
-already have been written to the uncompressed page.
-However, the data portion of the uncompressed page may differ from
-the compressed page when a record is being inserted in
-page_cur_insert_rec_zip(). */
-IB_INLINE
-void
-page_zip_write_header(
-/*==================*/
-	page_zip_des_t*	page_zip,/*!< in/out: compressed page */
-	const byte*	str,	/*!< in: address on the uncompressed page */
-	ulint		length,	/*!< in: length of the data */
-	mtr_t*		mtr)	/*!< in: mini-transaction, or NULL */
+/// \brief Write data to the uncompressed header portion of a page. The data must already have been written to the uncompressed page.
+/// \details However, the data portion of the uncompressed page may differ from the compressed page when a record is being inserted in page_cur_insert_rec_zip().
+/// \param [in,out] page_zip compressed page
+/// \param [in] str address on the uncompressed page
+/// \param [in] length length of the data
+/// \param [in] mtr mini-transaction, or NULL
+IB_INLINE void page_zip_write_header(page_zip_des_t* page_zip, const byte* str, ulint length, mtr_t* mtr);
 {
-	ulint	pos;
-
 	ut_ad(PAGE_ZIP_MATCH(str, page_zip));
 	ut_ad(page_zip_simple_validate(page_zip));
 	IB_MEM_ASSERT_RW(page_zip->data, page_zip_get_size(page_zip));
 
-	pos = page_offset(str);
+	ulint pos = page_offset(str);
 
 	ut_ad(pos < PAGE_DATA);
 
 	memcpy(page_zip->data + pos, str, length);
 
-	/* The following would fail in page_cur_insert_rec_zip(). */
-	/* ut_ad(page_zip_validate(page_zip, str - pos)); */
+	// The following would fail in page_cur_insert_rec_zip().
+	// ut_ad(page_zip_validate(page_zip, str - pos));
 
 	if (IB_LIKELY_NULL(mtr)) {
 #ifndef IB_HOTBACKUP
