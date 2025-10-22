@@ -349,28 +349,22 @@ IB_INTERN ulint dict_index_get_nth_col_pos(const dict_index_t* dict_index, ulint
 /// \return TRUE if contains the column or its prefix
 IB_INTERN ibool dict_index_contains_col_or_prefix(const dict_index_t* dict_index, ulint n);
 {
-	const dict_field_t*	field;
-	const dict_col_t*	col;
-	ulint			pos;
-	ulint			n_fields;
+	const dict_field_t* field;
+	const dict_col_t* col;
+	ulint pos;
+	ulint n_fields;
 
 	ut_ad(dict_index);
 	ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
 
 	if (dict_index_is_clust(dict_index)) {
-
 		return(TRUE);
 	}
-
 	col = dict_table_get_nth_col(dict_index->table, n);
-
 	n_fields = dict_index_get_n_fields(dict_index);
-
 	for (pos = 0; pos < n_fields; pos++) {
 		field = dict_index_get_nth_field(dict_index, pos);
-
 		if (col == field->col) {
-
 			return(TRUE);
 		}
 	}
@@ -385,24 +379,16 @@ IB_INTERN ulint dict_index_get_nth_field_pos(const dict_index_t* dict_index, con
 {
 	const dict_field_t*	field;
 	const dict_field_t*	field2;
-	ulint			n_fields;
-	ulint			pos;
+	ulint n_fields;
+	ulint pos;
 
 	ut_ad(dict_index);
 	ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
 	field2 = dict_index_get_nth_field(index2, n);
-
 	n_fields = dict_index_get_n_fields(dict_index);
-
 	for (pos = 0; pos < n_fields; pos++) {
 		field = dict_index_get_nth_field(dict_index, pos);
-
-		if (field->col == field2->col
-		    && (field->prefix_len == 0
-			|| (field->prefix_len >= field2->prefix_len
-			    && field2->prefix_len != 0))) {
-
+		if (field->col == field2->col && (field->prefix_len == 0 || (field->prefix_len >= field2->prefix_len && field2->prefix_len != 0))) {
 			return(pos);
 		}
 	}
@@ -414,22 +400,16 @@ IB_INTERN ulint dict_index_get_nth_field_pos(const dict_index_t* dict_index, con
 /// \return table, NULL if does not exist
 IB_INTERN dict_table_t* dict_table_get_on_id(ib_recovery_t recovery, dulint table_id, trx_t* trx);
 {
-	dict_table_t*	table;
+	if (ut_dulint_cmp(table_id, DICT_FIELDS_ID) <= 0 || trx->dict_operation_lock_mode == RW_X_LATCH) {
+		// It is a system table which will always exist in the table cache: we avoid acquiring the dictionary mutex, 
+		// because if we are doing a rollback to handle an error in TABLE CREATE, for example, we already have the mutex!
 
-	if (ut_dulint_cmp(table_id, DICT_FIELDS_ID) <= 0
-	    || trx->dict_operation_lock_mode == RW_X_LATCH) {
-		// It is a system table which will always exist in the table cache: we avoid acquiring the dictionary mutex, because if we are doing a rollback to handle an error in TABLE CREATE, for example, we already have the mutex!
-
-		ut_ad(mutex_own(&(dict_sys->mutex))
-		      || trx->dict_operation_lock_mode == RW_X_LATCH);
-
+		ut_ad(mutex_own(&(dict_sys->mutex)) || trx->dict_operation_lock_mode == RW_X_LATCH);
 		return dict_table_get_on_id_low(recovery, table_id);
 	}
 
 	mutex_enter(&(dict_sys->mutex));
-
-	table = dict_table_get_on_id_low(recovery, table_id);
-
+	dict_table_t* table = dict_table_get_on_id_low(recovery, table_id);
 	mutex_exit(&(dict_sys->mutex));
 
 	return(table);
@@ -447,25 +427,21 @@ IB_INTERN ulint dict_table_get_nth_col_pos(const dict_table_t* table, ulint n);
 /// \return TRUE if the column, or its prefix, is in the clustered key
 IB_INTERN ibool dict_table_col_in_clustered_key(const dict_table_t* table, ulint n);
 {
-	const dict_index_t*	dict_index;
-	const dict_field_t*	field;
-	const dict_col_t*	col;
-	ulint			pos;
-	ulint			n_fields;
+	const dict_index_t* dict_index;
+	const dict_field_t* field;
+	const dict_col_t* col;
+	ulint pos;
+	ulint n_fields;
 
 	ut_ad(table);
 
 	col = dict_table_get_nth_col(table, n);
-
 	dict_index = dict_table_get_first_index(table);
-
 	n_fields = dict_index_get_n_unique(dict_index);
 
 	for (pos = 0; pos < n_fields; pos++) {
 		field = dict_index_get_nth_field(dict_index, pos);
-
 		if (col == field->col) {
-
 			return(TRUE);
 		}
 	}
@@ -477,23 +453,13 @@ IB_INTERN ibool dict_table_col_in_clustered_key(const dict_table_t* table, ulint
 IB_INTERN void dict_init(void)
 {
 	dict_sys = mem_alloc(sizeof(dict_sys_t));
-
 	mutex_create(&dict_sys->mutex, SYNC_DICT);
-
-	dict_sys->table_hash = hash_create(buf_pool_get_curr_size()
-					   / (DICT_POOL_PER_TABLE_HASH
-					      * IB_WORD_SIZE));
-	dict_sys->table_id_hash = hash_create(buf_pool_get_curr_size()
-					      / (DICT_POOL_PER_TABLE_HASH
-						 * IB_WORD_SIZE));
-	dict_sys->size = 0;
-
+	dict_sys->table_hash = hash_create(buf_pool_get_curr_size() / (DICT_POOL_PER_TABLE_HASH * IB_WORD_SIZE));
+	dict_sys->table_id_hash = hash_create(buf_pool_get_curr_size() / (DICT_POOL_PER_TABLE_HASH * IB_WORD_SIZE));
+	dict_sys->size = 0
 	UT_LIST_INIT(dict_sys->table_LRU);
-
 	rw_lock_create(&dict_operation_lock, SYNC_DICT_OPERATION);
-
 	mutex_create(&dict_foreign_err_mutex, SYNC_ANY_LATCH);
-
 	for (int i = 0; i < DICT_INDEX_STAT_MUTEX_SIZE; i++) {
 		mutex_create(&dict_index_stat_mutex[i], SYNC_INDEX_TREE);
 	}
@@ -504,52 +470,40 @@ IB_INTERN void dict_init(void)
 /// \return table, NULL if does not exist
 IB_INTERN dict_table_t* dict_table_get(const char* table_name, ibool ref_count);
 {
-	dict_table_t*	table;
+	dict_table_t* table;
 
 	mutex_enter(&dict_sys->mutex);
-
 	table = dict_table_get_low(table_name);
-
 	if (ref_count && table != NULL) {
 		dict_table_increment_handle_count(table, TRUE);
 	}
 
 	mutex_exit(&dict_sys->mutex);
-
 	if (table != NULL && !table->stat_initialized) {
-		/* If table->ibd_file_missing == TRUE, this will
-		print an error message and return without doing
-		anything. */
+		// If table->ibd_file_missing == TRUE, this will print an error message and return without doing anything.
 		dict_update_statistics(table);
 	}
-
 	return(table);
 }
-#endif /* !IB_HOTBACKUP */
+#endif // !IB_HOTBACKUP
 
 /// \brief Returns a table instance based on table id.
 /// \return table, NULL if does not exist
 IB_INTERN dict_table_t* dict_table_get_using_id(ib_recovery_t recovery, dulint table_id, ibool ref_count);
 {
-	dict_table_t*	table;
+	dict_table_t* table;
 
 	ut_ad(mutex_own(&dict_sys->mutex));
-
 	table = dict_table_get_on_id_low(recovery, table_id);
-
 	if (ref_count && table != NULL) {
 		dict_table_increment_handle_count(table, TRUE);
 	}
-
 	return(table);
 }
 
 /**************************************************************************
 Adds system columns to a table object. */
-IB_INTERN
-void
-dict_table_add_system_columns(
-/*==========================*/
+IB_INTERN void dict_table_add_system_columns(
 	dict_table_t*	table,	/*!< in/out: table */
 	mem_heap_t*	heap)	/*!< in: temporary heap */
 {
@@ -564,21 +518,15 @@ dict_table_add_system_columns(
 	The clustered index will not always physically contain all
 	system columns. */
 
-	dict_mem_table_add_col(table, heap, "DB_ROW_ID", DATA_SYS,
-			       DATA_ROW_ID | DATA_NOT_NULL,
-			       DATA_ROW_ID_LEN);
+	dict_mem_table_add_col(table, heap, "DB_ROW_ID", DATA_SYS, DATA_ROW_ID | DATA_NOT_NULL, DATA_ROW_ID_LEN);
 #if DATA_ROW_ID != 0
 #error "DATA_ROW_ID != 0"
 #endif
-	dict_mem_table_add_col(table, heap, "DB_TRX_ID", DATA_SYS,
-			       DATA_TRX_ID | DATA_NOT_NULL,
-			       DATA_TRX_ID_LEN);
+	dict_mem_table_add_col(table, heap, "DB_TRX_ID", DATA_SYS, DATA_TRX_ID | DATA_NOT_NULL, DATA_TRX_ID_LEN);
 #if DATA_TRX_ID != 1
 #error "DATA_TRX_ID != 1"
 #endif
-	dict_mem_table_add_col(table, heap, "DB_ROLL_PTR", DATA_SYS,
-			       DATA_ROLL_PTR | DATA_NOT_NULL,
-			       DATA_ROLL_PTR_LEN);
+	dict_mem_table_add_col(table, heap, "DB_ROLL_PTR", DATA_SYS, DATA_ROLL_PTR | DATA_NOT_NULL, DATA_ROLL_PTR_LEN);
 #if DATA_ROLL_PTR != 2
 #error "DATA_ROLL_PTR != 2"
 #endif
@@ -629,16 +577,12 @@ IB_INTERN void dict_table_add_to_cache(dict_table_t* table, mem_heap_t* heap);
 	/* Look for a table with the same name: error if such exists */
 	{
 		dict_table_t*	table2;
-		HASH_SEARCH(name_hash, dict_sys->table_hash, fold,
-			    dict_table_t*, table2, ut_ad(table2->cached),
-			    ut_strcmp(table2->name, table->name) == 0);
+		HASH_SEARCH(name_hash, dict_sys->table_hash, fold, dict_table_t*, table2, ut_ad(table2->cached), ut_strcmp(table2->name, table->name) == 0);
 		ut_a(table2 == NULL);
 
 #ifdef IB_DEBUG
 		/* Look for the same table pointer with a different name */
-		HASH_SEARCH_ALL(name_hash, dict_sys->table_hash,
-				dict_table_t*, table2, ut_ad(table2->cached),
-				table2 == table);
+		HASH_SEARCH_ALL(name_hash, dict_sys->table_hash, dict_table_t*, table2, ut_ad(table2->cached), table2 == table);
 		ut_ad(table2 == NULL);
 #endif /* IB_DEBUG */
 	}
@@ -646,27 +590,21 @@ IB_INTERN void dict_table_add_to_cache(dict_table_t* table, mem_heap_t* heap);
 	/* Look for a table with the same id: error if such exists */
 	{
 		dict_table_t*	table2;
-		HASH_SEARCH(id_hash, dict_sys->table_id_hash, id_fold,
-			    dict_table_t*, table2, ut_ad(table2->cached),
-			    ut_dulint_cmp(table2->id, table->id) == 0);
+		HASH_SEARCH(id_hash, dict_sys->table_id_hash, id_fold, dict_table_t*, table2, ut_ad(table2->cached), ut_dulint_cmp(table2->id, table->id) == 0);
 		ut_a(table2 == NULL);
 
 #ifdef IB_DEBUG
 		/* Look for the same table pointer with a different id */
-		HASH_SEARCH_ALL(id_hash, dict_sys->table_id_hash,
-				dict_table_t*, table2, ut_ad(table2->cached),
-				table2 == table);
+		HASH_SEARCH_ALL(id_hash, dict_sys->table_id_hash, dict_table_t*, table2, ut_ad(table2->cached), table2 == table);
 		ut_ad(table2 == NULL);
 #endif /* IB_DEBUG */
 	}
 
 	/* Add table to hash table of tables */
-	HASH_INSERT(dict_table_t, name_hash, dict_sys->table_hash, fold,
-		    table);
+	HASH_INSERT(dict_table_t, name_hash, dict_sys->table_hash, fold, table);
 
 	/* Add table to hash table of tables based on table id */
-	HASH_INSERT(dict_table_t, id_hash, dict_sys->table_id_hash, id_fold,
-		    table);
+	HASH_INSERT(dict_table_t, id_hash, dict_sys->table_id_hash, id_fold, table);
 	/* Add table to LRU list of tables */
 	UT_LIST_ADD_FIRST(table_LRU, dict_sys->table_LRU, table);
 

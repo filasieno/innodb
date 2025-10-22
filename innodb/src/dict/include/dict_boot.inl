@@ -27,7 +27,6 @@ IB_INLINE dulint dict_sys_get_new_row_id(void)
 {
     mutex_enter(&(dict_sys->mutex));
     dulint id = dict_sys->row_id;
-
     if (0 == (ut_dulint_get_low(id) % DICT_HDR_ROW_ID_WRITE_MARGIN)) {
         dict_hdr_flush_row_id();
     }

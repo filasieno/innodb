@@ -20,20 +20,17 @@
 
 #include "dict_mem.hpp"
 
-#ifdef IB_DO_NOT_INLINE
-#include "dict0mem.inl"
-#endif
-
 #include "rem_rec.hpp"
 #include "data_type.hpp"
 #include "mach_data.hpp"
 #include "dict_dict.hpp"
+
 #ifndef IB_HOTBACKUP
-# include "lock0lock.h"
-#endif /* !IB_HOTBACKUP */
+	#include "lock_lock.h"
+#endif // !IB_HOTBACKUP
 
 // -----------------------------------------------------------------------------------------
-// macro constants
+// constants
 // -----------------------------------------------------------------------------------------
 
 constinit ulint DICT_HEAP_SIZE = 100; //!< initial memory heap size when creating a table or index object

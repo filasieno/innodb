@@ -1,30 +1,25 @@
-/*****************************************************************************
+// Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; version 2 of the License.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA 02111-1307 USA
 
-Copyright (c) 1996, 2009, Innobase Oy. All Rights Reserved.
+/// \file dict_dict.hpp
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License.
+/// \brief Data dictionary system
+/// \details Originally created by Heikki Tuuri in 1/8/1996
+/// \author Fabio N. Filasieno
+/// \date 22/10/2025
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place, Suite 330, Boston, MA 02111-1307 USA
-
-*****************************************************************************/
-
-/**************************************************//**
-@file include/dict0dict.h
-Data dictionary system
-
-Created 1/8/1996 Heikki Tuuri
-*******************************************************/
-
-#ifndef dict0dict_h
-#define dict0dict_h
+#pragma once
 
 #include "univ.i"
 #include "dict_types.hpp"
@@ -42,59 +37,42 @@ Created 1/8/1996 Heikki Tuuri
 #include "srv_srv.hpp"
 
 #ifndef IB_HOTBACKUP
-# include "sync0sync.h"
-# include "sync0rw.h"
-/******************************************************************//**
-Makes all characters in a NUL-terminated UTF-8 string lower case. */
-IB_INTERN
-void
-dict_casedn_str(
-/*============*/
-	char*	a);	/*!< in/out: string to put in lower case */
-/********************************************************************//**
-Get the database name length in a table name.
-@return	database name length */
-IB_INTERN
-ulint
-dict_get_db_IB_NAME_LEN(
-/*=================*/
-	const char*	name);	/*!< in: table name in the form
-				dbname '/' tablename */
-/********************************************************************//**
-Return the end of table name where we have removed dbname and '/'.
-@return	table name */
 
-const char*
-dict_remove_db_name(
-/*================*/
-	const char*	name);	/*!< in: table name in the form
-				dbname '/' tablename */
-/**********************************************************************//**
-Returns a table object based on table id.
-@return	table, NULL if does not exist */
-IB_INTERN
-dict_table_t*
-dict_table_get_on_id(
-/*=================*/
-	ib_recovery_t	recovery,	/*!< in: recovery flag */
-        dulint  	table_id,       /*!< in: table id */
-        trx_t*  	trx);           /*!< in: transaction handle */
-/********************************************************************//**
-Decrements the count of open handles to a table. */
-IB_INTERN
-void
-dict_table_decrement_handle_count(
-/*==============================*/
-	dict_table_t*	table,		/*!< in/out: table */
-	ibool		dict_locked);	/*!< in: TRUE=data dictionary locked */
-/**********************************************************************//**
-Increments the count of open client handles to a table. */
-IB_INTERN
-void
-dict_table_increment_handle_count(
-/*==============================*/
-	dict_table_t*	table,		/*!< in/out: table */
-	ibool		dict_locked);	/*!< in: TRUE=data dictionary locked */
+#include "sync_sync.h"
+#include "sync_rw.h"
+
+
+/// \brief Makes all characters in a NUL-terminated UTF-8 string lower case.
+/// \param [in,out] a string to put in lower case
+IB_INTERN void dict_casedn_str(char* a);
+
+/// \brief Get the database name length in a table name.
+/// \return database name length
+/// \param [in] name table name in the form dbname '/' tablename
+IB_INTERN ulint dict_get_db_IB_NAME_LEN(const char* name);
+
+/// \brief Return the end of table name where we have removed dbname and '/'.
+/// \return table name
+/// \param [in] name table name in the form dbname '/' tablename
+const char* dict_remove_db_name(const char* name);
+
+/// \brief Returns a table object based on table id.
+/// \return table, NULL if does not exist
+/// \param [in] recovery recovery flag
+/// \param [in] table_id table id
+/// \param [in] trx transaction handle
+IB_INTERN dict_table_t* dict_table_get_on_id(ib_recovery_t recovery, dulint table_id, trx_t* trx);
+
+/// \brief Decrements the count of open handles to a table.
+/// \param [in,out] table table
+/// \param [in] dict_locked TRUE=data dictionary locked
+IB_INTERN void dict_table_decrement_handle_count(dict_table_t* table, ibool dict_locked);
+
+/// \brief Increments the count of open client handles to a table.
+/// \param [in,out] table table
+/// \param [in] dict_locked TRUE=data dictionary locked
+IB_INTERN void dict_table_increment_handle_count(dict_table_t* table, ibool dict_locked);
+
 /**********************************************************************//**
 Inits the data dictionary module. */
 IB_INTERN
@@ -1189,6 +1167,4 @@ dict_close(void);
 
 #ifndef IB_DO_NOT_INLINE
 #include "dict0dict.inl"
-#endif
-
 #endif

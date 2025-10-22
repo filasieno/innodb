@@ -38,52 +38,31 @@
 #include "hash_hash.hpp"
 #include "trx_types.hpp"
 
-/** Type flags of an index: OR'ing of the flags is allowed to define a
-combination of types */
-/* @{ */
-#define DICT_CLUSTERED	1	/*!< clustered index */
-#define DICT_UNIQUE	2	/*!< unique index */
-#define	DICT_UNIVERSAL	4	/*!< index which can contain records from any
-				other index */
-#define	DICT_IBUF 	8	/*!< insert buffer tree */
-/* @} */
+constinit ulint DICT_CLUSTERED = 1;
+constinit ulint DICT_UNIQUE = 2;
+constinit ulint DICT_UNIVERSAL = 4;
+constinit ulint DICT_IBUF = 8;
 
-/** Types for a table object */
-#define DICT_TABLE_ORDINARY		1 /*!< ordinary table */
+constinit ulint DICT_TABLE_ORDINARY = 1;
+
 #if 0 /* not implemented */
 #define	DICT_TABLE_CLUSTER_MEMBER	2
 #define	DICT_TABLE_CLUSTER		3 /* this means that the table is
 					  really a cluster definition */
 #endif
 
-/** Table flags.  All unused bits must be 0. */
-/* @{ */
-#define DICT_TF_COMPACT			1	/* Compact page format.
-						This must be set for
-						new file formats
-						(later than
-						DICT_TF_FORMAT_51). */
+constinit ulint DICT_TF_COMPACT = 1;
 
-/** Compressed page size (0=uncompressed, up to 15 compressed sizes) */
-/* @{ */
-#define DICT_TF_ZSSIZE_SHIFT		1
-#define DICT_TF_ZSSIZE_MASK		(15 << DICT_TF_ZSSIZE_SHIFT)
-#define DICT_TF_ZSSIZE_MAX (IB_PAGE_SIZE_SHIFT - PAGE_ZIP_MIN_SIZE_SHIFT + 1)
-/* @} */
+constinit ulint DICT_TF_ZSSIZE_SHIFT = 1;
+constinit ulint DICT_TF_ZSSIZE_MASK = (15 << DICT_TF_ZSSIZE_SHIFT);
+constinit ulint DICT_TF_ZSSIZE_MAX = (IB_PAGE_SIZE_SHIFT - PAGE_ZIP_MIN_SIZE_SHIFT + 1);
 
-/** File format */
-/* @{ */
-#define DICT_TF_FORMAT_SHIFT		5	/* file format */
-#define DICT_TF_FORMAT_MASK		\
-((~(~0 << (DICT_TF_BITS - DICT_TF_FORMAT_SHIFT))) << DICT_TF_FORMAT_SHIFT)
-#define DICT_TF_FORMAT_51		0	/*!< InnoDB/MySQL up to 5.1 */
-#define DICT_TF_FORMAT_ZIP		1	/*!< InnoDB plugin for 5.1:
-						compressed tables,
-						new BLOB treatment */
-/** Maximum supported file format */
-#define DICT_TF_FORMAT_MAX		DICT_TF_FORMAT_ZIP
-/* @} */
-#define DICT_TF_BITS			6	/*!< number of flag bits */
+constinit ulint DICT_TF_FORMAT_SHIFT = 5;
+constinit ulint DICT_TF_FORMAT_MASK = ((~(~0 << (DICT_TF_BITS - DICT_TF_FORMAT_SHIFT))) << DICT_TF_FORMAT_SHIFT);
+constinit ulint DICT_TF_FORMAT_51 = 0;
+constinit ulint DICT_TF_FORMAT_ZIP = 1;
+constinit ulint DICT_TF_FORMAT_MAX = DICT_TF_FORMAT_ZIP;
+constinit ulint DICT_TF_BITS = 6;
 #if (1 << (DICT_TF_BITS - DICT_TF_FORMAT_SHIFT)) <= DICT_TF_FORMAT_MAX
 # error "DICT_TF_BITS is insufficient for DICT_TF_FORMAT_MAX"
 #endif
@@ -95,93 +74,49 @@ These flags will be stored in SYS_TABLES.MIX_LEN.  All unused flags
 will be written as 0.  The column may contain garbage for tables
 created with old versions of InnoDB that only implemented
 ROW_FORMAT=REDUNDANT. */
-/* @{ */
-#define DICT_TF2_SHIFT			DICT_TF_BITS
-						/*!< Shift value for
-						table->flags. */
-#define DICT_TF2_TEMPORARY		1	/*!< TRUE for tables from
-						CREATE TEMPORARY TABLE. */
-#define DICT_TF2_BITS			(DICT_TF2_SHIFT + 1)
-						/*!< Total number of bits
-						in table->flags. */
-/* @} */
+constinit ulint DICT_TF2_SHIFT = DICT_TF_BITS;
+constinit ulint DICT_TF2_TEMPORARY = 1;
+constinit ulint DICT_TF2_BITS = (DICT_TF2_SHIFT + 1);
 
 
-/**********************************************************************//**
-Creates a table memory object.
-@return	own: table object */
-IB_INTERN
-dict_table_t*
-dict_mem_table_create(
-/*==================*/
-	const char*	name,		/*!< in: table name */
-	ulint		space,		/*!< in: space where the clustered index
-					of the table is placed; this parameter
-					is ignored if the table is made
-					a member of a cluster */
-	ulint		n_cols,		/*!< in: number of columns */
-	ulint		flags);		/*!< in: table flags */
-/****************************************************************//**
-Free a table memory object. */
-IB_INTERN
-void
-dict_mem_table_free(
-/*================*/
-	dict_table_t*	table);		/*!< in: table */
-/**********************************************************************//**
-Adds a column definition to a table. */
-IB_INTERN
-void
-dict_mem_table_add_col(
-/*===================*/
-	dict_table_t*	table,	/*!< in: table */
-	mem_heap_t*	heap,	/*!< in: temporary memory heap, or NULL */
-	const char*	name,	/*!< in: column name, or NULL */
-	ulint		mtype,	/*!< in: main datatype */
-	ulint		prtype,	/*!< in: precise type */
-	ulint		len);	/*!< in: precision */
-/**********************************************************************//**
-Creates an index memory object.
-@return	own: index object */
-IB_INTERN
-dict_index_t*
-dict_mem_index_create(
-/*==================*/
-	const char*	table_name,	/*!< in: table name */
-	const char*	index_name,	/*!< in: index name */
-	ulint		space,		/*!< in: space where the index tree is
-					placed, ignored if the index is of
-					the clustered type */
-	ulint		type,		/*!< in: DICT_UNIQUE,
-					DICT_CLUSTERED, ... ORed */
-	ulint		n_fields);	/*!< in: number of fields */
-/**********************************************************************//**
-Adds a field definition to an index. NOTE: does not take a copy
-of the column name if the field is a column. The memory occupied
-by the column name may be released only after publishing the index. */
-IB_INTERN
-void
-dict_mem_index_add_field(
-/*=====================*/
-	dict_index_t*	index,		/*!< in: index */
-	const char*	name,		/*!< in: column name */
-	ulint		prefix_len);	/*!< in: 0 or the column prefix length
-					in a column prefix index like
-					INDEX (textcol(25)) */
-/**********************************************************************//**
-Frees an index memory object. */
-IB_INTERN
-void
-dict_mem_index_free(
-/*================*/
-	dict_index_t*	index);	/*!< in: index */
-/**********************************************************************//**
-Creates and initializes a foreign constraint memory object.
-@return	own: foreign constraint struct */
-IB_INTERN
-dict_foreign_t*
-dict_mem_foreign_create(void);
-/*=========================*/
+/// \brief Creates a table memory object.
+/// \return own: table object
+/// \param [in] name table name
+/// \param [in] space space where the clustered index of the table is placed; this parameter is ignored if the table is made a member of a cluster
+/// \param [in] n_cols number of columns
+/// \param [in] flags table flags
+IB_INTERN dict_table_t* dict_mem_table_create(const char* name, ulint space, ulint n_cols, ulint flags);
+/// \brief Free a table memory object.
+/// \param [in] table table
+IB_INTERN void dict_mem_table_free(dict_table_t* table);
+/// \brief Adds a column definition to a table.
+/// \param [in] table table
+/// \param [in] heap temporary memory heap, or NULL
+/// \param [in] name column name, or NULL
+/// \param [in] mtype main datatype
+/// \param [in] prtype precise type
+/// \param [in] len precision
+IB_INTERN void dict_mem_table_add_col(dict_table_t* table, mem_heap_t* heap, const char* name, ulint mtype, ulint prtype, ulint len);
+/// \brief Creates an index memory object.
+/// \return own: index object
+/// \param [in] table_name table name
+/// \param [in] index_name index name
+/// \param [in] space space where the index tree is placed, ignored if the index is of the clustered type
+/// \param [in] type DICT_UNIQUE, DICT_CLUSTERED, ... ORed
+/// \param [in] n_fields number of fields
+IB_INTERN dict_index_t* dict_mem_index_create(const char* table_name, const char* index_name, ulint space, ulint type, ulint n_fields);
+/// \brief Adds a field definition to an index.
+/// \param [in] index index
+/// \param [in] name column name
+/// \param [in] prefix_len 0 or the column prefix length in a column prefix index like INDEX (textcol(25))
+/// \details NOTE: does not take a copy of the column name if the field is a column. The memory occupied by the column name may be released only after publishing the index.
+IB_INTERN void dict_mem_index_add_field(dict_index_t* index, const char* name, ulint prefix_len);
+/// \brief Frees an index memory object.
+/// \param [in] index index
+IB_INTERN void dict_mem_index_free(dict_index_t* index);
+/// \brief Creates and initializes a foreign constraint memory object.
+/// \return own: foreign constraint struct
+IB_INTERN dict_foreign_t* dict_mem_foreign_create(void);
 
 /** Data structure for a column in a table */
 struct dict_col_struct{
@@ -204,7 +139,7 @@ It is set to 3*256, so that one can create a column prefix index on
 charset. In that charset, a character may take at most 3 bytes.  This
 constant MUST NOT BE CHANGED, or the compatibility of InnoDB data
 files would be at risk! */
-#define DICT_MAX_INDEX_COL_LEN		REC_MAX_INDEX_COL_LEN
+constinit ulint DICT_MAX_INDEX_COL_LEN = REC_MAX_INDEX_COL_LEN;
 
 /** Data structure for a field in an index */
 struct dict_field_struct{
@@ -292,8 +227,7 @@ struct dict_index_struct{
 #endif /* !IB_HOTBACKUP */
 #ifdef IB_DEBUG
 	ulint		magic_n;/*!< magic number */
-/** Value of dict_index_struct::magic_n */
-# define DICT_INDEX_MAGIC_N	76789786
+constinit ulint DICT_INDEX_MAGIC_N = 76789786;
 #endif
 };
 
@@ -338,14 +272,12 @@ struct dict_foreign_struct{
 
 /** The flags for ON_UPDATE and ON_DELETE can be ORed; the default is that
 a foreign key constraint is enforced, therefore RESTRICT just means no flag */
-/* @{ */
-#define DICT_FOREIGN_ON_DELETE_CASCADE	1	/*!< ON DELETE CASCADE */
-#define DICT_FOREIGN_ON_DELETE_SET_NULL	2	/*!< ON UPDATE SET NULL */
-#define DICT_FOREIGN_ON_UPDATE_CASCADE	4	/*!< ON DELETE CASCADE */
-#define DICT_FOREIGN_ON_UPDATE_SET_NULL	8	/*!< ON UPDATE SET NULL */
-#define DICT_FOREIGN_ON_DELETE_NO_ACTION 16	/*!< ON DELETE NO ACTION */
-#define DICT_FOREIGN_ON_UPDATE_NO_ACTION 32	/*!< ON UPDATE NO ACTION */
-/* @} */
+constinit ulint DICT_FOREIGN_ON_DELETE_CASCADE = 1;
+constinit ulint DICT_FOREIGN_ON_DELETE_SET_NULL = 2;
+constinit ulint DICT_FOREIGN_ON_UPDATE_CASCADE = 4;
+constinit ulint DICT_FOREIGN_ON_UPDATE_SET_NULL = 8;
+constinit ulint DICT_FOREIGN_ON_DELETE_NO_ACTION = 16;
+constinit ulint DICT_FOREIGN_ON_UPDATE_NO_ACTION = 32;
 
 
 /** Data structure for a database table.  Most fields will be
@@ -459,11 +391,7 @@ struct dict_table_struct{
 #endif /* !IB_HOTBACKUP */
 #ifdef IB_DEBUG
 	ulint		magic_n;/*!< magic number */
-/** Value of dict_table_struct::magic_n */
-# define DICT_TABLE_MAGIC_N	76333786
+constinit ulint DICT_TABLE_MAGIC_N = 76333786;
 #endif /* IB_DEBUG */
 };
 
-#ifndef IB_DO_NOT_INLINE
-#include "dict0mem.inl"
-#endif

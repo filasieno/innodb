@@ -31,17 +31,17 @@
 
 typedef	byte dict_hdr_t;
 
-/* Space id and page no where the dictionary header resides */
-constinit ulint DICT_HDR_SPACE = 0;	/* the SYSTEM tablespace */
+// Space id and page no where the dictionary header resides
+
+constinit ulint DICT_HDR_SPACE   = 0;                    // the SYSTEM tablespace 
 constinit ulint DICT_HDR_PAGE_NO = FSP_DICT_HDR_PAGE_NO;
-/*-------------------------------------------------------------*/
+
 /// \defgroup dict_header_offsets Dictionary Header Offsets
 /// \brief Byte offsets for various fields in the dictionary header page
 /// \details These constants define the byte positions of different data structures
 ///          stored in the dictionary header page (page 0 of the system tablespace).
 ///          The dictionary header contains metadata about the data dictionary itself,
 ///          including root page numbers for various index trees and ID counters.
-
 /// @{
 
 /// \brief Offset for the latest assigned row ID
@@ -75,18 +75,16 @@ constinit ulint DICT_HDR_FIELDS = 48;
 constinit ulint DICT_HDR_FSEG_HEADER = 56;
 
 /// @}
-/*-------------------------------------------------------------*/
 
-/* The field number of the page number field in the sys_indexes table
-clustered index */
+
+// The field number of the page number field in the sys_indexes table clustered index 
+
 constinit ulint DICT_SYS_INDEXES_PAGE_NO_FIELD = 8;
 constinit ulint DICT_SYS_INDEXES_SPACE_NO_FIELD = 7;
 constinit ulint DICT_SYS_INDEXES_TYPE_FIELD = 6;
 constinit ulint DICT_SYS_INDEXES_NAME_FIELD = 4;
 
-/* When a row id which is zero modulo this number (which must be a power of
-two) is assigned, the field DICT_HDR_ROW_ID on the dictionary header page is
-updated */
+// When a row id which is zero modulo this number (which must be a power of two) is assigned, the field DICT_HDR_ROW_ID on the dictionary header page is updated
 constinit ulint DICT_HDR_ROW_ID_WRITE_MARGIN = 256;
 
 
@@ -121,12 +119,12 @@ IB_INTERN void dict_boot(void);
 /// \brief Creates and initializes the data dictionary at the database creation.
 IB_INTERN void dict_create(void);
 
-/* The ids for the basic system tables and their indexes */
+// The ids for the basic system tables and their indexes
 #define DICT_TABLES_ID		ut_dulint_create(0, 1)
 #define DICT_COLUMNS_ID		ut_dulint_create(0, 2)
 #define DICT_INDEXES_ID		ut_dulint_create(0, 3)
 #define DICT_FIELDS_ID		ut_dulint_create(0, 4)
-/* The following is a secondary index on SYS_TABLES */
+// The following is a secondary index on SYS_TABLES 
 #define DICT_TABLE_IDS_ID	ut_dulint_create(0, 5)
 
 /// \brief The ids for tables etc. start from this number, except for basic system tables and their above defined indexes; ibuf tables and indexes are assigned as the id the number DICT_IBUF_ID_MIN plus the space id
@@ -135,7 +133,7 @@ constinit ulint DICT_HDR_FIRST_ID = 10;
 #define DICT_IBUF_ID_MIN	ut_dulint_create(0xFFFFFFFFUL, 0)
 
 // The offset of the dictionary header on the page 
-#define	DICT_HDR		FSEG_PAGE_DATA
+#define	DICT_HDR FSEG_PAGE_DATA
 
 #ifndef IB_DO_NOT_INLINE
 	#include "dict_boot.inl"

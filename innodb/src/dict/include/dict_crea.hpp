@@ -92,17 +92,17 @@ struct ind_node_struct{
 
 // Table create node states
 constinit ulint TABLE_BUILD_TABLE_DEF = 1;
-constinit ulint TABLE_BUILD_COL_DEF = 2;
-constinit ulint TABLE_COMMIT_WORK = 3;
-constinit ulint TABLE_ADD_TO_CACHE = 4;
-constinit ulint TABLE_COMPLETED = 5;
+constinit ulint TABLE_BUILD_COL_DEF   = 2;
+constinit ulint TABLE_COMMIT_WORK     = 3;
+constinit ulint TABLE_ADD_TO_CACHE    = 4;
+constinit ulint TABLE_COMPLETED       = 5;
 
 // Index create node states
-constinit ulint INDEX_BUILD_INDEX_DEF = 1;
-constinit ulint INDEX_BUILD_FIELD_DEF = 2;
+constinit ulint INDEX_BUILD_INDEX_DEF   = 1;
+constinit ulint INDEX_BUILD_FIELD_DEF   = 2;
 constinit ulint INDEX_CREATE_INDEX_TREE = 3;
-constinit ulint INDEX_COMMIT_WORK = 4;
-constinit ulint INDEX_ADD_TO_CACHE = 5;
+constinit ulint INDEX_COMMIT_WORK       = 4;
+constinit ulint INDEX_ADD_TO_CACHE      = 5;
 
 // -----------------------------------------------------------------------------------------
 // routine definitions
