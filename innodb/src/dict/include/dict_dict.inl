@@ -29,7 +29,6 @@
 IB_INLINE void dict_col_copy_type(const dict_col_t* col, dtype_t* type);
 {
     ut_ad(col && type);
-
     type->mtype = col->mtype;
     type->prtype = col->prtype;
     type->len = col->len;
@@ -45,7 +44,6 @@ IB_INLINE ibool dict_col_type_assert_equal(const dict_col_t* col, const dtype_t*
 {
     ut_ad(col);
     ut_ad(type);
-
     ut_ad(col->mtype == type->mtype);
     ut_ad(col->prtype == type->prtype);
     ut_ad(col->len == type->len);
@@ -53,7 +51,6 @@ IB_INLINE ibool dict_col_type_assert_equal(const dict_col_t* col, const dtype_t*
     ut_ad(col->mbminlen == type->mbminlen);
     ut_ad(col->mbmaxlen == type->mbmaxlen);
 # endif /* !IB_HOTBACKUP */
-
     return(TRUE);
 }
 #endif /* IB_DEBUG */
@@ -94,7 +91,6 @@ IB_INLINE ulint dict_col_get_sql_null_size(const dict_col_t* col, ulint comp);
 IB_INLINE ulint dict_col_get_no(const dict_col_t* col);
 {
     ut_ad(col);
-
     return(col->ind);
 }
 
@@ -124,7 +120,6 @@ IB_INLINE dict_index_t* dict_table_get_first_index(const dict_table_t* table);
 {
     ut_ad(table);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
-
     return(UT_LIST_GET_FIRST(((dict_table_t*) table)->indexes));
 }
 
@@ -135,7 +130,6 @@ IB_INLINE dict_index_t* dict_table_get_next_index(const dict_index_t* index);
 {
     ut_ad(index);
     ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(UT_LIST_GET_NEXT(indexes, (dict_index_t*) index));
 }
 #endif /* IB_DEBUG */
@@ -148,7 +142,6 @@ IB_INLINE ulint dict_index_is_clust(const dict_index_t* dict_index);
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(IB_UNLIKELY(dict_index->type & DICT_CLUSTERED));
 }
 /// \brief Check whether the index is unique.
@@ -158,7 +151,6 @@ IB_INLINE ulint dict_index_is_unique(const dict_index_t* dict_index);
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(IB_UNLIKELY(dict_index->type & DICT_UNIQUE));
 }
 /// \brief Check whether the index is the insert buffer tree.
@@ -168,7 +160,6 @@ IB_INLINE ulint dict_index_is_ibuf(const dict_index_t* dict_index);
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(IB_UNLIKELY(dict_index->type & DICT_IBUF));
 }
 
@@ -179,99 +170,71 @@ IB_INLINE ulint dict_index_is_sec_or_ibuf(const dict_index_t* dict_index);
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     ulint type = dict_index->type;
-
     return(IB_LIKELY(!(type & DICT_CLUSTERED) || (type & DICT_IBUF)));
 }
 
-/********************************************************************//**
-Gets the number of user-defined columns in a table in the dictionary
-cache.
-\return    number of user-defined (e.g., not ROW_ID) columns of a table */
-IB_INLINE
-ulint
-dict_table_get_n_user_cols(
-/*=======================*/
-    const dict_table_t*    table)    /*!< in: table */
+/// \brief Gets the number of user-defined columns in a table in the dictionary cache.
+/// \param [in] table table
+/// \return number of user-defined (e.g., not ROW_ID) columns of a table
+IB_INLINE ulint dict_table_get_n_user_cols(const dict_table_t* table);
 {
     ut_ad(table);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
-
     return(table->n_cols - DATA_N_SYS_COLS);
 }
 
-/********************************************************************//**
-Gets the number of system columns in a table in the dictionary cache.
-\return    number of system (e.g., ROW_ID) columns of a table */
-IB_INLINE
-ulint
-dict_table_get_n_sys_cols(
-/*======================*/
-    const dict_table_t*    table __attribute__((unused)))    /*!< in: table */
+/// \brief Gets the number of system columns in a table in the dictionary cache.
+/// \param [in] table table
+/// \return number of system (e.g., ROW_ID) columns of a table
+IB_INLINE ulint dict_table_get_n_sys_cols(const dict_table_t* table __attribute__((unused)));
 {
     ut_ad(table);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
     ut_ad(table->cached);
-
     return(DATA_N_SYS_COLS);
 }
 
-/********************************************************************//**
-Gets the number of all columns (also system) in a table in the dictionary
-cache.
-\return    number of columns of a table */
-IB_INLINE
-ulint
-dict_table_get_n_cols(
-/*==================*/
-    const dict_table_t*    table)    /*!< in: table */
+/// \brief Gets the number of all columns (also system) in a table in the dictionary cache.
+/// \param [in] table table
+/// \return number of columns of a table
+IB_INLINE ulint dict_table_get_n_cols(const dict_table_t* table);
 {
     ut_ad(table);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
-
     return(table->n_cols);
 }
 
 #ifdef IB_DEBUG
-/********************************************************************//**
-Gets the nth column of a table.
-\return    pointer to column object */
-IB_INLINE
-dict_col_t*
-dict_table_get_nth_col(
-/*===================*/
-    const dict_table_t*    table,    /*!< in: table */
-    ulint            pos)    /*!< in: position of column */
+/// \brief Gets the nth column of a table.
+/// \param [in] table table
+/// \param [in] pos position of column
+/// \return pointer to column object
+IB_INLINE dict_col_t* dict_table_get_nth_col(const dict_table_t* table, ulint pos);
 {
     ut_ad(table);
     ut_ad(pos < table->n_def);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
-
     return((dict_col_t*) (table->cols) + pos);
 }
 
-/********************************************************************//**
-Gets the given system column of a table.
-\return    pointer to column object */
+/// \brief Gets the given system column of a table.
+/// \return pointer to column object
 IB_INLINE
 dict_col_t*
 dict_table_get_sys_col(
 /*===================*/
-    const dict_table_t*    table,    /*!< in: table */
-    ulint            sys)    /*!< in: DATA_ROW_ID, ... */
+    const dict_table_t*    table,    /// \param [in] table 
+    ulint            sys)    /// \param [in] DATA_ROW_ID, ... 
 {
     dict_col_t*    col;
-
     ut_ad(table);
     ut_ad(sys < DATA_N_SYS_COLS);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
-
     col = dict_table_get_nth_col(table, table->n_cols
                      - DATA_N_SYS_COLS + sys);
     ut_ad(col->mtype == DATA_SYS);
     ut_ad(col->prtype == (sys | DATA_NOT_NULL));
-
     return(col);
 }
 #endif /* IB_DEBUG */
@@ -283,13 +246,12 @@ IB_INLINE
 ulint
 dict_table_get_sys_col_no(
 /*======================*/
-    const dict_table_t*    table,    /*!< in: table */
-    ulint            sys)    /*!< in: DATA_ROW_ID, ... */
+    const dict_table_t*    table,    /// \param [in] table 
+    ulint            sys)    /// \param [in] DATA_ROW_ID, ... 
 {
     ut_ad(table);
     ut_ad(sys < DATA_N_SYS_COLS);
     ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
-
     return(table->n_cols - DATA_N_SYS_COLS + sys);
 }
 
@@ -300,14 +262,12 @@ IB_INLINE
 ibool
 dict_table_is_comp(
 /*===============*/
-    const dict_table_t*    table)    /*!< in: table */
+    const dict_table_t*    table)    /// \param [in] table 
 {
     ut_ad(table);
-
 #if DICT_TF_COMPACT != TRUE
 #error
 #endif
-
     return(IB_LIKELY(table->flags & DICT_TF_COMPACT));
 }
 
@@ -318,10 +278,9 @@ IB_INLINE
 ulint
 dict_table_get_format(
 /*==================*/
-    const dict_table_t*    table)    /*!< in: table */
+    const dict_table_t*    table)    /// \param [in] table 
 {
     ut_ad(table);
-
     return((table->flags & DICT_TF_FORMAT_MASK) >> DICT_TF_FORMAT_SHIFT);
 }
 
@@ -331,11 +290,10 @@ IB_INLINE
 void
 dict_table_set_format(
 /*==================*/
-    dict_table_t*    table,    /*!< in/out: table */
-    ulint        format)    /*!< in: file format version */
+    dict_table_t*    table,    /// \param [in/out] table 
+    ulint        format)    /// \param [in] file format version 
 {
     ut_ad(table);
-
     table->flags = (table->flags & ~DICT_TF_FORMAT_MASK)
         | (format << DICT_TF_FORMAT_SHIFT);
 }
@@ -347,17 +305,14 @@ IB_INLINE
 ulint
 dict_table_flags_to_zip_size(
 /*=========================*/
-    ulint    flags)    /*!< in: flags */
+    ulint    flags)    /// \param [in] flags 
 {
     ulint    zip_size = flags & DICT_TF_ZSSIZE_MASK;
-
     if (IB_UNLIKELY(zip_size)) {
         zip_size = ((PAGE_ZIP_MIN_SIZE >> 1)
              << (zip_size >> DICT_TF_ZSSIZE_SHIFT));
-
         ut_ad(zip_size <= IB_PAGE_SIZE);
     }
-
     return(zip_size);
 }
 
@@ -368,10 +323,9 @@ IB_INLINE
 ulint
 dict_table_zip_size(
 /*================*/
-    const dict_table_t*    table)    /*!< in: table */
+    const dict_table_t*    table)    /// \param [in] table 
 {
     ut_ad(table);
-
     return(dict_table_flags_to_zip_size(table->flags));
 }
 
@@ -389,7 +343,6 @@ dict_index_get_n_fields(
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(dict_index->n_fields);
 }
 
@@ -411,7 +364,6 @@ dict_index_get_n_unique(
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
     ut_ad(index->cached);
-
     return(dict_index->n_uniq);
 }
 
@@ -432,12 +384,9 @@ dict_index_get_n_unique_in_tree(
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
     ut_ad(dict_index->cached);
-
     if (dict_index_is_clust(dict_index)) {
-
         return(dict_index_get_n_unique(dict_index));
     }
-
     return(dict_index_get_n_fields(dict_index));
 }
 
@@ -466,13 +415,12 @@ IB_INLINE
 dict_field_t*
 dict_index_get_nth_field(
 /*=====================*/
-    const dict_index_t*    index,    /*!< in: index */
-    ulint            pos)    /*!< in: position of field */
+    const dict_index_t*    index,    /// \param [in] index 
+    ulint            pos)    /// \param [in] position of field 
 {
     ut_ad(index);
     ut_ad(pos < index->n_def);
     ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-
     return((dict_field_t*) (index->fields) + pos);
 }
 #endif /* IB_DEBUG */
@@ -484,20 +432,17 @@ IB_INLINE
 ulint
 dict_index_get_sys_col_pos(
 /*=======================*/
-    const dict_index_t*    dict_index,    /*!< in: index */
-    ulint            type)    /*!< in: DATA_ROW_ID, ... */
+    const dict_index_t*    dict_index,    /// \param [in] index 
+    ulint            type)    /// \param [in] DATA_ROW_ID, ... 
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
     ut_ad(!(dict_index->type & DICT_UNIVERSAL));
-
     if (dict_index_is_clust(dict_index)) {
-
         return(dict_col_get_clust_pos(
                    dict_table_get_sys_col(dict_index->table, type),
                    dict_index));
     }
-
     return(dict_index_get_nth_col_pos(
                dict_index,
                dict_table_get_sys_col_no(dict_index->table, type)));
@@ -510,10 +455,9 @@ IB_INLINE
 const dict_col_t*
 dict_field_get_col(
 /*===============*/
-    const dict_field_t*    field)    /*!< in: index field */
+    const dict_field_t*    field)    /// \param [in] index field 
 {
     ut_ad(field);
-
     return(field->col);
 }
 
@@ -524,8 +468,8 @@ IB_INLINE
 const dict_col_t*
 dict_index_get_nth_col(
 /*===================*/
-    const dict_index_t*    dict_index,    /*!< in: index */
-    ulint            pos)    /*!< in: position of the field */
+    const dict_index_t*    dict_index,    /// \param [in] index 
+    ulint            pos)    /// \param [in] position of the field 
 {
     return(dict_field_get_col(dict_index_get_nth_field(dict_index, pos)));
 }
@@ -537,8 +481,8 @@ IB_INLINE
 ulint
 dict_index_get_nth_col_no(
 /*======================*/
-    const dict_index_t*    dict_index,    /*!< in: index */
-    ulint            pos)    /*!< in: position of the field */
+    const dict_index_t*    dict_index,    /// \param [in] index 
+    ulint            pos)    /// \param [in] position of the field 
 {
     return(dict_col_get_no(dict_index_get_nth_col(dict_index, pos)));
 }
@@ -551,15 +495,13 @@ IB_INLINE
 ulint
 dict_index_get_min_size(
 /*====================*/
-    const dict_index_t*    dict_index)    /*!< in: dict_index */
+    const dict_index_t*    dict_index)    /// \param [in] dict_index 
 {
     ulint    n    = dict_index_get_n_fields(dict_index);
     ulint    size    = 0;
-
     while (n--) {
         size += dict_col_get_min_size(dict_index_get_nth_col(dict_index, n));
     }
-
     return(size);
 }
 
@@ -570,11 +512,10 @@ IB_INLINE
 ulint
 dict_index_get_space(
 /*=================*/
-    const dict_index_t*    dict_index)    /*!< in: dict_index */
+    const dict_index_t*    dict_index)    /// \param [in] dict_index 
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(dict_index->space);
 }
 
@@ -584,12 +525,11 @@ IB_INLINE
 void
 dict_index_set_space(
 /*=================*/
-    dict_index_t*    dict_index,    /*!< in/out: dict_index */
-    ulint        space)    /*!< in: space id */
+    dict_index_t*    dict_index,    /// \param [in/out] dict_index 
+    ulint        space)    /// \param [in] space id 
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     dict_index->space = space;
 }
 
@@ -600,11 +540,10 @@ IB_INLINE
 ulint
 dict_index_get_page(
 /*================*/
-    const dict_index_t*    dict_index)    /*!< in: dict_index */
+    const dict_index_t*    dict_index)    /// \param [in] dict_index 
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(dict_index->page);
 }
 
@@ -614,12 +553,11 @@ IB_INLINE
 void
 dict_index_set_page(
 /*================*/
-    dict_index_t*    dict_index,    /*!< in/out: dict_index */
-    ulint        page)    /*!< in: page number */
+    dict_index_t*    dict_index,    /// \param [in/out] dict_index 
+    ulint        page)    /// \param [in] page number 
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     dict_index->page = page;
 }
 
@@ -630,11 +568,10 @@ IB_INLINE
 rw_lock_t*
 dict_index_get_lock(
 /*================*/
-    dict_index_t*    dict_index)    /*!< in: dict_index */
+    dict_index_t*    dict_index)    /// \param [in] dict_index 
 {
     ut_ad(dict_index);
     ut_ad(dict_index->magic_n == DICT_INDEX_MAGIC_N);
-
     return(&(dict_index->lock));
 }
 
@@ -658,17 +595,14 @@ IB_INLINE
 dict_table_t*
 dict_table_check_if_in_cache_low(
 /*=============================*/
-    const char*    table_name)    /*!< in: table name */
+    const char*    table_name)    /// \param [in] table name 
 {
     dict_table_t*    table;
     ulint        table_fold;
-
     ut_ad(table_name);
     ut_ad(mutex_own(&(dict_sys->mutex)));
-
     /* Look for the table name in the hash table */
     table_fold = ut_fold_string(table_name);
-
     HASH_SEARCH(name_hash, dict_sys->table_hash, table_fold,
             dict_table_t*, table, ut_ad(table->cached),
             !strcmp(table->name, table_name));
@@ -683,22 +617,17 @@ IB_INLINE
 dict_table_t*
 dict_table_get_low(
 /*===============*/
-    const char*    table_name)    /*!< in: table name */
+    const char*    table_name)    /// \param [in] table name 
 {
     dict_table_t*    table;
-
     ut_ad(table_name);
     ut_ad(mutex_own(&(dict_sys->mutex)));
-
     table = dict_table_check_if_in_cache_low(table_name);
-
     if (table == NULL) {
         // FIXME: srv_force_recovery should be passed in as an arg
         table = dict_load_table(srv_force_recovery, table_name);
     }
-
     ut_ad(!table || table->cached);
-
     return(table);
 }
 
@@ -709,26 +638,21 @@ IB_INLINE
 dict_table_t*
 dict_table_get_on_id_low(
 /*=====================*/
-    ib_recovery_t    recovery,/*!< in: recovery flag */
-    dulint    table_id)    /*!< in: table id */
+    ib_recovery_t    recovery,/// \param [in] recovery flag 
+    dulint    table_id)    /// \param [in] table id 
 {
     dict_table_t*    table;
     ulint        fold;
-
     ut_ad(mutex_own(&(dict_sys->mutex)));
-
     /* Look for the table name in the hash table */
     fold = ut_fold_dulint(table_id);
-
     HASH_SEARCH(id_hash, dict_sys->table_id_hash, fold,
             dict_table_t*, table, ut_ad(table->cached),
             !ut_dulint_cmp(table->id, table_id));
     if (table == NULL) {
         table = dict_load_table_on_id(recovery, table_id);
     }
-
     ut_ad(!table || table->cached);
-
     return(table);
 }
 #endif /* !IB_HOTBACKUP */

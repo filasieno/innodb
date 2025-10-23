@@ -52,12 +52,6 @@ static const char* dict_add_col_name(const char* col_names, ulint cols, const ch
 // routine definitions
 // -----------------------------------------------------------------------------------------
 
-/// \brief Creates a table memory object.
-/// \return own: table object
-/// \param [in] name table name
-/// \param [in] space space where the clustered index of the table is placed; this parameter is ignored if the table is made a member of a cluster
-/// \param [in] n_cols number of columns
-/// \param [in] flags table flags
 IB_INTERN dict_table_t* dict_mem_table_create(const char* name, ulint space, ulint n_cols, ulint flags)
 {
 	ut_ad(name);
@@ -74,8 +68,6 @@ IB_INTERN dict_table_t* dict_mem_table_create(const char* name, ulint space, uli
 	return table;
 }
 
-/// \brief Free a table memory object.
-/// \param [in] table table
 IB_INTERN void dict_mem_table_free(dict_table_t* table)
 {
 	ut_ad(table);
@@ -84,49 +76,7 @@ IB_INTERN void dict_mem_table_free(dict_table_t* table)
 	mem_heap_free(table->heap);
 }
 
-// -----------------------------------------------------------------------------------------
-// Static helper routine definitions
-// -----------------------------------------------------------------------------------------
 
-/// \brief Append 'name' to 'col_names'.
-/// \param [in] col_names existing column names, or NULL
-/// \param [in] cols number of existing columns
-/// \param [in] name new column name
-/// \param [in] heap heap
-/// \return new column names array
-/// \see dict_table_t::col_names
-static const char* dict_add_col_name(const char* col_names, ulint cols, const char* name, mem_heap_t* heap)
-{
-	ulint old_len;
-	ut_ad(!cols == !col_names);
-	// Find out length of existing array.                                                                                                                                       
-	if (col_names) {
-		const char* s = col_names;
-		ulint i;
-		for (i = 0; i < cols; i++) {
-			s += strlen(s) + 1;
-		}
-		old_len = s - col_names;
-	} else {
-		old_len = 0;
-	}
-	ulint new_len = strlen(name) + 1;
-	ulint total_len = old_len + new_len;
-	char* res = mem_heap_alloc(heap, total_len);
-	if (old_len > 0) {
-		memcpy(res, col_names, old_len);
-	}
-	memcpy(res + old_len, name, new_len);
-	return res;
-}
-
-/// \brief Adds a column definition to a table.
-/// \param [in] table table
-/// \param [in] heap temporary memory heap, or NULL
-/// \param [in] name column name, or NULL
-/// \param [in] mtype main datatype
-/// \param [in] prtype precise type
-/// \param [in] len precision
 IB_INTERN void dict_mem_table_add_col(dict_table_t* table, mem_heap_t* heap, const char* name, ulint mtype, ulint prtype, ulint len)
 {
 	ut_ad(table);
@@ -159,13 +109,6 @@ IB_INTERN void dict_mem_table_add_col(dict_table_t* table, mem_heap_t* heap, con
 #endif /* !IB_HOTBACKUP */
 }
 
-/// \brief Creates an index memory object.
-/// \return own: index object
-/// \param [in] table_name table name
-/// \param [in] index_name index name
-/// \param [in] space space where the index tree is placed, ignored if the index is of the clustered type
-/// \param [in] type DICT_UNIQUE, DICT_CLUSTERED, ... ORed
-/// \param [in] n_fields number of fields
 IB_INTERN dict_index_t* dict_mem_index_create(const char* table_name, const char* index_name, ulint space, ulint type, ulint n_fields)
 {
 	ut_ad(table_name && index_name);
@@ -187,8 +130,6 @@ IB_INTERN dict_index_t* dict_mem_index_create(const char* table_name, const char
 	return index;
 }
 
-/// \brief Creates and initializes a foreign constraint memory object.
-/// \return own: foreign constraint struct
 IB_INTERN dict_foreign_t* dict_mem_foreign_create(void)
 {
 	mem_heap_t* heap = mem_heap_create(100);
@@ -197,11 +138,6 @@ IB_INTERN dict_foreign_t* dict_mem_foreign_create(void)
 	return foreign;
 }
 
-/// \brief Adds a field definition to an index.
-/// \param [in] index index
-/// \param [in] name column name
-/// \param [in] prefix_len 0 or the column prefix length in a column prefix index like INDEX (textcol(25))
-/// \details NOTE: does not take a copy of the column name if the field is a column. The memory occupied by the column name may be released only after publishing the index.
 IB_INTERN void dict_mem_index_add_field(dict_index_t* index, const char* name, ulint prefix_len)
 {
 	ut_ad(index);
@@ -212,11 +148,38 @@ IB_INTERN void dict_mem_index_add_field(dict_index_t* index, const char* name, u
 	field->prefix_len = (unsigned int) prefix_len;
 }
 
-/// \brief Frees an index memory object.
-/// \param [in] index index
 IB_INTERN void dict_mem_index_free(dict_index_t* index)
 {
 	ut_ad(index);
 	ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
 	mem_heap_free(index->heap);
+}
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
+
+static const char* dict_add_col_name(const char* col_names, ulint cols, const char* name, mem_heap_t* heap)
+{
+	ulint old_len;
+	ut_ad(!cols == !col_names);
+	// Find out length of existing array.                                                                                                                                       
+	if (col_names) {
+		const char* s = col_names;
+		ulint i;
+		for (i = 0; i < cols; i++) {
+			s += strlen(s) + 1;
+		}
+		old_len = s - col_names;
+	} else {
+		old_len = 0;
+	}
+	ulint new_len = strlen(name) + 1;
+	ulint total_len = old_len + new_len;
+	char* res = mem_heap_alloc(heap, total_len);
+	if (old_len > 0) {
+		memcpy(res, col_names, old_len);
+	}
+	memcpy(res + old_len, name, new_len);
+	return res;
 }

@@ -21,8 +21,6 @@
 /// \brief Writes the current value of the row id counter to the dictionary header file page.
 IB_INTERN void dict_hdr_flush_row_id(void);
 
-/// \brief Returns a new row id.
-/// \return the new id
 IB_INLINE dulint dict_sys_get_new_row_id(void)
 {
     mutex_enter(&(dict_sys->mutex));
@@ -35,18 +33,12 @@ IB_INLINE dulint dict_sys_get_new_row_id(void)
     return(id);
 }
 
-/// \brief Reads a row id from a record or other 6-byte stored form.
-/// \return row id
-/// \param [in] field record field
 IB_INLINE dulint dict_sys_read_row_id(byte* field)
 {
     static_assert(DATA_ROW_ID_LEN == 6, "DATA_ROW_ID_LEN != 6");
     return(mach_read_from_6(field));
 }
 
-/// \brief Writes a row id to a record or other 6-byte stored form.
-/// \param [in] field record field
-/// \param [in] row_id row id
 IB_INLINE void dict_sys_write_row_id(byte* field, dulint row_id)
 {
     static_assert(DATA_ROW_ID_LEN == 6, "DATA_ROW_ID_LEN != 6");

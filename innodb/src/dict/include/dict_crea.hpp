@@ -152,9 +152,13 @@ IB_INTERN void dict_drop_index_tree(rec_t* rec, mtr_t* mtr);
 IB_INTERN ulint dict_create_or_check_foreign_constraint_tables(void);
 
 /// \brief Adds foreign key definitions to data dictionary tables in the database.
-/// \details We look at table->foreign_list, and also generate names to constraints that were not named by the user. A generated constraint has a name of the format databasename/tablename_ibfk_NUMBER, where the numbers start from 1, and are given locally for this table, that is, the number is not global, as in the old format constraints < 4.0.18 it used to be.
-/// \return error code or DB_SUCCESS
-/// \param [in] start_id if we are actually doing ALTER TABLE ADD CONSTRAINT, we want to generate constraint numbers which are bigger than in the table so far; we number the constraints from start_id + 1 up; start_id should be set to 0 if we are creating a new table, or if the table so far has no constraints for which the name was generated here
+/// \details We look at table->foreign_list, and also generate names to constraints that were not named by the user. 
+///          A generated constraint has a name of the format databasename/tablename_ibfk_NUMBER, where the numbers start from 1, 
+///          and are given locally for this table, that is, the number is not global, as in the old format constraints < 4.0.18 it used to be.
+/// \param [in] start_id if we are actually doing ALTER TABLE ADD CONSTRAINT, we want to generate constraint numbers which are bigger 
+///                      than in the table so far; we number the constraints from start_id + 1 up; start_id should be set to 0 if we are 
+///                      creating a new table, or if the table so far has no constraints for which the name was generated here
 /// \param [in] table table
 /// \param [in] trx transaction
+/// \return error code or DB_SUCCESS
 IB_INTERN ulint dict_create_add_foreigns_to_dictionary(ulint start_id, dict_table_t* table, trx_t* trx);

@@ -21,7 +21,7 @@
 #include "dict_boot.hpp"
 
 #ifdef IB_DO_NOT_INLINE
-#include "dict0boot.inl"
+	#include "dict_boot.inl"
 #endif
 
 #include "dict_crea.hpp"
@@ -43,9 +43,6 @@ IB_INTERN dict_hdr_t* dict_hdr_get(mtr_t* mtr)
     return(header);
 }
 
-/// \brief Returns a new table, index, or tree id.
-/// \param [in] type DICT_HDR_ROW_ID, ...
-/// \return the new id
 IB_INTERN dulint dict_hdr_get_new_id(ulint type)
 {
 	ut_ad((type == DICT_HDR_TABLE_ID) || (type == DICT_HDR_INDEX_ID));
@@ -60,7 +57,6 @@ IB_INTERN dulint dict_hdr_get_new_id(ulint type)
 	return(id);
 }
 
-/// \brief Writes the current value of the row id counter to the dictionary header file page.
 IB_INTERN void dict_hdr_flush_row_id(void)
 {
 	ut_ad(mutex_own(&(dict_sys->mutex)));
@@ -134,8 +130,6 @@ static ibool dict_hdr_create(mtr_t* mtr)
 	return TRUE;
 }
 
-/// \brief Initializes the data dictionary memory structures when the database is started.
-/// \details This function is also called when the data dictionary is created.
 IB_INTERN void dict_boot(void)
 {
 	 table;
@@ -303,7 +297,6 @@ static void dict_insert_initial_data(void)
 	// Does nothing yet
 }
 
-/// \brief Creates and initializes the data dictionary at the database creation.
 IB_INTERN void dict_create(void)
 {
 	mtr_t mtr;

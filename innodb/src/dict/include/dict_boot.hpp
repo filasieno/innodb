@@ -79,10 +79,10 @@ constinit ulint DICT_HDR_FSEG_HEADER = 56;
 
 // The field number of the page number field in the sys_indexes table clustered index 
 
-constinit ulint DICT_SYS_INDEXES_PAGE_NO_FIELD = 8;
+constinit ulint DICT_SYS_INDEXES_PAGE_NO_FIELD  = 8;
 constinit ulint DICT_SYS_INDEXES_SPACE_NO_FIELD = 7;
-constinit ulint DICT_SYS_INDEXES_TYPE_FIELD = 6;
-constinit ulint DICT_SYS_INDEXES_NAME_FIELD = 4;
+constinit ulint DICT_SYS_INDEXES_TYPE_FIELD     = 6;
+constinit ulint DICT_SYS_INDEXES_NAME_FIELD     = 4;
 
 // When a row id which is zero modulo this number (which must be a power of two) is assigned, the field DICT_HDR_ROW_ID on the dictionary header page is updated
 constinit ulint DICT_HDR_ROW_ID_WRITE_MARGIN = 256;
@@ -93,9 +93,9 @@ constinit ulint DICT_HDR_ROW_ID_WRITE_MARGIN = 256;
 /// \param [in] mtr mtr
 IB_INTERN dict_hdr_t* dict_hdr_get(mtr_t* mtr);
 
-/// \brief Returns a new row, table, index, or tree id.
+/// \brief Returns a new table or index id.
+/// \param [in] type DICT_HDR_TABLE_ID or DICT_HDR_INDEX_ID
 /// \return the new id
-/// \param [in] type DICT_HDR_ROW_ID, ...
 IB_INTERN dulint dict_hdr_get_new_id(ulint type);
 
 /// \brief Returns a new row id.

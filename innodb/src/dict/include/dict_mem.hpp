@@ -20,23 +20,26 @@
 
 #pragma once
 
-#include "univ.i"
+#include "defs.hpp"
 #include "dict_types.hpp"
 #include "data_type.hpp"
 #include "mem_mem.hpp"
 #include "rem_types.hpp"
 #include "btr_types.hpp"
-#ifndef IB_HOTBACKUP
-# include "lock0types.h"
-# include "que0types.h"
-# include "sync0rw.h"
-#endif /* !IB_HOTBACKUP */
 #include "ut_mem.hpp"
 #include "ut_lst.hpp"
 #include "ut_rnd.hpp"
 #include "ut_byte.hpp"
 #include "hash_hash.hpp"
 #include "trx_types.hpp"
+
+#ifndef IB_HOTBACKUP
+#include "lock_types.hpp"
+#include "que_types.hpp"
+#include "sync_rw.hpp"
+#endif // !IB_HOTBACKUP
+
+
 
 constinit ulint DICT_CLUSTERED = 1;
 constinit ulint DICT_UNIQUE = 2;
@@ -47,8 +50,7 @@ constinit ulint DICT_TABLE_ORDINARY = 1;
 
 #if 0 /* not implemented */
 #define	DICT_TABLE_CLUSTER_MEMBER	2
-#define	DICT_TABLE_CLUSTER		3 /* this means that the table is
-					  really a cluster definition */
+#define	DICT_TABLE_CLUSTER		    3 /* this means that the table is really a cluster definition */
 #endif
 
 constinit ulint DICT_TF_COMPACT = 1;
@@ -63,10 +65,11 @@ constinit ulint DICT_TF_FORMAT_51 = 0;
 constinit ulint DICT_TF_FORMAT_ZIP = 1;
 constinit ulint DICT_TF_FORMAT_MAX = DICT_TF_FORMAT_ZIP;
 constinit ulint DICT_TF_BITS = 6;
+
 #if (1 << (DICT_TF_BITS - DICT_TF_FORMAT_SHIFT)) <= DICT_TF_FORMAT_MAX
-# error "DICT_TF_BITS is insufficient for DICT_TF_FORMAT_MAX"
+#error "DICT_TF_BITS is insufficient for DICT_TF_FORMAT_MAX"
 #endif
-/* @} */
+
 
 /** @brief Additional table flags.
 
@@ -78,17 +81,18 @@ constinit ulint DICT_TF2_SHIFT = DICT_TF_BITS;
 constinit ulint DICT_TF2_TEMPORARY = 1;
 constinit ulint DICT_TF2_BITS = (DICT_TF2_SHIFT + 1);
 
-
 /// \brief Creates a table memory object.
-/// \return own: table object
 /// \param [in] name table name
 /// \param [in] space space where the clustered index of the table is placed; this parameter is ignored if the table is made a member of a cluster
 /// \param [in] n_cols number of columns
 /// \param [in] flags table flags
+/// \return own: table object
 IB_INTERN dict_table_t* dict_mem_table_create(const char* name, ulint space, ulint n_cols, ulint flags);
+
 /// \brief Free a table memory object.
 /// \param [in] table table
 IB_INTERN void dict_mem_table_free(dict_table_t* table);
+
 /// \brief Adds a column definition to a table.
 /// \param [in] table table
 /// \param [in] heap temporary memory heap, or NULL
@@ -97,23 +101,27 @@ IB_INTERN void dict_mem_table_free(dict_table_t* table);
 /// \param [in] prtype precise type
 /// \param [in] len precision
 IB_INTERN void dict_mem_table_add_col(dict_table_t* table, mem_heap_t* heap, const char* name, ulint mtype, ulint prtype, ulint len);
+
 /// \brief Creates an index memory object.
-/// \return own: index object
 /// \param [in] table_name table name
 /// \param [in] index_name index name
 /// \param [in] space space where the index tree is placed, ignored if the index is of the clustered type
 /// \param [in] type DICT_UNIQUE, DICT_CLUSTERED, ... ORed
 /// \param [in] n_fields number of fields
+/// \return own: index object
 IB_INTERN dict_index_t* dict_mem_index_create(const char* table_name, const char* index_name, ulint space, ulint type, ulint n_fields);
+
 /// \brief Adds a field definition to an index.
 /// \param [in] index index
 /// \param [in] name column name
 /// \param [in] prefix_len 0 or the column prefix length in a column prefix index like INDEX (textcol(25))
-/// \details NOTE: does not take a copy of the column name if the field is a column. The memory occupied by the column name may be released only after publishing the index.
+/// \note Does not take a copy of the column name if the field is a column. The memory occupied by the column name may be released only after publishing the index.
 IB_INTERN void dict_mem_index_add_field(dict_index_t* index, const char* name, ulint prefix_len);
+
 /// \brief Frees an index memory object.
 /// \param [in] index index
 IB_INTERN void dict_mem_index_free(dict_index_t* index);
+
 /// \brief Creates and initializes a foreign constraint memory object.
 /// \return own: foreign constraint struct
 IB_INTERN dict_foreign_t* dict_mem_foreign_create(void);
@@ -279,11 +287,12 @@ constinit ulint DICT_FOREIGN_ON_UPDATE_SET_NULL = 8;
 constinit ulint DICT_FOREIGN_ON_DELETE_NO_ACTION = 16;
 constinit ulint DICT_FOREIGN_ON_UPDATE_NO_ACTION = 32;
 
+constinit ulint DICT_TABLE_MAGIC_N = 76333786;
 
 /** Data structure for a database table.  Most fields will be
 initialized to 0, NULL or FALSE in dict_mem_table_create(). */
 struct dict_table_struct{
-	dulint		id;	/*!< id of the table */
+	dulint		id;	    /*!< id of the table */
 	mem_heap_t*	heap;	/*!< memory heap */
 	const char*	name;	/*!< table name */
 	const char*	dir_path_of_temp_table;/*!< NULL or the directory path
@@ -388,10 +397,11 @@ struct dict_table_struct{
 			       	this is only used for heuristics */
 				/* @} */
 	/*----------------------*/
-#endif /* !IB_HOTBACKUP */
+#endif // !IB_HOTBACKUP 
+
 #ifdef IB_DEBUG
 	ulint		magic_n;/*!< magic number */
-constinit ulint DICT_TABLE_MAGIC_N = 76333786;
-#endif /* IB_DEBUG */
+
+#endif // IB_DEBUG
 };
 
