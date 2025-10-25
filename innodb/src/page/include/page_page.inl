@@ -254,6 +254,7 @@ page_rec_is_user_rec_low(
 	ulint	offset)	/*!< in: record offset on page */
 {
 	ut_ad(offset >= PAGE_NEW_INFIMUM);
+
 #if PAGE_OLD_INFIMUM < PAGE_NEW_INFIMUM
 # error "PAGE_OLD_INFIMUM < PAGE_NEW_INFIMUM"
 #endif
@@ -965,7 +966,8 @@ page_rec_needs_ext(
 
 	return(rec_size >= page_get_free_space_of_empty(comp) / 2);
 }
+
 #ifdef IB_MATERIALIZE
-#undef IB_INLINE
-#define IB_INLINE	IB_INLINE_ORIGINAL
-#endif
+	#undef IB_INLINE
+	#define IB_INLINE IB_INLINE_ORIGINAL
+#endif // IB_MATERIALIZE

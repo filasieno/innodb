@@ -11,97 +11,98 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 
-/**************************************************//**
-@file include/page0zip.ic
-Compressed page interface
+/// \file page_zip.inl
 
-Created June 2005 by Marko Makela
-*******************************************************/
+/// \brief Compressed page interface
+/// \details 
+/// # The format of compressed pages is as follows.
+/// 
+/// The header and trailer of the uncompressed pages, excluding the page
+/// directory in the trailer, are copied as is to the header and trailer
+/// of the compressed page.
+///
+/// At the end of the compressed page, there is a dense page directory
+/// pointing to every user record contained on the page, including deleted
+/// records on the free list.  The dense directory is indexed in the
+/// collation order, i.e., in the order in which the record list is
+/// linked on the uncompressed page.  The infimum and supremum records are
+/// excluded.  The two most significant bits of the entries are allocated
+/// for the delete-mark and an n_owned flag indicating the last record in
+/// a chain of records pointed to from the sparse page directory on the
+/// uncompressed page.
+///
+/// The data between PAGE_ZIP_START and the last page directory entry will
+/// be written in compressed format, starting at offset PAGE_DATA.
+/// Infimum and supremum records are not stored.  We exclude the
+/// REC_N_NEW_EXTRA_BYTES in every record header.  These can be recovered
+/// from the dense page directory stored at the end of the compressed
+/// page.
+///
+/// The fields node_ptr (in non-leaf B-tree nodes; level>0), trx_id and
+/// roll_ptr (in leaf B-tree nodes; level=0), and BLOB pointers of
+/// externally stored columns are stored separately, in ascending order of
+/// heap_no and column index, starting backwards from the dense page
+/// directory.
+///
+/// The compressed data stream may be followed by a modification log
+/// covering the compressed portion of the page, as follows.
+///
+/// MODIFICATION LOG ENTRY FORMAT
+/// - write record:
+///   - (heap_no - 1) << 1 (1..2 bytes)
+///   - extra bytes backwards
+///   - data bytes
+/// - clear record:
+///   - (heap_no - 1) << 1 | 1 (1..2 bytes)
+///
+/// The integer values are stored in a variable-length format:
+/// - 0xxxxxxx: 0..127
+/// - 1xxxxxxx xxxxxxxx: 0..32767
+///
+/// The end of the modification log is marked by a 0 byte.
+///
+/// In summary, the compressed page looks like this:
+///
+/// (1) Uncompressed page header (PAGE_DATA bytes)
+/// (2) Compressed index information
+/// (3) Compressed page data
+/// (4) Page modification log (page_zip->m_start..page_zip->m_end)
+/// (5) Empty zero-filled space
+/// (6) BLOB pointers (on leaf pages)
+///   - BTR_EXTERN_FIELD_REF_SIZE for each externally stored column
+///   - in descending collation order
+/// (7) Uncompressed columns of user records, n_dense * uncompressed_size bytes,
+///   - indexed by heap_no
+///   - DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN for leaf pages of clustered indexes
+///   - REC_NODE_PTR_SIZE for non-leaf pages
+///   - 0 otherwise
+/// (8) dense page directory, stored backwards
+///   - n_dense = n_heap - 2
+///   - existing records in ascending collation order
+///   - deleted records (free list) in link order
+/// 
+/// Originally created June 2005 by Marko Makela
+///
+/// \author Fabio N. Filasieno
+/// \date 20/10/2025
 
 #ifdef IB_MATERIALIZE
-# undef IB_INLINE
-# define IB_INLINE
+	#undef IB_INLINE
+	#define IB_INLINE
 #endif
 
 #include "page_zip.hpp"
 #include "page_page.hpp"
 
-/* The format of compressed pages is as follows.
-
-The header and trailer of the uncompressed pages, excluding the page
-directory in the trailer, are copied as is to the header and trailer
-of the compressed page.
-
-At the end of the compressed page, there is a dense page directory
-pointing to every user record contained on the page, including deleted
-records on the free list.  The dense directory is indexed in the
-collation order, i.e., in the order in which the record list is
-linked on the uncompressed page.  The infimum and supremum records are
-excluded.  The two most significant bits of the entries are allocated
-for the delete-mark and an n_owned flag indicating the last record in
-a chain of records pointed to from the sparse page directory on the
-uncompressed page.
-
-The data between PAGE_ZIP_START and the last page directory entry will
-be written in compressed format, starting at offset PAGE_DATA.
-Infimum and supremum records are not stored.  We exclude the
-REC_N_NEW_EXTRA_BYTES in every record header.  These can be recovered
-from the dense page directory stored at the end of the compressed
-page.
-
-The fields node_ptr (in non-leaf B-tree nodes; level>0), trx_id and
-roll_ptr (in leaf B-tree nodes; level=0), and BLOB pointers of
-externally stored columns are stored separately, in ascending order of
-heap_no and column index, starting backwards from the dense page
-directory.
-
-The compressed data stream may be followed by a modification log
-covering the compressed portion of the page, as follows.
-
-MODIFICATION LOG ENTRY FORMAT
-- write record:
-  - (heap_no - 1) << 1 (1..2 bytes)
-  - extra bytes backwards
-  - data bytes
-- clear record:
-  - (heap_no - 1) << 1 | 1 (1..2 bytes)
-
-The integer values are stored in a variable-length format:
-- 0xxxxxxx: 0..127
-- 1xxxxxxx xxxxxxxx: 0..32767
-
-The end of the modification log is marked by a 0 byte.
-
-In summary, the compressed page looks like this:
-
-(1) Uncompressed page header (PAGE_DATA bytes)
-(2) Compressed index information
-(3) Compressed page data
-(4) Page modification log (page_zip->m_start..page_zip->m_end)
-(5) Empty zero-filled space
-(6) BLOB pointers (on leaf pages)
-  - BTR_EXTERN_FIELD_REF_SIZE for each externally stored column
-  - in descending collation order
-(7) Uncompressed columns of user records, n_dense * uncompressed_size bytes,
-  - indexed by heap_no
-  - DATA_TRX_ID_LEN + DATA_ROLL_PTR_LEN for leaf pages of clustered indexes
-  - REC_NODE_PTR_SIZE for non-leaf pages
-  - 0 otherwise
-(8) dense page directory, stored backwards
-  - n_dense = n_heap - 2
-  - existing records in ascending collation order
-  - deleted records (free list) in link order
-*/
-
 // -----------------------------------------------------------------------------------------
 // macro constants
 // -----------------------------------------------------------------------------------------
 
-constinit ulint PAGE_ZIP_START = PAGE_NEW_SUPREMUM_END;
-constinit ulint PAGE_ZIP_DIR_SLOT_SIZE = 2;
-constinit ulint PAGE_ZIP_DIR_SLOT_MASK = 0x3fff;
+constinit ulint PAGE_ZIP_START          = PAGE_NEW_SUPREMUM_END;
+constinit ulint PAGE_ZIP_DIR_SLOT_SIZE  = 2;
+constinit ulint PAGE_ZIP_DIR_SLOT_MASK  = 0x3fff;
 constinit ulint PAGE_ZIP_DIR_SLOT_OWNED = 0x4000;
-constinit ulint PAGE_ZIP_DIR_SLOT_DEL = 0x8000;
+constinit ulint PAGE_ZIP_DIR_SLOT_DEL   = 0x8000;
 
 // -----------------------------------------------------------------------------------------
 // routine definitions
@@ -123,6 +124,7 @@ IB_INLINE ulint page_zip_get_size(const page_zip_des_t* page_zip);
 
 	return size;
 }
+
 /// \brief Set the size of a compressed page in bytes.
 /// \param [in,out] page_zip compressed page
 /// \param [in] size size in bytes
@@ -144,6 +146,7 @@ IB_INLINE void page_zip_set_size(page_zip_des_t* page_zip, ulint size);
 }
 
 #ifndef IB_HOTBACKUP
+
 /// \brief Determine if a record is so big that it needs to be stored externally.
 /// \return FALSE if the entire record can be stored locally on the page
 /// \param [in] rec_size length of the record in bytes
@@ -175,6 +178,7 @@ IB_INLINE ibool page_zip_rec_needs_ext(ulint rec_size, ulint comp, ulint n_field
 #endif /* !IB_HOTBACKUP */
 
 #ifdef IB_DEBUG
+
 /// \brief Validate a compressed page descriptor.
 /// \return TRUE if ok
 /// \param [in] page_zip compressed page descriptor
@@ -190,6 +194,7 @@ IB_INLINE ibool page_zip_simple_validate(const page_zip_des_t* page_zip);
 	return TRUE;
 }
 #endif /* IB_DEBUG */
+
 
 /// \brief Determine the length of the page trailer.
 /// \return length of the page trailer, in bytes, not including the terminating zero byte of the modification log
@@ -219,6 +224,7 @@ IB_INLINE ibool page_zip_get_trailer_len(const page_zip_des_t* page_zip, ibool i
 	return ((page_dir_get_n_heap(page_zip->data) - 2) * uncompressed_size + page_zip->n_blobs * BTR_EXTERN_FIELD_REF_SIZE);
 }
 
+
 /// \brief Determine how big record can be inserted without recompressing the page.
 /// \return a positive number indicating the maximum size of a record whose insertion is guaranteed to succeed, or zero or negative
 /// \param [in] page_zip compressed page
@@ -234,6 +240,7 @@ IB_INLINE lint page_zip_max_ins_size(const page_zip_des_t* page_zip, ibool is_cl
 
 	return ((lint) page_zip_get_size(page_zip) - trailer_len - page_zip->m_end - (REC_N_NEW_EXTRA_BYTES - 2));
 }
+
 
 /// \brief Determine if enough space is available in the modification log.
 /// \return TRUE if enough space is available
@@ -273,6 +280,7 @@ IB_INLINE void page_zip_des_init(page_zip_des_t* page_zip);
 /// \param [in] mtr mini-transaction
 IB_INTERN void page_zip_write_header_log(const byte* data, ulint length, mtr_t* mtr);
 
+
 /// \brief Write data to the uncompressed header portion of a page. The data must already have been written to the uncompressed page.
 /// \details However, the data portion of the uncompressed page may differ from the compressed page when a record is being inserted in page_cur_insert_rec_zip().
 /// \param [in,out] page_zip compressed page
@@ -297,7 +305,7 @@ IB_INLINE void page_zip_write_header(page_zip_des_t* page_zip, const byte* str, 
 	if (IB_LIKELY_NULL(mtr)) {
 #ifndef IB_HOTBACKUP
 		page_zip_write_header_log(str, length, mtr);
-#endif /* !IB_HOTBACKUP */
+#endif // !IB_HOTBACKUP
 	}
 }
 

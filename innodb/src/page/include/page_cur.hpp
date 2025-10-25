@@ -33,10 +33,11 @@ constinit ulint PAGE_CUR_ADAPT = 0;
 /* Page cursor search modes; the values must be in this order! */
 
 constinit ulint PAGE_CUR_UNSUPP = 0;
-constinit ulint PAGE_CUR_G = 1;
-constinit ulint PAGE_CUR_GE = 2;
-constinit ulint PAGE_CUR_L = 3;
-constinit ulint PAGE_CUR_LE = 4;
+constinit ulint PAGE_CUR_G      = 1;
+constinit ulint PAGE_CUR_GE     = 2;
+constinit ulint PAGE_CUR_L      = 3;
+constinit ulint PAGE_CUR_LE     = 4;
+
 /*#define PAGE_CUR_LE_OR_EXTENDS 5*/ /* This is a search mode used in
 				 "column LIKE 'abc%' ORDER BY column DESC";
 				 we have to find strings which are <= 'abc' or
@@ -67,11 +68,14 @@ constinit ulint PAGE_CUR_LE = 4;
 	/// \param [in] cur page cursor
 	/// \return record
 	IB_INLINE rec_t* page_cur_get_rec(page_cur_t* cur);
+
 #else  // IB_DEBUG 
+	
 	#define page_cur_get_page(cur)		page_align((cur)->rec)
 	#define page_cur_get_block(cur)	(cur)->block
 	#define page_cur_get_page_zip(cur)	buf_block_get_page_zip((cur)->block)
 	#define page_cur_get_rec(cur)		(cur)->rec
+
 #endif // IB_DEBUG 
 
 /// \brief Sets the cursor object to point before the first user record on the page.
@@ -111,10 +115,12 @@ IB_INLINE void page_cur_move_to_next(page_cur_t* cur);
 /// \brief Moves the cursor to the previous record on page.
 /// \param [in,out] cur page cursor
 IB_INLINE void page_cur_move_to_prev(page_cur_t* cur);
+
 #ifndef IB_HOTBACKUP
 
 /// \brief Inserts a record next to page cursor.
-/// \details Returns pointer to inserted record if succeed, i.e., enough space available, NULL otherwise. The cursor stays at the same logical position, but the physical position may change if it is pointing to a compressed page that was reorganized.
+/// \details Returns pointer to inserted record if succeed, i.e., enough space available, NULL otherwise. The cursor stays at the same logical position,
+///  but the physical position may change if it is pointing to a compressed page that was reorganized.
 /// \param [in,out] cursor a page cursor
 /// \param [in] tuple pointer to a data tuple
 /// \param [in] index record descriptor
@@ -122,10 +128,12 @@ IB_INLINE void page_cur_move_to_prev(page_cur_t* cur);
 /// \param [in] mtr mini-transaction handle, or NULL
 /// \return pointer to record if succeed, NULL otherwise
 IB_INLINE rec_t* page_cur_tuple_insert(page_cur_t* cursor, const dtuple_t* tuple, dict_index_t* index, ulint n_ext, mtr_t* mtr);
-#endif /* !IB_HOTBACKUP */
+
+#endif // !IB_HOTBACKUP
 
 /// \brief Inserts a record next to page cursor.
-/// \details Returns pointer to inserted record if succeed, i.e., enough space available, NULL otherwise. The cursor stays at the same logical position, but the physical position may change if it is pointing to a compressed page that was reorganized.
+/// \details Returns pointer to inserted record if succeed, i.e., enough space available, NULL otherwise. The cursor stays at the same logical position, 
+/// but the physical position may change if it is pointing to a compressed page that was reorganized.
 /// \param [in,out] cursor a page cursor
 /// \param [in] rec record to insert
 /// \param [in] index record descriptor
@@ -137,20 +145,40 @@ IB_INLINE rec_t* page_cur_rec_insert(page_cur_t* cursor, const rec_t* rec, dict_
 /// \brief Inserts a record next to page cursor on an uncompressed page.
 /// \details Returns pointer to inserted record if succeed, i.e., enough space available, NULL otherwise. The cursor stays at the same position.
 /// \return pointer to record if succeed, NULL otherwise
+/// \param [in] current_rec current record next to which to insert
+/// \param [in] index record descriptor
+/// \param [in] rec physical record to insert
+/// \param [in,out] offsets rec_get_offsets(rec, index)
+/// \param [in] mtr mini-transaction handle, or NULL
 IB_INTERN rec_t* page_cur_insert_rec_low(rec_t* current_rec, dict_index_t* index, const rec_t* rec, ulint* offsets, mtr_t* mtr);
 
 /// \brief Inserts a record next to page cursor on a compressed and uncompressed page.
 /// \details Returns pointer to inserted record if succeed, i.e., enough space available, NULL otherwise. The cursor stays at the same position.
 /// \return pointer to record if succeed, NULL otherwise
+/// \param [in,out] current_rec pointer to current record next to which to insert
+/// \param [in] block buffer block
+/// \param [in] index record descriptor
+/// \param [in] rec physical record to insert
+/// \param [in,out] offsets rec_get_offsets(rec, index)
+/// \param [in] mtr mini-transaction handle, or NULL
 IB_INTERN rec_t* page_cur_insert_rec_zip(rec_t** current_rec, buf_block_t* block, dict_index_t* index, const rec_t* rec, ulint* offsets, mtr_t* mtr);
 
 /// \brief Copies records from page to a newly created page, from a given record onward, including that record.
 /// \details Infimum and supremum records are not copied.
+/// \param [in,out] new_page index page to copy to
+/// \param [in] rec first record to copy
+/// \param [in] index record descriptor
+/// \param [in] mtr mtr
 IB_INTERN void page_copy_rec_list_end_to_created_page(page_t* new_page, rec_t* rec, dict_index_t* index, mtr_t* mtr);
 
 /// \brief Deletes a record at the page cursor.
 /// \details The cursor is moved to the next record after the deleted one.
+/// \param [in,out] cursor a page cursor
+/// \param [in] index record descriptor
+/// \param [in] offsets rec_get_offsets(cursor->rec, index)
+/// \param [in] mtr mini-transaction handle
 IB_INTERN void page_cur_delete_rec(page_cur_t* cursor, dict_index_t* index, const ulint* offsets, mtr_t* mtr);
+
 #ifndef IB_HOTBACKUP
 
 /// \brief Searches the right position for a page cursor.
@@ -163,34 +191,69 @@ IB_INTERN void page_cur_delete_rec(page_cur_t* cursor, dict_index_t* index, cons
 IB_INLINE ulint page_cur_search(const buf_block_t* block, const dict_index_t* index, const dtuple_t* tuple, ulint mode, page_cur_t* cursor);
 
 /// \brief Searches the right position for a page cursor.
+/// \details Performs binary search through the page directory and then as a linear search in the list of records owned by the upper limit directory slot.
+/// \param [in] block buffer block
+/// \param [in] index record descriptor
+/// \param [in] tuple data tuple
+/// \param [in] mode PAGE_CUR_L, PAGE_CUR_LE, PAGE_CUR_G, or PAGE_CUR_GE
+/// \param [in,out] iup_matched_fields already matched fields in upper limit record
+/// \param [in,out] iup_matched_bytes already matched bytes in first partially matched field in upper limit record
+/// \param [in,out] ilow_matched_fields already matched fields in lower limit record
+/// \param [in,out] ilow_matched_bytes already matched bytes in first partially matched field in lower limit record
+/// \param [out] cursor page cursor
 IB_INTERN void page_cur_search_with_match(const buf_block_t* block, const dict_index_t* index, const dtuple_t* tuple, ulint mode, ulint* iup_matched_fields, ulint* iup_matched_bytes, ulint* ilow_matched_fields, ulint* ilow_matched_bytes, page_cur_t* cursor);
 
 /// \brief Positions a page cursor on a randomly chosen user record on a page.
 /// \details If there are no user records, sets the cursor on the infimum record.
+/// \param [in] block buffer block
+/// \param [out] cursor page cursor
 IB_INTERN void page_cur_open_on_rnd_user_rec(buf_block_t* block, page_cur_t* cursor);
-#endif /* !IB_HOTBACKUP */
+
+#endif // !IB_HOTBACKUP
 
 /// \brief Parses a log record of a record insert on a page.
 /// \return end of log record or NULL
+/// \param [in] is_short TRUE if short format  
+/// \param [in] ptr buffer
+/// \param [in] end_ptr buffer end
+/// \param [in] block buffer block or NULL
+/// \param [in] index record descriptor
+/// \param [in] mtr mtr or NULL
 IB_INTERN byte* page_cur_parse_insert_rec(ibool is_short, byte* ptr, byte* end_ptr, buf_block_t* block, dict_index_t* index, mtr_t* mtr);
 
 /// \brief Parses a log record of copying a record list end to a new created page.
 /// \return end of log record or NULL
+/// \param [in] ptr buffer
+/// \param [in] end_ptr buffer end
+/// \param [in] block buffer block or NULL
+/// \param [in] index record descriptor
+/// \param [in] mtr mtr or NULL
 IB_INTERN byte* page_parse_copy_rec_list_to_created_page(byte* ptr, byte* end_ptr, buf_block_t* block, dict_index_t* index, mtr_t* mtr);
 
 /// \brief Parses log record of a record delete on a page.
 /// \return pointer to record end or NULL
+/// \param [in] ptr buffer
+/// \param [in] end_ptr buffer end
+/// \param [in] block buffer block or NULL
+/// \param [in] index record descriptor
+/// \param [in] mtr mtr or NULL
 IB_INTERN byte* page_cur_parse_delete_rec(byte* ptr, byte* end_ptr, buf_block_t* block, dict_index_t* index, mtr_t* mtr);
 
-/** Index page cursor */
+/// \struct page_cur_struct
+/// \brief Index page cursor
+/// \details The page cursor is used to position the cursor on a record on a page.
+/// \var byte* page_cur_struct::rec
+/// \brief pointer to a record on page
+/// \var buf_block_t* page_cur_struct::block
+/// \brief pointer to the block containing rec
 
 struct page_cur_struct {
-    byte* rec;       /*!< pointer to a record on page */
-    buf_block_t* block; /*!< pointer to the block containing rec */
+    byte*        rec;
+    buf_block_t* block;
 };
 
 #ifndef IB_DO_NOT_INLINE
-#include "page_cur.inl"
+	#include "page_cur.inl"
 #endif
 
-#endif
+#endif // IB_HOTBACKUP

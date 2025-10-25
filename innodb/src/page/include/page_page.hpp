@@ -121,6 +121,7 @@ IB_INLINE ulint page_offset(const void* ptr) __attribute__((const));
 IB_INLINE trx_id_t page_get_max_trx_id(const page_t* page);
 
 /// \brief Sets the max trx id field value.
+/// \details It is not necessary to write this change to the redo log, as during a database recovery we assume that the max trx id of every page is the maximum trx id assigned before the crash.
 /// \param [in,out] block page
 /// \param [in,out] page_zip compressed page, or NULL
 /// \param [in] trx_id transaction id
@@ -185,7 +186,8 @@ IB_INLINE ulint page_get_supremum_offset(const page_t* page);
 #define page_get_infimum_rec(page) ((page) + page_get_infimum_offset(page))
 #define page_get_supremum_rec(page) ((page) + page_get_supremum_offset(page))
 
-/// \brief Returns the middle record of record list. If there are an even number of records in the list, returns the first record of upper half-list.
+/// \brief Returns the middle record of the record list.
+/// \details If there are an even number of records in the list, returns the first record of the upper half-list.
 /// \return middle record
 /// \param [in] page page
 IB_INTERN rec_t* page_get_middle_rec(page_t* page);
@@ -218,9 +220,10 @@ IB_INLINE ulint page_get_space_id(const page_t* page);
 /// \return number of user records
 IB_INLINE ulint page_get_n_recs(const page_t* page);
 
-/// \brief Returns the number of records before the given record in chain. The number includes infimum and supremum records.
-/// \param [in] rec the physical record
+/// \brief Returns the number of records before the given record in chain.
+/// \details The number includes infimum and supremum records.
 /// \return number of records
+/// \param [in] rec the physical record
 IB_INTERN ulint page_rec_get_n_recs_before(const rec_t* rec);
 
 /// \brief Gets the number of records in the heap.
@@ -287,8 +290,8 @@ IB_INLINE void page_dir_slot_set_n_owned(page_dir_slot_t* slot, page_zip_des_t* 
 IB_INLINE ulint page_dir_calc_reserved_space(ulint n_recs);
 
 /// \brief Looks for the directory slot which owns the given record.
-/// \param [in] rec the physical record
 /// \return the directory slot number
+/// \param [in] rec the physical record
 IB_INTERN ulint page_dir_find_owner_slot(const rec_t* rec);
 
 /// \brief Determine whether the page is in new-style compact format.
@@ -436,11 +439,12 @@ IB_INTERN byte* page_mem_alloc_heap(page_t* page, page_zip_des_t* page_zip, ulin
 /// \param [in] offsets array returned by rec_get_offsets()
 IB_INLINE void page_mem_free(page_t* page, page_zip_des_t* page_zip, rec_t* rec, dict_index_t* index, const ulint* offsets);
 
-/// \brief Create an uncompressed B-tree index page.
+/// \brief The index page creation function.
+/// \details Create an uncompressed B-tree index page.
+/// \return pointer to the page
 /// \param [in] block a buffer block where the page is created
 /// \param [in] mtr mini-transaction handle
 /// \param [in] comp nonzero=compact page format
-/// \return pointer to the page
 IB_INTERN page_t* page_create(buf_block_t* block, mtr_t* mtr, ulint comp);
 
 /// \brief Create a compressed B-tree index page.
@@ -453,6 +457,7 @@ IB_INTERN page_t* page_create_zip(buf_block_t* block, dict_index_t* index, ulint
 
 
 /// \brief Differs from page_copy_rec_list_end, because this function does not touch the lock table and max trx id on page or compress the page.
+/// \details Copies records from page to new_page, from the given record onward, including that record. Infimum and supremum records are not copied.
 /// \param [in] new_block index page to copy to
 /// \param [in] block index page of rec
 /// \param [in] rec record on page
@@ -494,22 +499,24 @@ IB_INTERN void page_delete_rec_list_end(rec_t* rec, buf_block_t* block, dict_ind
 /// \param [in] mtr mtr
 IB_INTERN void page_delete_rec_list_start(rec_t* rec, buf_block_t* block, dict_index_t* index, mtr_t* mtr) __attribute__((nonnull));
 
-/// \brief Moves record list end to another page. Moved records include split_rec.
+/// \brief Moves record list end to another page.
+/// \details Moved records include split_rec.
+/// \return TRUE on success; FALSE on compression failure (new_block will be decompressed)
 /// \param [in,out] new_block index page where to move
 /// \param [in] block index page from where to move
 /// \param [in] split_rec first record to move
 /// \param [in] index record descriptor
 /// \param [in] mtr mtr
-/// \return TRUE on success; FALSE on compression failure (new_block will be decompressed)
 IB_INTERN ibool page_move_rec_list_end(buf_block_t* new_block, buf_block_t* block, rec_t* split_rec, dict_index_t* index, mtr_t* mtr) __attribute__((nonnull(1, 2, 4, 5)));
 
-/// \brief Moves record list start to another page. Moved records do not include split_rec.
+/// \brief Moves record list start to another page.
+/// \details Moved records do not include split_rec.
+/// \return TRUE on success; FALSE on compression failure
 /// \param [in,out] new_block index page where to move
 /// \param [in,out] block page containing split_rec
 /// \param [in] split_rec first record not to move
 /// \param [in] index record descriptor
 /// \param [in] mtr mtr
-/// \return TRUE on success; FALSE on compression failure
 IB_INTERN ibool page_move_rec_list_start(buf_block_t* new_block, buf_block_t* block, rec_t* split_rec, dict_index_t* index, mtr_t* mtr) __attribute__((nonnull(1, 2, 4, 5)));
 
 /// \brief Splits a directory slot which owns too many records.
@@ -570,56 +577,35 @@ IB_INTERN void page_header_print(const page_t* page);
 /// \param [in] rn print rn first and last records in directory
 IB_INTERN void page_print(buf_block_t* block, dict_index_t* index, ulint dn, ulint rn);
 
-/***************************************************************//**
-The following is used to validate a record on a page. This function
-differs from rec_validate as it can also check the n_owned field and
-the heap_no field.
-/// \return    TRUE if ok */
-IB_INTERN
-ibool
-page_rec_validate(
-/*==============*/
-    rec_t*        rec,    /*!< in: physical record */
-    const ulint*    offsets);/*!< in: array returned by rec_get_offsets() */
-/***************************************************************//**
-Checks that the first directory slot points to the infimum record and
-the last to the supremum. This function is intended to track if the
-bug fixed in 4.0.14 has caused corruption to users' databases. */
-IB_INTERN
-void
-page_check_dir(
-/*===========*/
-    const page_t*    page);    /*!< in: index page */
-/***************************************************************//**
-This function checks the consistency of an index page when we do not
-know the index. This is also resilient so that this should never crash
-even if the page is total garbage.
-/// \return    TRUE if ok */
-IB_INTERN
-ibool
-page_simple_validate_old(
-/*=====================*/
-    page_t*    page);    /*!< in: old-style index page */
-/***************************************************************//**
-This function checks the consistency of an index page when we do not
-know the index. This is also resilient so that this should never crash
-even if the page is total garbage.
-/// \return    TRUE if ok */
-IB_INTERN
-ibool
-page_simple_validate_new(
-/*=====================*/
-    page_t*    block);    /*!< in: new-style index page */
-/***************************************************************//**
-This function checks the consistency of an index page.
-/// \return    TRUE if ok */
-IB_INTERN
-ibool
-page_validate(
-/*==========*/
-    page_t*        page,    /*!< in: index page */
-    dict_index_t*    index);    /*!< in: data dictionary index containing
-                the page record type definition */
+/// \brief The following is used to validate a record on a page.
+/// \param [in] rec physical record
+/// \param [in] offsets array returned by rec_get_offsets()
+/// \return TRUE if ok
+/// \details This function differs from rec_validate as it can also check the n_owned field and the heap_no field.
+IB_INTERN ibool page_rec_validate(rec_t* rec, const ulint* offsets);
+
+/// \brief Checks that the first directory slot points to the infimum record and the last to the supremum.
+/// \param [in] page index page
+/// \details This function is intended to track if the bug fixed in 4.0.14 has caused corruption to users' databases.
+IB_INTERN void page_check_dir(const page_t* page);
+
+/// \brief This function checks the consistency of an index page when we do not know the index.
+/// \param [in] page old-style index page
+/// \return TRUE if ok
+/// \details This is also resilient so that this should never crash even if the page is total garbage.
+IB_INTERN ibool page_simple_validate_old(page_t* page);
+
+/// \brief This function checks the consistency of an index page when we do not know the index.
+/// \param [in] block new-style index page
+/// \return TRUE if ok
+/// \details This is also resilient so that this should never crash even if the page is total garbage.
+IB_INTERN ibool page_simple_validate_new(page_t* block);
+
+/// \brief This function checks the consistency of an index page.
+/// \param [in] page index page
+/// \param [in] index data dictionary index containing the page record type definition
+/// \return TRUE if ok
+IB_INTERN ibool page_validate(page_t* page, dict_index_t* index);
 /// \brief Looks in the page record list for a record with the given heap number.
 /// \param [in] page index page
 /// \param [in] heap_no heap number
@@ -633,6 +619,34 @@ const rec_t* page_find_rec_with_heap_no(const page_t* page, ulint heap_no);
 /// \param [in] zip_size compressed page size in bytes, or 0
 /// \return FALSE if the entire record can be stored locally on the page
 IB_INLINE ibool page_rec_needs_ext(ulint rec_size, ulint comp, ulint n_fields, ulint zip_size);
+
+
+/// \brief Write the "deleted" flag of a record on a compressed page.
+/// \param [in/out] page_zip compressed page
+/// \param [in] rec record on the uncompressed page
+/// \param [in] flag the deleted flag (nonzero=TRUE)
+/// \details The flag must already have been written on the uncompressed page.
+IB_INTERN void page_zip_rec_set_deleted(page_zip_des_t* page_zip, const byte* rec, ulint flag) __attribute__((nonnull));
+
+/// \brief Write the "owned" flag of a record on a compressed page.
+/// \param [in/out] page_zip compressed page
+/// \param [in] rec record on the uncompressed page
+/// \param [in] flag the owned flag (nonzero=TRUE)
+/// \details The n_owned field must already have been written on the uncompressed page.
+IB_INTERN void page_zip_rec_set_owned(page_zip_des_t* page_zip, const byte* rec, ulint flag) __attribute__((nonnull));
+
+/// \brief Shift the dense page directory when a record is deleted.
+/// \param [in/out] page_zip compressed page
+/// \param [in] rec deleted record
+/// \param [in] index index of rec
+/// \param [in] offsets rec_get_offsets(rec)
+/// \param [in] free previous start of the free list
+IB_INTERN void page_zip_dir_delete(page_zip_des_t* page_zip, byte* rec, dict_index_t* index, const ulint* offsets, const byte* free) __attribute__((nonnull(1,2,3,4)));
+
+/// \brief Add a slot to the dense page directory.
+/// \param [in/out] page_zip compressed page
+/// \param [in] is_clustered nonzero for clustered index, zero for others
+IB_INTERN void page_zip_dir_add_slot(page_zip_des_t* page_zip, ulint is_clustered) __attribute__((nonnull));
 
 #ifdef IB_MATERIALIZE
 #undef IB_INLINE
