@@ -12,12 +12,11 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-/**************************************************//**
-@file que/que0que.c
-Query graph
-
-Created 5/27/1996 Heikki Tuuri
-*******************************************************/
+/// \file que_que.cpp
+/// \brief Query graph
+/// \details Originally created by Heikki Tuuri on 5/27/1996
+/// \author Fabio N. Filasieno
+/// \date 25/10/2025
 
 #include "que_que.hpp"
 
@@ -40,105 +39,90 @@ Created 5/27/1996 Heikki Tuuri
 #include "eval_eval.hpp"
 #include "pars_types.hpp"
 
+// -----------------------------------------------------------------------------------------
+// macro constants
+// -----------------------------------------------------------------------------------------
+
 constinit ulint QUE_PARALLELIZE_LIMIT = (64 * 256 * 256 * 256);
 constinit ulint QUE_ROUND_ROBIN_LIMIT = (64 * 256 * 256 * 256);
 constinit ulint QUE_MAX_LOOPS_WITHOUT_CHECK = 16;
 
+// -----------------------------------------------------------------------------------------
+// globals
+// -----------------------------------------------------------------------------------------
+
 #ifdef IB_DEBUG
-/* If the following flag is set TRUE, the module will print trace info
-of SQL execution in the IB_SQL_DEBUG version */
-IB_INTERN ibool	que_trace_on		= FALSE;
-#endif /* IB_DEBUG */
+// If the following flag is set TRUE, the module will print trace info of SQL execution in the IB_SQL_DEBUG version
+IB_INTERN ibool que_trace_on = FALSE;
+#endif // IB_DEBUG
 
-/* Short introduction to query graphs
-   ==================================
+// Short introduction to query graphs: A query graph consists of nodes linked to each other in various ways.
+// The execution starts at que_run_threads() which takes a que_thr_t parameter.
+// que_thr_t contains two fields that control query graph execution: run_node and prev_node.
+// run_node is the next node to execute and prev_node is the last node executed.
+// Each node has a pointer to a 'next' statement, i.e., its brother, and a pointer to its parent node.
+// The next pointer is NULL in the last statement of a block.
+// Loop nodes contain a link to the first statement of the enclosed statement list.
+// While the loop runs, que_thr_step() checks if execution to the loop node came from its parent or from one of the statement nodes in the loop.
+// If it came from the parent of the loop node it starts executing the first statement node in the loop.
+// If it came from one of the statement nodes in the loop, then it checks if the statement node has another statement node following it, and runs it if so.
+// To signify loop ending, the loop statements (see e.g. while_step()) set que_thr_t->run_node to the loop node's parent node.
+// This is noticed on the next call of que_thr_step() and execution proceeds to the node pointed to by the loop node's 'next' pointer.
+// For example, 
+// the code: 
+// ```
+//    X := 1; 
+//    WHILE X < 5 LOOP 
+//        X := X + 1; 
+//        X := X + 1; 
+//        X := 5 
+//    END LOOP;
+// ```
+// will result in the following node hierarchy, with the X-axis indicating 'next' links and the Y-axis indicating parent/child links: 
+//    A - W - A 
+//        |
+//        |
+//        A - A.
+// where A = assign_node_t, W = while_node_t.
+// 
+// How a stored procedure containing COMMIT or ROLLBACK commands is executed: The commit or rollback can be seen as a subprocedure call.
+// The problem is that if there are several query threads currently running within the transaction, their action could mess the commit or rollback operation.
+// Or, at the least, the operation would be difficult to visualize and keep in control.
+// Therefore the query thread requesting a commit or a rollback sends to the transaction a signal, which moves the transaction to TRX_QUE_SIGNALED state.
+// All running query threads of the transaction will eventually notice that the transaction is now in this state and voluntarily suspend themselves.
+// Only the last query thread which suspends itself will trigger handling of the signal.
+// When the transaction starts to handle a rollback or commit signal, it builds a query graph which, when executed, will roll back or commit the incomplete transaction.
+// The transaction is moved to the TRX_QUE_ROLLING_BACK or TRX_QUE_COMMITTING state.
+// If specified, the SQL cursors opened by the transaction are closed.
+// When the execution of the graph completes, it is like returning from a subprocedure: the query thread which requested the operation starts running again.
 
-A query graph consists of nodes linked to each other in various ways. The
-execution starts at que_run_threads() which takes a que_thr_t parameter.
-que_thr_t contains two fields that control query graph execution: run_node
-and prev_node. run_node is the next node to execute and prev_node is the
-last node executed.
+// -----------------------------------------------------------------------------------------
+// Static helper routine declarations
+// -----------------------------------------------------------------------------------------
 
-Each node has a pointer to a 'next' statement, i.e., its brother, and a
-pointer to its parent node. The next pointer is NULL in the last statement
-of a block.
+static void que_graph_free_stat_list(que_node_t* node);
+static que_thr_t* que_thr_node_step(que_thr_t* thr);
+static void que_thr_dec_refer_count(que_thr_t* thr, que_thr_t** next_thr);
+static void que_run_threads_low(que_thr_t* thr);
 
-Loop nodes contain a link to the first statement of the enclosed statement
-list. While the loop runs, que_thr_step() checks if execution to the loop
-node came from its parent or from one of the statement nodes in the loop. If
-it came from the parent of the loop node it starts executing the first
-statement node in the loop. If it came from one of the statement nodes in
-the loop, then it checks if the statement node has another statement node
-following it, and runs it if so.
+// -----------------------------------------------------------------------------------------
+// routine definitions
+// -----------------------------------------------------------------------------------------
 
-To signify loop ending, the loop statements (see e.g. while_step()) set
-que_thr_t->run_node to the loop node's parent node. This is noticed on the
-next call of que_thr_step() and execution proceeds to the node pointed to by
-the loop node's 'next' pointer.
-
-For example, the code:
-
-X := 1;
-WHILE X < 5 LOOP
- X := X + 1;
- X := X + 1;
-X := 5
-
-will result in the following node hierarchy, with the X-axis indicating
-'next' links and the Y-axis indicating parent/child links:
-
-A - W - A
-    |
-    |
-    A - A
-
-A = assign_node_t, W = while_node_t. */
-
-/* How a stored procedure containing COMMIT or ROLLBACK commands
-is executed?
-
-The commit or rollback can be seen as a subprocedure call.
-The problem is that if there are several query threads
-currently running within the transaction, their action could
-mess the commit or rollback operation. Or, at the least, the
-operation would be difficult to visualize and keep in control.
-
-Therefore the query thread requesting a commit or a rollback
-sends to the transaction a signal, which moves the transaction
-to TRX_QUE_SIGNALED state. All running query threads of the
-transaction will eventually notice that the transaction is now in
-this state and voluntarily suspend themselves. Only the last
-query thread which suspends itself will trigger handling of
-the signal.
-
-When the transaction starts to handle a rollback or commit
-signal, it builds a query graph which, when executed, will
-roll back or commit the incomplete transaction. The transaction
-is moved to the TRX_QUE_ROLLING_BACK or TRX_QUE_COMMITTING state.
-If specified, the SQL cursors opened by the transaction are closed.
-When the execution of the graph completes, it is like returning
-from a subprocedure: the query thread which requested the operation
-starts running again. */
-
-/*************************************************************************//**
-Reset the variables. */
-IB_INTERN
-void
-que_var_init(void)
-/*=============*/
+/// \brief Reset the variables.
+IB_INTERN void que_var_init(void)
 {
 #ifdef IB_DEBUG
 	que_trace_on = FALSE;
-#endif /* IB_DEBUG */
+#endif
 }
 
 /// \brief Adds a query graph to the session's list of graphs.
-/// \param [in] graph graph
+/// \param [in] graph query graph
 /// \param [in] sess session
 IB_INTERN void que_graph_publish(que_t* graph, sess_t* sess)
 {
 	ut_ad(mutex_own(&kernel_mutex));
-
 	UT_LIST_ADD_LAST(graphs, sess->graphs, graph);
 }
 
@@ -151,33 +135,23 @@ IB_INTERN void que_graph_publish(que_t* graph, sess_t* sess)
 IB_INTERN que_fork_t* que_fork_create(que_t* graph, que_node_t* parent, ulint fork_type, mem_heap_t* heap)
 {
 	ut_ad(heap);
-
 	que_fork_t* fork = mem_heap_alloc(heap, sizeof(que_fork_t));
-
 	fork->common.type = QUE_NODE_FORK;
 	fork->n_active_thrs = 0;
-
 	fork->state = QUE_FORK_COMMAND_WAIT;
-
 	if (graph != NULL) {
 		fork->graph = graph;
 	} else {
 		fork->graph = fork;
 	}
-
 	fork->common.parent = parent;
 	fork->fork_type = fork_type;
-
 	fork->caller = NULL;
-
 	UT_LIST_INIT(fork->thrs);
-
 	fork->sym_tab = NULL;
 	fork->info = NULL;
-
 	fork->heap = heap;
-
-	return(fork);
+	return fork;
 }
 
 /// \brief Creates a query graph thread node.
@@ -189,50 +163,36 @@ IB_INTERN que_thr_t* que_thr_create(que_fork_t* parent, mem_heap_t* heap)
 	ut_ad(parent && heap);
 
 	que_thr_t* thr = mem_heap_alloc(heap, sizeof(que_thr_t));
-
 	thr->common.type = QUE_NODE_THR;
 	thr->common.parent = parent;
-
 	thr->magic_n = QUE_THR_MAGIC_N;
-
 	thr->graph = parent->graph;
-
 	thr->state = QUE_THR_COMMAND_WAIT;
-
 	thr->is_active = FALSE;
-
 	thr->run_node = NULL;
 	thr->resource = 0;
 	thr->lock_state = QUE_THR_LOCK_NOLOCK;
-
 	UT_LIST_ADD_LAST(thrs, parent->thrs, thr);
-
-	return(thr);
+	return thr;
 }
 
-/// \brief Moves a suspended query thread to the QUE_THR_RUNNING state and may release a single worker thread to execute it. This function should be used to end the wait state of a query thread waiting for a lock or a stored procedure completion.
+/// \brief Moves a suspended query thread to the QUE_THR_RUNNING state and may release a single worker thread to execute it.
+/// \details This function should be used to end the wait state of a query thread waiting for a lock or a stored procedure completion.
 /// \param [in] thr query thread in the QUE_THR_LOCK_WAIT, or QUE_THR_PROCEDURE_WAIT, or QUE_THR_SIG_REPLY_WAIT state
 /// \param [in,out] next_thr next query thread to run; if the value which is passed in is a pointer to a NULL pointer, then the calling function can start running a new query thread; if NULL is passed as the parameter, it is ignored
 IB_INTERN void que_thr_end_wait(que_thr_t* thr, que_thr_t** next_thr)
 {
 	ut_ad(mutex_own(&kernel_mutex));
 	ut_ad(thr);
-	ut_ad((thr->state == QUE_THR_LOCK_WAIT)
-	      || (thr->state == QUE_THR_PROCEDURE_WAIT)
-	      || (thr->state == QUE_THR_SIG_REPLY_WAIT));
+	ut_ad((thr->state == QUE_THR_LOCK_WAIT) || (thr->state == QUE_THR_PROCEDURE_WAIT) || (thr->state == QUE_THR_SIG_REPLY_WAIT));
 	ut_ad(thr->run_node);
 
 	thr->prev_node = thr->run_node;
-
 	ibool was_active = thr->is_active;
-
 	que_thr_move_to_run_state(thr);
-
 	if (was_active) {
-
 		return;
 	}
-
 	if (next_thr && *next_thr == NULL) {
 		*next_thr = thr;
 	} else {
@@ -241,47 +201,27 @@ IB_INTERN void que_thr_end_wait(que_thr_t* thr, que_thr_t** next_thr)
 	}
 }
 
-/**********************************************************************//**
-Same as que_thr_end_wait, but no parameter next_thr available. */
-IB_INTERN
-void
-que_thr_end_wait_no_next_thr(
-/*=========================*/
-	que_thr_t*	thr)	/*!< in: query thread in the QUE_THR_LOCK_WAIT,
-				or QUE_THR_PROCEDURE_WAIT, or
-				QUE_THR_SIG_REPLY_WAIT state */
+/// \brief Same as que_thr_end_wait, but no parameter next_thr available.
+/// \param [in] thr query thread in the QUE_THR_LOCK_WAIT, or QUE_THR_PROCEDURE_WAIT, or QUE_THR_SIG_REPLY_WAIT state
+IB_INTERN void que_thr_end_wait_no_next_thr(que_thr_t* thr)
 {
 	ut_a(thr->state == QUE_THR_LOCK_WAIT);
 	ut_ad(mutex_own(&kernel_mutex));
 	ut_ad(thr);
-	ut_ad((thr->state == QUE_THR_LOCK_WAIT)
-	      || (thr->state == QUE_THR_PROCEDURE_WAIT)
-	      || (thr->state == QUE_THR_SIG_REPLY_WAIT));
+	ut_ad((thr->state == QUE_THR_LOCK_WAIT) || (thr->state == QUE_THR_PROCEDURE_WAIT) || (thr->state == QUE_THR_SIG_REPLY_WAIT));
 
 	ibool was_active = thr->is_active;
-
 	que_thr_move_to_run_state(thr);
-
 	if (was_active) {
-
 		return;
 	}
-
-	/* We let the OS thread (not just the query thread) to wait
-	for the lock to be released: */
-
+	// We let the OS thread (not just the query thread) to wait for the lock to be released:
 	srv_release_user_thread_if_suspended(thr);
-
-	/* srv_que_task_enqueue_low(thr); */
 }
 
-/**********************************************************************//**
-Inits a query thread for a command. */
-IB_INLINE
-void
-que_thr_init_command(
-/*=================*/
-	que_thr_t*	thr)	/*!< in: query thread */
+/// \brief Inits a query thread for a command.
+/// \param [in] thr query thread
+IB_INLINE void que_thr_init_command(que_thr_t* thr)
 {
 	thr->run_node = thr;
 	thr->prev_node = thr->common.parent;
@@ -289,102 +229,60 @@ que_thr_init_command(
 	que_thr_move_to_run_state(thr);
 }
 
-/**********************************************************************//**
-Starts execution of a command in a query fork. Picks a query thread which
-is not in the QUE_THR_RUNNING state and moves it to that state. If none
-can be chosen, a situation which may arise in parallelized fetches, NULL
-is returned.
-@return a query thread of the graph moved to QUE_THR_RUNNING state, or
-NULL; the query thread should be executed by que_run_threads by the
-caller */
-IB_INTERN
-que_thr_t*
-que_fork_start_command(
-/*===================*/
-	que_fork_t*	fork)	/*!< in: a query fork */
+/// \brief Starts execution of a command in a query fork.
+/// \details Picks a query thread which is not in the QUE_THR_RUNNING state and moves it to that state.
+/// If none can be chosen, a situation which may arise in parallelized fetches, NULL is returned.
+/// \param [in] fork a query fork
+/// \return a query thread of the graph moved to QUE_THR_RUNNING state, or NULL; the query thread should be executed by que_run_threads by the caller
+IB_INTERN que_thr_t* que_fork_start_command(que_fork_t* fork)
 {
 	fork->state = QUE_FORK_ACTIVE;
-
 	fork->last_sel_node = NULL;
-
 	que_thr_t* thr;
 	que_thr_t* suspended_thr = NULL;
 	que_thr_t* completed_thr = NULL;
-
-	/* Choose the query thread to run: usually there is just one thread,
-	but in a parallelized select, which necessarily is non-scrollable,
-	there may be several to choose from */
-
-	/* First we try to find a query thread in the QUE_THR_COMMAND_WAIT
-	state. Then we try to find a query thread in the QUE_THR_SUSPENDED
-	state, finally we try to find a query thread in the QUE_THR_COMPLETED
-	state */
-
+	// Choose the query thread to run: usually there is just one thread, but in a parallelized select, which necessarily is non-scrollable, there may be several to choose from.
+	// First we try to find a query thread in the QUE_THR_COMMAND_WAIT state.
+	// Then we try to find a query thread in the QUE_THR_SUSPENDED state, finally we try to find a query thread in the QUE_THR_COMPLETED state.
 	thr = UT_LIST_GET_FIRST(fork->thrs);
-
-	/* We make a single pass over the thr list within which we note which
-	threads are ready to run. */
+	// We make a single pass over the thr list within which we note which threads are ready to run.
 	while (thr) {
 		switch (thr->state) {
 		case QUE_THR_COMMAND_WAIT:
-
-			/* We have to send the initial message to query thread
-			to start it */
-
+			// We have to send the initial message to query thread to start it
 			que_thr_init_command(thr);
-
-			return(thr);
-
+			return thr;
 		case QUE_THR_SUSPENDED:
-			/* In this case the execution of the thread was
-			suspended: no initial message is needed because
-			execution can continue from where it was left */
+			// In this case the execution of the thread was suspended: no initial message is needed because execution can continue from where it was left
 			if (!suspended_thr) {
 				suspended_thr = thr;
 			}
-
 			break;
-
 		case QUE_THR_COMPLETED:
 			if (!completed_thr) {
 				completed_thr = thr;
 			}
-
 			break;
-
 		case QUE_THR_LOCK_WAIT:
 			UT_ERROR;
-
 		}
-
 		thr = UT_LIST_GET_NEXT(thrs, thr);
 	}
-
 	if (suspended_thr) {
-
 		thr = suspended_thr;
 		que_thr_move_to_run_state(thr);
-
 	} else if (completed_thr) {
-
 		thr = completed_thr;
 		que_thr_init_command(thr);
 	}
-
-	return(thr);
+	return thr;
 }
 
-/**********************************************************************//**
-After signal handling is finished, returns control to a query graph error
-handling routine. (Currently, just returns the control to the root of the
-graph so that the graph can communicate an error message to the client.) */
-IB_INTERN
-void
-que_fork_error_handle(
-/*==================*/
-	trx_t*	trx __attribute__((unused)),	/*!< in: trx */
-	que_t*	fork)	/*!< in: query graph which was run before signal
-			handling started, NULL not allowed */
+/// \brief After signal handling is finished, returns control to a query graph error handling routine.
+/// \details Currently, just returns the control to the root of the graph so that the graph can communicate an error message to the client.
+/// \param [in] trx transaction
+/// \param [in] fork query graph which was run before signal handling started, NULL not allowed
+IB_INTERN void que_fork_error_handle(trx_t* trx __attribute__((unused)), que_t* fork)
 {
 	ut_ad(mutex_own(&kernel_mutex));
 	ut_ad(trx->sess->state == SESS_ERROR);
@@ -392,213 +290,150 @@ que_fork_error_handle(
 	ut_ad(UT_LIST_GET_LEN(trx->wait_thrs) == 0);
 
 	que_thr_t* thr = UT_LIST_GET_FIRST(fork->thrs);
-
 	while (thr != NULL) {
 		ut_ad(!thr->is_active);
 		ut_ad(thr->state != QUE_THR_SIG_REPLY_WAIT);
 		ut_ad(thr->state != QUE_THR_LOCK_WAIT);
-
 		thr->run_node = thr;
 		thr->prev_node = thr->child;
 		thr->state = QUE_THR_COMPLETED;
-
 		thr = UT_LIST_GET_NEXT(thrs, thr);
 	}
-
 	thr = UT_LIST_GET_FIRST(fork->thrs);
-
 	que_thr_move_to_run_state(thr);
-
 	ut_a(0);
 	srv_que_task_enqueue_low(thr);
 }
 
-/****************************************************************//**
-Tests if all the query threads in the same fork have a given state.
-@return TRUE if all the query threads in the same fork were in the
-given state */
-IB_INLINE
-ibool
-que_fork_all_thrs_in_state(
-/*=======================*/
-	que_fork_t*	fork,	/*!< in: query fork */
-	ulint		state)	/*!< in: state */
+/// \brief Tests if all the query threads in the same fork have a given state.
+/// \param [in] fork query fork
+/// \param [in] state state
+/// \return TRUE if all the query threads in the same fork were in the given state
+IB_INLINE ibool que_fork_all_thrs_in_state(que_fork_t* fork, ulint state)
 {
 	que_thr_t* thr_node = UT_LIST_GET_FIRST(fork->thrs);
-
 	while (thr_node != NULL) {
 		if (thr_node->state != state) {
-
-			return(FALSE);
+			return FALSE;
 		}
-
 		thr_node = UT_LIST_GET_NEXT(thrs, thr_node);
 	}
-
-	return(TRUE);
+	return TRUE;
 }
 
-/**********************************************************************//**
-Calls que_graph_free_recursive for statements in a statement list. */
-static
-void
-que_graph_free_stat_list(
-/*=====================*/
-	que_node_t*	node)	/*!< in: first query graph node in the list */
-{
-	while (node) {
-		que_graph_free_recursive(node);
-		node = que_node_get_next(node);
-	}
-}
-
-/**********************************************************************//**
-Frees a query graph, but not the heap where it was created. Does not free
-explicit cursor declarations, they are freed in que_graph_free. */
-IB_INTERN
-void
-que_graph_free_recursive(
-/*=====================*/
-	que_node_t*	node)	/*!< in: query graph node */
+/// \brief Frees a query graph, but not the heap where it was created.
+/// \details Does not free explicit cursor declarations, they are freed in que_graph_free.
+/// \param [in] node query graph node
+IB_INTERN void que_graph_free_recursive(que_node_t* node)
 {
 	if (node == NULL) {
 		return;
 	}
-
-	que_fork_t* fork;
-	que_thr_t* thr;
-	undo_node_t* undo;
-	sel_node_t* sel;
-	ins_node_t* ins;
-	upd_node_t* upd;
-	tab_node_t* cre_tab;
-	ind_node_t* cre_ind;
-	purge_node_t* purge;
-
 	switch (que_node_get_type(node)) {
-
-	case QUE_NODE_FORK:
-		fork = node;
-
-		thr = UT_LIST_GET_FIRST(fork->thrs);
-
+	case QUE_NODE_FORK: {
+		que_fork_t* fork = node;
+		que_thr_t* thr = UT_LIST_GET_FIRST(fork->thrs);
 		while (thr) {
 			que_graph_free_recursive(thr);
-
 			thr = UT_LIST_GET_NEXT(thrs, thr);
 		}
-
 		break;
-	case QUE_NODE_THR:
-
-		thr = node;
-
+	}
+	case QUE_NODE_THR: 
+	{
+		que_thr_t* thr = node;
 		if (thr->magic_n != QUE_THR_MAGIC_N) {
-			ib_log(state,
-				"que_thr struct appears corrupt;"
-				" magic n %lu\n",
-				(unsigned long) thr->magic_n);
+			ib_log(state, "que_thr struct appears corrupt; magic n %lu\n", (unsigned long) thr->magic_n);
 			UT_ERROR;
 		}
-
 		thr->magic_n = QUE_THR_MAGIC_FREED;
-
 		que_graph_free_recursive(thr->child);
-
 		break;
+	}
 	case QUE_NODE_UNDO:
-
-		undo = node;
-
+	{
+		undo_node_t* undo = node;
 		mem_heap_free(undo->heap);
-
 		break;
+	}
 	case QUE_NODE_SELECT:
-
-		sel = node;
-
+	{
+		sel_node_t* sel = node;
 		sel_node_free_private(sel);
-
 		break;
+	}
 	case QUE_NODE_INSERT:
-
-		ins = node;
-
+	{
+		ins_node_t* ins = node;
 		que_graph_free_recursive(ins->select);
-
 		mem_heap_free(ins->entry_sys_heap);
-
 		break;
+	}
 	case QUE_NODE_PURGE:
-		purge = node;
-
+	{
+		purge_node_t* purge = node;
 		mem_heap_free(purge->heap);
-
-		break;
-
+		break;	
+	}
 	case QUE_NODE_UPDATE:
-
-		upd = node;
-
+	{
+		upd_node_t* upd = node;
 		if (upd->in_client_interface) {
-
 			btr_pcur_free(upd->pcur);
 		}
-
 		que_graph_free_recursive(upd->cascade_node);
-
 		if (upd->cascade_heap) {
 			mem_heap_free(upd->cascade_heap);
 		}
-
 		que_graph_free_recursive(upd->select);
-
 		mem_heap_free(upd->heap);
-
 		break;
+	}
 	case QUE_NODE_CREATE_TABLE:
-		cre_tab = node;
-
+	{
+		tab_node_t*cre_tab = node;
 		que_graph_free_recursive(cre_tab->tab_def);
 		que_graph_free_recursive(cre_tab->col_def);
 		que_graph_free_recursive(cre_tab->commit_node);
-
 		mem_heap_free(cre_tab->heap);
-
 		break;
+	}
 	case QUE_NODE_CREATE_INDEX:
+	{
 		cre_ind = node;
-
 		que_graph_free_recursive(cre_ind->ind_def);
 		que_graph_free_recursive(cre_ind->field_def);
 		que_graph_free_recursive(cre_ind->commit_node);
-
 		mem_heap_free(cre_ind->heap);
-
 		break;
+	}
 	case QUE_NODE_PROC:
+	{
 		que_graph_free_stat_list(((proc_node_t*)node)->stat_list);
-
 		break;
+	}
 	case QUE_NODE_IF:
+	{
 		que_graph_free_stat_list(((if_node_t*)node)->stat_list);
 		que_graph_free_stat_list(((if_node_t*)node)->else_part);
 		que_graph_free_stat_list(((if_node_t*)node)->elsif_list);
-
 		break;
+	}
 	case QUE_NODE_ELSIF:
+	{
 		que_graph_free_stat_list(((elsif_node_t*)node)->stat_list);
-
 		break;
+	}
 	case QUE_NODE_WHILE:
+	{
 		que_graph_free_stat_list(((while_node_t*)node)->stat_list);
-
 		break;
+	}
 	case QUE_NODE_FOR:
+	{
 		que_graph_free_stat_list(((for_node_t*)node)->stat_list);
-
 		break;
-
+	}
 	case QUE_NODE_ASSIGNMENT:
 	case QUE_NODE_EXIT:
 	case QUE_NODE_RETURN:
@@ -610,305 +445,101 @@ que_graph_free_recursive(
 	case QUE_NODE_ROW_PRINTF:
 	case QUE_NODE_OPEN:
 	case QUE_NODE_FETCH:
-		/* No need to do anything */
-
+		// No need to do anything
 		break;
 	default:
-		ib_log(state,
-			"que_node struct appears corrupt; type %lu\n",
-			(unsigned long) que_node_get_type(node));
+		ib_log(state, "que_node struct appears corrupt; type %lu\n", (unsigned long) que_node_get_type(node));
 		UT_ERROR;
 	}
 }
 
-/**********************************************************************//**
-Frees a query graph. */
-IB_INTERN
-void
-que_graph_free(
-/*===========*/
-	que_t*	graph)	/*!< in: query graph; we assume that the memory
-			heap where this graph was created is private
-			to this graph: if not, then use
-			que_graph_free_recursive and free the heap
-			afterwards! */
+/// \brief Frees a query graph.
+/// \param [in] graph query graph; we assume that the memory heap where this graph was created is private to this graph: if not, then use que_graph_free_recursive and free the heap afterwards!
+IB_INTERN void que_graph_free(que_t* graph)
 {
 	ut_ad(graph);
-
 	if (graph->sym_tab) {
 		sym_tab_free_private(graph->sym_tab);
 	}
-
 	if (graph->info && graph->info->graph_owns_us) {
 		pars_info_free(graph->info);
 	}
-
 	que_graph_free_recursive(graph);
 	mem_heap_free(graph->heap);
 }
 
-/****************************************************************//**
-Performs an execution step on a thr node.
-@return	query thread to run next, or NULL if none */
-static
-que_thr_t*
-que_thr_node_step(
-/*==============*/
-	que_thr_t*	thr)	/*!< in: query thread where run_node must
-				be the thread node itself */
-{
-	ut_ad(thr->run_node == thr);
 
-	if (thr->prev_node == thr->common.parent) {
-		thr->run_node = thr->child;
-		return(thr);
-	}
-
-	mutex_enter(&kernel_mutex);
-
-	if (que_thr_peek_stop(thr)) {
-		mutex_exit(&kernel_mutex);
-		return(thr);
-	}
-
-	thr->state = QUE_THR_COMPLETED;
-	mutex_exit(&kernel_mutex);
-	return(NULL);
-}
-
-/**********************************************************************//**
-Moves a thread from another state to the QUE_THR_RUNNING state. Increments
-the n_active_thrs counters of the query graph and transaction if thr was
-not active.
-***NOTE***: This is the only functions in which such a transition is
-allowed to happen! */
-IB_INTERN
-void
-que_thr_move_to_run_state(
-/*======================*/
-	que_thr_t*	thr)	/*!< in: an query thread */
+/// \brief Moves a thread from another state to the QUE_THR_RUNNING state.
+/// \details Increments the n_active_thrs counters of the query graph and transaction if thr was not active.
+/// ***NOTE***: This is the only functions in which such a transition is allowed to happen!
+/// \param [in] thr an query thread
+IB_INTERN void que_thr_move_to_run_state(que_thr_t* thr)
 {
 	ut_ad(thr->state != QUE_THR_RUNNING);
-
 	trx_t* trx = thr_get_trx(thr);
-
 	if (!thr->is_active) {
-
 		(thr->graph)->n_active_thrs++;
-
 		trx->n_active_thrs++;
-
 		thr->is_active = TRUE;
-
 		ut_ad((thr->graph)->n_active_thrs == 1);
 		ut_ad(trx->n_active_thrs == 1);
 	}
-
 	thr->state = QUE_THR_RUNNING;
 }
 
-/**********************************************************************//**
-Decrements the query thread reference counts in the query graph and the
-transaction. May start signal handling, e.g., a rollback.
-*** NOTE ***:
-This and que_thr_stop_client are the only functions where the reference
-count can be decremented and this function may only be called from inside
-que_run_threads or que_thr_check_if_switch! These restrictions exist to make
-the rollback code easier to maintain. */
-static
-void
-que_thr_dec_refer_count(
-/*====================*/
-	que_thr_t*	thr,		/*!< in: query thread */
-	que_thr_t**	next_thr)	/*!< in/out: next query thread to run;
-					if the value which is passed in is
-					a pointer to a NULL pointer, then the
-					calling function can start running
-					a new query thread */
-{
-	mutex_enter(&kernel_mutex);
 
-	que_fork_t* fork = thr->common.parent;
-	trx_t* trx = thr_get_trx(thr);
-	ulint fork_type;
-	ibool stopped;
-
-	ut_a(thr->is_active);
-
-	if (thr->state == QUE_THR_RUNNING) {
-
-		stopped = que_thr_stop(thr);
-
-		if (!stopped) {
-			/* The reason for the thr suspension or wait was
-			already canceled before we came here: continue
-			running the thread */
-
-			/* ib_log(state,
-			   	"!!!!!!!! Wait already ended: continue thr\n");
-			*/
-
-			if (next_thr && *next_thr == NULL) {
-				/* Normally srv_suspend_user_thread resets
-				the state to DB_SUCCESS before waiting, but
-				in this case we have to do it here,
-				otherwise nobody does it. */
-				trx->error_state = DB_SUCCESS;
-
-				*next_thr = thr;
-			} else {
-				UT_ERROR;
-				srv_que_task_enqueue_low(thr);
-			}
-
-			mutex_exit(&kernel_mutex);
-
-			return;
-		}
-	}
-
-	ut_ad(fork->n_active_thrs == 1);
-	ut_ad(trx->n_active_thrs == 1);
-
-	fork->n_active_thrs--;
-	trx->n_active_thrs--;
-
-	thr->is_active = FALSE;
-
-	if (trx->n_active_thrs > 0) {
-
-		mutex_exit(&kernel_mutex);
-
-		return;
-	}
-
-	fork_type = fork->fork_type;
-
-	/* Check if all query threads in the same fork are completed */
-
-	if (que_fork_all_thrs_in_state(fork, QUE_THR_COMPLETED)) {
-
-		switch (fork_type) {
-		case QUE_FORK_ROLLBACK:
-			/* This is really the undo graph used in rollback,
-			no roll_node in this graph */
-
-			ut_ad(UT_LIST_GET_LEN(trx->signals) > 0);
-			ut_ad(trx->handling_signals == TRUE);
-
-			trx_finish_rollback_off_kernel(fork, trx, next_thr);
-			break;
-
-		case QUE_FORK_PURGE:
-		case QUE_FORK_RECOVERY:
-		case QUE_FORK_USER_INTERFACE:
-
-			/* Do nothing */
-			break;
-
-		default:
-			UT_ERROR;	/* not used */
-		}
-	}
-
-	if (UT_LIST_GET_LEN(trx->signals) > 0 && trx->n_active_thrs == 0) {
-
-		/* If the trx is signaled and its query thread count drops to
-		zero, then we start processing a signal; from it we may get
-		a new query thread to run */
-
-		trx_sig_start_handle(trx, next_thr);
-	}
-
-	if (trx->handling_signals && UT_LIST_GET_LEN(trx->signals) == 0) {
-
-		trx_end_signal_handling(trx);
-	}
-
-	mutex_exit(&kernel_mutex);
-}
-
-/**********************************************************************//**
-Stops a query thread if graph or trx is in a state requiring it. The
-conditions are tested in the order (1) graph, (2) trx. The kernel mutex has
-to be reserved.
-@return	TRUE if stopped */
-IB_INTERN
-ibool
-que_thr_stop(
-/*=========*/
-	que_thr_t*	thr)	/*!< in: query thread */
+/// \brief Stops a query thread if graph or trx is in a state requiring it.
+/// \details The conditions are tested in the order (1) graph, (2) trx.
+/// The kernel mutex has to be reserved.
+/// \param [in] thr query thread
+/// \return TRUE if stopped
+IB_INTERN ibool que_thr_stop(que_thr_t* thr)
 {
 	ut_ad(mutex_own(&kernel_mutex));
-
 	que_t* graph = thr->graph;
 	trx_t* trx = graph->trx;
 	ibool ret = TRUE;
-
 	if (graph->state == QUE_FORK_COMMAND_WAIT) {
 		thr->state = QUE_THR_SUSPENDED;
-
 	} else if (trx->que_state == TRX_QUE_LOCK_WAIT) {
-
 		UT_LIST_ADD_FIRST(trx_thrs, trx->wait_thrs, thr);
 		thr->state = QUE_THR_LOCK_WAIT;
-
-	} else if (trx->error_state != DB_SUCCESS
-		   && trx->error_state != DB_LOCK_WAIT) {
-
+	} else if (trx->error_state != DB_SUCCESS && trx->error_state != DB_LOCK_WAIT) {
 		thr->state = QUE_THR_COMPLETED;
-
-	} else if (UT_LIST_GET_LEN(trx->signals) > 0
-		   && graph->fork_type != QUE_FORK_ROLLBACK) {
-
+	} else if (UT_LIST_GET_LEN(trx->signals) > 0 && graph->fork_type != QUE_FORK_ROLLBACK) {
 		thr->state = QUE_THR_SUSPENDED;
 	} else {
 		ut_ad(graph->state == QUE_FORK_ACTIVE);
-
 		ret = FALSE;
 	}
-
-	return(ret);
+	return ret;
 }
 
-/**********************************************************************//**
-A patch for a client used to 'stop' a dummy query thread used in client
-select, when there is no error or lock wait.
-
-TODO: Currently only called from row0merge, needs to be removed. */
-IB_INTERN
-void
-que_thr_stop_for_client_no_error(
-/*=============================*/
-	que_thr_t*	thr,	/*!< in: query thread */
-	trx_t*		trx)	/*!< in: transaction */
+/// \brief A patch for a client used to 'stop' a dummy query thread used in client select, when there is no error or lock wait.
+/// \details TODO: Currently only called from row0merge, needs to be removed.
+/// \param [in] thr query thread
+/// \param [in] trx transaction
+IB_INTERN void que_thr_stop_for_client_no_error(que_thr_t* thr, trx_t* trx)
 {
 	ut_ad(thr->state == QUE_THR_RUNNING);
 	ut_ad(thr->is_active == TRUE);
 	ut_ad(trx->n_active_thrs == 1);
 	ut_ad(thr->graph->n_active_thrs == 1);
-
 	if (thr->magic_n != QUE_THR_MAGIC_N) {
 		ib_log(state, "que_thr struct appears corrupt; magic n %lu\n", (unsigned long) thr->magic_n);
 		UT_ERROR;
 	}
-
 	thr->state = QUE_THR_COMPLETED;
 	thr->is_active = FALSE;
 	(thr->graph)->n_active_thrs--;
 	trx->n_active_thrs--;
 }
 
-/**********************************************************************//**
-Moves a thread from another state to the QUE_THR_RUNNING state. Increments
-the n_active_thrs counters of the query graph and transaction if thr was
-not active. */
-IB_INTERN
-void
-que_thr_move_to_run_state_for_client(
-/*=================================*/
-	que_thr_t*	thr,	/*!< in: an query thread */
-	trx_t*		trx)	/*!< in: transaction */
+/// \brief Moves a thread from another state to the QUE_THR_RUNNING state.
+/// \details Increments the n_active_thrs counters of the query graph and transaction if thr was not active.
+/// \param [in] thr an query thread
+/// \param [in] trx transaction
+IB_INTERN void que_thr_move_to_run_state_for_client(que_thr_t* thr, trx_t* trx)
 {
 	if (thr->magic_n != QUE_THR_MAGIC_N) {
 		ib_log(state, "que_thr struct appears corrupt; magic n %lu\n", (unsigned long) thr->magic_n);
@@ -918,92 +549,61 @@ que_thr_move_to_run_state_for_client(
 		trx->n_active_thrs++;
 		thr->is_active = TRUE;
 	}
-
 	thr->state = QUE_THR_RUNNING;
 }
 
-/**********************************************************************//**
-The query thread is stopped and made inactive, except in the case where
-it was put to the lock wait state in lock0lock.c, but the lock has already
-been granted or the transaction chosen as a victim in deadlock resolution. */
-IB_INTERN
-void
-que_thr_stop_client(
-/*================*/
-	que_thr_t*	thr)	/*!< in: query thread */
+/// \brief The query thread is stopped and made inactive, except in the case where it was put to the lock wait state in lock0lock.c, but the lock has already been granted or the transaction chosen as a victim in deadlock resolution.
+/// \param [in] thr query thread
+IB_INTERN void que_thr_stop_client(que_thr_t* thr)
 {
 	trx_t* trx = thr_get_trx(thr);
 	mutex_enter(&kernel_mutex);
-
-	if (thr->state == QUE_THR_RUNNING) {
-
-		if (trx->error_state != DB_SUCCESS
-		    && trx->error_state != DB_LOCK_WAIT) {
-
-			thr->state = QUE_THR_COMPLETED;
-		} else {
-			/* It must have been a lock wait but the lock was
-			already released, or this transaction was chosen
-			as a victim in selective deadlock resolution */
-
-			mutex_exit(&kernel_mutex);
-
-			return;
+	{
+		if (thr->state == QUE_THR_RUNNING) {
+			if (trx->error_state != DB_SUCCESS && trx->error_state != DB_LOCK_WAIT) {
+				thr->state = QUE_THR_COMPLETED;
+			} else {
+				// It must have been a lock wait but the lock was already released, or this transaction was chosen as a victim in selective deadlock resolution
+				mutex_exit(&kernel_mutex);
+				return;
+			}
 		}
+		ut_ad(thr->is_active == TRUE);
+		ut_ad(trx->n_active_thrs == 1);
+		ut_ad(thr->graph->n_active_thrs == 1);
+		thr->is_active = FALSE;
+		(thr->graph)->n_active_thrs--;
+		trx->n_active_thrs--;
 	}
-
-	ut_ad(thr->is_active == TRUE);
-	ut_ad(trx->n_active_thrs == 1);
-	ut_ad(thr->graph->n_active_thrs == 1);
-
-	thr->is_active = FALSE;
-	(thr->graph)->n_active_thrs--;
-
-	trx->n_active_thrs--;
-
 	mutex_exit(&kernel_mutex);
 }
 
-/****************************************************************//**
-Get the first containing loop node (e.g. while_node_t or for_node_t) for the
-given node, or NULL if the node is not within a loop.
-@return	containing loop node, or NULL. */
-IB_INTERN
-que_node_t*
-que_node_get_containing_loop_node(
-/*==============================*/
-	que_node_t*	node)	/*!< in: node */
+/// \brief Get the first containing loop node (e.g.
+/// \details while_node_t or for_node_t) for the given node, or NULL if the node is not within a loop.
+/// \param [in] node node
+/// \return containing loop node, or NULL.
+IB_INTERN que_node_t* que_node_get_containing_loop_node(que_node_t* node)
 {
 	ut_ad(node);
-
 	for (;;) {
 		node = que_node_get_parent(node);
-
 		if (!node) {
 			break;
 		}
-
 		ulint type = que_node_get_type(node);
-
 		if ((type == QUE_NODE_FOR) || (type == QUE_NODE_WHILE)) {
 			break;
 		}
 	}
-
-	return(node);
+	return node;
 }
 
-/**********************************************************************//**
-Prints info of an SQL query graph node. */
-IB_INTERN
-void
-que_node_print_info(
-/*================*/
-	que_node_t*	node)	/*!< in: query graph node */
+/// \brief Prints info of an SQL query graph node.
+/// \param [in] node query graph node
+IB_INTERN void que_node_print_info(que_node_t* node)
 {
 	ulint type = que_node_get_type(node);
 	const char* str;
-
 	if (type == QUE_NODE_SELECT) {
 		str = "SELECT";
 	} else if (type == QUE_NODE_INSERT) {
@@ -1049,33 +649,21 @@ que_node_print_info(
 	} else {
 		str = "UNKNOWN NODE TYPE";
 	}
-
-	ib_log(state, "Node type %lu: %s, address %p\n",
-		(ulong) type, str, (void*) node);
+	ib_log(state, "Node type %lu: %s, address %p\n", (ulong) type, str, (void*) node);
 }
 
-/**********************************************************************//**
-Performs an execution step on a query thread.
-@return query thread to run next: it may differ from the input
-parameter if, e.g., a subprocedure call is made */
-IB_INLINE
-que_thr_t*
-que_thr_step(
-/*=========*/
-	que_thr_t*	thr)	/*!< in: query thread */
+/// \brief Performs an execution step on a query thread.
+/// \param [in] thr query thread
+/// \return query thread to run next: it may differ from the input parameter if, e.g., a subprocedure call is made
+IB_INLINE que_thr_t* que_thr_step(que_thr_t* thr)
 {
 	trx_t* trx = thr_get_trx(thr);
-
 	ut_ad(thr->state == QUE_THR_RUNNING);
 	ut_a(trx->error_state == DB_SUCCESS);
-
 	thr->resource++;
-
 	que_node_t* node = thr->run_node;
 	ulint type = que_node_get_type(node);
-
 	que_thr_t* old_thr = thr;
-
 #ifdef IB_DEBUG
 	if (que_trace_on) {
 		ib_log(state, "To execute: ");
@@ -1083,30 +671,18 @@ que_thr_step(
 	}
 #endif
 	if (type & QUE_NODE_CONTROL_STAT) {
-		if ((thr->prev_node != que_node_get_parent(node))
-		    && que_node_get_next(thr->prev_node)) {
-
-			/* The control statements, like WHILE, always pass the
-			control to the next child statement if there is any
-			child left */
-
+		if ((thr->prev_node != que_node_get_parent(node)) && que_node_get_next(thr->prev_node)) {
+			// The control statements, like WHILE, always pass the control to the next child statement if there is any child left
 			thr->run_node = que_node_get_next(thr->prev_node);
-
 		} else if (type == QUE_NODE_IF) {
 			if_step(thr);
 		} else if (type == QUE_NODE_FOR) {
 			for_step(thr);
 		} else if (type == QUE_NODE_PROC) {
-
-			/* We can access trx->undo_no without reserving
-			trx->undo_mutex, because there cannot be active query
-			threads doing updating or inserting at the moment! */
-
+			// We can access trx->undo_no without reserving trx->undo_mutex, because there cannot be active query threads doing updating or inserting at the moment!
 			if (thr->prev_node == que_node_get_parent(node)) {
-				trx->last_sql_stat_start.least_undo_no
-					= trx->undo_no;
+				trx->last_sql_stat_start.least_undo_no = trx->undo_no;
 			}
-
 			proc_step(thr);
 		} else if (type == QUE_NODE_WHILE) {
 			while_step(thr);
@@ -1127,13 +703,8 @@ que_thr_step(
 		thr = open_step(thr);
 	} else if (type == QUE_NODE_FUNC) {
 		proc_eval_step(thr);
-
 	} else if (type == QUE_NODE_LOCK) {
-
 		UT_ERROR;
-		/*
-		thr = que_lock_step(thr);
-		*/
 	} else if (type == QUE_NODE_THR) {
 		thr = que_thr_node_step(thr);
 	} else if (type == QUE_NODE_COMMIT) {
@@ -1157,166 +728,208 @@ que_thr_step(
 	} else {
 		UT_ERROR;
 	}
-
 	if (type == QUE_NODE_EXIT) {
 		old_thr->prev_node = que_node_get_containing_loop_node(node);
 	} else {
 		old_thr->prev_node = node;
 	}
-
 	if (thr) {
 		ut_a(thr_get_trx(thr)->error_state == DB_SUCCESS);
 	}
-
-	return(thr);
+	return thr;
 }
 
-/**********************************************************************//**
-Run a query thread until it finishes or encounters e.g. a lock wait. */
-static
-void
-que_run_threads_low(
-/*================*/
-	que_thr_t*	thr)	/*!< in: query thread */
-{
-	ut_ad(thr->state == QUE_THR_RUNNING);
-	ut_a(thr_get_trx(thr)->error_state == DB_SUCCESS);
-	ut_ad(!mutex_own(&kernel_mutex));
 
-	ulint loop_count = QUE_MAX_LOOPS_WITHOUT_CHECK;
-	ulint cumul_resource = 0;
-
-	que_thr_t* next_thr;
-loop:
-	/* Check that there is enough space in the log to accommodate
-	possible log entries by this query step; if the operation can touch
-	more than about 4 pages, checks must be made also within the query
-	step! */
-
-	log_free_check();
-
-	/* Perform the actual query step: note that the query thread
-	may change if, e.g., a subprocedure call is made */
-
-	/*-------------------------*/
-	next_thr = que_thr_step(thr);
-	/*-------------------------*/
-
-	ut_a(!next_thr || (thr_get_trx(next_thr)->error_state == DB_SUCCESS));
-
-	loop_count++;
-
-	if (next_thr != thr) {
-		ut_a(next_thr == NULL);
-
-		/* This can change next_thr to a non-NULL value if there was
-		a lock wait that already completed. */
-		que_thr_dec_refer_count(thr, &next_thr);
-
-		if (next_thr == NULL) {
-
-			return;
-		}
-
-		loop_count = QUE_MAX_LOOPS_WITHOUT_CHECK;
-
-		thr = next_thr;
-	}
-
-	goto loop;
-}
-
-/**********************************************************************//**
-Run a query thread. Handles lock waits. */
-IB_INTERN
-void
-que_run_threads(
-/*============*/
-	que_thr_t*	thr)	/*!< in: query thread */
+/// \brief Run a query thread.
+/// \details Handles lock waits.
+/// \param [in] thr query thread
+IB_INTERN void que_run_threads(que_thr_t* thr)
 {
 loop:
 	ut_a(thr_get_trx(thr)->error_state == DB_SUCCESS);
 	que_run_threads_low(thr);
 	mutex_enter(&kernel_mutex);
-
 	switch (thr->state) {
-
 	case QUE_THR_RUNNING:
-		/* There probably was a lock wait, but it already ended
-		before we came here: continue running thr */
-
+		// There probably was a lock wait, but it already ended before we came here: continue running thr
 		mutex_exit(&kernel_mutex);
-
 		goto loop;
-
 	case QUE_THR_LOCK_WAIT:
 		mutex_exit(&kernel_mutex);
-
-		/* The ..._user_... function works also for InnoDB's
-		internal threads. Let us wait that the lock wait ends. */
-
+		// The ..._user_... function works also for InnoDB's internal threads.
+		// Let us wait that the lock wait ends.
 		srv_suspend_user_thread(thr);
-
 		if (thr_get_trx(thr)->error_state != DB_SUCCESS) {
-			/* thr was chosen as a deadlock victim or there was
-			a lock wait timeout */
-
+			// thr was chosen as a deadlock victim or there was a lock wait timeout
 			que_thr_dec_refer_count(thr, NULL);
-
 			return;
 		}
-
 		goto loop;
-
 	case QUE_THR_COMPLETED:
 	case QUE_THR_COMMAND_WAIT:
-		/* Do nothing */
+		// Do nothing
 		break;
-
 	default:
 		UT_ERROR;
 	}
-
 	mutex_exit(&kernel_mutex);
 }
 
-/*********************************************************************//**
-Evaluate the given SQL.
-@return	error code or DB_SUCCESS */
-IB_INTERN
-ulint
-que_eval_sql(
-/*=========*/
-	pars_info_t*	info,	/*!< in: info struct, or NULL */
-	const char*	sql,	/*!< in: SQL string */
-	ibool		reserve_dict_mutex,
-				/*!< in: if TRUE, acquire/release
-				dict_sys->mutex around call to pars_sql. */
-	trx_t*		trx)	/*!< in: trx */
+/// \brief Evaluate the given SQL.
+/// \param [in] info info struct, or NULL
+/// \param [in] sql SQL string
+/// \param [in] reserve_dict_mutex if TRUE, acquire/release dict_sys->mutex around call to pars_sql
+/// \param [in] trx transaction
+/// \return error code or DB_SUCCESS
+IB_INTERN ulint que_eval_sql(pars_info_t* info, const char* sql, ibool reserve_dict_mutex, trx_t* trx)
 {
 	ut_a(trx->error_state == DB_SUCCESS);
-
 	if (reserve_dict_mutex) {
 		mutex_enter(&dict_sys->mutex);
 	}
-
 	que_t* graph = pars_sql(info, sql);
-
 	if (reserve_dict_mutex) {
 		mutex_exit(&dict_sys->mutex);
 	}
-
 	ut_a(graph);
-
 	graph->trx = trx;
 	trx->graph = NULL;
-
 	graph->fork_type = QUE_FORK_USER_INTERFACE;
-
 	que_thr_t* thr;
 	ut_a(thr = que_fork_start_command(graph));
-
 	que_run_threads(thr);
 	que_graph_free(graph);
-	return(trx->error_state);
+	return trx->error_state;
+}
+
+// -----------------------------------------------------------------------------------------
+// Static helper routine definitions
+// -----------------------------------------------------------------------------------------
+
+/// \brief Calls que_graph_free_recursive for statements in a statement list.
+/// \param [in] node first query graph node in the list
+static void que_graph_free_stat_list(que_node_t* node)
+{
+	while (node) {
+		que_graph_free_recursive(node);
+		node = que_node_get_next(node);
+	}
+}
+
+/// \brief Performs an execution step on a thr node.
+/// \param [in] thr query thread where run_node must be the thread node itself
+/// \return query thread to run next, or NULL if none
+static que_thr_t* que_thr_node_step(que_thr_t* thr)
+{
+	ut_ad(thr->run_node == thr);
+	if (thr->prev_node == thr->common.parent) {
+		thr->run_node = thr->child;
+		return thr;
+	}
+	mutex_enter(&kernel_mutex);
+	if (que_thr_peek_stop(thr)) {
+		mutex_exit(&kernel_mutex);
+		return thr;
+	}
+	thr->state = QUE_THR_COMPLETED;
+	mutex_exit(&kernel_mutex);
+	return NULL;
+}
+
+/// \brief Decrements the query thread reference counts in the query graph and the transaction.
+/// \details May start signal handling, e.g., a rollback.
+/// ***NOTE***: This and que_thr_stop_client are the only functions where the reference count can be decremented and this function may only be called from inside que_run_threads or que_thr_check_if_switch! These restrictions exist to make the rollback code easier to maintain.
+/// \param [in] thr query thread
+/// \param [in,out] next_thr next query thread to run; if the value which is passed in is a pointer to a NULL pointer, then the calling function can start running a new query thread
+static void que_thr_dec_refer_count(que_thr_t* thr, que_thr_t** next_thr)
+{
+	mutex_enter(&kernel_mutex);
+	que_fork_t* fork = thr->common.parent;
+	trx_t* trx = thr_get_trx(thr);
+	ulint fork_type;
+	ibool stopped;
+	ut_a(thr->is_active);
+	if (thr->state == QUE_THR_RUNNING) {
+		stopped = que_thr_stop(thr);
+		if (!stopped) {
+			// The reason for the thr suspension or wait was already canceled before we came here: continue running the thread
+			if (next_thr && *next_thr == NULL) {
+				// Normally srv_suspend_user_thread resets the state to DB_SUCCESS before waiting, but in this case we have to do it here, otherwise nobody does it.
+				trx->error_state = DB_SUCCESS;
+				*next_thr = thr;
+			} else {
+				UT_ERROR;
+				srv_que_task_enqueue_low(thr);
+			}
+			mutex_exit(&kernel_mutex);
+			return;
+		}
+	}
+	ut_ad(fork->n_active_thrs == 1);
+	ut_ad(trx->n_active_thrs == 1);
+	fork->n_active_thrs--;
+	trx->n_active_thrs--;
+	thr->is_active = FALSE;
+	if (trx->n_active_thrs > 0) {
+		mutex_exit(&kernel_mutex);
+		return;
+	}
+	fork_type = fork->fork_type;
+	// Check if all query threads in the same fork are completed
+	if (que_fork_all_thrs_in_state(fork, QUE_THR_COMPLETED)) {
+		switch (fork_type) {
+		case QUE_FORK_ROLLBACK:
+			// This is really the undo graph used in rollback, no roll_node in this graph
+			ut_ad(UT_LIST_GET_LEN(trx->signals) > 0);
+			ut_ad(trx->handling_signals == TRUE);
+			trx_finish_rollback_off_kernel(fork, trx, next_thr);
+			break;
+		case QUE_FORK_PURGE:
+		case QUE_FORK_RECOVERY:
+		case QUE_FORK_USER_INTERFACE:
+			// Do nothing
+			break;
+		default:
+			UT_ERROR;
+		}
+	}
+	if (UT_LIST_GET_LEN(trx->signals) > 0 && trx->n_active_thrs == 0) {
+		// If the trx is signaled and its query thread count drops to zero, then we start processing a signal; from it we may get a new query thread to run
+		trx_sig_start_handle(trx, next_thr);
+	}
+	if (trx->handling_signals && UT_LIST_GET_LEN(trx->signals) == 0) {
+		trx_end_signal_handling(trx);
+	}
+	mutex_exit(&kernel_mutex);
+}
+
+/// \brief Run a query thread until it finishes or encounters e.g.
+/// \details a lock wait.
+/// \param [in] thr query thread
+static void que_run_threads_low(que_thr_t* thr)
+{
+	ut_ad(thr->state == QUE_THR_RUNNING);
+	ut_a(thr_get_trx(thr)->error_state == DB_SUCCESS);
+	ut_ad(!mutex_own(&kernel_mutex));
+	ulint loop_count = QUE_MAX_LOOPS_WITHOUT_CHECK;
+	ulint cumul_resource = 0;
+	que_thr_t* next_thr;
+loop:
+	// Check that there is enough space in the log to accommodate possible log entries by this query step; if the operation can touch more than about 4 pages, checks must be made also within the query step!
+	log_free_check();
+	// Perform the actual query step: note that the query thread may change if, e.g., a subprocedure call is made
+	next_thr = que_thr_step(thr);
+	ut_a(!next_thr || (thr_get_trx(next_thr)->error_state == DB_SUCCESS));
+	loop_count++;
+	if (next_thr != thr) {
+		ut_a(next_thr == NULL);
+		// This can change next_thr to a non-NULL value if there was a lock wait that already completed.
+		que_thr_dec_refer_count(thr, &next_thr);
+		if (next_thr == NULL) {
+			return;
+		}
+		loop_count = QUE_MAX_LOOPS_WITHOUT_CHECK;
+		thr = next_thr;
+	}
+	goto loop;
 }

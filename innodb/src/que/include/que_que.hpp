@@ -343,5 +343,5 @@ constinit ulint QUE_CUR_END = 3;
 
 
 #ifndef IB_DO_NOT_INLINE
-#include "que0que.inl"
+#include "que_que.inl"
 #endif

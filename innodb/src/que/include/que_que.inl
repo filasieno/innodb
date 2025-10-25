@@ -170,8 +170,7 @@ IB_INLINE ibool que_thr_peek_stop(que_thr_t* thr)
 /// \return TRUE if a select
 IB_INLINE ibool que_graph_is_select(que_t* graph)
 {
-    if (graph->fork_type == QUE_FORK_SELECT_SCROLL
-        || graph->fork_type == QUE_FORK_SELECT_NON_SCROLL) {
+    if (graph->fork_type == QUE_FORK_SELECT_SCROLL || graph->fork_type == QUE_FORK_SELECT_NON_SCROLL) {
         return TRUE;
     }
     return FALSE;
