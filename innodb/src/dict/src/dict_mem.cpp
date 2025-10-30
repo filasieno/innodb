@@ -56,7 +56,7 @@ IB_INTERN dict_table_t* dict_mem_table_create(const char* name, ulint space, uli
 {
 	ut_ad(name);
 	ut_a(!(flags & (~0 << DICT_TF2_BITS)));
-	mem_heap_t* heap = mem_heap_create(DICT_HEAP_SIZE);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(DICT_HEAP_SIZE);
 	dict_table_t* table = mem_heap_zalloc(heap, sizeof(dict_table_t));
 	table->heap = heap;
 	table->flags = (unsigned int) flags;
@@ -73,7 +73,7 @@ IB_INTERN void dict_mem_table_free(dict_table_t* table)
 	ut_ad(table);
 	ut_ad(table->magic_n == DICT_TABLE_MAGIC_N);
 	ut_d(table->cached = FALSE);
-	mem_heap_free(table->heap);
+	IB_MEM_HEAP_FREE(table->heap);
 }
 
 
@@ -112,7 +112,7 @@ IB_INTERN void dict_mem_table_add_col(dict_table_t* table, mem_heap_t* heap, con
 IB_INTERN dict_index_t* dict_mem_index_create(const char* table_name, const char* index_name, ulint space, ulint type, ulint n_fields)
 {
 	ut_ad(table_name && index_name);
-	mem_heap_t* heap = mem_heap_create(DICT_HEAP_SIZE);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(DICT_HEAP_SIZE);
 	dict_index_t* index = mem_heap_zalloc(heap, sizeof(dict_index_t));
 	index->heap = heap;
 	index->type = type;
@@ -132,7 +132,7 @@ IB_INTERN dict_index_t* dict_mem_index_create(const char* table_name, const char
 
 IB_INTERN dict_foreign_t* dict_mem_foreign_create(void)
 {
-	mem_heap_t* heap = mem_heap_create(100);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(100);
 	dict_foreign_t* foreign = mem_heap_zalloc(heap, sizeof(dict_foreign_t));
 	foreign->heap = heap;
 	return foreign;
@@ -152,7 +152,7 @@ IB_INTERN void dict_mem_index_free(dict_index_t* index)
 {
 	ut_ad(index);
 	ut_ad(index->magic_n == DICT_INDEX_MAGIC_N);
-	mem_heap_free(index->heap);
+	IB_MEM_HEAP_FREE(index->heap);
 }
 
 // -----------------------------------------------------------------------------------------

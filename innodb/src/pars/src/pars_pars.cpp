@@ -1908,7 +1908,7 @@ pars_sql(
 
 	ut_ad(str);
 
-	heap = mem_heap_create(256);
+	heap = IB_MEM_HEAP_CREATE(256);
 
 	/* Currently, the parser is not reentrant: */
 	ut_ad(mutex_own(&(dict_sys->mutex)));
@@ -1984,7 +1984,7 @@ pars_info_create(void)
 	pars_info_t*	info;
 	mem_heap_t*	heap;
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 
 	info = mem_heap_alloc(heap, sizeof(*info));
 
@@ -2005,7 +2005,7 @@ pars_info_free(
 /*===========*/
 	pars_info_t*	info)	/*!< in, own: info struct */
 {
-	mem_heap_free(info->heap);
+	IB_MEM_HEAP_FREE(info->heap);
 }
 
 /****************************************************************//**

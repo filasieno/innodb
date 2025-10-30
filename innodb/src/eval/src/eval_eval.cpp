@@ -72,12 +72,12 @@ IB_INTERN byte* eval_node_alloc_val_buf(que_node_t* node, ulint size)
 	dfield_t* dfield = que_node_get_val(node);
 	byte* data = dfield_get_data(dfield);
 	if (data && data != &eval_dummy) {
-		mem_free(data);
+		IB_MEM_FREE(data);
 	}
 	if (size == 0) {
 		data = &eval_dummy;
 	} else {
-		data = mem_alloc(size);
+		data = IB_MEM_ALLOC(size);
 	}
 	que_node_set_val_buf_size(node, size);
 	dfield_set_data(dfield, data, size);
@@ -94,7 +94,7 @@ IB_INTERN void eval_node_free_val_buf(que_node_t* node)
 	byte* data = dfield_get_data(dfield);
 	if (que_node_get_val_buf_size(node) > 0) {
 		ut_a(data);
-		mem_free(data);
+		IB_MEM_FREE(data);
 	}
 }
 

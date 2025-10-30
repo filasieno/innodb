@@ -226,7 +226,7 @@ enum db_err ib_trx_lock_table_with_retry(
 	mem_heap_t*	heap;
 	sel_node_t*	node;
 	ut_ad(trx->client_thread_id == os_thread_get_curr_id());
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 	trx->op_info = "setting table lock";
 	node = sel_node_create(heap);
 	thr = pars_complete_graph_for_exec(node, trx, heap);

@@ -66,7 +66,7 @@ ha_storage_create(
 
 	/* we put "storage" within "storage->heap" */
 
-	heap = mem_heap_create(sizeof(ha_storage_t)
+	heap = IB_MEM_HEAP_CREATE(sizeof(ha_storage_t)
 			       + initial_heap_bytes);
 
 	storage = (ha_storage_t*) mem_heap_alloc(heap,
@@ -116,7 +116,7 @@ ha_storage_free(
 	/* order is important because the pointer storage->hash is
 	within the heap */
 	hash_table_free(storage->hash);
-	mem_heap_free(storage->heap);
+	IB_MEM_HEAP_FREE(storage->heap);
 }
 
 /*******************************************************************//**

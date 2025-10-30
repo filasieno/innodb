@@ -145,7 +145,7 @@ IB_INTERN undo_node_t* row_undo_node_create(trx_t* trx, que_thr_t* parent, mem_h
 
 	btr_pcur_init(&(undo->pcur));
 
-	undo->heap = mem_heap_create(256);
+	undo->heap = IB_MEM_HEAP_CREATE(256);
 
 	return undo;
 }
@@ -208,7 +208,7 @@ IB_INTERN ibool row_undo_search_clust_to_pcur(undo_node_t* node);
 	btr_pcur_commit_specify_mtr(&(node->pcur), &mtr);
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return ret;
 }

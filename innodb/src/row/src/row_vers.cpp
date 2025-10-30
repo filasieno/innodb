@@ -114,7 +114,7 @@ row_vers_impl_x_locked_off_kernel(
 		return(NULL);
 	}
 
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 	clust_offsets = rec_get_offsets(clust_rec, clust_index, NULL,
 					ULINT_UNDEFINED, &heap);
 	trx_id = row_get_rec_trx_id(clust_rec, clust_index, clust_offsets);
@@ -171,11 +171,11 @@ row_vers_impl_x_locked_off_kernel(
 		it and get an implicit x-lock on rec. */
 
 		heap2 = heap;
-		heap = mem_heap_create(1024);
+		heap = IB_MEM_HEAP_CREATE(1024);
 		err = trx_undo_prev_version_build(clust_rec, &mtr, version,
 						  clust_index, clust_offsets,
 						  heap, &prev_version);
-		mem_heap_free(heap2); /* free version and clust_offsets */
+		IB_MEM_HEAP_FREE(heap2); /* free version and clust_offsets */
 
 		if (prev_version == NULL) {
 			mutex_enter(&kernel_mutex);
@@ -297,7 +297,7 @@ row_vers_impl_x_locked_off_kernel(
 
 exit_func:
 	mtr_commit(&mtr);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(trx);
 }
@@ -375,7 +375,7 @@ row_vers_old_has_index_entry(
 
 	comp = page_rec_is_comp(rec);
 	ut_ad(!dict_table_is_comp(index->table) == !comp);
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 	clust_offsets = rec_get_offsets(rec, clust_index, NULL,
 					ULINT_UNDEFINED, &heap);
 
@@ -413,7 +413,7 @@ row_vers_old_has_index_entry(
 		if (entry
 		    && !dtuple_coll_cmp(index->cmp_ctx, ientry, entry)) {
 
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 
 			return(TRUE);
 		}
@@ -423,16 +423,16 @@ row_vers_old_has_index_entry(
 
 	for (;;) {
 		heap2 = heap;
-		heap = mem_heap_create(1024);
+		heap = IB_MEM_HEAP_CREATE(1024);
 		err = trx_undo_prev_version_build(rec, mtr, version,
 						  clust_index, clust_offsets,
 						  heap, &prev_version);
-		mem_heap_free(heap2); /* free version and clust_offsets */
+		IB_MEM_HEAP_FREE(heap2); /* free version and clust_offsets */
 
 		if (err != DB_SUCCESS || !prev_version) {
 			/* Versions end here */
 
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 
 			return(FALSE);
 		}
@@ -467,7 +467,7 @@ row_vers_old_has_index_entry(
 			    && !dtuple_coll_cmp(
 				    index->cmp_ctx, ientry, entry)) {
 
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 
 				return(TRUE);
 			}
@@ -533,7 +533,7 @@ row_vers_build_for_consistent_read(
 		trx_undo_rec_t* undo_rec;
 		roll_ptr_t	roll_ptr;
 		undo_no_t	undo_no;
-		heap = mem_heap_create(1024);
+		heap = IB_MEM_HEAP_CREATE(1024);
 
 		/* If we have high-granularity consistent read view and
 		creating transaction of the view is the same as trx_id in
@@ -568,7 +568,7 @@ row_vers_build_for_consistent_read(
 						  *offsets, heap,
 						  &prev_version);
 		if (heap2) {
-			mem_heap_free(heap2); /* free version */
+			IB_MEM_HEAP_FREE(heap2); /* free version */
 		}
 
 		if (err != DB_SUCCESS) {
@@ -604,7 +604,7 @@ row_vers_build_for_consistent_read(
 		version = prev_version;
 	}/* for (;;) */
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	rw_lock_s_unlock(&(purge_sys->latch));
 
 	return(err);
@@ -714,13 +714,13 @@ row_vers_build_for_semi_consistent_read(
 		}
 
 		heap2 = heap;
-		heap = mem_heap_create(1024);
+		heap = IB_MEM_HEAP_CREATE(1024);
 
 		err = trx_undo_prev_version_build(rec, mtr, version, index,
 						  *offsets, heap,
 						  &prev_version);
 		if (heap2) {
-			mem_heap_free(heap2); /* free version */
+			IB_MEM_HEAP_FREE(heap2); /* free version */
 		}
 
 		if (IB_UNLIKELY(err != DB_SUCCESS)) {
@@ -741,7 +741,7 @@ row_vers_build_for_semi_consistent_read(
 	}/* for (;;) */
 
 	if (heap) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	rw_lock_s_unlock(&(purge_sys->latch));
 

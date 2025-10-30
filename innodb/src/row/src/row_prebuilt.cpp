@@ -42,7 +42,7 @@
 
 IB_INTERN row_prebuilt_t* row_prebuilt_create(dict_table_t* table)
 {
-    mem_heap_t* heap = mem_heap_create(128);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(128);
     row_prebuilt_t* prebuilt = mem_heap_zalloc(heap, sizeof(row_prebuilt_t));
     prebuilt->magic_n = ROW_PREBUILT_ALLOCATED;
     prebuilt->magic_n2 = ROW_PREBUILT_ALLOCATED;
@@ -64,7 +64,7 @@ IB_INTERN row_prebuilt_t* row_prebuilt_create(dict_table_t* table)
     row_cache->n_max = FETCH_CACHE_SIZE;
     row_cache->n_size = row_cache->n_max;
     ulint sz = sizeof(*row_cache->ptr) * row_cache->n_max;
-    row_cache->heap = mem_heap_create(sz);
+    row_cache->heap = IB_MEM_HEAP_CREATE(sz);
     row_cache->ptr = mem_heap_zalloc(row_cache->heap, sz);
     return prebuilt;
 }
@@ -86,20 +86,20 @@ IB_INTERN void row_prebuilt_free(row_prebuilt_t* prebuilt, ibool dict_locked)
         que_graph_free_recursive(prebuilt->sel_graph);
     }
     if (prebuilt->old_vers_heap) {
-        mem_heap_free(prebuilt->old_vers_heap);
+        IB_MEM_HEAP_FREE(prebuilt->old_vers_heap);
     }
     ib_row_cache_t* row_cache = &prebuilt->row_cache;
     for (i = 0; i < row_cache->n_max; i++) {
         ib_cached_row_t* row = &row_cache->ptr[i];
         if (row->ptr != NULL) {
-            mem_free(row->ptr);
+            IB_MEM_FREE(row->ptr);
         }
     }
-    mem_heap_free(row_cache->heap);
+    IB_MEM_HEAP_FREE(row_cache->heap);
     if (prebuilt->table != NULL) {
         dict_table_decrement_handle_count(prebuilt->table, dict_locked);
     }
-    mem_heap_free(prebuilt->heap);
+    IB_MEM_HEAP_FREE(prebuilt->heap);
 }
 
 IB_INTERN void row_prebuilt_reset(row_prebuilt_t* prebuilt)
@@ -113,7 +113,7 @@ IB_INTERN void row_prebuilt_reset(row_prebuilt_t* prebuilt)
     prebuilt->simple_select = FALSE;
     prebuilt->select_lock_type = LOCK_NONE;
     if (prebuilt->old_vers_heap) {
-        mem_heap_free(prebuilt->old_vers_heap);
+        IB_MEM_HEAP_FREE(prebuilt->old_vers_heap);
         prebuilt->old_vers_heap = NULL;
     }
     prebuilt->trx = NULL;

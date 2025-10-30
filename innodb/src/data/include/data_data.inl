@@ -405,5 +405,5 @@ IB_INLINE ibool dtuple_contains_null(const dtuple_t* tuple);
 /// \param [in] vector big rec vector; it is freed in this function
 IB_INLINE void dtuple_big_rec_free(big_rec_t* vector);
 {
-	mem_heap_free(vector->heap);
+	IB_MEM_HEAP_FREE(vector->heap);
 }

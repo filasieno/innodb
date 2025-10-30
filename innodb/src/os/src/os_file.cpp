@@ -3046,7 +3046,7 @@ os_file_create_subdirs_if_needed(
 	if (strlen(subdir) == 1
 	    && (*subdir == SRV_PATH_SEPARATOR || *subdir == '.')) {
 		/* subdir is root or cwd, nothing to do */
-		mem_free(subdir);
+		IB_MEM_FREE(subdir);
 
 		return(TRUE);
 	}
@@ -3057,14 +3057,14 @@ os_file_create_subdirs_if_needed(
 		/* subdir does not exist, create it */
 		success = os_file_create_subdirs_if_needed(subdir);
 		if (!success) {
-			mem_free(subdir);
+			IB_MEM_FREE(subdir);
 
 			return(FALSE);
 		}
 		success = os_file_create_directory(subdir, FALSE);
 	}
 
-	mem_free(subdir);
+	IB_MEM_FREE(subdir);
 
 	return(success);
 }

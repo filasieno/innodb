@@ -244,7 +244,7 @@ IB_INTERN tab_node_t* tab_create_graph_create(dict_table_t* table, mem_heap_t* h
 	node->common.type = QUE_NODE_CREATE_TABLE;
 	node->table = table;
 	node->state = TABLE_BUILD_TABLE_DEF;
-	node->heap = mem_heap_create(256);
+	node->heap = IB_MEM_HEAP_CREATE(256);
 	node->tab_def = row_ins_node_create(INS_DIRECT, dict_sys->sys_tables, heap);
 	node->tab_def->common.parent = node;
 	node->col_def = row_ins_node_create(INS_DIRECT, dict_sys->sys_columns, heap);
@@ -265,7 +265,7 @@ IB_INTERN ind_node_t* ind_create_graph_create(dict_index_t* index, mem_heap_t* h
 	node->index = index;
 	node->state = INDEX_BUILD_INDEX_DEF;
 	node->page_no = FIL_NULL;
-	node->heap = mem_heap_create(256);
+	node->heap = IB_MEM_HEAP_CREATE(256);
 	node->ind_def = row_ins_node_create(INS_DIRECT, dict_sys->sys_indexes, heap);
 	node->ind_def->common.parent = node;
 	node->field_def = row_ins_node_create(INS_DIRECT, dict_sys->sys_fields, heap);

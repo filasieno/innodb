@@ -976,7 +976,7 @@ buf_pool_init(void)
 	buf_chunk_t*	chunk;
 	ulint		i;
 
-	buf_pool = mem_zalloc(sizeof(buf_pool_t));
+	buf_pool = IB_MEM_ZALLOC(sizeof(buf_pool_t));
 
 	/* 1. Initialize general fields
 	------------------------------- */
@@ -986,13 +986,13 @@ buf_pool_init(void)
 	buf_pool_mutex_enter();
 
 	buf_pool->n_chunks = 1;
-	buf_pool->chunks = chunk = mem_alloc(sizeof *chunk);
+	buf_pool->chunks = chunk = IB_MEM_ALLOC(sizeof *chunk);
 
 	UT_LIST_INIT(buf_pool->free);
 
 	if (!buf_chunk_init(chunk, srv_buf_pool_size)) {
-		mem_free(chunk);
-		mem_free(buf_pool);
+		IB_MEM_FREE(chunk);
+		IB_MEM_FREE(buf_pool);
 		buf_pool = NULL;
 		buf_pool_mutex_exit();
 		return(NULL);
@@ -1016,7 +1016,7 @@ buf_pool_init(void)
 
 	/* 3. Initialize LRU fields
 	--------------------------- */
-	/* All fields are initialized by mem_zalloc(). */
+	/* All fields are initialized by IB_MEM_ZALLOC(). */
 
 	buf_pool_mutex_exit();
 
@@ -1024,7 +1024,7 @@ buf_pool_init(void)
 			      * IB_PAGE_SIZE / sizeof(void*) / 64);
 
 	/* 4. Initialize the buddy allocator fields */
-	/* All fields are initialized by mem_zalloc(). */
+	/* All fields are initialized by IB_MEM_ZALLOC(). */
 
 	return(buf_pool);
 }
@@ -1080,8 +1080,8 @@ buf_mem_free(void)
 
 		buf_pool->n_chunks = 0;
 
-		mem_free(buf_pool->chunks);
-		mem_free(buf_pool);
+		IB_MEM_FREE(buf_pool->chunks);
+		IB_MEM_FREE(buf_pool);
 		buf_pool = NULL;
 	}
 }
@@ -1373,7 +1373,7 @@ shrink_again:
 	srv_buf_pool_old_size = srv_buf_pool_size;
 
 	/* Rewrite buf_pool->chunks.  Copy everything but max_chunk. */
-	chunks = mem_alloc((buf_pool->n_chunks - 1) * sizeof *chunks);
+	chunks = IB_MEM_ALLOC((buf_pool->n_chunks - 1) * sizeof *chunks);
 	memcpy(chunks, buf_pool->chunks,
 	       (max_chunk - buf_pool->chunks) * sizeof *chunks);
 	memcpy(chunks + (max_chunk - buf_pool->chunks),
@@ -1385,7 +1385,7 @@ shrink_again:
 	srv_buf_pool_curr_size = buf_pool->curr_size * IB_PAGE_SIZE;
 	chunk_size -= max_chunk->size;
 	buf_chunk_free(max_chunk);
-	mem_free(buf_pool->chunks);
+	IB_MEM_FREE(buf_pool->chunks);
 	buf_pool->chunks = chunks;
 	buf_pool->n_chunks--;
 
@@ -1531,7 +1531,7 @@ buf_pool_resize(void)
 		buf_chunk_t*	chunks;
 		buf_chunk_t*	chunk;
 
-		chunks = mem_alloc((buf_pool->n_chunks + 1) * sizeof *chunks);
+		chunks = IB_MEM_ALLOC((buf_pool->n_chunks + 1) * sizeof *chunks);
 
 		memcpy(chunks, buf_pool->chunks, buf_pool->n_chunks
 		       * sizeof *chunks);
@@ -1539,12 +1539,12 @@ buf_pool_resize(void)
 		chunk = &chunks[buf_pool->n_chunks];
 
 		if (!buf_chunk_init(chunk, mem_size)) {
-			mem_free(chunks);
+			IB_MEM_FREE(chunks);
 		} else {
 			buf_pool->curr_size += chunk->size;
 			srv_buf_pool_curr_size = buf_pool->curr_size
 				* IB_PAGE_SIZE;
-			mem_free(buf_pool->chunks);
+			IB_MEM_FREE(buf_pool->chunks);
 			buf_pool->chunks = chunks;
 			buf_pool->n_chunks++;
 		}
@@ -3680,8 +3680,8 @@ buf_print(void)
 
 	size = buf_pool->curr_size;
 
-	index_ids = mem_alloc(sizeof(dulint) * size);
-	counts = mem_alloc(sizeof(ulint) * size);
+	index_ids = IB_MEM_ALLOC(sizeof(dulint) * size);
+	counts = IB_MEM_ALLOC(sizeof(ulint) * size);
 
 	buf_pool_mutex_enter();
 
@@ -3768,8 +3768,8 @@ buf_print(void)
 		ib_log(state, "\n");
 	}
 
-	mem_free(index_ids);
-	mem_free(counts);
+	IB_MEM_FREE(index_ids);
+	IB_MEM_FREE(counts);
 
 	ut_a(buf_validate());
 }

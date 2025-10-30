@@ -409,7 +409,7 @@ retry_page_get:
 				// Insertion to the insert buffer succeeded
 				cursor->flag = BTR_CUR_INSERT_TO_IBUF;
 				if (IB_LIKELY_NULL(heap)) {
-					mem_heap_free(heap);
+					IB_MEM_HEAP_FREE(heap);
 				}
 				goto func_exit;
 			}
@@ -472,7 +472,7 @@ retry_page_get:
 		page_no = btr_node_ptr_get_child_page_no(node_ptr, offsets);
 	}
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	if (level == 0) {
 		cursor->low_match = low_match;
@@ -570,7 +570,7 @@ IB_INTERN void btr_cur_open_at_index_side_func(ibool from_left, dict_index_t* di
         page_no = btr_node_ptr_get_child_page_no(node_ptr, offsets);
     }
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 }
 
@@ -621,9 +621,10 @@ IB_INTERN void btr_cur_open_at_rnd_pos_func(dict_index_t* dict_index, ulint latc
         page_no = btr_node_ptr_get_child_page_no(node_ptr, offsets);
     }
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 }
+
 //==================== B-TREE INSERT =========================
 
 /// \brief Inserts a record if there is enough space, or if enough space can be freed by reorganizing. 
@@ -681,6 +682,7 @@ IB_INLINE ulint btr_cur_ins_lock_and_undo(ulint flags, btr_cur_t* cursor, const 
     }
     return DB_SUCCESS;
 }
+
 #ifdef IB_DEBUG
 
 /// \brief Report information about a transaction.
@@ -695,6 +697,7 @@ static void btr_cur_trx_report(trx_t* trx, const dict_index_t* index, const char
 	dict_index_name_print(state->stream, trx, index);
 	ib_log(state, "\n");
 }
+
 #endif // IB_DEBUG
 
 /// \brief Tries to perform an insert to a page in an index tree, next to cursor. 
@@ -702,7 +705,7 @@ static void btr_cur_trx_report(trx_t* trx, const dict_index_t* index, const char
 //  If there is just one record on the page, the insert will always succeed; this is to prevent trying to split a page with just one record.
 /// \param [in] flags undo logging and locking flags: if not zero, the parameters index and thr should be specified
 /// \param [in] cursor cursor on page after which to insert; cursor stays valid
-/// \param [in/out] entry entry to insert
+/// \param [in,out] entry entry to insert
 /// \param [out] rec pointer to inserted record if succeed
 /// \param [out] big_rec big rec vector whose fields have to be stored externally by the caller, or NULL
 /// \param [in] n_ext number of externally stored columns
@@ -844,10 +847,9 @@ fail_err:
 /// \brief Performs an insert on a page of an index tree.
 /// \details It is assumed that mtr holds an x-latch on the tree and on the cursor page. If the insert is made on the leaf level, 
 /// to avoid deadlocks, mtr must also own x-latches to brothers of page, if those brothers exist.
-/// \param [in] flags undo logging and locking flags: if not zero, the parameter thr should be specified; if no undo logging is specified, then the caller must have reserved 
-/// enough free extents in the file space so that the insertion will certainly succeed
+/// \param [in] flags undo logging and locking flags: if not zero, the parameter thr should be specified; if no undo logging is specified, then the caller must have reserved  enough free extents in the file space so that the insertion will certainly succeed
 /// \param [in] cursor cursor after which to insert; cursor stays valid
-/// \param [in/out] entry entry to insert
+/// \param [in,out] entry entry to insert
 /// \param [out] rec pointer to inserted record if succeed
 /// \param [out] big_rec big rec vector whose fields have to be stored externally by the caller, or NULL
 /// \param [in] n_ext number of externally stored columns
@@ -908,7 +910,7 @@ IB_INTERN ulint btr_cur_pessimistic_insert(ulint flags, btr_cur_t* cursor, dtupl
         *rec = btr_page_split_and_insert(cursor, entry, n_ext, mtr);
     }
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
     ut_ad(page_rec_get_next(btr_cur_get_rec(cursor)) == *rec);
 #ifdef BTR_CUR_ADAPT
@@ -923,6 +925,7 @@ IB_INTERN ulint btr_cur_pessimistic_insert(ulint flags, btr_cur_t* cursor, dtupl
     *big_rec = big_rec_vec;
     return DB_SUCCESS;
 }
+
 //==================== B-TREE UPDATE =========================
 
 /// \brief For an update, checks the locks and does the undo logging.
@@ -951,7 +954,7 @@ IB_INLINE ulint btr_cur_upd_lock_and_undo(ulint flags, btr_cur_t* cursor, const 
         rec_offs_init(offsets_);
         err = lock_clust_rec_modify_check_and_lock(flags, btr_cur_get_block(cursor), rec, dict_index, rec_get_offsets(rec, dict_index, offsets_, ULINT_UNDEFINED, &heap), thr);
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
         if (err != DB_SUCCESS) {
             return err;
@@ -1019,7 +1022,7 @@ IB_INTERN byte* btr_cur_parse_update_in_place(byte* ptr, byte* end_ptr, page_t* 
     ulint rec_offset = mach_read_from_2(ptr);
     ptr += 2;
     ut_a(rec_offset <= IB_PAGE_SIZE);
-    mem_heap_t* heap = mem_heap_create(256);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
     upd_t* update;
     ptr = row_upd_index_parse(ptr, end_ptr, heap, &update);
     if (!ptr || !page) {
@@ -1034,9 +1037,10 @@ IB_INTERN byte* btr_cur_parse_update_in_place(byte* ptr, byte* end_ptr, page_t* 
     }
     row_upd_rec_in_place(rec, dict_index, offsets, update, page_zip);
 func_exit:
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
     return ptr;
 }
+
 #ifndef IB_HOTBACKUP
 
 /// \brief See if there is enough place in the page modification log to log an update-in-place.
@@ -1086,6 +1090,8 @@ static ibool btr_cur_update_alloc_zip(page_zip_des_t* page_zip, buf_block_t* blo
 /// \return DB_SUCCESS or error number
 IB_INTERN ulint btr_cur_update_in_place(ulint flags, btr_cur_t* cursor, const upd_t* update, ulint cmpl_info, que_thr_t* thr, mtr_t* mtr)
 {
+    ulint err;
+
     rec_t* rec = btr_cur_get_rec(cursor);
     dict_index_t* dict_index = cursor->index;
     ut_ad(!!page_rec_is_comp(rec) == dict_table_is_comp(dict_index->table));
@@ -1098,18 +1104,15 @@ IB_INTERN ulint btr_cur_update_in_place(ulint flags, btr_cur_t* cursor, const up
     rec_offs_init(offsets_);
     offsets = rec_get_offsets(rec, dict_index, offsets, ULINT_UNDEFINED, &heap);
     roll_ptr_t roll_ptr = ut_dulint_zero;
-    buf_block_t* block;
-    page_zip_des_t* page_zip;
-    ulint err;
-    ulint was_delete_marked;
+    
 #ifdef IB_DEBUG
     if (btr_cur_print_record_ops && thr) {
         btr_cur_trx_report(trx, dict_index, "update ");
         rec_print_new(state->stream, rec, offsets);
     }
 #endif // IB_DEBUG
-    block = btr_cur_get_block(cursor);
-    page_zip = buf_block_get_page_zip(block);
+    buf_block_t* block = btr_cur_get_block(cursor);
+    page_zip_des_t* page_zip = buf_block_get_page_zip(block);
     // Check that enough space is available on the compressed page.
     if (IB_LIKELY_NULL(page_zip) && !btr_cur_update_alloc_zip(page_zip, block, dict_index, rec_offs_size(offsets), FALSE, mtr)) {
         return DB_ZIP_OVERFLOW;
@@ -1118,7 +1121,7 @@ IB_INTERN ulint btr_cur_update_in_place(ulint flags, btr_cur_t* cursor, const up
     err = btr_cur_upd_lock_and_undo(flags, cursor, update, cmpl_info, thr, mtr, &roll_ptr);
     if (IB_UNLIKELY(err != DB_SUCCESS)) {
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
         return err;
     }
@@ -1133,7 +1136,7 @@ IB_INTERN ulint btr_cur_update_in_place(ulint flags, btr_cur_t* cursor, const up
     if (!(flags & BTR_KEEP_SYS_FLAG)) {
         row_upd_rec_sys_fields(rec, NULL, dict_index, offsets, trx, roll_ptr);
     }
-    was_delete_marked = rec_get_deleted_flag(rec, page_is_comp(buf_block_get_frame(block)));
+    ulint was_delete_marked = rec_get_deleted_flag(rec, page_is_comp(buf_block_get_frame(block)));
     row_upd_rec_in_place(rec, dict_index, offsets, update, page_zip);
     if (block->is_hashed) {
         rw_lock_x_unlock(&btr_search_latch);
@@ -1148,7 +1151,7 @@ IB_INTERN ulint btr_cur_update_in_place(ulint flags, btr_cur_t* cursor, const up
         btr_cur_unmark_extern_fields(page_zip, rec, dict_index, offsets, mtr);
     }
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
     return DB_SUCCESS;
 }
@@ -1173,7 +1176,7 @@ IB_INTERN ulint btr_cur_optimistic_update(ulint flags, btr_cur_t* cursor, const 
     ut_ad(mtr_memo_contains(mtr, block, MTR_MEMO_PAGE_X_FIX));
     // The insert buffer tree should never be updated in place.
     ut_ad(!dict_index_is_ibuf(index));
-    mem_heap_t* heap = mem_heap_create(1024);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(1024);
     ulint* offsets = rec_get_offsets(rec, index, NULL, ULINT_UNDEFINED, &heap);
 #ifdef IB_DEBUG
     if (btr_cur_print_record_ops && thr) {
@@ -1183,13 +1186,13 @@ IB_INTERN ulint btr_cur_optimistic_update(ulint flags, btr_cur_t* cursor, const 
 #endif // IB_DEBUG
     if (!row_upd_changes_field_size_or_external(index, offsets, update)) {
         // The simplest and the most common case: the update does not change the size of any field and none of the updated fields is externally stored in rec or update, and there is enough space on the compressed page to log the update.
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return btr_cur_update_in_place(flags, cursor, update, cmpl_info, thr, mtr);
     }
     if (rec_offs_any_extern(offsets)) {
 any_extern:
         // Externally stored fields are treated in pessimistic update
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return DB_OVERFLOW;
     }
     for (ulint i = 0; i < upd_get_n_fields(update); i++) {
@@ -1234,7 +1237,7 @@ any_extern:
     ulint err = btr_cur_upd_lock_and_undo(flags, cursor, update, cmpl_info, thr, mtr, &roll_ptr);
     if (err != DB_SUCCESS) {
 err_exit:
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return err;
     }
     // Ok, we may do the replacement. Store on the page infimum the explicit locks on rec, before deleting rec (see the comment in btr_cur_pessimistic_update).
@@ -1260,7 +1263,7 @@ err_exit:
     // Restore the old explicit lock state on the record
     lock_rec_restore_from_page_infimum(block, rec, block);
     page_cur_move_to_next(page_cursor);
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
     return DB_SUCCESS;
 }
 
@@ -1296,7 +1299,7 @@ static void btr_cur_pess_upd_restore_supremum(buf_block_t* block, const rec_t* r
 /// \return DB_SUCCESS or error code
 /// \param [in] flags undo logging, locking, and rollback flags
 /// \param [in] cursor cursor on the record to update
-/// \param [in/out] heap pointer to memory heap, or NULL
+/// \param [in,out] heap pointer to memory heap, or NULL
 /// \param [out] big_rec big rec vector whose fields have to be stored externally by the caller, or NULL
 /// \param [in] update update vector; this is allowed also contain trx id and roll ptr fields, but the values in update vector have no effect
 /// \param [in] cmpl_info compiler info on secondary index updates
@@ -1352,7 +1355,7 @@ IB_INTERN ulint btr_cur_pessimistic_update(ulint flags, btr_cur_t* cursor, mem_h
 		}
 	}
 	if (!*heap) {
-		*heap = mem_heap_create(1024);
+		*heap = IB_MEM_HEAP_CREATE(1024);
 	}
 	offsets = rec_get_offsets(rec, index, NULL, ULINT_UNDEFINED, heap);
 	trx_t* trx = thr_get_trx(thr);
@@ -1466,6 +1469,7 @@ return_after_reservations:
 	*big_rec = big_rec_vec;
 	return err;
 }
+
 /*==================== B-TREE DELETE MARK AND UNMARK ===============*/
 
 /// \brief Writes the redo log record for delete marking or unmarking of an index record.
@@ -1537,7 +1541,7 @@ IB_INTERN byte* btr_cur_parse_del_mark_set_clust_rec(byte* ptr, byte* end_ptr, p
 			rec_offs_init(offsets_);
 			row_upd_rec_sys_fields_in_recovery(rec, page_zip, rec_get_offsets(rec, index, offsets_, ULINT_UNDEFINED, &heap), pos, trx_id, roll_ptr);
 			if (IB_LIKELY_NULL(heap)) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 			}
 		}
 	}
@@ -1596,7 +1600,7 @@ IB_INTERN ulint btr_cur_del_mark_set_clust_rec(ulint flags, btr_cur_t* cursor, i
 	btr_cur_del_mark_set_clust_rec_log(flags, rec, index, val, trx, roll_ptr, mtr);
 func_exit:
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return err;
 }
@@ -1755,7 +1759,7 @@ IB_INTERN ibool btr_cur_optimistic_delete(btr_cur_t* cursor, mtr_t* mtr)
 		}
 	}
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return no_compress_needed;
 }
@@ -1787,7 +1791,7 @@ IB_INTERN ibool btr_cur_pessimistic_delete(ulint* err, ibool has_reserved_extent
 			return FALSE;
 		}
 	}
-	mem_heap_t* heap = mem_heap_create(1024);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(1024);
 	rec_t* rec = btr_cur_get_rec(cursor);
 	page_zip_des_t* page_zip = buf_block_get_page_zip(block);
 #ifdef IB_ZIP_DEBUG
@@ -1839,7 +1843,7 @@ IB_INTERN ibool btr_cur_pessimistic_delete(ulint* err, ibool has_reserved_extent
 	ut_ad(btr_check_node_ptr(index, block, mtr));
 	*err = DB_SUCCESS;
 return_after_reservations:
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	if (ret == FALSE) {
 		ret = btr_cur_compress_if_useful(cursor, mtr);
 	}
@@ -1968,7 +1972,7 @@ IB_INTERN ib_int64_t btr_estimate_n_rows_in_range(dict_index_t* index, const dtu
 IB_INTERN void btr_estimate_number_of_different_key_vals(dict_index_t* index)
 {
     ulint n_cols = dict_index_get_n_unique(index);
-    ib_int64_t* n_diff = mem_zalloc((n_cols + 1) * sizeof(ib_int64_t));
+    ib_int64_t* n_diff = IB_MEM_ZALLOC((n_cols + 1) * sizeof(ib_int64_t));
     ulint not_empty_flag = 0;
     ulint total_external_size = 0;
     mem_heap_t* heap = NULL;
@@ -2053,9 +2057,9 @@ IB_INTERN void btr_estimate_number_of_different_key_vals(dict_index_t* index)
         index->stat_n_diff_key_vals[j] += add_on;
     }
     dict_index_stat_mutex_exit(index);
-    mem_free(n_diff);
+    IB_MEM_FREE(n_diff);
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 }
 /*================== EXTERNAL STORAGE OF BIG FIELDS ===================*/
@@ -2310,7 +2314,7 @@ IB_INTERN ulint btr_store_big_rec_extern_fields(dict_index_t* index, buf_block_t
     if (IB_LIKELY_NULL(page_zip)) {
         int err;
         // Zlib deflate needs 128 kilobytes for the default window size, plus 512 << memLevel, plus a few kilobytes for small objects. We use reduced memLevel to limit the memory consumption, and preallocate the heap, hoping to avoid memory fragmentation.
-        heap = mem_heap_create(250000);
+        heap = IB_MEM_HEAP_CREATE(250000);
         page_zip_set_alloc(&c_stream, heap);
         err = deflateInit2(&c_stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15, 7, Z_DEFAULT_STRATEGY);
         ut_a(err == Z_OK);
@@ -2349,7 +2353,7 @@ IB_INTERN ulint btr_store_big_rec_extern_fields(dict_index_t* index, buf_block_t
                 mtr_commit(&mtr);
                 if (IB_LIKELY_NULL(page_zip)) {
                     deflateEnd(&c_stream);
-                    mem_heap_free(heap);
+                    IB_MEM_HEAP_FREE(heap);
                 }
                 return DB_OUT_OF_FILE_SPACE;
             }
@@ -2452,7 +2456,7 @@ next_zip_page:
     }
     if (IB_LIKELY_NULL(page_zip)) {
         deflateEnd(&c_stream);
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
     return DB_SUCCESS;
 }
@@ -2764,7 +2768,7 @@ static ulint btr_copy_externally_stored_field_prefix_low(byte* buf, ulint len, u
     }
     if (IB_UNLIKELY(zip_size)) {
         // Zlib inflate needs 32 kilobytes for the default window size, plus a few kilobytes for small objects.
-        mem_heap_t* heap = mem_heap_create(40000);
+        mem_heap_t* heap = IB_MEM_HEAP_CREATE(40000);
         z_stream d_stream;
         page_zip_set_alloc(&d_stream, heap);
         int err = inflateInit(&d_stream);
@@ -2774,7 +2778,7 @@ static ulint btr_copy_externally_stored_field_prefix_low(byte* buf, ulint len, u
         d_stream.avail_in = 0;
         btr_copy_zblob_prefix(&d_stream, zip_size, space_id, page_no, offset);
         inflateEnd(&d_stream);
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return d_stream.total_out;
     } else {
         return btr_copy_blob_prefix(buf, len, space_id, page_no, offset);

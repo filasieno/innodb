@@ -93,7 +93,7 @@ IB_INLINE T* ib_vector_pop(ib_vector_t<T>*	vec)
 template <typename T>
 IB_INLINE void ib_vector_free(ib_vector_t<T>* vec)
 {
-	mem_heap_free(vec->heap);
+	IB_MEM_HEAP_FREE(vec->heap);
 }
 
 template <typename T>

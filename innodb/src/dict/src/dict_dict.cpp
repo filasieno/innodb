@@ -461,7 +461,7 @@ IB_INTERN ibool dict_table_col_in_clustered_key(const dict_table_t* table, ulint
 /// \brief Inits the data dictionary module.
 IB_INTERN void dict_init(void)
 {
-	dict_sys = mem_alloc(sizeof(dict_sys_t));
+	dict_sys = IB_MEM_ALLOC(sizeof(dict_sys_t));
 	mutex_create(&dict_sys->mutex, SYNC_DICT);
 	dict_sys->table_hash = hash_create(buf_pool_get_curr_size() / (DICT_POOL_PER_TABLE_HASH * IB_WORD_SIZE));
 	dict_sys->table_id_hash = hash_create(buf_pool_get_curr_size() / (DICT_POOL_PER_TABLE_HASH * IB_WORD_SIZE));
@@ -750,7 +750,7 @@ IB_INTERN ibool dict_table_rename_in_cache(dict_table_t* table, const char* new_
 				ut_memcpy(foreign->id, table->name, db_len);
 				strcpy(foreign->id + db_len, dict_remove_db_name(old_id));
 			}
-			mem_free(old_id);
+			IB_MEM_FREE(old_id);
 		}
 		foreign = UT_LIST_GET_NEXT(foreign_list, foreign);
 	}
@@ -1318,7 +1318,7 @@ static dict_index_t* dict_index_build_internal_clust(const dict_table_t* table, 
 		}
 	}
 	// Remember the table columns already contained in new_index
-	ibool* indexed = mem_zalloc(table->n_cols * sizeof *indexed);
+	ibool* indexed = IB_MEM_ZALLOC(table->n_cols * sizeof *indexed);
 	// Mark the table columns already contained in new_index
 	for (ulint i = 0; i < new_index->n_def; i++) {
 		dict_field_t* field = dict_index_get_nth_field(new_index, i);
@@ -1335,7 +1335,7 @@ static dict_index_t* dict_index_build_internal_clust(const dict_table_t* table, 
 			dict_index_add_col(new_index, table, col, 0);
 		}
 	}
-	mem_free(indexed);
+	IB_MEM_FREE(indexed);
 	ut_ad(dict_index_is_ibuf(index) || (UT_LIST_GET_LEN(table->indexes) == 0));
 	new_index->cached = TRUE;
 	return new_index;
@@ -1364,7 +1364,7 @@ static dict_index_t* dict_index_build_internal_non_clust(const dict_table_t* tab
 	// Copy fields from index to new_index
 	dict_index_copy(new_index, index, table, 0, index->n_fields);
 	// Remember the table columns already contained in new_index
-	ibool* indexed = mem_zalloc(table->n_cols * sizeof *indexed);
+	ibool* indexed = IB_MEM_ZALLOC(table->n_cols * sizeof *indexed);
 	// Mark the table columns already contained in new_index
 	for (ulint i = 0; i < new_index->n_def; i++) {
 		dict_field_t* field = dict_index_get_nth_field(new_index, i);
@@ -1380,7 +1380,7 @@ static dict_index_t* dict_index_build_internal_non_clust(const dict_table_t* tab
 			dict_index_add_col(new_index, table, field->col, field->prefix_len);
 		}
 	}
-	mem_free(indexed);
+	IB_MEM_FREE(indexed);
 	if (dict_index_is_unique(index)) {
 		new_index->n_uniq = index->n_fields;
 	} else {
@@ -1439,7 +1439,7 @@ IB_INTERN dict_foreign_t* dict_table_get_foreign_constraint(dict_table_t* table,
 /// \param [in,own] foreign foreign key struct
 static void dict_foreign_free(dict_foreign_t* foreign)
 {
-	mem_heap_free(foreign->heap);
+	IB_MEM_HEAP_FREE(foreign->heap);
 }
 
 /// \brief Removes a foreign constraint struct from the dictionary cache.
@@ -1652,7 +1652,7 @@ dict_foreign_add_to_cache(
 
 	if (for_in_cache) {
 		/* Free the foreign object */
-		mem_heap_free(foreign->heap);
+		IB_MEM_HEAP_FREE(foreign->heap);
 	} else {
 		for_in_cache = foreign;
 	}
@@ -1675,7 +1675,7 @@ dict_foreign_add_to_cache(
 				" the ones in table.");
 
 			if (for_in_cache == foreign) {
-				mem_heap_free(foreign->heap);
+				IB_MEM_HEAP_FREE(foreign->heap);
 			}
 
 			return(DB_CANNOT_ADD_CONSTRAINT);
@@ -1719,7 +1719,7 @@ dict_foreign_add_to_cache(
 						for_in_cache);
 				}
 
-				mem_heap_free(foreign->heap);
+				IB_MEM_HEAP_FREE(foreign->heap);
 			}
 
 			return(DB_CANNOT_ADD_CONSTRAINT);
@@ -2107,7 +2107,7 @@ Removes comments from an SQL string. A comment is either
 (c) '[slash][asterisk]' till the next '[asterisk][slash]' (like the familiar
 C comment syntax).
 @return own: SQL string stripped from comments; the caller must free
-this with mem_free()! */
+this with IB_MEM_FREE()! */
 static
 char*
 dict_strip_comments(
@@ -2120,7 +2120,7 @@ dict_strip_comments(
 	/* unclosed quote character (0 if none) */
 	char		quote	= 0;
 
-	str = mem_alloc(strlen(sql_string) + 1);
+	str = IB_MEM_ALLOC(strlen(sql_string) + 1);
 
 	sptr = sql_string;
 	ptr = str;
@@ -2587,11 +2587,11 @@ IB_INTERN ulint dict_create_foreign_constraints(trx_t* trx, const char* sql_stri
 {
 	ut_a(trx);
 	char* str = dict_strip_comments(sql_string);
-	mem_heap_t* heap = mem_heap_create(10000);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(10000);
 	const charset_t* cs = ib_ucode_get_connection_charset();
 	ulint err = dict_create_foreign_constraints_low(trx, heap, cs, str, name, reject_fks);
-	mem_heap_free(heap);
-	mem_free(str);
+	IB_MEM_HEAP_FREE(heap);
+	IB_MEM_FREE(str);
 	return err;
 }
 
@@ -2614,7 +2614,7 @@ IB_INTERN ulint dict_foreign_parse_drop_constraints(mem_heap_t* heap, trx_t* trx
 loop:
 	ptr = dict_scan_to(ptr, "DROP");
 	if (*ptr == '\0') {
-		mem_free(str);
+		IB_MEM_FREE(str);
 		return DB_SUCCESS;
 	}
 	ibool success;
@@ -2657,7 +2657,7 @@ loop:
 		ut_print_name(state->stream, NULL, FALSE, id);
 		ib_log(state, ".\n");
 		mutex_exit(&dict_foreign_err_mutex);
-		mem_free(str);
+		IB_MEM_FREE(str);
 		return DB_CANNOT_DROP_CONSTRAINT;
 	}
 	goto loop;
@@ -2668,7 +2668,7 @@ syntax_error:
 	ut_print_name(state->stream, NULL, TRUE, table->name);
 	ib_log(state, ",\nclose to:\n%s\n in SQL command\n%s\n", ptr, str);
 	mutex_exit(&dict_foreign_err_mutex);
-	mem_free(str);
+	IB_MEM_FREE(str);
 	return DB_CANNOT_DROP_CONSTRAINT;
 }
 
@@ -3286,7 +3286,7 @@ IB_INTERN void dict_close(void)
 	rw_lock_free(&dict_operation_lock);
 	memset(&dict_operation_lock, 0x0, sizeof(dict_operation_lock));
 	mutex_free(&dict_foreign_err_mutex);
-	mem_free(dict_sys);
+	IB_MEM_FREE(dict_sys);
 	dict_sys = NULL;
 	for (ulint i = 0; i < DICT_INDEX_STAT_MUTEX_SIZE; i++) {
 		mutex_free(&dict_index_stat_mutex[i]);

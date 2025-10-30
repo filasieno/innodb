@@ -27,7 +27,7 @@
 IB_INTERN
 ib_list_t *ib_list_create(void)
 {
-	ib_list_t *list = mem_alloc(sizeof(ib_list_t));
+	ib_list_t *list = IB_MEM_ALLOC(sizeof(ib_list_t));
 
 	list->first = NULL;
 	list->last = NULL;
@@ -47,7 +47,7 @@ void ib_list_free(ib_list_t *list)
 	to e.g. have all the nodes allocated from a single heap that is then
 	freed after the list itself is freed. */
 
-	mem_free(list);
+	IB_MEM_FREE(list);
 }
 
 /// \brief Add the data to the end of the list.

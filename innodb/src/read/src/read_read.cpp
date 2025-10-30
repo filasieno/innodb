@@ -364,7 +364,7 @@ IB_INTERN cursor_view_t* read_cursor_view_create(trx_t* cr_trx)
 	/* Use larger heap than in trx_create when creating a read_view
 	because cursors are quite long. */
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 
 	curview = (cursor_view_t*) mem_heap_alloc(heap, sizeof(cursor_view_t));
 	curview->heap = heap;
@@ -454,7 +454,7 @@ IB_INTERN void read_cursor_view_close(trx_t* trx, cursor_view_t* curview)
 
 	mutex_exit(&kernel_mutex);
 
-	mem_heap_free(curview->heap);
+	IB_MEM_HEAP_FREE(curview->heap);
 }
 
 /// \brief This function sets a given consistent cursor view to a transaction read view if given consistent cursor view is not NULL. Otherwise, function restores a global read view to a transaction read view.

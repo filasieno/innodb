@@ -175,7 +175,7 @@ IB_INTERN void thr_local_create(void)
 	if (thr_local_hash == NULL) {
 		thr_local_init();
 	}
-	thr_local_t* local = mem_alloc(sizeof(thr_local_t));
+	thr_local_t* local = IB_MEM_ALLOC(sizeof(thr_local_t));
 	local->id = os_thread_get_curr_id();
 	local->handle = os_thread_get_curr();
 	local->magic_n = THR_LOCAL_MAGIC_N;
@@ -198,7 +198,7 @@ IB_INTERN void thr_local_free(os_thread_id_t	id)	/*!< in: thread id */
 	HASH_DELETE(thr_local_t, hash, thr_local_hash, os_thread_pf(id), local);
 	mutex_exit(&thr_local_mutex);
 	ut_a(local->magic_n == THR_LOCAL_MAGIC_N);
-	mem_free(local);
+	IB_MEM_FREE(local);
 }
 
 IB_INTERN void thr_local_init(void)
@@ -218,7 +218,7 @@ IB_INTERN void thr_local_close(void)
 			thr_local_t* prev_local = local;
 			local = HASH_GET_NEXT(hash, prev_local);
 			ut_a(prev_local->magic_n == THR_LOCAL_MAGIC_N);
-			mem_free(prev_local);
+			IB_MEM_FREE(prev_local);
 		}
 	}
 	hash_table_free(thr_local_hash);

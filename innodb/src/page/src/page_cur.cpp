@@ -191,7 +191,7 @@ IB_INLINE ibool page_cur_try_search_shortcut(const buf_block_t* block, const dic
     success = TRUE;
 exit_func:
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
     return success;
 }
@@ -385,7 +385,7 @@ up_rec_match:
     *ilow_matched_fields = low_matched_fields;
     *ilow_matched_bytes = low_matched_bytes;
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 }
 
@@ -428,7 +428,7 @@ static void page_cur_insert_rec_write_log(rec_t* insert_rec, ulint rec_size, rec
         ut_ad(rec_size == rec_offs_size(ins_offs));
         cur_rec_size = rec_offs_size(cur_offs);
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
     }
     const byte* ins_ptr = insert_rec - extra_size;
@@ -599,7 +599,7 @@ IB_INTERN byte* page_cur_parse_insert_rec(ibool is_short, byte* ptr, byte* end_p
     if (mismatch_index + end_seg_len < sizeof buf1) {
         buf = buf1;
     } else {
-        buf = mem_alloc(mismatch_index + end_seg_len);
+        buf = IB_MEM_ALLOC(mismatch_index + end_seg_len);
     }
     // Build the inserted record to buf
     if (IB_UNLIKELY(mismatch_index >= IB_PAGE_SIZE)) {
@@ -625,10 +625,10 @@ IB_INTERN byte* page_cur_parse_insert_rec(ibool is_short, byte* ptr, byte* end_p
         UT_ERROR;
     }
     if (buf != buf1) {
-        mem_free(buf);
+        IB_MEM_FREE(buf);
     }
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
     return ptr + end_seg_len;
 }
@@ -661,7 +661,7 @@ IB_INTERN rec_t* page_cur_insert_rec_low(rec_t* current_rec, dict_index_t* index
         foffsets = rec_get_offsets(free_rec, index, foffsets, ULINT_UNDEFINED, &heap);
         if (rec_offs_size(foffsets) < rec_size) {
             if (IB_LIKELY_NULL(heap)) {
-                mem_heap_free(heap);
+                IB_MEM_HEAP_FREE(heap);
             }
             goto use_heap;
         }
@@ -675,7 +675,7 @@ IB_INTERN rec_t* page_cur_insert_rec_low(rec_t* current_rec, dict_index_t* index
             page_mem_alloc_free(page, NULL, rec_get_next_ptr(free_rec, FALSE), rec_size);
         }
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
     } else {
 use_heap:
@@ -866,7 +866,7 @@ IB_INTERN rec_t* page_cur_insert_rec_zip(rec_t** current_rec, buf_block_t* block
         if (rec_offs_size(foffsets) < rec_size) {
 too_small:
             if (IB_LIKELY_NULL(heap)) {
-                mem_heap_free(heap);
+                IB_MEM_HEAP_FREE(heap);
             }
             goto use_heap;
         }
@@ -915,7 +915,7 @@ too_small:
         }
 
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
     } else {
 use_heap:
@@ -1141,7 +1141,7 @@ IB_INTERN void page_copy_rec_list_end_to_created_page(
     }
 
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 
     log_data_len = dyn_array_get_data_size(&(mtr->log)) - log_data_len;
@@ -1233,7 +1233,7 @@ IB_INTERN byte* page_cur_parse_delete_rec(byte* ptr, byte* end_ptr, buf_block_t*
 
         page_cur_delete_rec(&cursor, index, rec_get_offsets(rec, index, offsets_, ULINT_UNDEFINED, &heap), mtr);
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
     }
 

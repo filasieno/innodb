@@ -169,7 +169,7 @@ static que_t *trx_purge_graph_build(void)
 	que_thr_t *thr;
 	/*	que_thr_t*	thr2; */
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 	fork = que_fork_create(NULL, NULL, QUE_FORK_PURGE, heap);
 	fork->trx = purge_sys->trx;
 
@@ -193,7 +193,7 @@ void trx_purge_sys_create(void)
 {
 	ut_ad(mutex_own(&kernel_mutex));
 
-	purge_sys = mem_alloc(sizeof(trx_purge_t));
+	purge_sys = IB_MEM_ALLOC(sizeof(trx_purge_t));
 
 	purge_sys->state = TRX_STOP_PURGE;
 
@@ -207,7 +207,7 @@ void trx_purge_sys_create(void)
 
 	mutex_create(&purge_sys->mutex, SYNC_PURGE_SYS);
 
-	purge_sys->heap = mem_heap_create(256);
+	purge_sys->heap = IB_MEM_HEAP_CREATE(256);
 
 	purge_sys->arr = trx_undo_arr_create();
 
@@ -255,8 +255,8 @@ void trx_purge_sys_close(void)
 	rw_lock_free(&purge_sys->latch);
 	mutex_free(&purge_sys->mutex);
 
-	mem_heap_free(purge_sys->heap);
-	mem_free(purge_sys);
+	IB_MEM_HEAP_FREE(purge_sys->heap);
+	IB_MEM_FREE(purge_sys);
 
 	purge_sys = NULL;
 }

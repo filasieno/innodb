@@ -143,7 +143,7 @@ IB_INTERN void dict_boot(void)
 	// Create the hash tables etc.
 	dict_init();
 
-	mem_heap_t* heap = mem_heap_create(450);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(450);
 
 	mutex_enter(&(dict_sys->mutex));
 
@@ -266,7 +266,7 @@ IB_INTERN void dict_boot(void)
 	table->id = DICT_FIELDS_ID;
 	dict_table_add_to_cache(table, heap);
 	dict_sys->sys_fields = table;
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	index = dict_mem_index_create("SYS_FIELDS", "CLUST_IND", DICT_HDR_SPACE, DICT_UNIQUE | DICT_CLUSTERED, 2);
 	dict_mem_index_add_field(index, "INDEX_ID", 0);

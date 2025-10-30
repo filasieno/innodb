@@ -131,7 +131,7 @@ IB_INLINE ulint page_cur_search( const buf_block_t* block, const dict_index_t* d
 IB_INLINE rec_t* page_cur_tuple_insert(page_cur_t* cursor, const dtuple_t* tuple, dict_index_t* dict_index, ulint n_ext, mtr_t* mtr)
 {
     ulint size = rec_get_converted_size(dict_index, tuple, n_ext);
-    mem_heap_t* heap = mem_heap_create(size + (4 + REC_OFFS_HEADER_SIZE + dtuple_get_n_fields(tuple)) * sizeof *offsets);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(size + (4 + REC_OFFS_HEADER_SIZE + dtuple_get_n_fields(tuple)) * sizeof *offsets);
     rec_t* rec = rec_convert_dtuple_to_rec((byte*) mem_heap_alloc(heap, size), dict_index, tuple, n_ext);
     ulint* offsets = rec_get_offsets(rec, dict_index, NULL, ULINT_UNDEFINED, &heap);
 #ifdef WITH_ZIP
@@ -142,7 +142,7 @@ IB_INLINE rec_t* page_cur_tuple_insert(page_cur_t* cursor, const dtuple_t* tuple
     {
         rec = page_cur_insert_rec_low(cursor->rec, dict_index, rec, offsets, mtr);
     }
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
     return rec;
 }
 

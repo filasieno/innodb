@@ -600,7 +600,7 @@ struct trx_struct{
 					return control to the original query
 					graph for error processing */
 	trx_sig_t	sig;		/*!< one signal object can be allocated
-					in this space, avoiding mem_alloc */
+					in this space, avoiding IB_MEM_ALLOC */
 	UT_LIST_BASE_NODE_T(trx_sig_t)
 			signals;	/*!< queue of processed or pending
 					signals to the trx */

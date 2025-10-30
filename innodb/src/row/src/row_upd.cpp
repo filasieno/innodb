@@ -199,7 +199,7 @@ static ulint row_upd_check_references_constraints(
 	rec = btr_pcur_get_rec(pcur);
 	ut_ad(rec_offs_validate(rec, index, offsets));
 
-	heap = mem_heap_create(500);
+	heap = IB_MEM_HEAP_CREATE(500);
 
 	entry = row_rec_to_index_entry(ROW_COPY_DATA, rec, index, offsets,
 				       &n_ext, heap);
@@ -278,7 +278,7 @@ func_exit:
 		dict_unfreeze_data_dictionary(trx);
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(err);
 }
@@ -316,7 +316,7 @@ upd_node_create(
 
 	node->select = NULL;
 
-	node->heap = mem_heap_create(128);
+	node->heap = IB_MEM_HEAP_CREATE(128);
 	node->magic_n = UPD_NODE_MAGIC_N;
 
 	node->cmpl_info = 0;
@@ -1421,7 +1421,7 @@ row_upd_store_row(
 	}
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 }
 
@@ -1452,7 +1452,7 @@ row_upd_sec_index_entry(
 
 	check_ref = row_upd_index_is_referenced(index, trx);
 
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 
 	/* Build old index entry */
 	entry = row_build_index_entry(node->row, node->ext, index, heap);
@@ -1523,7 +1523,7 @@ row_upd_sec_index_entry(
 	err = row_ins_index_entry(index, entry, 0, TRUE, thr);
 
 func_exit:
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(err);
 }
@@ -1621,7 +1621,7 @@ row_upd_clust_rec_by_insert(
 			if (err != DB_SUCCESS) {
 				mtr_commit(mtr);
 				if (IB_LIKELY_NULL(heap)) {
-					mem_heap_free(heap);
+					IB_MEM_HEAP_FREE(heap);
 				}
 				return(err);
 			}
@@ -1631,7 +1631,7 @@ row_upd_clust_rec_by_insert(
 	mtr_commit(mtr);
 
 	if (!heap) {
-		heap = mem_heap_create(500);
+		heap = IB_MEM_HEAP_CREATE(500);
 	}
 	node->state = UPD_NODE_INSERT_CLUSTERED;
 
@@ -1657,7 +1657,7 @@ row_upd_clust_rec_by_insert(
 	err = row_ins_index_entry(index, entry,
 				  node->upd_ext ? node->upd_ext->n_ext : 0,
 				  TRUE, thr);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(err);
 }
@@ -1755,7 +1755,7 @@ row_upd_clust_rec(
 	}
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 
 	if (big_rec) {
@@ -1920,7 +1920,7 @@ row_upd_clust_step(
 		}
 exit_func:
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 		return(err);
 	}
@@ -1937,7 +1937,7 @@ exit_func:
 	}
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 
 	if (node->cmpl_info & UPD_NODE_NO_ORD_CHANGE) {

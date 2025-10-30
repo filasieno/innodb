@@ -87,7 +87,7 @@ static ulint dict_load_foreign(const char* id, ibool check_charsets);
 IB_INTERN char* dict_get_first_table_name_in_db(const char* name)
 {
     ut_ad(mutex_own(&(dict_sys->mutex)));
-    mem_heap_t* heap = mem_heap_create(1000);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(1000);
     mtr_t mtr;
     mtr_start(&mtr);
     dict_table_t* sys_tables = dict_table_get_low("SYS_TABLES");
@@ -104,7 +104,7 @@ loop:
     if (!btr_pcur_is_on_user_rec(&pcur)) {
         btr_pcur_close(&pcur);
         mtr_commit(&mtr);
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return NULL;
     }
     ulint len;
@@ -112,14 +112,14 @@ loop:
     if (len < strlen(name) || ut_memcmp(name, field, strlen(name)) != 0) {
         btr_pcur_close(&pcur);
         mtr_commit(&mtr);
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return NULL;
     }
     if (!rec_get_deleted_flag(rec, 0)) {
         char* table_name = mem_strdupl((char*) field, len);
         btr_pcur_close(&pcur);
         mtr_commit(&mtr);
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return table_name;
     }
     btr_pcur_move_to_next_user_rec(&pcur, &mtr);
@@ -162,7 +162,7 @@ loop:
         btr_pcur_store_position(&pcur, &mtr);
         mtr_commit(&mtr);
         dict_table_t* table = dict_table_get_low(table_name);
-        mem_free(table_name);
+        IB_MEM_FREE(table_name);
         if (table == NULL) {
             ib_log(state, "InnoDB: Failed to load table ");
             ut_print_namel(state->stream, (char*) field, len);
@@ -255,7 +255,7 @@ loop:
             // It is a normal database startup: create the space object and check that the .ibd file exists. 
             fil_open_single_table_tablespace(FALSE, space_id, flags, name);
         }
-        mem_free(name);
+        IB_MEM_FREE(name);
         if (space_id > max_space_id) {
             max_space_id = space_id;
         }
@@ -271,7 +271,7 @@ IB_INTERN dict_table_t* dict_load_table(ib_recovery_t recovery, const char* name
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
-	mem_heap_t* heap = mem_heap_create(32000);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(32000);
 
 	mtr_t mtr;
 	mtr_start(&mtr);
@@ -295,7 +295,7 @@ IB_INTERN dict_table_t* dict_load_table(ib_recovery_t recovery, const char* name
 err_exit:
 		btr_pcur_close(&pcur);
 		mtr_commit(&mtr);
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 
 		return NULL;
 	}
@@ -413,7 +413,7 @@ err_exit:
 	}
 #endif // 0
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	return table;
 }
 
@@ -430,7 +430,7 @@ IB_INTERN dict_table_t* dict_load_table_on_id(ib_recovery_t recovery, dulint tab
 	dict_table_t* sys_tables = dict_sys->sys_tables;
 	dict_index_t* sys_table_ids = dict_table_get_next_index(dict_table_get_first_index(sys_tables));
 	ut_a(!dict_table_is_comp(sys_tables));
-	mem_heap_t* heap = mem_heap_create(256);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
 
 	dtuple_t* tuple = dtuple_create(heap, 1);
 	dfield_t* dfield = dtuple_get_nth_field(tuple, 0);
@@ -449,7 +449,7 @@ IB_INTERN dict_table_t* dict_load_table_on_id(ib_recovery_t recovery, dulint tab
 		// Not found
 		btr_pcur_close(&pcur);
 		mtr_commit(&mtr);
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return NULL;
 	}
 
@@ -465,7 +465,7 @@ IB_INTERN dict_table_t* dict_load_table_on_id(ib_recovery_t recovery, dulint tab
 	if (ut_dulint_cmp(table_id, mach_read_from_8(field)) != 0) {
 		btr_pcur_close(&pcur);
 		mtr_commit(&mtr);
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return NULL;
 	}
 
@@ -476,16 +476,16 @@ IB_INTERN dict_table_t* dict_load_table_on_id(ib_recovery_t recovery, dulint tab
 
 	btr_pcur_close(&pcur);
 	mtr_commit(&mtr);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	return table;
 }
 
 IB_INTERN void dict_load_sys_table(dict_table_t* table)
 {
     ut_ad(mutex_own(&(dict_sys->mutex)));
-    mem_heap_t* heap = mem_heap_create(1000);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(1000);
     dict_load_indexes(table, heap);
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
 }
 
 IB_INTERN ulint dict_load_foreigns(const char* table_name, ibool check_charsets)
@@ -506,7 +506,7 @@ IB_INTERN ulint dict_load_foreigns(const char* table_name, ibool check_charsets)
 	dict_index_t* sec_index = dict_table_get_next_index(dict_table_get_first_index(sys_foreign));
 
 start_load:
-	mem_heap_t* heap = mem_heap_create(256);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
 	dtuple_t* tuple  = dtuple_create(heap, 1);
 	dfield_t* dfield = dtuple_get_nth_field(tuple, 0);
 
@@ -555,7 +555,7 @@ loop:
 	ulint err = dict_load_foreign(id, check_charsets);
 	if (err != DB_SUCCESS) {
 		btr_pcur_close(&pcur);
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return err;
 	}
 
@@ -569,7 +569,7 @@ next_rec:
 load_next_index:
 	btr_pcur_close(&pcur);
 	mtr_commit(&mtr);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	sec_index = dict_table_get_next_index(sec_index);
 	if (sec_index != NULL) {
@@ -914,7 +914,7 @@ static ulint dict_load_foreign(const char* id, ibool check_charsets)
 {
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
-	mem_heap_t* heap2 = mem_heap_create(1000);
+	mem_heap_t* heap2 = IB_MEM_HEAP_CREATE(1000);
 
 	mtr_t mtr;
 	mtr_start(&mtr);
@@ -940,7 +940,7 @@ static ulint dict_load_foreign(const char* id, ibool check_charsets)
 
 		btr_pcur_close(&pcur);
 		mtr_commit(&mtr);
-		mem_heap_free(heap2);
+		IB_MEM_HEAP_FREE(heap2);
 
 		return DB_ERROR;
 	}
@@ -953,14 +953,14 @@ static ulint dict_load_foreign(const char* id, ibool check_charsets)
 		ib_log(state, "InnoDB: Error B: cannot load foreign constraint %s\n", id);
 		btr_pcur_close(&pcur);
 		mtr_commit(&mtr);
-		mem_heap_free(heap2);
+		IB_MEM_HEAP_FREE(heap2);
 
 		return DB_ERROR;
 	}
 
 	// Read the table names and the number of columns associated with the constraint
 
-	mem_heap_free(heap2);
+	IB_MEM_HEAP_FREE(heap2);
 	dict_foreign_t* foreign = dict_mem_foreign_create();
 	ulint n_fields_and_type = mach_read_from_4(rec_get_nth_field_old(rec, 5, &len));
 	ut_a(len == 4);

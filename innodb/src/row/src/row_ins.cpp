@@ -76,7 +76,7 @@ IB_INTERN ins_node_t* row_ins_node_create(ib_ins_mode_t ins_type, dict_table_t* 
 	node->entry = NULL;
 	node->select = NULL;
 	node->trx_id = ut_dulint_zero;
-	node->entry_sys_heap = mem_heap_create(128);
+	node->entry_sys_heap = IB_MEM_HEAP_CREATE(128);
 	node->magic_n = INS_NODE_MAGIC_N;
 	return node;
 }
@@ -167,7 +167,7 @@ row_ins_sec_index_entry_by_modify(
 	ut_ad(rec_get_deleted_flag(rec, dict_table_is_comp(cursor->index->table)));
 
 	// We know that in the alphabetical ordering, entry and rec are identified. But in their binary form there may be differences if there are char fields in them. Therefore we have to calculate the difference.
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 	update = row_upd_build_sec_rec_difference_binary(cursor->index, entry, rec, thr_get_trx(thr), heap);
 	if (mode == BTR_MODIFY_LEAF) {
 		// Try an optimistic updating of the record, keeping changes within the page
@@ -188,7 +188,7 @@ row_ins_sec_index_entry_by_modify(
 		ut_ad(!dummy_big_rec);
 	}
 func_exit:
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	return err;
 }
 
@@ -211,7 +211,7 @@ row_ins_clust_index_entry_by_modify(
 	*big_rec = NULL;
 	ut_ad(rec_get_deleted_flag(rec, dict_table_is_comp(cursor->index->table)));
 	if (!*heap) {
-		*heap = mem_heap_create(1024);
+		*heap = IB_MEM_HEAP_CREATE(1024);
 	}
 
 	// Build an update vector containing all the fields to be modified; NOTE that this vector may NOT contain system columns trx_id or roll_ptr
@@ -736,7 +736,7 @@ row_ins_foreign_check_on_constraint(
 		update node. The child is used in the cascade or set null
 		operation. */
 
-		node->cascade_heap = mem_heap_create(128);
+		node->cascade_heap = IB_MEM_HEAP_CREATE(128);
 		node->cascade_node = row_create_update_node(
 			table, node->cascade_heap);
 		que_node_set_parent(node->cascade_node, node);
@@ -822,7 +822,7 @@ row_ins_foreign_check_on_constraint(
 
 		clust_index = dict_table_get_first_index(table);
 
-		tmp_heap = mem_heap_create(256);
+		tmp_heap = IB_MEM_HEAP_CREATE(256);
 
 		ref = row_build_row_ref(ROW_COPY_POINTERS, index, rec,
 					tmp_heap);
@@ -915,7 +915,7 @@ row_ins_foreign_check_on_constraint(
 		/* Build the appropriate update vector which sets changing
 		foreign->n_fields first fields in rec to new values */
 
-		upd_vec_heap = mem_heap_create(256);
+		upd_vec_heap = IB_MEM_HEAP_CREATE(256);
 
 		n_to_update = row_ins_cascade_calc_update_vec(node, foreign,
 							      upd_vec_heap);
@@ -990,22 +990,22 @@ row_ins_foreign_check_on_constraint(
 	btr_pcur_restore_position(BTR_SEARCH_LEAF, pcur, mtr);
 
 	if (tmp_heap) {
-		mem_heap_free(tmp_heap);
+		IB_MEM_HEAP_FREE(tmp_heap);
 	}
 
 	if (upd_vec_heap) {
-		mem_heap_free(upd_vec_heap);
+		IB_MEM_HEAP_FREE(upd_vec_heap);
 	}
 
 	return(err);
 
 nonstandard_exit_func:
 	if (tmp_heap) {
-		mem_heap_free(tmp_heap);
+		IB_MEM_HEAP_FREE(tmp_heap);
 	}
 
 	if (upd_vec_heap) {
-		mem_heap_free(upd_vec_heap);
+		IB_MEM_HEAP_FREE(upd_vec_heap);
 	}
 
 	btr_pcur_store_position(pcur, mtr);
@@ -1395,7 +1395,7 @@ do_possible_lock_wait:
 
 exit_func:
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(err);
 }
@@ -1649,7 +1649,7 @@ row_ins_scan_sec_index_for_duplicate(
 	} while (btr_pcur_move_to_next(&pcur, &mtr));
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	mtr_commit(&mtr);
 
@@ -1795,7 +1795,7 @@ row_ins_duplicate_error_in_clust(
 	err = DB_SUCCESS;
 func_exit:
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(err);
 }
@@ -2024,7 +2024,7 @@ function_exit:
 	}
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(err);
 }

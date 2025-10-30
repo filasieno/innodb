@@ -24,61 +24,90 @@
 #include "ut_mem.hpp"
 #include "ut_byte.hpp"
 #include "ut_rnd.hpp"
+
 #ifndef IB_HOTBACKUP
 # include "sync0sync.h"
-#endif /* IB_HOTBACKUP */
+#endif // IB_HOTBACKUP
+
 #include "ut_lst.hpp"
 #include "mach_data.hpp"
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Types 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-/* The info structure stored at the beginning of a heap block */
+/// \brief The info structure stored at the beginning of a heap block
 typedef struct mem_block_info_struct mem_block_info_t;
 
-/* A block of a memory heap consists of the info structure
-followed by an area of memory */
-typedef mem_block_info_t	mem_block_t;
+/// \brief A block of a memory heap consists of the info structure followed by an area of memory
+typedef mem_block_info_t mem_block_t;
 
-/* A memory heap is a nonempty linear list of memory blocks */
+/// \brief A memory heap is a nonempty linear list of memory blocks
 typedef mem_block_t	mem_heap_t;
 
-/* Types of allocation for memory heaps: DYNAMIC means allocation from the
-dynamic memory pool of the C compiler, BUFFER means allocation from the
-buffer pool; the latter method is used for very big heaps */
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Constants
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-constinit ulint MEM_HEAP_DYNAMIC = 0;	/* the most common type */
+/// \brief allocation from the dynamic memory pool of the C compiler; the most common type
+constinit ulint MEM_HEAP_DYNAMIC = 0; 
+
+/// \brief means allocation from the buffer pool
 constinit ulint MEM_HEAP_BUFFER = 1;
-constinit ulint MEM_HEAP_BTR_SEARCH = 2;	/* this flag can optionally be ORed to MEM_HEAP_BUFFER, in which case heap->free_block is used in some cases for memory allocations, and if it's NULL, the memory allocation functions can return NULL. */
 
-// The following start size is used for the first block in the memory heap if
-// the size is not specified, i.e., 0 is given as the parameter in the call of
-// create. The standard size is the maximum (payload) size of the blocks used for
-// allocations of small buffers.
+/// \brief this flag can optionally be ORed to MEM_HEAP_BUFFER, in which case heap->free_block is used in some cases for memory allocations, and if it's NULL, the memory allocation functions can return NULL.
+constinit ulint MEM_HEAP_BTR_SEARCH = 2;
+
+/// \brief Magic number for a memory heap block
+constinit ulint MEM_BLOCK_MAGIC_N = 764741555;
+
+/// \brief Magic number for a freed memory heap block
+constinit ulint MEM_FREED_BLOCK_MAGIC_N = 547711122;
+
+/// \brief Header size for a memory heap block
+constinit ulint MEM_BLOCK_HEADER_SIZE = ut_calc_align(sizeof(mem_block_info_t), IB_MEM_ALIGNMENT);
+
+/// \brief used for the first block in the memory heap if the size is not specified, i.e., 0 is given as the parameter in the call of
+/// create. The standard size is the maximum (payload) size of the blocks used for
+/// allocations of small buffers.
 
 constinit ulint MEM_BLOCK_START_SIZE = 64;
 constinit ulint MEM_BLOCK_STANDARD_SIZE = (IB_PAGE_SIZE >= 16384 ? 8000 : MEM_MAX_ALLOC_IN_BUF);
 
-// If a memory heap is allowed to grow into the buffer pool, the following is the maximum size for a single allocated buffer:
+/// \brief If a memory heap is allowed to grow into the buffer pool, the following is the maximum size for a single allocated buffer:
 constinit ulint MEM_MAX_ALLOC_IN_BUF = (IB_PAGE_SIZE - 200);
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Macros 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#define IB_MEM_ALLOC(N)	                    mem_alloc_func((N), NULL, __FILE__, __LINE__)
+#define IB_MEM_ALLOC_EX(N,S)                mem_alloc_func((N), (S), __FILE__, __LINE__)
+#define IB_MEM_FREE(PTR)	                mem_free_func((PTR), __FILE__, __LINE__)
+#define IB_MEM_ZALLOC(N)	                memset(IB_MEM_ALLOC(N), 0, (N))
+
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation. */
+#define IB_MEM_HEAP_CREATE(N)               mem_heap_create_func((N), MEM_HEAP_DYNAMIC, __FILE__, __LINE__)
+
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation.
+#define IB_MEM_HEAP_CREATE_IN_BUFFER(N)     mem_heap_create_func((N), MEM_HEAP_BUFFER, __FILE__, __LINE__)
+
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation.
+#define IB_MEM_HEAP_CREATE_IN_BTR_SEARCH(N) mem_heap_create_func((N), MEM_HEAP_BTR_SEARCH | MEM_HEAP_BUFFER, __FILE__, __LINE__)
+
+/// \brief Use this macro instead of the corresponding function! Macro for memory heap freeing.
+#define IB_MEM_HEAP_FREE(heap)              mem_heap_free_func((heap), __FILE__, __LINE__)
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Routines 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 /// \brief Initializes the memory system.
 /// \param [in] size common pool size in bytes
-IB_INTERN void mem_init(ulint	size);
+IB_INTERN void mem_init(ulint size);
 
 /// \brief Closes the memory system.
 IB_INTERN void mem_close(void);
-
-/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation. */
-#define mem_heap_create(N) mem_heap_create_func((N), MEM_HEAP_DYNAMIC, __FILE__, __LINE__)
-
-/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation.
-#define mem_heap_create_in_buffer(N) mem_heap_create_func((N), MEM_HEAP_BUFFER, __FILE__, __LINE__)
-
-/// \brief Use this macro instead of the corresponding function! Macro for memory heap creation.
-#define mem_heap_create_in_btr_search(N) mem_heap_create_func((N), MEM_HEAP_BTR_SEARCH | MEM_HEAP_BUFFER, __FILE__, __LINE__)
-
-/// \brief Use this macro instead of the corresponding function! Macro for memory heap freeing.
-#define mem_heap_free(heap) mem_heap_free_func((heap), __FILE__, __LINE__)
 
 /// \brief Creates a memory heap.
 /// \details For debugging purposes, takes also the file name and line as arguments. Use the corresponding macros instead of this function.
@@ -108,41 +137,37 @@ IB_INLINE void* mem_heap_zalloc(mem_heap_t* heap, ulint n);
 /// \return allocated storage, NULL if did not succeed (only possible for MEM_HEAP_BTR_SEARCH type heaps)
 IB_INLINE void* mem_heap_alloc(mem_heap_t* heap, ulint n);
 
-
 /// \brief Frees the space in a memory heap exceeding the pointer given.
 /// \details The pointer must have been acquired from mem_heap_get_heap_top. The first memory block of the heap is not freed.
 /// \param [in] heap from which to free
 /// \param [in] old_top pointer to old top of heap
 IB_INLINE void mem_heap_free_heap_top(mem_heap_t* heap, byte* old_top);
+
 /// \brief Empties a memory heap.
 /// \details The first memory block of the heap is not freed.
 /// \param [in] heap to empty
 IB_INLINE void mem_heap_empty(mem_heap_t* heap);
+
 /// \brief Returns a pointer to the topmost element in a memory heap.
 /// \details The size of the element must be given.
 /// \param [in] heap memory heap
 /// \param [in] n size of the topmost element
 /// \return pointer to the topmost element
 IB_INLINE void* mem_heap_get_top(mem_heap_t* heap, ulint n);
+
 /// \brief Frees the topmost element in a memory heap.
 /// \details The size of the element must be given.
 /// \param [in] heap memory heap
 /// \param [in] n size of the topmost element
 IB_INLINE void mem_heap_free_top(mem_heap_t* heap, ulint n);
+
 /// \brief Returns the space in bytes occupied by a memory heap.
 /// \param [in] heap heap
 /// \return space in bytes occupied by the memory heap
 IB_INLINE ulint mem_heap_get_size(mem_heap_t* heap);
-/**************************************************************//**
-Use this macro instead of the corresponding function!
-Macro for memory buffer allocation */
 
-#define mem_zalloc(N)	memset(mem_alloc(N), 0, (N));
-
-#define mem_alloc(N)	mem_alloc_func((N), NULL, __FILE__, __LINE__)
-#define mem_alloc2(N,S)	mem_alloc_func((N), (S), __FILE__, __LINE__)
 /// \brief Allocates a single buffer of memory from the dynamic memory of the C compiler.
-/// \details Is like malloc of C. The buffer must be freed with mem_free. NOTE: Use the corresponding macro instead of this function.
+/// \details Is like malloc of C. The buffer must be freed with IB_MEM_FREE. NOTE: Use the corresponding macro instead of this function.
 /// \param [in] n requested size in bytes
 /// \param [out] size allocated size in bytes, or NULL
 /// \param [in] file_name file name where created
@@ -150,11 +175,6 @@ Macro for memory buffer allocation */
 /// \return own: free storage
 IB_INLINE void* mem_alloc_func(ulint n, ulint* size, const char* file_name, ulint line);
 
-/**************************************************************//**
-Use this macro instead of the corresponding function!
-Macro for memory buffer freeing */
-
-#define mem_free(PTR)	mem_free_func((PTR), __FILE__, __LINE__)
 /// \brief Frees a single buffer of storage from the dynamic memory of C compiler.
 /// \details Similar to free of C. NOTE: Use the corresponding macro instead of this function.
 /// \param [in] ptr buffer to be freed
@@ -164,12 +184,13 @@ IB_INLINE void mem_free_func(void* ptr, const char* file_name, ulint line);
 
 /// \brief Duplicates a NUL-terminated string.
 /// \param [in] str string to be copied
-/// \return own: a copy of the string, must be deallocated with mem_free
+/// \return own: a copy of the string, must be deallocated with IB_MEM_FREE
 IB_INLINE char* mem_strdup(const char* str);
+
 /// \brief Makes a NUL-terminated copy of a nonterminated string.
 /// \param [in] str string to be copied
 /// \param [in] len length of str, in bytes
-/// \return own: a copy of the string, must be deallocated with mem_free
+/// \return own: a copy of the string, must be deallocated with IB_MEM_FREE
 IB_INLINE char* mem_strdupl(const char* str, ulint len);
 
 /// \brief Duplicates a NUL-terminated string, allocated from a memory heap.
@@ -177,6 +198,7 @@ IB_INLINE char* mem_strdupl(const char* str, ulint len);
 /// \param [in] str string to be copied
 /// \return own: a copy of the string
 IB_INTERN char* mem_heap_strdup(mem_heap_t* heap, const char* str);
+
 /// \brief Makes a NUL-terminated copy of a nonterminated string, allocated from a memory heap.
 /// \param [in] heap memory heap where string is allocated
 /// \param [in] str string to be copied
@@ -210,59 +232,6 @@ IB_INTERN char* mem_heap_printf(mem_heap_t* heap, const char* format, ...) __att
 /// \param [in] heap heap to verify
 IB_INTERN void mem_heap_verify(const mem_heap_t* heap);
 #endif
-
-/*#######################################################################*/
-
-/* The info header of a block in a memory heap */
-
-struct mem_block_info_struct {
-	ulint	magic_n;/* magic number for debugging */
-	char	file_name[8];/* file name where the mem heap was created */
-	ulint	line;	/*!< line number where the mem heap was created */
-	UT_LIST_BASE_NODE_T(mem_block_t) base; /* In the first block in the
-			the list this is the base node of the list of blocks;
-			in subsequent blocks this is undefined */
-	UT_LIST_NODE_T(mem_block_t) list; /* This contains pointers to next
-			and prev in the list. The first block allocated
-			to the heap is also the first block in this list,
-			though it also contains the base node of the list. */
-	ulint	len;	/*!< physical length of this block in bytes */
-	ulint	total_size; /* physical length in bytes of all blocks
-			in the heap. This is defined only in the base
-			node and is set to ULINT_UNDEFINED in others. */
-	ulint	type;	/*!< type of heap: MEM_HEAP_DYNAMIC, or
-			MEM_HEAP_BUF possibly ORed to MEM_HEAP_BTR_SEARCH */
-	ulint	free;	/*!< offset in bytes of the first free position for
-			user data in the block */
-	ulint	start;	/*!< the value of the struct field 'free' at the
-			creation of the block */
-#ifndef IB_HOTBACKUP
-	void*	free_block;
-			/* if the MEM_HEAP_BTR_SEARCH bit is set in type,
-			and this is the heap root, this can contain an
-			allocated buffer frame, which can be appended as a
-			free block to the heap, if we need more space;
-			otherwise, this is NULL */
-	void*	buf_block;
-			/* if this block has been allocated from the buffer
-			pool, this contains the buf_block_t handle;
-			otherwise, this is NULL */
-#endif /* !IB_HOTBACKUP */
-#ifdef IB_DEBUG
-	UT_LIST_NODE_T(mem_block_t) mem_block_list;
-			/* List of all mem blocks allocated; protected
-			by the mem_comm_pool mutex */
-#endif
-};
-
-/// \brief Magic number for a memory heap block
-constinit ulint MEM_BLOCK_MAGIC_N = 764741555;
-
-/// \brief Magic number for a freed memory heap block
-constinit ulint MEM_FREED_BLOCK_MAGIC_N = 547711122;
-
-/// \brief Header size for a memory heap block
-constinit ulint MEM_BLOCK_HEADER_SIZE = ut_calc_align(sizeof(mem_block_info_t), IB_MEM_ALIGNMENT);
 
 #include "mem_dbg.hpp"
 

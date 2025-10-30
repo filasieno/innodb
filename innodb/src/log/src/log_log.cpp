@@ -578,7 +578,7 @@ failure:
 /// \brief Initializes the log.
 IB_INTERN void innobase_log_init(void)
 {
-	log_sys = mem_alloc(sizeof(log_t));
+	log_sys = IB_MEM_ALLOC(sizeof(log_t));
 
 	mutex_create(&log_sys->mutex, SYNC_LOG);
 
@@ -591,7 +591,7 @@ IB_INTERN void innobase_log_init(void)
 	ut_a(LOG_BUFFER_SIZE >= 16 * OS_FILE_LOG_BLOCK_SIZE);
 	ut_a(LOG_BUFFER_SIZE >= 4 * IB_PAGE_SIZE);
 
-	log_sys->buf_ptr = mem_alloc(LOG_BUFFER_SIZE + OS_FILE_LOG_BLOCK_SIZE);
+	log_sys->buf_ptr = IB_MEM_ALLOC(LOG_BUFFER_SIZE + OS_FILE_LOG_BLOCK_SIZE);
 	log_sys->buf = ut_align(log_sys->buf_ptr, OS_FILE_LOG_BLOCK_SIZE);
 
 	log_sys->buf_size = LOG_BUFFER_SIZE;
@@ -636,7 +636,7 @@ IB_INTERN void innobase_log_init(void)
 
 	rw_lock_create(&log_sys->checkpoint_lock, SYNC_NO_ORDER_CHECK);
 
-	log_sys->checkpoint_buf_ptr = mem_alloc(2 * OS_FILE_LOG_BLOCK_SIZE);
+	log_sys->checkpoint_buf_ptr = IB_MEM_ALLOC(2 * OS_FILE_LOG_BLOCK_SIZE);
 
 	log_sys->checkpoint_buf = ut_align(log_sys->checkpoint_buf_ptr, OS_FILE_LOG_BLOCK_SIZE);
 
@@ -700,7 +700,7 @@ IB_INTERN void log_group_init(ulint id, ulint n_files, ulint file_size, ulint sp
 
 	log_group_t *group;
 
-	group = mem_alloc(sizeof(log_group_t));
+	group = IB_MEM_ALLOC(sizeof(log_group_t));
 
 	group->id = id;
 	group->n_files = n_files;
@@ -711,23 +711,23 @@ IB_INTERN void log_group_init(ulint id, ulint n_files, ulint file_size, ulint sp
 	group->lsn_offset = LOG_FILE_HDR_SIZE;
 	group->n_pending_writes = 0;
 
-	group->file_header_bufs_ptr = mem_alloc(sizeof(byte *) * n_files);
-	group->file_header_bufs = mem_alloc(sizeof(byte *) * n_files);
+	group->file_header_bufs_ptr = IB_MEM_ALLOC(sizeof(byte *) * n_files);
+	group->file_header_bufs = IB_MEM_ALLOC(sizeof(byte *) * n_files);
 #ifdef IB_LOG_ARCHIVE
-	group->archive_file_header_bufs_ptr = mem_alloc(sizeof(byte *) * n_files);
+	group->archive_file_header_bufs_ptr = IB_MEM_ALLOC(sizeof(byte *) * n_files);
 
-	group->archive_file_header_bufs = mem_alloc(sizeof(byte *) * n_files);
+	group->archive_file_header_bufs = IB_MEM_ALLOC(sizeof(byte *) * n_files);
 #endif	  // IB_LOG_ARCHIVE
 
 	for (i = 0; i < n_files; i++) {
-		group->file_header_bufs_ptr[i] = mem_alloc(LOG_FILE_HDR_SIZE + OS_FILE_LOG_BLOCK_SIZE);
+		group->file_header_bufs_ptr[i] = IB_MEM_ALLOC(LOG_FILE_HDR_SIZE + OS_FILE_LOG_BLOCK_SIZE);
 
 		group->file_header_bufs[i] = ut_align(group->file_header_bufs_ptr[i], OS_FILE_LOG_BLOCK_SIZE);
 
 		memset(*(group->file_header_bufs + i), '\0', LOG_FILE_HDR_SIZE);
 
 #ifdef IB_LOG_ARCHIVE
-		group->archive_file_header_bufs_ptr[i] = mem_alloc(LOG_FILE_HDR_SIZE + OS_FILE_LOG_BLOCK_SIZE);
+		group->archive_file_header_bufs_ptr[i] = IB_MEM_ALLOC(LOG_FILE_HDR_SIZE + OS_FILE_LOG_BLOCK_SIZE);
 
 		group->archive_file_header_bufs[i] = ut_align(group->archive_file_header_bufs_ptr[i], OS_FILE_LOG_BLOCK_SIZE);
 
@@ -742,7 +742,7 @@ IB_INTERN void log_group_init(ulint id, ulint n_files, ulint file_size, ulint sp
 	group->archived_offset = 0;
 #endif	  // IB_LOG_ARCHIVE
 
-	group->checkpoint_buf_ptr = mem_alloc(2 * OS_FILE_LOG_BLOCK_SIZE);
+	group->checkpoint_buf_ptr = IB_MEM_ALLOC(2 * OS_FILE_LOG_BLOCK_SIZE);
 
 	group->checkpoint_buf = ut_align(group->checkpoint_buf_ptr, OS_FILE_LOG_BLOCK_SIZE);
 
@@ -2922,7 +2922,7 @@ ibool log_check_log_recs(
 	start = ut_align_down(buf, OS_FILE_LOG_BLOCK_SIZE);
 	end = ut_align(buf + len, OS_FILE_LOG_BLOCK_SIZE);
 
-	buf1 = mem_alloc((end - start) + OS_FILE_LOG_BLOCK_SIZE);
+	buf1 = IB_MEM_ALLOC((end - start) + OS_FILE_LOG_BLOCK_SIZE);
 	scan_buf = ut_align(buf1, OS_FILE_LOG_BLOCK_SIZE);
 
 	ut_memcpy(scan_buf, start, end - start);
@@ -2932,7 +2932,7 @@ ibool log_check_log_recs(
 	ut_a(scanned_lsn == buf_start_lsn + len);
 	ut_a(recv_sys->recovered_lsn == scanned_lsn);
 
-	mem_free(buf1);
+	IB_MEM_FREE(buf1);
 
 	return (TRUE);
 }
@@ -3020,23 +3020,23 @@ static void log_group_close(
 	ulint i;
 
 	for (i = 0; i < group->n_files; ++i) {
-		mem_free(group->file_header_bufs_ptr[i]);
+		IB_MEM_FREE(group->file_header_bufs_ptr[i]);
 #ifdef IB_LOG_ARCHIVE
-		mem_free(group->archive_file_header_bufs_ptr[i]);
+		IB_MEM_FREE(group->archive_file_header_bufs_ptr[i]);
 #endif
 	}
 
-	mem_free(group->file_header_bufs);
-	mem_free(group->file_header_bufs_ptr);
+	IB_MEM_FREE(group->file_header_bufs);
+	IB_MEM_FREE(group->file_header_bufs_ptr);
 
 #ifdef IB_LOG_ARCHIVE
-	mem_free(group->archive_file_header_bufs);
-	mem_free(group->archive_file_header_bufs_ptr);
+	IB_MEM_FREE(group->archive_file_header_bufs);
+	IB_MEM_FREE(group->archive_file_header_bufs_ptr);
 #endif	  // IB_LOG_ARCHIVE
 
-	mem_free(group->checkpoint_buf_ptr);
+	IB_MEM_FREE(group->checkpoint_buf_ptr);
 
-	mem_free(group);
+	IB_MEM_FREE(group);
 }
 
 /**********************************************************
@@ -3063,9 +3063,9 @@ void log_shutdown(void)
 		log_group_close(prev_group);
 	}
 
-	mem_free(log_sys->buf_ptr);
+	IB_MEM_FREE(log_sys->buf_ptr);
 	log_sys->buf_ptr = NULL;
-	mem_free(log_sys->checkpoint_buf_ptr);
+	IB_MEM_FREE(log_sys->checkpoint_buf_ptr);
 	log_sys->checkpoint_buf_ptr = NULL;
 
 	os_event_free(log_sys->no_flush_event);
@@ -3094,7 +3094,7 @@ void log_mem_free(void)
 {
 	if (log_sys != NULL) {
 		recv_sys_mem_free();
-		mem_free(log_sys);
+		IB_MEM_FREE(log_sys);
 
 		log_sys = NULL;
 	}

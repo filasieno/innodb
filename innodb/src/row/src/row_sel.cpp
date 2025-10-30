@@ -239,7 +239,7 @@ inequal:
 
 func_exit:
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(is_equal);
 }
@@ -266,7 +266,7 @@ IB_INTERN void sel_node_free_private(sel_node_t* node)
 			btr_pcur_close(&(plan->clust_pcur));
 
 			if (plan->old_vers_heap) {
-				mem_heap_free(plan->old_vers_heap);
+				IB_MEM_HEAP_FREE(plan->old_vers_heap);
 			}
 		}
 	}
@@ -407,7 +407,7 @@ row_sel_fetch_columns(
 				/* Copy an externally stored field to the
 				temporary heap */
 
-				heap = mem_heap_create(1);
+				heap = IB_MEM_HEAP_CREATE(1);
 
 				data = btr_rec_copy_externally_stored_field(
 					rec, offsets,
@@ -433,7 +433,7 @@ row_sel_fetch_columns(
 			}
 
 			if (IB_LIKELY_NULL(heap)) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 			}
 		}
 
@@ -454,7 +454,7 @@ sel_col_prefetch_buf_alloc(
 
 	ut_ad(que_node_get_type(column) == QUE_NODE_SYMBOL);
 
-	column->prefetch_buf = mem_alloc(SEL_MAX_N_PREFETCH
+	column->prefetch_buf = IB_MEM_ALLOC(SEL_MAX_N_PREFETCH
 					 * sizeof(sel_buf_t));
 	for (i = 0; i < SEL_MAX_N_PREFETCH; i++) {
 		sel_buf = column->prefetch_buf + i;
@@ -475,7 +475,7 @@ IB_INTERN void sel_col_prefetch_buf_free(sel_buf_t* prefetch_buf)
 	for (i = 0; i < SEL_MAX_N_PREFETCH; i++) {
 		sel_buf = prefetch_buf + i;
 		if (sel_buf->val_buf_size > 0) {
-			mem_free(sel_buf->data);
+			IB_MEM_FREE(sel_buf->data);
 		}
 	}
 }
@@ -706,7 +706,7 @@ row_sel_build_prev_vers(
 	if (*old_vers_heap) {
 		mem_heap_empty(*old_vers_heap);
 	} else {
-		*old_vers_heap = mem_heap_create(512);
+		*old_vers_heap = IB_MEM_HEAP_CREATE(512);
 	}
 
 	err = row_vers_build_for_consistent_read(
@@ -872,7 +872,7 @@ func_exit:
 	err = DB_SUCCESS;
 err_exit:
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(err);
 }
@@ -1197,7 +1197,7 @@ row_sel_try_search_shortcut(
 	ret = SEL_FOUND;
 func_exit:
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(ret);
 }
@@ -1893,7 +1893,7 @@ func_exit:
 		rw_lock_s_unlock(&btr_search_latch);
 	}
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	return(err);
 }
@@ -2593,7 +2593,7 @@ row_sel_row_cache_add(
 		if (row->ptr != NULL) {
 			ut_a(row->max_len > 0);
 			ut_a(row->rec_len > 0);
-			mem_free(row->ptr);
+			IB_MEM_FREE(row->ptr);
 
 			row->ptr = NULL;
 			row->rec = NULL;
@@ -2611,7 +2611,7 @@ row_sel_row_cache_add(
 
 	if (row->ptr == NULL) {
 		row->max_len = row->rec_len * 2;
-		row->ptr = mem_alloc(row->max_len);
+		row->ptr = IB_MEM_ALLOC(row->max_len);
 	}
 
 	ut_a(row->max_len >= row->rec_len);
@@ -3912,7 +3912,7 @@ func_exit:
 	trx->op_info = "";
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 
 	return(err);

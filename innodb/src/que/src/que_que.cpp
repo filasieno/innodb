@@ -353,7 +353,7 @@ IB_INTERN void que_graph_free_recursive(que_node_t* node)
 	case QUE_NODE_UNDO:
 	{
 		undo_node_t* undo = node;
-		mem_heap_free(undo->heap);
+		IB_MEM_HEAP_FREE(undo->heap);
 		break;
 	}
 	case QUE_NODE_SELECT:
@@ -366,13 +366,13 @@ IB_INTERN void que_graph_free_recursive(que_node_t* node)
 	{
 		ins_node_t* ins = node;
 		que_graph_free_recursive(ins->select);
-		mem_heap_free(ins->entry_sys_heap);
+		IB_MEM_HEAP_FREE(ins->entry_sys_heap);
 		break;
 	}
 	case QUE_NODE_PURGE:
 	{
 		purge_node_t* purge = node;
-		mem_heap_free(purge->heap);
+		IB_MEM_HEAP_FREE(purge->heap);
 		break;	
 	}
 	case QUE_NODE_UPDATE:
@@ -383,10 +383,10 @@ IB_INTERN void que_graph_free_recursive(que_node_t* node)
 		}
 		que_graph_free_recursive(upd->cascade_node);
 		if (upd->cascade_heap) {
-			mem_heap_free(upd->cascade_heap);
+			IB_MEM_HEAP_FREE(upd->cascade_heap);
 		}
 		que_graph_free_recursive(upd->select);
-		mem_heap_free(upd->heap);
+		IB_MEM_HEAP_FREE(upd->heap);
 		break;
 	}
 	case QUE_NODE_CREATE_TABLE:
@@ -395,7 +395,7 @@ IB_INTERN void que_graph_free_recursive(que_node_t* node)
 		que_graph_free_recursive(cre_tab->tab_def);
 		que_graph_free_recursive(cre_tab->col_def);
 		que_graph_free_recursive(cre_tab->commit_node);
-		mem_heap_free(cre_tab->heap);
+		IB_MEM_HEAP_FREE(cre_tab->heap);
 		break;
 	}
 	case QUE_NODE_CREATE_INDEX:
@@ -404,7 +404,7 @@ IB_INTERN void que_graph_free_recursive(que_node_t* node)
 		que_graph_free_recursive(cre_ind->ind_def);
 		que_graph_free_recursive(cre_ind->field_def);
 		que_graph_free_recursive(cre_ind->commit_node);
-		mem_heap_free(cre_ind->heap);
+		IB_MEM_HEAP_FREE(cre_ind->heap);
 		break;
 	}
 	case QUE_NODE_PROC:
@@ -465,7 +465,7 @@ IB_INTERN void que_graph_free(que_t* graph)
 		pars_info_free(graph->info);
 	}
 	que_graph_free_recursive(graph);
-	mem_heap_free(graph->heap);
+	IB_MEM_HEAP_FREE(graph->heap);
 }
 
 

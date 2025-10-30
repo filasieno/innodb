@@ -489,7 +489,7 @@ ulint ut_strcount(const char *s1, const char *s2)
 /// \param str String to operate on.
 /// \param s1 String to replace.
 /// \param s2 String to replace s1 with.
-/// \return Modified string, must be freed with mem_free().
+/// \return Modified string, must be freed with IB_MEM_FREE().
 IB_INTERN
 char *ut_strreplace(const char *str, const char *s1, const char *s2)
 {
@@ -510,7 +510,7 @@ char *ut_strreplace(const char *str, const char *s1, const char *s2)
 		count = ut_strcount(str, s1);
 	}
 
-	new_str = mem_alloc(str_len + count * len_delta + 1);
+	new_str = IB_MEM_ALLOC(str_len + count * len_delta + 1);
 	ptr = new_str;
 
 	while (str) {

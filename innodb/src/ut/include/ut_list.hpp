@@ -45,7 +45,7 @@ typedef struct ib_list_struct ib_list_t;
 typedef struct ib_list_node_struct ib_list_node_t;
 typedef struct ib_list_helper_struct ib_list_helper_t;
 
-/// \brief Create a new list using mem_alloc. Lists created with this function must be freed with ib_list_free.
+/// \brief Create a new list using IB_MEM_ALLOC. Lists created with this function must be freed with ib_list_free.
 /// \return list
 IB_INTERN ib_list_t* ib_list_create(void);
 

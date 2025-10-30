@@ -189,7 +189,7 @@ IB_INTERN ulint ut_strcount(const char*	s1, const char*	s2);
 /// \param [in] str string to operate on
 /// \param [in] s1 string to replace
 /// \param [in] s2 string to replace s1 with
-/// \return own: modified string, must be freed with mem_free()
+/// \return own: modified string, must be freed with IB_MEM_FREE()
 IB_INTERN char* ut_strreplace(const char*	str, const char* s1, const char* s2);
 
 /// \brief Converts a raw binary data to a NUL-terminated hex string. 

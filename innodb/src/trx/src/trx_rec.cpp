@@ -1291,7 +1291,7 @@ trx_undo_report_row_operation(
 				op_type == TRX_UNDO_INSERT_OP,
 				rseg->id, page_no, offset);
 			if (IB_LIKELY_NULL(heap)) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 			}
 			return(DB_SUCCESS);
 		}
@@ -1318,7 +1318,7 @@ trx_undo_report_row_operation(
 			mutex_exit(&(trx->undo_mutex));
 			mtr_commit(&mtr);
 			if (IB_LIKELY_NULL(heap)) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 			}
 			return(DB_OUT_OF_FILE_SPACE);
 		}

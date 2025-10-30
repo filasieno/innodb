@@ -105,7 +105,7 @@ trx_create(
 	ut_ad(mutex_own(&kernel_mutex));
 	ut_ad(sess);
 
-	trx = mem_alloc(sizeof(trx_t));
+	trx = IB_MEM_ALLOC(sizeof(trx_t));
 
 	trx->magic_n = TRX_MAGIC_N;
 
@@ -169,7 +169,7 @@ trx_create(
 	trx->was_chosen_as_deadlock_victim = FALSE;
 	UT_LIST_INIT(trx->wait_thrs);
 
-	trx->lock_heap = mem_heap_create_in_buffer(256);
+	trx->lock_heap = IB_MEM_HEAP_CREATE_IN_BUFFER(256);
 	UT_LIST_INIT(trx->trx_locks);
 
 	UT_LIST_INIT(trx->trx_savepoints);
@@ -178,7 +178,7 @@ trx_create(
 	trx->has_search_latch = FALSE;
 	trx->search_latch_timeout = BTR_SEA_TIMEOUT;
 
-	trx->global_read_view_heap = mem_heap_create(256);
+	trx->global_read_view_heap = IB_MEM_HEAP_CREATE(256);
 	trx->global_read_view = NULL;
 	trx->read_view = NULL;
 
@@ -310,20 +310,20 @@ trx_free(
 	ut_a(trx->dict_operation_lock_mode == 0);
 
 	if (trx->lock_heap) {
-		mem_heap_free(trx->lock_heap);
+		IB_MEM_HEAP_FREE(trx->lock_heap);
 	}
 
 	ut_a(UT_LIST_GET_LEN(trx->trx_locks) == 0);
 
 	if (trx->global_read_view_heap) {
-		mem_heap_free(trx->global_read_view_heap);
+		IB_MEM_HEAP_FREE(trx->global_read_view_heap);
 	}
 
 	trx->global_read_view = NULL;
 
 	ut_a(trx->read_view == NULL);
 
-	mem_free(trx);
+	IB_MEM_FREE(trx);
 }
 
 /********************************************************************//**
@@ -1238,13 +1238,13 @@ trx_sig_send(
 	if (UT_LIST_GET_LEN(trx->signals) == 0) {
 
 		/* The signal list is empty: the 'sig' slot must be unused
-		(we improve performance a bit by avoiding mem_alloc) */
+		(we improve performance a bit by avoiding IB_MEM_ALLOC) */
 		sig = &(trx->sig);
 	} else {
 		/* It might be that the 'sig' slot is unused also in this
-		case, but we choose the easy way of using mem_alloc */
+		case, but we choose the easy way of using IB_MEM_ALLOC */
 
-		sig = mem_alloc(sizeof(trx_sig_t));
+		sig = IB_MEM_ALLOC(sizeof(trx_sig_t));
 	}
 
 	UT_LIST_ADD_LAST(signals, trx->signals, sig);
@@ -1464,7 +1464,7 @@ trx_sig_remove(
 	sig->type = 0;	/* reset the field to catch possible bugs */
 
 	if (sig != &(trx->sig)) {
-		mem_free(sig);
+		IB_MEM_FREE(sig);
 	}
 }
 

@@ -228,3 +228,32 @@ struct btr_search_struct{
 #define BTR_SEARCH_MAGIC_N 1112765
 #endif /* IB_DEBUG */
 };
+
+/// \brief Latching modes for btr_cur_search_to_nth_level(). 
+enum btr_latch_mode {
+    /// \brief Search a record on a leaf page and S-latch it. 
+    BTR_SEARCH_LEAF = RW_S_LATCH,
+    /// \brief(Prepare to) modify a record on a leaf page and X-latch it. 
+    BTR_MODIFY_LEAF = RW_X_LATCH,
+    /// \brief Obtain no latches.
+    BTR_NO_LATCHES = RW_NO_LATCH,
+    /// \brief Start modifying the entire B-tree. 
+    BTR_MODIFY_TREE = 33,
+    /// \brief Continue modifying the entire B-tree.
+    BTR_CONT_MODIFY_TREE = 34,
+    /// \brief Search the previous record.
+    BTR_SEARCH_PREV = 35,
+    /// \brief Modify the previous record.
+    BTR_MODIFY_PREV = 36
+};
+
+/// \brief Persistent cursor
+typedef struct btr_pcur_struct		btr_pcur_t;
+/// \brief B-tree cursor
+typedef struct btr_cur_struct		btr_cur_t;
+/// \brief B-tree search information for the adaptive hash index
+typedef struct btr_search_struct	btr_search_t;
+
+/// \brief The size of a reference to data stored on a different page.
+/// \details The reference is stored at the end of the prefix of the field in the index record.
+constinit ulint BTR_EXTERN_FIELD_REF_SIZE = 20;

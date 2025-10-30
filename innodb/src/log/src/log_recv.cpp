@@ -210,7 +210,7 @@ IB_INTERN void recv_sys_create(void)
 		return;
 	}
 
-	recv_sys = mem_alloc(sizeof(*recv_sys));
+	recv_sys = IB_MEM_ALLOC(sizeof(*recv_sys));
 	memset(recv_sys, 0x0, sizeof(*recv_sys));
 
 	mutex_create(&recv_sys->mutex, SYNC_RECV);
@@ -241,7 +241,7 @@ void recv_sys_mem_free(void)
 		}
 
 		if (recv_sys->heap != NULL) {
-			mem_heap_free(recv_sys->heap);
+			IB_MEM_HEAP_FREE(recv_sys->heap);
 		}
 
 		if (recv_sys->buf != NULL) {
@@ -249,10 +249,10 @@ void recv_sys_mem_free(void)
 		}
 
 		if (recv_sys->last_block_buf_start != NULL) {
-			mem_free(recv_sys->last_block_buf_start);
+			IB_MEM_FREE(recv_sys->last_block_buf_start);
 		}
 
-		mem_free(recv_sys);
+		IB_MEM_FREE(recv_sys);
 		recv_sys = NULL;
 	}
 }
@@ -279,9 +279,9 @@ void recv_sys_init(
 
 	mutex_enter(&(recv_sys->mutex));
 
-	recv_sys->heap = mem_heap_create_in_buffer(256);
+	recv_sys->heap = IB_MEM_HEAP_CREATE_IN_BUFFER(256);
 #else	  // !IB_HOTBACKUP
-	recv_sys->heap = mem_heap_create(256);
+	recv_sys->heap = IB_MEM_HEAP_CREATE(256);
 	recv_is_from_backup = TRUE;
 #endif	  // !IB_HOTBACKUP
 
@@ -301,7 +301,7 @@ void recv_sys_init(
 	recv_sys->apply_log_recs = FALSE;
 	recv_sys->apply_batch_on = FALSE;
 
-	recv_sys->last_block_buf_start = mem_alloc(2 * OS_FILE_LOG_BLOCK_SIZE);
+	recv_sys->last_block_buf_start = IB_MEM_ALLOC(2 * OS_FILE_LOG_BLOCK_SIZE);
 
 	recv_sys->last_block = ut_align(recv_sys->last_block_buf_start, OS_FILE_LOG_BLOCK_SIZE);
 	recv_sys->found_corrupt_log = FALSE;
@@ -345,9 +345,9 @@ static void recv_sys_debug_free(void)
 	mutex_enter(&(recv_sys->mutex));
 
 	hash_table_free(recv_sys->addr_hash);
-	mem_heap_free(recv_sys->heap);
+	IB_MEM_HEAP_FREE(recv_sys->heap);
 	ut_free(recv_sys->buf);
-	mem_free(recv_sys->last_block_buf_start);
+	IB_MEM_FREE(recv_sys->last_block_buf_start);
 
 	recv_sys->buf = NULL;
 	recv_sys->heap = NULL;
@@ -1432,7 +1432,7 @@ void recv_recover_page_func(
 			/* We have to copy the record body to a separate
 			buffer */
 
-			buf = mem_alloc(recv->len);
+			buf = IB_MEM_ALLOC(recv->len);
 
 			recv_data_copy_to_buf(buf, recv);
 		} else {
@@ -1487,7 +1487,7 @@ void recv_recover_page_func(
 		}
 
 		if (recv->len > RECV_DATA_BLOCK_SIZE) {
-			mem_free(buf);
+			IB_MEM_FREE(buf);
 		}
 
 		recv = UT_LIST_GET_NEXT(rec_list, recv);

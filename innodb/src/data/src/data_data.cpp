@@ -473,7 +473,7 @@ IB_INTERN big_rec_t* dtuple_convert_big_rec(innodb_state* state, ib_dict_index_t
 		ib_log(state, "\n");
 	}
 
-	mem_heap_t* heap = mem_heap_create(size + dtuple_get_n_fields(entry) * sizeof(big_rec_field_t) + 1000);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(size + dtuple_get_n_fields(entry) * sizeof(big_rec_field_t) + 1000);
 	vector = mem_heap_alloc(heap, sizeof(big_rec_t));
 	vector->heap = heap;
 	vector->fields = mem_heap_alloc(heap, dtuple_get_n_fields(entry) * sizeof(big_rec_field_t));
@@ -518,7 +518,7 @@ IB_INTERN big_rec_t* dtuple_convert_big_rec(innodb_state* state, ib_dict_index_t
 
 		if (!longest) {
 			// Cannot shorten more
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 			return NULL;
 		}
 
@@ -581,7 +581,7 @@ IB_INTERN void dtuple_convert_back_big_rec(ib_dict_index_t* index, dtuple_t* ent
 		dfield_set_data(dfield, (char*) b->data - local_len, b->len + local_len);
 	}
 
-	mem_heap_free(vector->heap);
+	IB_MEM_HEAP_FREE(vector->heap);
 }
 
 // -----------------------------------------------------------------------------------------

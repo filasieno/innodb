@@ -72,7 +72,7 @@ IB_INTERN void hash_mutex_exit_all(hash_table_t* table)
 IB_INTERN hash_table_t* hash_create(ulint n)
 {
     ulint prime = ut_find_prime(n);
-    hash_table_t* table = mem_alloc(sizeof(hash_table_t));
+    hash_table_t* table = IB_MEM_ALLOC(sizeof(hash_table_t));
     hash_cell_t* array = ut_malloc(sizeof(hash_cell_t) * prime);
 
     table->array = array;
@@ -103,7 +103,7 @@ IB_INTERN void hash_table_free(hash_table_t* table)
 #endif /* !IB_HOTBACKUP */
 
     ut_free(table->array);
-    mem_free(table);
+    IB_MEM_FREE(table);
 }
 
 #ifndef IB_HOTBACKUP
@@ -124,7 +124,7 @@ IB_INTERN void hash_create_mutexes_func(hash_table_t* table,
     ut_a(n_mutexes > 0);
     ut_a(ut_is_2pow(n_mutexes));
 
-    table->mutexes = mem_alloc(n_mutexes * sizeof(mutex_t));
+    table->mutexes = IB_MEM_ALLOC(n_mutexes * sizeof(mutex_t));
 
     for (ulint i = 0; i < n_mutexes; i++) {
         mutex_create(table->mutexes + i, sync_level);
@@ -144,6 +144,6 @@ IB_INTERN void hash_free_mutexes_func(hash_table_t* table)
 #endif
     }
 
-    mem_free(table->mutexes);
+    IB_MEM_FREE(table->mutexes);
 }
 #endif /* !IB_HOTBACKUP */

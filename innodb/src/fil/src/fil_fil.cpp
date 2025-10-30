@@ -504,7 +504,7 @@ fil_node_create(
 
 	mutex_enter(&fil_system->mutex);
 
-	node = mem_alloc(sizeof(fil_node_t));
+	node = IB_MEM_ALLOC(sizeof(fil_node_t));
 
 	node->name = mem_strdup(name);
 	node->open = FALSE;
@@ -529,9 +529,9 @@ fil_node_create(
 			"InnoDB: file ", (ulong) id);
 		ut_print_filename(state->stream, name);
 		ib_log(state, " in the tablespace memory cache.\n");
-		mem_free(node->name);
+		IB_MEM_FREE(node->name);
 
-		mem_free(node);
+		IB_MEM_FREE(node);
 
 		mutex_exit(&fil_system->mutex);
 
@@ -978,8 +978,8 @@ fil_node_free(
 
 	UT_LIST_REMOVE(chain, space->chain, node);
 
-	mem_free(node->name);
-	mem_free(node);
+	IB_MEM_FREE(node->name);
+	IB_MEM_FREE(node);
 }
 
 #ifdef IB_LOG_ARCHIVE
@@ -1121,7 +1121,7 @@ try_again:
 		return(FALSE);
 	}
 
-	space = mem_alloc(sizeof(fil_space_t));
+	space = IB_MEM_ALLOC(sizeof(fil_space_t));
 
 	space->name = mem_strdup(name);
 	space->id = id;
@@ -1288,8 +1288,8 @@ fil_space_free(
 
 	rw_lock_free(&(space->latch));
 
-	mem_free(space->name);
-	mem_free(space);
+	IB_MEM_FREE(space->name);
+	IB_MEM_FREE(space);
 
 	return(TRUE);
 }
@@ -1449,7 +1449,7 @@ fil_init(
 	ut_a(hash_size > 0);
 	ut_a(max_n_open > 0);
 
-	fil_system = mem_alloc(sizeof(fil_system_t));
+	fil_system = IB_MEM_ALLOC(sizeof(fil_system_t));
 
 	mutex_create(&fil_system->mutex, SYNC_ANY_LATCH);
 
@@ -1610,7 +1610,7 @@ fil_write_lsn_and_arch_no_to_file(
 	byte*	buf1;
 	byte*	buf;
 
-	buf1 = mem_alloc(2 * IB_PAGE_SIZE);
+	buf1 = IB_MEM_ALLOC(2 * IB_PAGE_SIZE);
 	buf = ut_align(buf1, IB_PAGE_SIZE);
 
 	fil_read(TRUE, 0, 0, sum_of_sizes, 0, IB_PAGE_SIZE, buf, NULL);
@@ -1623,7 +1623,7 @@ fil_write_lsn_and_arch_no_to_file(
 
 	fil_write(TRUE, 0, 0, sum_of_sizes, 0, IB_PAGE_SIZE, buf, NULL);
 
-	mem_free(buf1);
+	IB_MEM_FREE(buf1);
 
 	return(DB_SUCCESS);
 }
@@ -1837,7 +1837,7 @@ fil_create_directory_for_tablename(
 	namend = strchr(name, '/');
 	ut_a(namend);
 
-	path = mem_alloc(len + (namend - name) + 2);
+	path = IB_MEM_ALLOC(len + (namend - name) + 2);
 
 	strncpy(path, srv_data_home, len);
 	srv_normalize_path_for_win(path);
@@ -1846,7 +1846,7 @@ fil_create_directory_for_tablename(
 	strncpy(path + len, name, namend - name);
 
 	ut_a(os_file_create_directory(path, FALSE));
-	mem_free(path);
+	IB_MEM_FREE(path);
 }
 
 #ifndef IB_HOTBACKUP
@@ -2232,12 +2232,12 @@ try_again:
 		fil_op_write_log(MLOG_FILE_DELETE, id, 0, 0, path, NULL, &mtr);
 		mtr_commit(&mtr);
 #endif
-		mem_free(path);
+		IB_MEM_FREE(path);
 
 		return(TRUE);
 	}
 
-	mem_free(path);
+	IB_MEM_FREE(path);
 
 	return(FALSE);
 }
@@ -2316,8 +2316,8 @@ fil_rename_tablespace_in_mem(
 
 	HASH_DELETE(fil_space_t, name_hash, fil_system->name_hash,
 		    ut_fold_string(space->name), space);
-	mem_free(space->name);
-	mem_free(node->name);
+	IB_MEM_FREE(space->name);
+	IB_MEM_FREE(node->name);
 
 	space->name = mem_strdup(path);
 	node->name = mem_strdup(path);
@@ -2329,7 +2329,7 @@ fil_rename_tablespace_in_mem(
 
 /*******************************************************************//**
 Allocates a file name for a single-table tablespace. The string must be freed
-by caller with mem_free().
+by caller with IB_MEM_FREE().
 @return	own: file name */
 static
 char*
@@ -2346,7 +2346,7 @@ fil_make_ibd_name(
 
 	dirlen = ut_strlen(srv_data_home);
 	sz = dirlen + namelen + sizeof("/.ibd");
-	filename = mem_alloc(sz);
+	filename = IB_MEM_ALLOC(sz);
 
 	ut_snprintf(filename, sz, "%s%s.ibd",
 		fil_normalize_path(srv_data_home), name);
@@ -2486,8 +2486,8 @@ retry:
 		}
 	}
 
-	mem_free(path);
-	mem_free(old_path);
+	IB_MEM_FREE(path);
+	IB_MEM_FREE(old_path);
 
 	space->stop_ios = FALSE;
 
@@ -2582,17 +2582,17 @@ fil_create_new_single_table_tablespace(
 			ib_log(state, "\n"
 			      "InnoDB: under the 'datadir' of the server.\n");
 
-			mem_free(path);
+			IB_MEM_FREE(path);
 			return(DB_TABLESPACE_ALREADY_EXISTS);
 		}
 
 		if (err == OS_FILE_DISK_FULL) {
 
-			mem_free(path);
+			IB_MEM_FREE(path);
 			return(DB_OUT_OF_FILE_SPACE);
 		}
 
-		mem_free(path);
+		IB_MEM_FREE(path);
 		return(DB_ERROR);
 	}
 
@@ -2607,7 +2607,7 @@ fil_create_new_single_table_tablespace(
 		os_file_close(file);
 		os_file_delete(path);
 
-		mem_free(path);
+		IB_MEM_FREE(path);
 		return(DB_OUT_OF_FILE_SPACE);
 	}
 
@@ -2624,7 +2624,7 @@ error_exit:
 error_exit2:
 		os_file_delete(path);
 
-		mem_free(path);
+		IB_MEM_FREE(path);
 		return(DB_ERROR);
 	}
 
@@ -2717,7 +2717,7 @@ error_exit2:
 		mtr_commit(&mtr);
 	}
 #endif
-	mem_free(path);
+	IB_MEM_FREE(path);
 	return(DB_SUCCESS);
 }
 
@@ -2769,7 +2769,7 @@ fil_reset_too_high_lsns(
 		      "InnoDB: open the tablespace file ");
 		ut_print_filename(state->stream, filepath);
 		ib_log(state, "!\n");
-		mem_free(filepath);
+		IB_MEM_FREE(filepath);
 
 		return(FALSE);
 	}
@@ -2890,7 +2890,7 @@ fil_reset_too_high_lsns(
 func_exit:
 	os_file_close(file);
 	ut_free(buf2);
-	mem_free(filepath);
+	IB_MEM_FREE(filepath);
 
 	return(success);
 }
@@ -2964,7 +2964,7 @@ fil_open_single_table_tablespace(
 		      "InnoDB: the InnoDB website for details\n"
 		      "InnoDB: for how to resolve the issue.\n");
 
-		mem_free(filepath);
+		IB_MEM_FREE(filepath);
 
 		return(FALSE);
 	}
@@ -3027,7 +3027,7 @@ skip_check:
 	fil_node_create(filepath, 0, space_id, FALSE);
 func_exit:
 	os_file_close(file);
-	mem_free(filepath);
+	IB_MEM_FREE(filepath);
 
 	return(success);
 }
@@ -3036,7 +3036,7 @@ func_exit:
 #ifdef IB_HOTBACKUP
 /*******************************************************************//**
 Allocates a file name for an old version of a single-table tablespace.
-The string must be freed by caller with mem_free()!
+The string must be freed by caller with IB_MEM_FREE()!
 @return	own: file name */
 static
 char*
@@ -3046,7 +3046,7 @@ fil_make_ibbackup_old_name(
 {
 	static const char suffix[] = "_ibbackup_old_vers_";
 	ulint	len	= strlen(name);
-	char*	path	= mem_alloc(len + (15 + sizeof suffix));
+	char*	path	= IB_MEM_ALLOC(len + (15 + sizeof suffix));
 
 	memcpy(path, name, len);
 	memcpy(path + len, suffix, (sizeof suffix) - 1);
@@ -3092,7 +3092,7 @@ fil_load_single_table_tablespace(
 #endif
 
 	len = ut_strlen(dbname) + ut_strlen(filename) + ut_strlen(dir) + 3;
-	filepath = mem_alloc(len);
+	filepath = IB_MEM_ALLOC(len);
 
 	dbIB_NAME_LEN = ut_strlen(dbname);
 
@@ -3149,7 +3149,7 @@ fil_load_single_table_tablespace(
 			"InnoDB: and force InnoDB to continue crash"
 			" recovery here.\n", filepath);
 
-		mem_free(filepath);
+		IB_MEM_FREE(filepath);
 
 		if (recovery != IB_RECOVERY_DEFAULT) {
 			ib_log(state,
@@ -3197,7 +3197,7 @@ fil_load_single_table_tablespace(
 			" crash recovery here.\n", filepath);
 
 		os_file_close(file);
-		mem_free(filepath);
+		IB_MEM_FREE(filepath);
 
 		if (recovery != IB_RECOVERY_DEFAULT) {
 			ib_log(state,
@@ -3230,7 +3230,7 @@ fil_load_single_table_tablespace(
 			(ulong) size_high,
 			(ulong) size_low, (ulong) (4 * IB_PAGE_SIZE));
 		os_file_close(file);
-		mem_free(filepath);
+		IB_MEM_FREE(filepath);
 
 		return;
 	}
@@ -3282,8 +3282,8 @@ fil_load_single_table_tablespace(
 		ut_a(os_file_rename(filepath, new_path));
 
 		ut_free(buf2);
-		mem_free(filepath);
-		mem_free(new_path);
+		IB_MEM_FREE(filepath);
+		IB_MEM_FREE(new_path);
 
 		return;
 	}
@@ -3320,8 +3320,8 @@ fil_load_single_table_tablespace(
 		ut_a(os_file_rename(filepath, new_path));
 
 		ut_free(buf2);
-		mem_free(filepath);
-		mem_free(new_path);
+		IB_MEM_FREE(filepath);
+		IB_MEM_FREE(new_path);
 
 		return;
 	}
@@ -3352,7 +3352,7 @@ fil_load_single_table_tablespace(
 func_exit:
 	os_file_close(file);
 	ut_free(buf2);
-	mem_free(filepath);
+	IB_MEM_FREE(filepath);
 }
 
 /***********************************************************************//**
@@ -3431,7 +3431,7 @@ fil_load_single_table_tablespaces(
 		return(DB_ERROR);
 	}
 
-	dbpath = mem_alloc(dbpath_len);
+	dbpath = IB_MEM_ALLOC(dbpath_len);
 
 	/* Scan all directories under the datadir. They are the database
 	directories of the server. */
@@ -3456,10 +3456,10 @@ fil_load_single_table_tablespaces(
 			dbpath_len = len;
 
 			if (dbpath) {
-				mem_free(dbpath);
+				IB_MEM_FREE(dbpath);
 			}
 
-			dbpath = mem_alloc(dbpath_len);
+			dbpath = IB_MEM_ALLOC(dbpath_len);
 		}
 
 		len = ut_strlen(home);
@@ -3520,7 +3520,7 @@ next_datadir_item:
 		ret = fil_file_readdir_next_file(&err, home, dir, &dbinfo);
 	}
 
-	mem_free(dbpath);
+	IB_MEM_FREE(dbpath);
 
 	if (0 != os_file_closedir(dir)) {
 		ib_log(state,
@@ -3679,7 +3679,7 @@ fil_space_for_table_exists_in_mem(
 			space->mark = TRUE;
 		}
 
-		mem_free(path);
+		IB_MEM_FREE(path);
 		mutex_exit(&fil_system->mutex);
 
 		return(TRUE);
@@ -3687,7 +3687,7 @@ fil_space_for_table_exists_in_mem(
 
 	if (!print_error_if_does_not_exist) {
 
-		mem_free(path);
+		IB_MEM_FREE(path);
 		mutex_exit(&fil_system->mutex);
 
 		return(FALSE);
@@ -3726,7 +3726,7 @@ error_exit:
 		      "InnoDB: the InnoDB website for details\n"
 		      "InnoDB: for how to resolve the issue.\n");
 
-		mem_free(path);
+		IB_MEM_FREE(path);
 		mutex_exit(&fil_system->mutex);
 
 		return(FALSE);
@@ -3757,7 +3757,7 @@ error_exit:
 		goto error_exit;
 	}
 
-	mem_free(path);
+	IB_MEM_FREE(path);
 	mutex_exit(&fil_system->mutex);
 
 	return(FALSE);
@@ -3793,7 +3793,7 @@ fil_get_space_id_for_table(
 		id = namespace->id;
 	}
 
-	mem_free(path);
+	IB_MEM_FREE(path);
 
 	mutex_exit(&fil_system->mutex);
 
@@ -3858,7 +3858,7 @@ fil_extend_space_to_desired_size(
 
 	/* Extend at most 64 pages at a time */
 	buf_size = ut_min(64, size_after_extend - start_page_no) * page_size;
-	buf2 = mem_alloc(buf_size + page_size);
+	buf2 = IB_MEM_ALLOC(buf_size + page_size);
 	buf = ut_align(buf2, page_size);
 
 	memset(buf, 0, buf_size);
@@ -3906,7 +3906,7 @@ fil_extend_space_to_desired_size(
 		start_page_no += n_pages;
 	}
 
-	mem_free(buf2);
+	IB_MEM_FREE(buf2);
 
 	fil_node_complete_io(node, fil_system, OS_FILE_WRITE);
 
@@ -3952,7 +3952,7 @@ fil_extend_tablespaces_to_stored_len(void)
 	ulint		error;
 	ibool		success;
 
-	buf = mem_alloc(IB_PAGE_SIZE);
+	buf = IB_MEM_ALLOC(IB_PAGE_SIZE);
 
 	mutex_enter(&fil_system->mutex);
 
@@ -3992,7 +3992,7 @@ fil_extend_tablespaces_to_stored_len(void)
 
 	mutex_exit(&fil_system->mutex);
 
-	mem_free(buf);
+	IB_MEM_FREE(buf);
 }
 #endif
 
@@ -4629,7 +4629,7 @@ fil_flush_file_spaces(
 	traversed fil_system->unflushed_spaces and called UT_LIST_GET_NEXT()
 	on a space that was just removed from the list by fil_flush().
 	Thus, the space could be dropped and the memory overwritten. */
-	space_ids = mem_alloc(n_space_ids * sizeof *space_ids);
+	space_ids = IB_MEM_ALLOC(n_space_ids * sizeof *space_ids);
 
 	i = 0;
 
@@ -4655,7 +4655,7 @@ fil_flush_file_spaces(
 		fil_flush(space_ids[i]);
 	}
 
-	mem_free(space_ids);
+	IB_MEM_FREE(space_ids);
 }
 
 /******************************************************************//**
@@ -4815,7 +4815,7 @@ fil_close(void)
 
 			space = HASH_GET_NEXT(hash, prev_space);
 			ut_a(prev_space->magic_n == FIL_SPACE_MAGIC_N);
-			mem_free(prev_space);
+			IB_MEM_FREE(prev_space);
 		}
 	}
 	hash_table_free(system->spaces);
@@ -4828,7 +4828,7 @@ fil_close(void)
 	ut_a(UT_LIST_GET_LEN(system->unflushed_spaces) == 0);
 	ut_a(UT_LIST_GET_LEN(system->space_list) == 0);
 
-	mem_free(system);
+	IB_MEM_FREE(system);
 
 	fil_system = NULL;
 }

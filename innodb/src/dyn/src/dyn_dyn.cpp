@@ -47,7 +47,7 @@ dyn_array_add_block(
 		UT_LIST_INIT(arr->base);
 		UT_LIST_ADD_FIRST(list, arr->base, arr);
 
-		arr->heap = mem_heap_create(sizeof(dyn_block_t));
+		arr->heap = IB_MEM_HEAP_CREATE(sizeof(dyn_block_t));
 	}
 
 	block = dyn_array_get_last_block(arr);

@@ -119,7 +119,7 @@ IB_INTERN purge_node_t* row_purge_node_create(que_thr_t* parent, mem_heap_t* hea
     node = mem_heap_alloc(heap, sizeof(purge_node_t));
     node->common.type = QUE_NODE_PURGE;
     node->common.parent = parent;
-    node->heap = mem_heap_create(256);
+    node->heap = IB_MEM_HEAP_CREATE(256);
     return node;
 }
 
@@ -168,7 +168,7 @@ static ibool row_purge_remove_clust_if_poss_low(purge_node_t* node, ulint mode)
 
     if (0 != ut_dulint_cmp(node->roll_ptr, row_get_rec_roll_ptr(rec, index, rec_get_offsets(rec, index, offsets_, ULINT_UNDEFINED, &heap)))) {
         if (IB_LIKELY_NULL(heap)) {
-            mem_heap_free(heap);
+            IB_MEM_HEAP_FREE(heap);
         }
         /* Someone else has modified the record later: do not remove */
         btr_pcur_commit_specify_mtr(pcur, &mtr);
@@ -176,7 +176,7 @@ static ibool row_purge_remove_clust_if_poss_low(purge_node_t* node, ulint mode)
     }
 
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 
     if (mode == BTR_MODIFY_LEAF) {
@@ -298,7 +298,7 @@ retry:
 /// \brief Purges a delete marking of a record.
 {
 	ut_ad(node);
-    mem_heap_t* heap = mem_heap_create(1024);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(1024);
 
 	while (node->index != NULL) {
         dict_index_t* index = node->index;
@@ -309,7 +309,7 @@ retry:
 		node->index = dict_table_get_next_index(node->index);
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	row_purge_remove_clust_if_poss(node);
 }
@@ -322,7 +322,7 @@ retry:
 		goto skip_secondaries;
 	}
 
-    mem_heap_t* heap = mem_heap_create(1024);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(1024);
 
 	while (node->index != NULL) {
         dict_index_t* index = node->index;
@@ -337,7 +337,7 @@ retry:
 		node->index = dict_table_get_next_index(node->index);
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 skip_secondaries:
 	/* Free possible externally stored fields */

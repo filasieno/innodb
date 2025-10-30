@@ -876,13 +876,13 @@ IB_INTERN ulint rw_lock_n_locked(void)
 /// \return own: debug info struct
 static rw_lock_debug_t* rw_lock_debug_create(void)
 {
-	return((rw_lock_debug_t*) mem_alloc(sizeof(rw_lock_debug_t)));
+	return((rw_lock_debug_t*) IB_MEM_ALLOC(sizeof(rw_lock_debug_t)));
 }
 
 /// \brief Frees a debug info struct.
 /// \param info debug info struct
 static void rw_lock_debug_free(rw_lock_debug_t* info)
 {
-	mem_free(info);
+	IB_MEM_FREE(info);
 }
 #endif /* IB_SYNC_DEBUG */

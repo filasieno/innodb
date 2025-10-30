@@ -129,7 +129,7 @@ static void trx_doublewrite_init(
 ) /*!< in: pointer to the doublewrite buf
                                                      header on trx sys page */
 {
-	trx_doublewrite = mem_alloc(sizeof(trx_doublewrite_t));
+	trx_doublewrite = IB_MEM_ALLOC(sizeof(trx_doublewrite_t));
 
 	/* Since we now start to use the doublewrite buffer, no need to call
   fsync() after every write to a data file */
@@ -151,7 +151,7 @@ static void trx_doublewrite_init(
 	trx_doublewrite->write_buf =
 		ut_align(trx_doublewrite->write_buf_unaligned, IB_PAGE_SIZE);
 	trx_doublewrite->buf_block_arr =
-		mem_alloc(2 * TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * sizeof(void *));
+		IB_MEM_ALLOC(2 * TRX_SYS_DOUBLEWRITE_BLOCK_SIZE * sizeof(void *));
 }
 
 /****************************************************************/ /**
@@ -656,7 +656,7 @@ void trx_sys_init_at_db_start(
 
 	mutex_enter(&kernel_mutex);
 
-	trx_sys = mem_alloc(sizeof(trx_sys_t));
+	trx_sys = IB_MEM_ALLOC(sizeof(trx_sys_t));
 
 	sys_header = trx_sysf_get(&mtr);
 
@@ -1220,14 +1220,14 @@ void trx_sys_close(void)
 	ut_free(trx_doublewrite->write_buf_unaligned);
 	trx_doublewrite->write_buf_unaligned = NULL;
 
-	mem_free(trx_doublewrite->buf_block_arr);
+	IB_MEM_FREE(trx_doublewrite->buf_block_arr);
 	trx_doublewrite->buf_block_arr = NULL;
 
 	mutex_free(&trx_doublewrite->mutex);
 #ifdef IB_DEBUG
 	memset(&trx_doublewrite->mutex, 0x0, sizeof(trx_doublewrite->mutex));
 #endif
-	mem_free(trx_doublewrite);
+	IB_MEM_FREE(trx_doublewrite);
 	trx_doublewrite = NULL;
 	/* End freeing of doublewrite buffer data structures. */
 
@@ -1260,7 +1260,7 @@ void trx_sys_close(void)
 	ut_a(UT_LIST_GET_LEN(trx_sys->view_list) == 0);
 	ut_a(UT_LIST_GET_LEN(trx_sys->client_trx_list) == 0);
 
-	mem_free(trx_sys);
+	IB_MEM_FREE(trx_sys);
 
 	trx_sys = NULL;
 	mutex_exit(&kernel_mutex);

@@ -746,7 +746,7 @@ IB_INTERN ibool page_zip_compress(page_zip_des_t* page_zip, const page_t* page, 
 	if (IB_UNLIKELY(n_dense * PAGE_ZIP_DIR_SLOT_SIZE >= page_zip_get_size(page_zip))) {
 		goto err_exit;
 	}
-	mem_heap_t* heap = mem_heap_create(page_zip_get_size(page_zip) + n_fields * (2 + sizeof *offsets) + n_dense * ((sizeof(const rec_t*)) - PAGE_ZIP_DIR_SLOT_SIZE) + IB_PAGE_SIZE * 4 + (512 << MAX_MEM_LEVEL));
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(page_zip_get_size(page_zip) + n_fields * (2 + sizeof *offsets) + n_dense * ((sizeof(const rec_t*)) - PAGE_ZIP_DIR_SLOT_SIZE) + IB_PAGE_SIZE * 4 + (512 << MAX_MEM_LEVEL));
 	const rec_t** recs = mem_heap_zalloc(heap, n_dense * sizeof *recs); // dense page directory, sorted by address
 	byte* fields = mem_heap_alloc(heap, (n_fields + 1) * 2); // index field information
 	byte* buf = mem_heap_alloc(heap, page_zip_get_size(page_zip) - PAGE_DATA); // compressed payload of the page
@@ -826,7 +826,7 @@ IB_INTERN ibool page_zip_compress(page_zip_des_t* page_zip, const page_t* page, 
 	if (IB_UNLIKELY(err != Z_STREAM_END)) {
 zlib_error:
 		deflateEnd(&c_stream);
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 err_exit:
 #ifdef PAGE_ZIP_COMPRESS_DBG
 		if (logfile) {
@@ -858,7 +858,7 @@ err_exit:
 	memcpy(page_zip->data + FIL_PAGE_DATA, page + FIL_PAGE_DATA, PAGE_DATA - FIL_PAGE_DATA);
 	// Copy the rest of the compressed page
 	memcpy(page_zip->data + PAGE_DATA, buf, page_zip_get_size(page_zip) - PAGE_DATA);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 #ifdef IB_ZIP_DEBUG
 	ut_a(page_zip_validate(page_zip, page));
 #endif /* IB_ZIP_DEBUG */
@@ -903,8 +903,8 @@ static void page_zip_fields_free(dict_index_t* index)
 {
 	if (index) {
 		dict_table_t* table = index->table;
-		mem_heap_free(index->heap);
-		mem_heap_free(table->heap);
+		IB_MEM_HEAP_FREE(index->heap);
+		IB_MEM_HEAP_FREE(table->heap);
 	}
 }
 
@@ -1219,7 +1219,7 @@ static const byte* page_zip_apply_log(const byte* data, ulint size, rec_t** recs
 			ulint* offs = rec_get_offsets(rec, index, offsets, ULINT_UNDEFINED, &heap);
 			memset(rec, 0, rec_offs_data_size(offs));
 			if (IB_LIKELY_NULL(heap)) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 			}
 			continue;
 		}
@@ -1717,7 +1717,7 @@ IB_INTERN ibool page_zip_decompress(page_zip_des_t* page_zip, page_t* page, iboo
 		page_zip_fail(state->stream, "page_zip_decompress 1: %lu %lu\n", (ulong) n_dense, (ulong) page_zip_get_size(page_zip));
 		return FALSE;
 	}
-	mem_heap_t* heap = mem_heap_create(n_dense * (3 * sizeof(rec_t**)) + IB_PAGE_SIZE);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(n_dense * (3 * sizeof(rec_t**)) + IB_PAGE_SIZE);
 	rec_t** recs = static_cast<rec_t**>(mem_heap_alloc(heap, n_dense * (2 * sizeof(rec_t**))));
 	if (all) {
 		// Copy the page header.
@@ -1744,7 +1744,7 @@ IB_INTERN ibool page_zip_decompress(page_zip_des_t* page_zip, page_t* page, iboo
 	// Copy the page directory.
 	if (IB_UNLIKELY(!page_zip_dir_decode(page_zip, page, recs, recs + n_dense, n_dense))) {
 zlib_error:
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return FALSE;
 	}
 	// Copy the infimum and supremum records.
@@ -1804,7 +1804,7 @@ zlib_error:
 		if (IB_UNLIKELY(!page_zip_set_extra_bytes(page_zip, page, 0))) {
 err_exit:
 			page_zip_fields_free(index);
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 			return FALSE;
 		}
 	} else {
@@ -1819,7 +1819,7 @@ err_exit:
 	ut_a(page_is_comp(page));
 	IB_MEM_ASSERT_RW(page, IB_PAGE_SIZE);
 	page_zip_fields_free(index);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 #ifndef IB_HOTBACKUP
 	page_zip_stat_t* zip_stat = &page_zip_stat[page_zip->ssize - 1];
 	zip_stat->decompressed++;

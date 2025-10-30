@@ -118,8 +118,8 @@ already_dropped:
 	ib_log(state, "  InnoDB: Dropped table ");
 	ut_print_name(state->stream, NULL, TRUE, drop->table_name);
 	ib_log(state, " in background drop queue.\n");
-	mem_free(drop->table_name);
-	mem_free(drop);
+	IB_MEM_FREE(drop->table_name);
+	IB_MEM_FREE(drop);
 	mutex_exit(&kernel_mutex);
 	goto loop;
 }
@@ -161,7 +161,7 @@ static ibool ddl_add_table_to_background_drop_list(const char* name)
 		drop = UT_LIST_GET_NEXT(ddl_drop_list, drop);
 	}
 
-	drop = mem_alloc(sizeof(ddl_drop_t));
+	drop = IB_MEM_ALLOC(sizeof(ddl_drop_t));
 	drop->table_name = mem_strdup(name);
 	UT_LIST_ADD_LAST(ddl_drop_list, ddl_drop_list, drop);
 
@@ -480,7 +480,7 @@ check_next_foreign:
 	} else {
 		ibool is_path;
 		const char* name_or_path;
-		mem_heap_t* heap = mem_heap_create(200);
+		mem_heap_t* heap = IB_MEM_HEAP_CREATE(200);
 
 		// Clone the name, in case it has been allocated from table->heap, which will be freed by dict_table_remove_from_cache(table) below. 
 		
@@ -528,7 +528,7 @@ check_next_foreign:
 				err = DB_ERROR;
 			}
 		}
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 func_exit:
 	trx->op_info = "";
@@ -653,7 +653,7 @@ err_exit:
 #endif /* IB_MEM_DEBUG */
 	}
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 
 	trx_set_dict_operation(trx, TRX_DICT_OP_TABLE);
 
@@ -723,7 +723,7 @@ IB_INTERN ulint ddl_create_index(ib_dict_index_t* index, trx_t* trx)
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
 	/* This heap is destroyed when the query graph is freed. */
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 
 	node = ind_create_graph_create(index, heap, FALSE);
 	thr = pars_complete_graph_for_exec(node, trx, heap);
@@ -919,7 +919,7 @@ IB_INTERN enum db_err ddl_truncate_table(dict_table_t* table, trx_t* trx)
 	}
 
 	/* scan SYS_INDEXES for all indexes of the table */
-	heap = mem_heap_create(800);
+	heap = IB_MEM_HEAP_CREATE(800);
 
 	tuple = dtuple_create(heap, 1);
 	dfield = dtuple_get_nth_field(tuple, 0);
@@ -989,7 +989,7 @@ next_rec:
 	btr_pcur_close(&pcur);
 	mtr_commit(&mtr);
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	new_id = dict_hdr_get_new_id(DICT_HDR_TABLE_ID);
 
@@ -1337,7 +1337,7 @@ IB_INTERN ulint ddl_rename_table(const char* old_name, const char* new_name, trx
 func_exit:
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 
 	trx->op_info = "";
@@ -1498,7 +1498,7 @@ loop:
 			ut_print_name(state->stream, trx, TRUE, table_name);
 			ib_log(state, ".\n");
 			os_thread_sleep(1000000);
-			mem_free(table_name);
+			IB_MEM_FREE(table_name);
 			goto loop;
 		}
 
@@ -1509,10 +1509,10 @@ loop:
 			ib_log(state, " failed with error %lu for table ", (ulint) err);
 			ut_print_name(state->stream, trx, TRUE, table_name);
 			ib_log(state, "\n");
-			mem_free(table_name);
+			IB_MEM_FREE(table_name);
 			break;
 		}
-		mem_free(table_name);
+		IB_MEM_FREE(table_name);
 	}
 
 	if (err == DB_SUCCESS) {
@@ -1609,7 +1609,7 @@ IB_INTERN void ddl_drop_all_temp_tables(ib_recovery_t recovery)
 	started = trx_start(trx, ULINT_UNDEFINED);
 	trx->op_info = "dropping temporary tables";
 	dict_lock_data_dictionary(trx);
-	heap = mem_heap_create(200);
+	heap = IB_MEM_HEAP_CREATE(200);
 	mtr_start(&mtr);
 	btr_pcur_open_at_index_side( TRUE, dict_table_get_first_index(dict_sys->sys_tables), BTR_SEARCH_LEAF, &pcur, TRUE, &mtr);
 
@@ -1654,7 +1654,7 @@ IB_INTERN void ddl_drop_all_temp_tables(ib_recovery_t recovery)
 
 	btr_pcur_close(&pcur);
 	mtr_commit(&mtr);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	dict_unlock_data_dictionary(trx);
 

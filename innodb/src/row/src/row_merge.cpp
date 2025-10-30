@@ -221,7 +221,7 @@ row_merge_buf_create(
 
 	buf_size = (sizeof *buf) + (max_tuples - 1) * sizeof *buf->tuples;
 
-	heap = mem_heap_create(buf_size + sizeof(row_merge_block_t));
+	heap = IB_MEM_HEAP_CREATE(buf_size + sizeof(row_merge_block_t));
 
 	buf = row_merge_buf_create_low(heap, index, max_tuples, buf_size);
 
@@ -257,7 +257,7 @@ row_merge_buf_free(
 /*===============*/
 	row_merge_buf_t*	buf)	/*!< in,own: sort buffer, to be freed */
 {
-	mem_heap_free(buf->heap);
+	IB_MEM_HEAP_FREE(buf->heap);
 }
 
 /******************************************************//**
@@ -463,7 +463,7 @@ row_merge_dup_report(
 				  &heap);
 
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 }
 
@@ -654,7 +654,7 @@ row_merge_heap_create(
 {
 	ulint		i	= 1 + REC_OFFS_HEADER_SIZE
 		+ dict_index_get_n_fields(index);
-	mem_heap_t*	heap	= mem_heap_create(2 * i * sizeof *offsets1);
+	mem_heap_t*	heap	= IB_MEM_HEAP_CREATE(2 * i * sizeof *offsets1);
 
 	*offsets1 = mem_heap_alloc(heap, i * sizeof *offsets1);
 	*offsets2 = mem_heap_alloc(heap, i * sizeof *offsets2);
@@ -680,7 +680,7 @@ row_merge_dict_table_get_index(
 	dict_index_t*	index;
 	const char**	column_names;
 
-	column_names = mem_alloc(index_def->n_fields * sizeof *column_names);
+	column_names = IB_MEM_ALLOC(index_def->n_fields * sizeof *column_names);
 
 	for (i = 0; i < index_def->n_fields; ++i) {
 		column_names[i] = index_def->fields[i].field_name;
@@ -689,7 +689,7 @@ row_merge_dict_table_get_index(
 	index = dict_table_get_index_by_max_id(
 		table, index_def->name, column_names, index_def->n_fields);
 
-	mem_free((void*) column_names);
+	IB_MEM_FREE((void*) column_names);
 
 	return(index);
 }
@@ -1151,7 +1151,7 @@ row_merge_read_clustered_index(
 
 	/* Create and initialize memory for record buffers */
 
-	merge_buf = mem_alloc(n_index * sizeof *merge_buf);
+	merge_buf = IB_MEM_ALLOC(n_index * sizeof *merge_buf);
 
 	for (i = 0; i < n_index; i++) {
 		merge_buf[i] = row_merge_buf_create(index[i]);
@@ -1178,7 +1178,7 @@ row_merge_read_clustered_index(
 
 		ut_a(n_cols == dict_table_get_n_cols(new_table));
 
-		nonnull = mem_alloc(n_cols * sizeof *nonnull);
+		nonnull = IB_MEM_ALLOC(n_cols * sizeof *nonnull);
 
 		for (i = 0; i < n_cols; i++) {
 			if (dict_table_get_nth_col(old_table, i)->prtype
@@ -1195,12 +1195,12 @@ row_merge_read_clustered_index(
 		}
 
 		if (!n_nonnull) {
-			mem_free(nonnull);
+			IB_MEM_FREE(nonnull);
 			nonnull = NULL;
 		}
 	}
 
-	row_heap = mem_heap_create(sizeof(mrec_buf_t));
+	row_heap = IB_MEM_HEAP_CREATE(sizeof(mrec_buf_t));
 
 	/* Scan the clustered index. */
 	for (;;) {
@@ -1348,17 +1348,17 @@ err_exit:
 func_exit:
 	btr_pcur_close(&pcur);
 	mtr_commit(&mtr);
-	mem_heap_free(row_heap);
+	IB_MEM_HEAP_FREE(row_heap);
 
 	if (IB_LIKELY_NULL(nonnull)) {
-		mem_free(nonnull);
+		IB_MEM_FREE(nonnull);
 	}
 
 	for (i = 0; i < n_index; i++) {
 		row_merge_buf_free(merge_buf[i]);
 	}
 
-	mem_free(merge_buf);
+	IB_MEM_FREE(merge_buf);
 
 	trx->op_info = "";
 
@@ -1438,7 +1438,7 @@ row_merge_blocks(
 	if (!row_merge_read(file->fd, *foffs0, &block[0])
 	    || !row_merge_read(file->fd, *foffs1, &block[1])) {
 corrupt:
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return(DB_CORRUPTION);
 	}
 
@@ -1462,7 +1462,7 @@ corrupt:
 		case 0:
 			if (IB_UNLIKELY
 			    (dict_index_is_unique(index))) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 				return(DB_DUPLICATE_KEY);
 			}
 			/* fall through */
@@ -1494,7 +1494,7 @@ done0:
 	}
 done1:
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	b2 = row_merge_write_eof(&block[2], b2, of->fd, &of->offset);
 	return(b2 ? DB_SUCCESS : DB_CORRUPTION);
 }
@@ -1539,7 +1539,7 @@ row_merge_blocks_copy(
 
 	if (!row_merge_read(file->fd, *foffs0, &block[0])) {
 corrupt:
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return(FALSE);
 	}
 
@@ -1565,7 +1565,7 @@ done0:
 	that has been read.  Update it to point to the next block. */
 	(*foffs0)++;
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	return(row_merge_write_eof(&block[2], b2, of->fd, &of->offset)
 	       != NULL);
 }
@@ -1793,14 +1793,14 @@ row_merge_insert_index_tuples(
 
 	trx->op_info = "inserting index entries";
 
-	graph_heap = mem_heap_create(500);
+	graph_heap = IB_MEM_HEAP_CREATE(500);
 	node = row_ins_node_create(INS_DIRECT, table, graph_heap);
 
 	thr = pars_complete_graph_for_exec(node, trx, graph_heap);
 
 	que_thr_move_to_run_state(thr);
 
-	tuple_heap = mem_heap_create(1000);
+	tuple_heap = IB_MEM_HEAP_CREATE(1000);
 
 	{
 		ulint i	= 1 + REC_OFFS_HEADER_SIZE
@@ -1874,7 +1874,7 @@ err_exit:
 
 	trx->op_info = "";
 
-	mem_heap_free(tuple_heap);
+	IB_MEM_HEAP_FREE(tuple_heap);
 
 	return(err);
 }
@@ -2002,7 +2002,7 @@ row_merge_create_temporary_table(
 	dict_table_t*	new_table = NULL;
 	ulint		n_cols = dict_table_get_n_user_cols(table);
 	ulint		error;
-	mem_heap_t*	heap = mem_heap_create(1000);
+	mem_heap_t*	heap = IB_MEM_HEAP_CREATE(1000);
 
 	ut_ad(table_name);
 	ut_ad(index_def);
@@ -2025,7 +2025,7 @@ row_merge_create_temporary_table(
 	}
 
 	error = ddl_create_table(new_table, trx);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	if (error != DB_SUCCESS) {
 		trx->error_state = error;
@@ -2291,7 +2291,7 @@ row_merge_build_indexes(
 	/* Allocate memory for merge file data structure and initialize
 	fields */
 
-	merge_files = mem_alloc(n_indexes * sizeof *merge_files);
+	merge_files = IB_MEM_ALLOC(n_indexes * sizeof *merge_files);
 	block_size = 3 * sizeof *block;
 	block = os_mem_alloc_large(&block_size);
 
@@ -2348,7 +2348,7 @@ func_exit:
 		row_merge_file_destroy(&merge_files[i]);
 	}
 
-	mem_free(merge_files);
+	IB_MEM_FREE(merge_files);
 	os_mem_free_large(block, block_size);
 
 	return(error);

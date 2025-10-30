@@ -460,7 +460,7 @@ ib_key_tuple_new_low(
 	UT_DBG_ENTER_FUNC;
 	tuple = mem_heap_alloc(heap, sizeof(*tuple));
 	if (tuple == NULL) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return(NULL);
 	}
 	tuple->heap = heap;
@@ -495,7 +495,7 @@ static ib_tpl_t ib_key_tuple_new(const dict_index_t* dict_index, ulint n_cols)
 {
 	mem_heap_t* heap;
 	UT_DBG_ENTER_FUNC;
-	heap = mem_heap_create(64);
+	heap = IB_MEM_HEAP_CREATE(64);
 	if (heap == NULL) {
 		return(NULL);
 	}
@@ -517,7 +517,7 @@ ib_row_tuple_new_low(
 	UT_DBG_ENTER_FUNC;
 	tuple = mem_heap_alloc(heap, sizeof(*tuple));
 	if (tuple == NULL) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 		return(NULL);
 	}
 	tuple->heap = heap;
@@ -541,7 +541,7 @@ ib_row_tuple_new(
 {
 	mem_heap_t* heap;
 	UT_DBG_ENTER_FUNC;
-	heap = mem_heap_create(64);
+	heap = IB_MEM_HEAP_CREATE(64);
 	if (heap == NULL) {
 		return(NULL);
 	}
@@ -1005,7 +1005,7 @@ void ib_table_schema_delete(ib_tbl_sch_t ib_tbl_sch)
 	if (table_def->table != NULL) {
 		dict_table_decrement_handle_count(table_def->table, FALSE);
 	}
-	mem_heap_free(table_def->heap);
+	IB_MEM_HEAP_FREE(table_def->heap);
 }
 
 /**
@@ -1192,7 +1192,7 @@ ib_table_schema_create(
 	ib_ulint_t page_size) /*!< in: Page size or 0 for default */
 {
 	ib_err_t err = DB_SUCCESS;
-	mem_heap_t* heap = mem_heap_create(1024);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(1024);
 
 	IB_CHECK_PANIC();
 
@@ -1214,7 +1214,7 @@ ib_table_schema_create(
 		table_def = (ib_table_def_t*) mem_heap_zalloc(heap, sizeof(*table_def));
 		if (table_def == NULL) {
 			err = DB_OUT_OF_MEMORY;
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		} else {
 			char* normalized_name;
 			table_def->heap = heap;
@@ -1399,12 +1399,12 @@ ib_index_schema_create(
 		return(DB_INVALID_INPUT);
 	}
 
-	normalized_name = mem_alloc(ut_strlen(table_name) + 1);
+	normalized_name = IB_MEM_ALLOC(ut_strlen(table_name) + 1);
 	ib_normalize_table_name(normalized_name, table_name);
 
 	table = ib_lookup_table_by_name(normalized_name);
 
-	mem_free(normalized_name);
+	IB_MEM_FREE(normalized_name);
 	normalized_name = NULL;
 
 	if (table == NULL) {
@@ -1412,7 +1412,7 @@ ib_index_schema_create(
 	} else if (dict_table_get_index_on_name(table, name) != NULL) {
 		err = DB_DUPLICATE_KEY;
 	} else {
-		mem_heap_t* heap = mem_heap_create(1024);
+		mem_heap_t* heap = IB_MEM_HEAP_CREATE(1024);
 
 		if (heap == NULL) {
 			err  = DB_OUT_OF_MEMORY;
@@ -1425,7 +1425,7 @@ ib_index_schema_create(
 			if (index_def == NULL) {
 				err = DB_OUT_OF_MEMORY;
 
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 			} else {
 				index_def->heap = heap;
 
@@ -1549,7 +1549,7 @@ ib_index_schema_delete(
 
 	ut_a(index_def->schema == NULL);
 
-	mem_heap_free(index_def->heap);
+	IB_MEM_HEAP_FREE(index_def->heap);
 }
 
 /**
@@ -2328,16 +2328,16 @@ ib_table_rename(
 		}
 	}
 
-	normalized_old_name = mem_alloc(ut_strlen(old_name) + 1);
+	normalized_old_name = IB_MEM_ALLOC(ut_strlen(old_name) + 1);
 	ib_normalize_table_name(normalized_old_name, old_name);
 
-	normalized_new_name = mem_alloc(ut_strlen(new_name) + 1);
+	normalized_new_name = IB_MEM_ALLOC(ut_strlen(new_name) + 1);
 	ib_normalize_table_name(normalized_new_name, new_name);
 
 	err = ddl_rename_table(normalized_old_name, normalized_new_name, trx);
 
-	mem_free(normalized_old_name);
-	mem_free(normalized_new_name);
+	IB_MEM_FREE(normalized_old_name);
+	IB_MEM_FREE(normalized_new_name);
 
 	return(err);
 }
@@ -2377,7 +2377,7 @@ ib_create_primary_index(
 
 	usr_trx->op_info = "recreating clustered index";
 
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 
 	/* This transaction should be the only one operating on the table. */
 	ut_a(table->n_handles_opened == 1);
@@ -2421,7 +2421,7 @@ ib_create_primary_index(
 		}
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	usr_trx->op_info = "";
 
@@ -2562,12 +2562,12 @@ ib_table_drop(
 		return(DB_SCHEMA_NOT_LOCKED);
 	}
 
-	normalized_name = mem_alloc(ut_strlen(name) + 1);
+	normalized_name = IB_MEM_ALLOC(ut_strlen(name) + 1);
 	ib_normalize_table_name(normalized_name, name);
 
 	err = ddl_drop_table(normalized_name, (trx_t*) ib_trx, FALSE);
 
-	mem_free(normalized_name);
+	IB_MEM_FREE(normalized_name);
 
 	return(err);
 }
@@ -2639,7 +2639,7 @@ ib_create_cursor(
 
 	UT_DBG_ENTER_FUNC;
 
-	heap = mem_heap_create(sizeof(*cursor) * 2);
+	heap = IB_MEM_HEAP_CREATE(sizeof(*cursor) * 2);
 
 	if (heap != NULL) {
 		row_prebuilt_t* prebuilt;
@@ -2648,10 +2648,10 @@ ib_create_cursor(
 
 		cursor->heap = heap;
 
-		cursor->query_heap = mem_heap_create(64);
+		cursor->query_heap = IB_MEM_HEAP_CREATE(64);
 
 		if (cursor->query_heap == NULL) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 
 			return(DB_OUT_OF_MEMORY);
 		}
@@ -2873,7 +2873,7 @@ ib_cursor_open_table(
 
 	UT_DBG_ENTER_FUNC;
 
-	normalized_name = mem_alloc(ut_strlen(name) + 1);
+	normalized_name = IB_MEM_ALLOC(ut_strlen(name) + 1);
 	ib_normalize_table_name(normalized_name, name);
 
 	if (ib_trx != NULL) {
@@ -2890,7 +2890,7 @@ ib_cursor_open_table(
 		table = ib_open_table_by_name(normalized_name);
 	}
 
-	mem_free(normalized_name);
+	IB_MEM_FREE(normalized_name);
 	normalized_name = NULL;
 
 	/* It can happen that another thread has created the table but
@@ -2990,8 +2990,8 @@ ib_cursor_close(
 		row_prebuilt_free(cursor->prebuilt, FALSE);
 	}
 
-	mem_heap_free(cursor->query_heap);
-	mem_heap_free(cursor->heap);
+	IB_MEM_HEAP_FREE(cursor->query_heap);
+	IB_MEM_HEAP_FREE(cursor->heap);
 
 	return(DB_SUCCESS);
 }
@@ -4856,7 +4856,7 @@ ib_tuple_delete(
 
 	UT_DBG_ENTER_FUNC;
 
-	mem_heap_free(tuple->heap);
+	IB_MEM_HEAP_FREE(tuple->heap);
 }
 
 /**
@@ -5020,12 +5020,12 @@ ib_index_get_id(
 
 	*index_id = 0;
 
-	normalized_name = mem_alloc(ut_strlen(table_name) + 1);
+	normalized_name = IB_MEM_ALLOC(ut_strlen(table_name) + 1);
 	ib_normalize_table_name(normalized_name, table_name);
 
 	table = ib_lookup_table_by_name(normalized_name);
 
-	mem_free(normalized_name);
+	IB_MEM_FREE(normalized_name);
 	normalized_name = NULL;
 
 	if (table != NULL) {
@@ -5099,7 +5099,7 @@ ib_database_drop(
 		return(DB_INVALID_INPUT);
 	}
 
-	ptr = (char*) mem_alloc(len + 2);
+	ptr = (char*) IB_MEM_ALLOC(len + 2);
 	memset(ptr, 0x0, len + 2);
 	ut_strcpy(ptr, dbname);
 #ifdef __WIN__
@@ -5121,7 +5121,7 @@ ib_database_drop(
 		fil_rmdir(ptr);
 	}
 
-	mem_free(ptr);
+	IB_MEM_FREE(ptr);
 
 	if (err == DB_SUCCESS) {
 		ib_err_t trx_err;
@@ -5309,7 +5309,7 @@ ib_table_lock(
 
 	ut_a(ib_lck_mode <= LOCK_NUM);
 
-	heap = mem_heap_create(128);
+	heap = IB_MEM_HEAP_CREATE(128);
 
 	q_proc.node.sel = sel_node_create(heap);
 
@@ -5327,7 +5327,7 @@ ib_table_lock(
 
 	dict_table_decrement_handle_count(table, FALSE);
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(err);
 }
@@ -5457,10 +5457,10 @@ void ib_savepoint_take(ib_trx_t ib_trx, const void* name, ib_ulint_t IB_NAME_LEN
 	if (savep) {
 		/* There is a savepoint with the same name: free that */
 		UT_LIST_REMOVE(trx_savepoints, trx->trx_savepoints, savep);
-		mem_free(savep);
+		IB_MEM_FREE(savep);
 	}
 	/* Create a new savepoint and add it as the last in the list */
-	savep = mem_alloc(sizeof(trx_named_savept_t) + IB_NAME_LEN);
+	savep = IB_MEM_ALLOC(sizeof(trx_named_savept_t) + IB_NAME_LEN);
 	savep->name = savep + 1;
 	savep->savept = trx_savept_take(trx);
 	savep->IB_NAME_LEN = IB_NAME_LEN;
@@ -5496,7 +5496,7 @@ ib_savepoint_release(
 
 			UT_LIST_REMOVE(trx_savepoints,
 					trx->trx_savepoints, savep);
-			mem_free(savep);
+			IB_MEM_FREE(savep);
 
 			return(DB_SUCCESS);
 		}
@@ -5724,12 +5724,12 @@ ib_table_schema_visit(
 		return(DB_SCHEMA_NOT_LOCKED);
 	}
 
-	normalized_name = mem_alloc(ut_strlen(name) + 1);
+	normalized_name = IB_MEM_ALLOC(ut_strlen(name) + 1);
 	ib_normalize_table_name(normalized_name, name);
 
 	table = ib_lookup_table_by_name(normalized_name);
 
-	mem_free(normalized_name);
+	IB_MEM_FREE(normalized_name);
 	normalized_name = NULL;
 
 	if (table != NULL) {

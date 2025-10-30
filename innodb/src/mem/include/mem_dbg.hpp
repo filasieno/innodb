@@ -17,8 +17,9 @@
 /// \brief The memory management: the debug code. This is not a compilation module, but is included in mem_mem.cpp
 
 // Created 6/9/1994 Heikki Tuuri
+// In the debug version each allocated field is surrounded with check fields whose sizes are given below
 
-//  In the debug version each allocated field is surrounded with check fields whose sizes are given below
+extern ulint mem_current_allocated_memory;
 
 #ifdef IB_MEM_DEBUG
 
@@ -31,7 +32,7 @@
 
 	#define MEM_FIELD_HEADER_SIZE	ut_calc_align(2 * sizeof(ulint), IB_MEM_ALIGNMENT)
 	#define MEM_FIELD_TRAILER_SIZE	sizeof(ulint)
-	#define MEM_SPACE_NEEDED(N) ut_calc_align((N) + MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE, IB_MEM_ALIGNMENT)
+	#define MEM_SPACE_NEEDED(N)     ut_calc_align((N) + MEM_FIELD_HEADER_SIZE + MEM_FIELD_TRAILER_SIZE, IB_MEM_ALIGNMENT)
 
 #else
 

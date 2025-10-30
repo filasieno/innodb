@@ -17,7 +17,7 @@
 /// \details Created 6/8/1994 Heikki Tuuri
 
 #ifdef IB_MEM_DEBUG
-	extern ulint mem_current_allocated_memory;
+
 
 	/// \brief Initializes an allocated memory field in the debug version.
 	/// \param [in] buf memory field

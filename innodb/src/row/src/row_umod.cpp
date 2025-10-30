@@ -138,7 +138,7 @@ row_undo_mod_clust_low(
 
 		ut_a(!dummy_big_rec);
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 	}
 
@@ -489,7 +489,7 @@ row_undo_mod_del_unmark_sec_and_undo_update(
 		err = btr_cur_del_mark_set_sec_rec(BTR_NO_LOCKING_FLAG,
 						   btr_cur, FALSE, thr, &mtr);
 		ut_a(err == DB_SUCCESS);
-		heap = mem_heap_create(100);
+		heap = IB_MEM_HEAP_CREATE(100);
 
 		update = row_upd_build_sec_rec_difference_binary(
 			index, entry, btr_cur_get_rec(btr_cur), trx, heap);
@@ -519,7 +519,7 @@ row_undo_mod_del_unmark_sec_and_undo_update(
 			ut_a(!dummy_big_rec);
 		}
 
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 
 	btr_pcur_close(&pcur);
@@ -544,7 +544,7 @@ row_undo_mod_upd_del_sec(
 	ulint		err	= DB_SUCCESS;
 
 	ut_ad(node->rec_type == TRX_UNDO_UPD_DEL_REC);
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 
 	while (node->index != NULL) {
 		index = node->index;
@@ -577,7 +577,7 @@ row_undo_mod_upd_del_sec(
 		node->index = dict_table_get_next_index(node->index);
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(err);
 }
@@ -597,7 +597,7 @@ row_undo_mod_del_mark_sec(
 	dict_index_t*	index;
 	ulint		err;
 
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 
 	while (node->index != NULL) {
 		index = node->index;
@@ -614,7 +614,7 @@ row_undo_mod_del_mark_sec(
 
 		if (err != DB_SUCCESS) {
 
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 
 			return(err);
 		}
@@ -622,7 +622,7 @@ row_undo_mod_del_mark_sec(
 		node->index = dict_table_get_next_index(node->index);
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(DB_SUCCESS);
 }
@@ -648,7 +648,7 @@ row_undo_mod_upd_exist_sec(
 		return(DB_SUCCESS);
 	}
 
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 
 	while (node->index != NULL) {
 		index = node->index;
@@ -674,7 +674,7 @@ row_undo_mod_upd_exist_sec(
 								  index,
 								  entry);
 			if (err != DB_SUCCESS) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 
 				return(err);
 			}
@@ -699,7 +699,7 @@ row_undo_mod_upd_exist_sec(
 			}
 
 			if (err != DB_SUCCESS) {
-				mem_heap_free(heap);
+				IB_MEM_HEAP_FREE(heap);
 
 				return(err);
 			}
@@ -708,7 +708,7 @@ row_undo_mod_upd_exist_sec(
 		node->index = dict_table_get_next_index(node->index);
 	}
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	return(DB_SUCCESS);
 }

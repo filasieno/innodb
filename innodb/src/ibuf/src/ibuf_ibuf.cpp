@@ -326,7 +326,7 @@ IB_INTERN void ibuf_close(void)
 	mutex_free(&ibuf_bitmap_mutex);
 	memset(&ibuf_bitmap_mutex, 0x0, sizeof(ibuf_mutex));
 
-	mem_free(ibuf);
+	IB_MEM_FREE(ibuf);
 	ibuf = NULL;
 }
 
@@ -350,7 +350,7 @@ static void ibuf_size_update(const page_t* root, mtr_t* mtr)
 /// \brief Creates the insert buffer data structure at a database startup and initializes the data structures for the insert buffer.
 IB_INTERN void ibuf_init_at_db_start(void)
 {
-    ibuf = mem_alloc(sizeof(ibuf_t));
+    ibuf = IB_MEM_ALLOC(sizeof(ibuf_t));
     memset(ibuf, 0, sizeof(*ibuf));
     /* Note that also a pessimistic delete can sometimes make a B-tree grow in size, as the references on the upper levels of the tree can change */
     ibuf->max_size = buf_pool_get_curr_size() / IB_PAGE_SIZE / IBUF_POOL_SIZE_PER_MAX_SIZE;
@@ -374,13 +374,13 @@ IB_INTERN void ibuf_init_at_db_start(void)
     mutex_exit(&ibuf_mutex);
     mtr_commit(&mtr);
     ibuf_exit();
-    mem_heap_t* heap = mem_heap_create(450);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(450);
     /* Use old-style record format for the insert buffer. */
     dict_table_t* table = dict_mem_table_create(IBUF_TABLE_NAME, IBUF_SPACE_ID, 1, 0);
     dict_mem_table_add_col(table, heap, "DUMMY_COLUMN", DATA_BINARY, 0, 0);
     table->id = ut_dulint_add(DICT_IBUF_ID_MIN, IBUF_SPACE_ID);
     dict_table_add_to_cache(table, heap);
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
     dict_index_t* index = dict_mem_index_create(IBUF_TABLE_NAME, "CLUST_IND", IBUF_SPACE_ID, DICT_CLUSTERED | DICT_UNIVERSAL | DICT_IBUF, 1);
     dict_mem_index_add_field(index, "DUMMY_COLUMN", 0);
     index->id = ut_dulint_add(DICT_IBUF_ID_MIN, IBUF_SPACE_ID);
@@ -888,12 +888,12 @@ static ulint ibuf_rec_get_volume(const rec_t* ibuf_rec)
 		ut_a(comp <= 1);
 		if (comp) {
 			// compact record format
-			mem_heap_t* heap = mem_heap_create(500);
+			mem_heap_t* heap = IB_MEM_HEAP_CREATE(500);
 			dict_index_t* dummy_index;
 			dtuple_t* entry = ibuf_build_entry_from_ibuf_rec(ibuf_rec, heap, &dummy_index);
 			ulint volume = rec_get_converted_size(dummy_index, entry, 0);
 			ibuf_dummy_index_free(dummy_index);
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 			return(volume + page_dir_calc_reserved_space(1));
 		}
 		n_fields = rec_get_n_fields_old(ibuf_rec) - 4;
@@ -1609,7 +1609,7 @@ static ulint ibuf_insert_low(ulint mode, const dtuple_t* entry, ulint entry_size
 	} else {
 		ibuf_enter();
 	}
-	mem_heap_t* heap = mem_heap_create(512);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(512);
 
 	// Build the entry which contains the space id and the page number as the first fields and the type information for other fields, and which will be inserted to the insert buffer.
 	dtuple_t* ibuf_entry = ibuf_entry_build(index, entry, space, page_no, heap);
@@ -1704,7 +1704,7 @@ function_exit:
 	mtr_commit(&mtr);
 	btr_pcur_close(&pcur);
 	ibuf_exit();
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	if (err == DB_SUCCESS) {
 		mutex_enter(&ibuf_mutex);
 		ibuf->empty = FALSE;
@@ -1972,7 +1972,7 @@ IB_INTERN void ibuf_merge_or_delete_for_page(buf_block_t* block, ulint space, ul
 	}
 
 	ibuf_enter();
-	mem_heap_t* heap = mem_heap_create(512);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(512);
 	dtuple_t* search_tuple;
 	if (!trx_sys_multiple_tablespace_format) {
 		ut_a(trx_doublewrite_must_reset_space_ids);
@@ -2078,7 +2078,7 @@ reset_bit:
 	}
 	mtr_commit(&mtr);
 	btr_pcur_close(&pcur);
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	// Protect our statistics keeping from race conditions
 	mutex_enter(&ibuf_mutex);
@@ -2099,7 +2099,7 @@ reset_bit:
 /// \param [in] space space id
 IB_INTERN void ibuf_delete_for_discarded_space(ulint space)
 {
-	mem_heap_t* heap = mem_heap_create(512);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(512);
 
 	// Use page number 0 to build the search tuple so that we get the cursor positioned at the first entry for this space id
 	dtuple_t* search_tuple = ibuf_new_search_tuple_build(space, 0, heap);
@@ -2152,7 +2152,7 @@ leave_loop:
 	ibuf->n_merged_recs += n_inserts;
 	mutex_exit(&ibuf_mutex);
 	ibuf_exit();
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 }
 
 /// \brief Looks if the insert buffer is empty.

@@ -908,14 +908,14 @@ srv_init(void)
 	srv_slot_t*		slot;
 	ulint			i;
 
-	srv_sys = mem_alloc(sizeof(srv_sys_t));
+	srv_sys = IB_MEM_ALLOC(sizeof(srv_sys_t));
 
-	kernel_mutex_temp = mem_alloc(sizeof(mutex_t));
+	kernel_mutex_temp = IB_MEM_ALLOC(sizeof(mutex_t));
 	mutex_create(&kernel_mutex, SYNC_KERNEL);
 
 	mutex_create(&srv_innodb_monitor_mutex, SYNC_NO_ORDER_CHECK);
 
-	srv_sys->threads = mem_alloc(OS_THREAD_MAX_N * sizeof(srv_slot_t));
+	srv_sys->threads = IB_MEM_ALLOC(OS_THREAD_MAX_N * sizeof(srv_slot_t));
 
 	for (i = 0; i < OS_THREAD_MAX_N; i++) {
 		slot = srv_table_get_nth_slot(i);
@@ -925,7 +925,7 @@ srv_init(void)
 		ut_a(slot->event);
 	}
 
-	srv_client_table = mem_alloc(OS_THREAD_MAX_N * sizeof(srv_slot_t));
+	srv_client_table = IB_MEM_ALLOC(OS_THREAD_MAX_N * sizeof(srv_slot_t));
 
 	slot = srv_client_table;
 
@@ -955,7 +955,7 @@ srv_init(void)
 
 	UT_LIST_INIT(srv_conc_queue);
 
-	srv_conc_slots = mem_alloc(OS_THREAD_MAX_N * sizeof(srv_conc_slot_t));
+	srv_conc_slots = IB_MEM_ALLOC(OS_THREAD_MAX_N * sizeof(srv_conc_slot_t));
 
 	conc_slot = srv_conc_slots;
 
@@ -989,13 +989,13 @@ srv_free(void)
 	os_event_free(srv_lock_timeout_thread_event);
 	srv_lock_timeout_thread_event = NULL;
 
-	mem_free(srv_sys->threads);
+	IB_MEM_FREE(srv_sys->threads);
 	srv_sys->threads = NULL;
 
-	mem_free(srv_client_table);
+	IB_MEM_FREE(srv_client_table);
 	srv_client_table = NULL;
 
-	mem_free(srv_conc_slots);
+	IB_MEM_FREE(srv_conc_slots);
 	srv_conc_slots = NULL;
 
 	os_fast_mutex_free(&srv_conc_mutex);
@@ -1003,10 +1003,10 @@ srv_free(void)
 	mutex_free(&srv_innodb_monitor_mutex);
 	mutex_free(&kernel_mutex);
 
-	mem_free(kernel_mutex_temp);
+	IB_MEM_FREE(kernel_mutex_temp);
 	kernel_mutex_temp = NULL;
 
-	mem_free(srv_sys);
+	IB_MEM_FREE(srv_sys);
 	srv_sys = NULL;
 }
 

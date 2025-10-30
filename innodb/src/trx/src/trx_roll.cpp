@@ -79,7 +79,7 @@ trx_general_rollback(
 
 	srv_active_wake_master_thread();
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 
 	roll_node = roll_node_create(heap);
 
@@ -109,7 +109,7 @@ trx_general_rollback(
 
 	mutex_exit(&kernel_mutex);
 
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	ut_a(trx->error_state == DB_SUCCESS);
 
@@ -145,7 +145,7 @@ trx_roll_savepoints_free(
 		next_savep = UT_LIST_GET_NEXT(trx_savepoints, savep);
 
 		UT_LIST_REMOVE(trx_savepoints, trx->trx_savepoints, savep);
-		mem_free(savep);
+		IB_MEM_FREE(savep);
 
 		savep = next_savep;
 	}
@@ -199,7 +199,7 @@ trx_rollback_active(
 	const char*	unit		= "";
 	ibool		dictionary_locked = FALSE;
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 
 	fork = que_fork_create(NULL, NULL, QUE_FORK_RECOVERY, heap);
 	fork->trx = trx;
@@ -298,7 +298,7 @@ trx_rollback_active(
 	ib_log(state, "\nInnoDB: Rolling back of trx id " TRX_ID_FMT
 		" completed\n",
 		TRX_ID_PREP_PRINTF(trx->id));
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 
 	trx_roll_crash_recv_trx	= NULL;
 }
@@ -413,7 +413,7 @@ trx_undo_arr_create(void)
 	mem_heap_t*	heap;
 	ulint		i;
 
-	heap = mem_heap_create(1024);
+	heap = IB_MEM_HEAP_CREATE(1024);
 
 	arr = mem_heap_alloc(heap, sizeof(trx_undo_arr_t));
 
@@ -442,7 +442,7 @@ trx_undo_arr_free(
 {
 	ut_ad(arr->n_used == 0);
 
-	mem_heap_free(arr->heap);
+	IB_MEM_HEAP_FREE(arr->heap);
 }
 
 /*******************************************************************//**
@@ -928,7 +928,7 @@ trx_roll_graph_build(
 
 	ut_ad(mutex_own(&kernel_mutex));
 
-	heap = mem_heap_create(512);
+	heap = IB_MEM_HEAP_CREATE(512);
 	fork = que_fork_create(NULL, NULL, QUE_FORK_ROLLBACK, heap);
 	fork->trx = trx;
 

@@ -1488,7 +1488,7 @@ trx_undo_mem_create(
 		UT_ERROR;
 	}
 
-	undo = mem_alloc(sizeof(trx_undo_t));
+	undo = IB_MEM_ALLOC(sizeof(trx_undo_t));
 
 	if (undo == NULL) {
 
@@ -1572,7 +1572,7 @@ trx_undo_mem_free(
 		UT_ERROR;
 	}
 
-	mem_free(undo);
+	IB_MEM_FREE(undo);
 }
 
 /**********************************************************************//**

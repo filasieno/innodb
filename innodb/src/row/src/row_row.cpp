@@ -192,7 +192,7 @@ IB_INTERN dtuple_t* row_build(ulint type, const dict_index_t* index, const rec_t
         *ext = NULL;
     }
     if (tmp_heap) {
-        mem_heap_free(tmp_heap);
+        IB_MEM_HEAP_FREE(tmp_heap);
     }
     return(row);
 }
@@ -337,7 +337,7 @@ row_build_row_ref(
     }
     ut_ad(dtuple_check_typed(ref));
     if (tmp_heap) {
-        mem_heap_free(tmp_heap);
+        IB_MEM_HEAP_FREE(tmp_heap);
     }
     return(ref);
 }
@@ -411,7 +411,7 @@ notfound:
     }
     ut_ad(dtuple_check_typed(ref));
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
 }
 
@@ -451,12 +451,12 @@ IB_INTERN rec_t* row_get_clust_rec(ulint mode, const rec_t* rec, dict_index_t* i
 {
     ut_ad(!dict_index_is_clust(index));
     dict_table_t* table = index->table;
-    mem_heap_t* heap = mem_heap_create(256);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
     dtuple_t* ref = row_build_row_ref(ROW_COPY_POINTERS, index, rec, heap);
     btr_pcur_t pcur;
     ibool found = row_search_on_row_ref(&pcur, mode, table, ref, mtr);
     rec_t* clust_rec = found ? btr_pcur_get_rec(&pcur) : NULL;
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
     btr_pcur_close(&pcur);
     *clust_index = dict_table_get_first_index(table);
     return(clust_rec);

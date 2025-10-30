@@ -380,7 +380,7 @@ IB_INTERN ulint lock_sec_rec_cons_read_sees(const rec_t* rec, const read_view_t*
 
 IB_INTERN void lock_sys_create(ulint n_cells)
 {
-	lock_sys = mem_alloc(sizeof(lock_sys_t));
+	lock_sys = IB_MEM_ALLOC(sizeof(lock_sys_t));
 	lock_sys->rec_hash = hash_create(n_cells);
 	// hash_create_mutexes(lock_sys->rec_hash, 2, SYNC_REC_LOCK);
 	lock_latest_err_stream = os_file_create_tmpfile();
@@ -403,7 +403,7 @@ IB_INTERN void lock_sys_close(void)
 		lock_latest_err_stream = NULL;
 	}
 
-	mem_free(lock_sys);
+	IB_MEM_FREE(lock_sys);
 	lock_sys = NULL;
 }
 
@@ -1352,7 +1352,7 @@ IB_INTERN void lock_move_reorganize_page(const buf_bib_lock_t* block, const buf_
         lock_mutex_exit_kernel();
         return;
     }
-    mem_heap_t* heap = mem_heap_create(256);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
     // Copy first all the locks on the page to heap and reset the bitmaps in the original locks; chain the copies of the locks using the trx_locks field in them.
     UT_LIST_BASE_NODE_T(ib_lock_t) old_locks;
     UT_LIST_INIT(old_locks);
@@ -1410,7 +1410,7 @@ IB_INTERN void lock_move_reorganize_page(const buf_bib_lock_t* block, const buf_
     }
     }
     lock_mutex_exit_kernel();
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
 #ifdef IB_DEBUG_LOCK_VALIDATE
     ut_ad(lock_rec_validate_page(buf_block_get_space(block), buf_block_get_zip_size(block), buf_block_get_page_no(block)));
 #endif
@@ -2109,7 +2109,7 @@ IB_INTERN void lock_rec_print(innodb_state* state, const ib_lock_t* lock)
 	}
 	mtr_commit(&mtr);
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 }
 
@@ -2396,7 +2396,7 @@ function_exit:
     lock_mutex_exit_kernel();
     mtr_commit(&mtr);
     if (IB_LIKELY_NULL(heap)) {
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
     }
     return TRUE;
 }
@@ -2491,7 +2491,7 @@ IB_INTERN ulint lock_rec_insert_check_and_lock(ulint flags, const rec_t* rec, bu
 		const ulint* offsets = rec_get_offsets(next_rec, index, offsets_, ULINT_UNDEFINED, &heap);
 		ut_ad(lock_rec_queue_validate(block, next_rec, index, offsets));
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 	}
     return err;
@@ -2570,7 +2570,7 @@ IB_INTERN ulint lock_sec_rec_modify_check_and_lock(ulint flags, buf_bib_lock_t* 
 		offsets = rec_get_offsets(rec, index, offsets_, ULINT_UNDEFINED, &heap);
 		ut_ad(lock_rec_queue_validate(block, rec, index, offsets));
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 	}
 	if (err == DB_SUCCESS) {
@@ -2636,7 +2636,7 @@ IB_INTERN ulint lock_clust_rec_read_check_and_lock_alt(ulint flags, const buf_bi
 	offsets = rec_get_offsets(rec, index, offsets, ULINT_UNDEFINED, &tmp_heap);
 	ulint ret = lock_clust_rec_read_check_and_lock(flags, block, rec, index, offsets, mode, gap_mode, thr);
 	if (tmp_heap) {
-		mem_heap_free(tmp_heap);
+		IB_MEM_HEAP_FREE(tmp_heap);
 	}
 	return ret;
 }

@@ -171,7 +171,7 @@ trx_rseg_mem_free(
 
 	trx_sys_set_nth_rseg(trx_sys, rseg->id, NULL);
 
-	mem_free(rseg);
+	IB_MEM_FREE(rseg);
 }
 
 /***************************************************************************
@@ -201,7 +201,7 @@ trx_rseg_mem_create(
 
 	ut_ad(mutex_own(&kernel_mutex));
 
-	rseg = mem_alloc(sizeof(trx_rseg_t));
+	rseg = IB_MEM_ALLOC(sizeof(trx_rseg_t));
 
 	rseg->id = id;
 	rseg->space = space;

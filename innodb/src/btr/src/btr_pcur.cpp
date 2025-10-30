@@ -8,33 +8,38 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
+
 /// \file btr_pcur.cpp
 /// \brief The index tree persistent cursor
 /// \details Originally created by Heikki Tuuri in 2/23/1996
 /// \author Fabio N. Filasieno
 /// \date 21/10/2025
+
 #include "btr_pcur.hpp"
 #ifdef IB_DO_NOT_INLINE
-#include "btr0pcur.inl"
+    #include "btr_pcur.inl"
 #endif
+
 #include "ut_byte.hpp"
 #include "rem_cmp.hpp"
 #include "trx_trx.hpp"
+
 /// \brief Allocates memory for a persistent cursor object and initializes the cursor.
 /// \return own: persistent cursor
 IB_INTERN btr_pcur_t* btr_pcur_create(void)
 {
-    btr_pcur_t* pcur = mem_alloc(sizeof(btr_pcur_t));
+    btr_pcur_t* pcur = IB_MEM_ALLOC(sizeof(btr_pcur_t));
     pcur->btr_cur.index = NULL;
     btr_pcur_init(pcur);
     return pcur;
 }
+
 /// \brief Frees the memory for a persistent cursor object.
 /// \param [in] cursor persistent cursor
 IB_INTERN void btr_pcur_free(btr_pcur_t* cursor)
 {
     if (cursor->old_rec_buf != NULL) {
-        mem_free(cursor->old_rec_buf);
+        IB_MEM_FREE(cursor->old_rec_buf);
         cursor->old_rec_buf = NULL;
     }
     cursor->btr_cur.page_cur.rec = NULL;
@@ -43,8 +48,9 @@ IB_INTERN void btr_pcur_free(btr_pcur_t* cursor)
     cursor->old_stored = BTR_PCUR_OLD_NOT_STORED;
     cursor->latch_mode = BTR_NO_LATCHES;
     cursor->pos_state = BTR_PCUR_NOT_POSITIONED;
-    mem_free(cursor);
+    IB_MEM_FREE(cursor);
 }
+
 /// \brief The position of the cursor is stored by taking an initial segment of the record the cursor is positioned on, before, or after, and copying it to the cursor data structure.
 /// \param [in] cursor persistent cursor
 /// \param [in] mtr mtr
@@ -87,22 +93,24 @@ IB_INTERN void btr_pcur_store_position(btr_pcur_t* cursor, mtr_t* mtr)
     cursor->block_when_stored = block;
     cursor->modify_clock = buf_block_get_modify_clock(block);
 }
+
 /// \brief Copies the stored position of a pcur to another pcur.
 /// \param [in] pcur_receive pcur which will receive the position info
 /// \param [in] pcur_donate pcur from which the info is copied
 IB_INTERN void btr_pcur_copy_stored_position(btr_pcur_t* pcur_receive, btr_pcur_t* pcur_donate)
 {
     if (pcur_receive->old_rec_buf) {
-        mem_free(pcur_receive->old_rec_buf);
+        IB_MEM_FREE(pcur_receive->old_rec_buf);
     }
     ut_memcpy(pcur_receive, pcur_donate, sizeof(btr_pcur_t));
     if (pcur_donate->old_rec_buf) {
-        pcur_receive->old_rec_buf = mem_alloc(pcur_donate->buf_size);
+        pcur_receive->old_rec_buf = IB_MEM_ALLOC(pcur_donate->buf_size);
         ut_memcpy(pcur_receive->old_rec_buf, pcur_donate->old_rec_buf, pcur_donate->buf_size);
         pcur_receive->old_rec = pcur_receive->old_rec_buf + (pcur_donate->old_rec - pcur_donate->old_rec_buf);
     }
     pcur_receive->old_n_fields = pcur_donate->old_n_fields;
 }
+
 /// \brief Restores the stored position of a persistent cursor bufferfixing the page and obtaining the specified latches.
 /// \param [in] latch_mode BTR_SEARCH_LEAF, ...
 /// \param [in] cursor detached persistent cursor
@@ -146,11 +154,11 @@ IB_INTERN ibool btr_pcur_restore_position_func(ulint latch_mode, btr_pcur_t* cur
                 cursor->latch_mode = latch_mode;
 #ifdef IB_DEBUG
                 rec = btr_pcur_get_rec(cursor);
-                mem_heap_t* heap = mem_heap_create(256);
+                mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
                 offsets1 = rec_get_offsets(cursor->old_rec, index, NULL, cursor->old_n_fields, &heap);
                 offsets2 = rec_get_offsets(rec, index, NULL, cursor->old_n_fields, &heap);
                 ut_ad(!cmp_rec_rec(cursor->old_rec, rec, offsets1, offsets2, index));
-                mem_heap_free(heap);
+                IB_MEM_HEAP_FREE(heap);
 #endif /* IB_DEBUG */
                 return TRUE;
             }
@@ -158,7 +166,7 @@ IB_INTERN ibool btr_pcur_restore_position_func(ulint latch_mode, btr_pcur_t* cur
         }
     }
     // If optimistic restoration did not succeed, open the cursor anew
-    mem_heap_t* heap = mem_heap_create(256);
+    mem_heap_t* heap = IB_MEM_HEAP_CREATE(256);
     dtuple_t* tuple = dict_index_build_data_tuple(index, cursor->old_rec, cursor->old_n_fields, heap);
     // Save the old search mode of the cursor
     ulint old_mode = cursor->search_mode;
@@ -179,14 +187,15 @@ IB_INTERN ibool btr_pcur_restore_position_func(ulint latch_mode, btr_pcur_t* cur
         cursor->block_when_stored = btr_pcur_get_block(cursor);
         cursor->modify_clock = buf_block_get_modify_clock(cursor->block_when_stored);
         cursor->old_stored = BTR_PCUR_OLD_STORED;
-        mem_heap_free(heap);
+        IB_MEM_HEAP_FREE(heap);
         return TRUE;
     }
-    mem_heap_free(heap);
+    IB_MEM_HEAP_FREE(heap);
     // We have to store new position information, modify_clock etc., to the cursor because it can now be on a different page, the record under it may have been removed, etc.
     btr_pcur_store_position(cursor, mtr);
     return FALSE;
 }
+
 /// \brief If the latch mode of the cursor is BTR_LEAF_SEARCH or BTR_LEAF_MODIFY, releases the page latch and bufferfix reserved by the cursor.
 /// \param [in] cursor persistent cursor
 /// \param [in] mtr mtr
@@ -200,6 +209,7 @@ IB_INTERN void btr_pcur_release_leaf(btr_pcur_t* cursor, mtr_t* mtr)
     cursor->latch_mode = BTR_NO_LATCHES;
     cursor->pos_state = BTR_PCUR_WAS_POSITIONED;
 }
+
 /// \brief Moves the persistent cursor to the first record on the next page.
 /// \param [in] cursor persistent cursor; must be on the last record of the current page
 /// \param [in] mtr mtr
@@ -226,6 +236,7 @@ IB_INTERN void btr_pcur_move_to_next_page(btr_pcur_t* cursor, mtr_t* mtr)
     page_cur_set_before_first(next_block, btr_pcur_get_page_cur(cursor));
     page_check_dir(next_page);
 }
+
 /// \brief Moves the persistent cursor backward if it is on the first record of the page.
 /// \param [in] cursor persistent cursor, must be on the first record of the current page
 /// \param [in] mtr mtr
@@ -266,6 +277,7 @@ IB_INTERN void btr_pcur_move_backward_from_page(btr_pcur_t* cursor, mtr_t* mtr)
     cursor->latch_mode = latch_mode;
     cursor->old_stored = BTR_PCUR_OLD_NOT_STORED;
 }
+
 /// \brief If mode is PAGE_CUR_G or PAGE_CUR_GE, opens a persistent cursor on the first user record satisfying the search condition, in the case PAGE_CUR_L or PAGE_CUR_LE, on the last user record.
 /// \param [in] index index
 /// \param [in] tuple tuple on which search done

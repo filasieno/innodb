@@ -52,7 +52,7 @@ IB_INTERN hash_table_t* ha_create_func(ulint n,
 	but in practise it never should in this case, hence the asserts. */
 
 	if (n_mutexes == 0) {
-		table->heap = mem_heap_create_in_btr_search(
+		table->heap = IB_MEM_HEAP_CREATE_IN_BTR_SEARCH(
 			ut_min(4096, MEM_MAX_ALLOC_IN_BUF));
 		ut_a(table->heap);
 
@@ -62,10 +62,10 @@ IB_INTERN hash_table_t* ha_create_func(ulint n,
 #ifndef IB_HOTBACKUP
 	hash_create_mutexes(table, n_mutexes, mutex_level);
 
-	table->heaps = mem_alloc(n_mutexes * sizeof(void*));
+	table->heaps = IB_MEM_ALLOC(n_mutexes * sizeof(void*));
 
 	for (ulint i = 0; i < n_mutexes; i++) {
-		table->heaps[i] = mem_heap_create_in_btr_search(4096);
+		table->heaps[i] = IB_MEM_HEAP_CREATE_IN_BTR_SEARCH(4096);
 		ut_a(table->heaps[i]);
 	}
 #endif /* !IB_HOTBACKUP */
@@ -86,7 +86,7 @@ IB_INTERN void ha_clear(hash_table_t* table)
 	/* Free the memory heaps. */
 	ulint n = table->n_mutexes;
 	for (ulint i = 0; i < n; i++) {
-		mem_heap_free(table->heaps[i]);
+		IB_MEM_HEAP_FREE(table->heaps[i]);
 	}
 #endif /* !IB_HOTBACKUP */
 	/* Clear the hash table. */

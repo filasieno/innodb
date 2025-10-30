@@ -149,7 +149,7 @@ dyn_array_free(
 	dyn_array_t*	arr)	/*!< in: dyn array */
 {
 	if (arr->heap != NULL) {
-		mem_heap_free(arr->heap);
+		IB_MEM_HEAP_FREE(arr->heap);
 	}
 
 #ifdef IB_DEBUG

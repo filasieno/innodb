@@ -1053,7 +1053,7 @@ IB_INTERN rec_t* rec_convert_dtuple_to_rec(byte* buf, const dict_index_t* index,
 		}
 
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 	}
 #endif // IB_DEBUG
@@ -1118,10 +1118,10 @@ static rec_t* rec_copy_prefix_to_buf_old(const rec_t* rec, ulint n_fields, ulint
 
 	if ((*buf == NULL) || (*buf_size < prefix_len)) {
 		if (*buf != NULL) {
-			mem_free(*buf);
+			IB_MEM_FREE(*buf);
 		}
 
-		*buf = mem_alloc2(prefix_len, buf_size);
+		*buf = IB_MEM_ALLOC_EX(prefix_len, buf_size);
 	}
 
 	ut_memcpy(*buf, rec - area_start, prefix_len);
@@ -1233,10 +1233,10 @@ IB_INTERN rec_t* rec_copy_prefix_to_buf(const rec_t* rec, const dict_index_t* in
 
 	if ((*buf == NULL) || (*buf_size < prefix_len)) {
 		if (*buf != NULL) {
-			mem_free(*buf);
+			IB_MEM_FREE(*buf);
 		}
 
-		*buf = mem_alloc2(prefix_len, buf_size);
+		*buf = IB_MEM_ALLOC_EX(prefix_len, buf_size);
 	}
 
 	memcpy(*buf, lens + 1, prefix_len);
@@ -1482,7 +1482,7 @@ IB_INTERN void rec_print(ib_stream_t state->stream, const rec_t* rec, dict_index
 		rec_offs_init(offsets_);
 		rec_print_new(state->stream, rec, rec_get_offsets(rec, index, offsets_, ULINT_UNDEFINED, &heap));
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 	}
 }

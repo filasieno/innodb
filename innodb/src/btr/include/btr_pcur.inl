@@ -18,7 +18,6 @@
 /// \author Fabio N. Filasieno
 /// \date 21/10/2025
 
-
 IB_INLINE ulint btr_pcur_get_rel_pos(const btr_pcur_t* cursor);
 {
 	ut_ad(cursor);
@@ -41,6 +40,7 @@ IB_INLINE mtr_t* btr_pcur_get_mtr(btr_pcur_t* cursor);
 }
 
 #ifdef IB_DEBUG
+
 IB_INLINE btr_cur_t* btr_pcur_get_btr_cur(const btr_pcur_t* cursor);
 {
     const btr_cur_t* btr_cur = &cursor->btr_cur;
@@ -51,7 +51,8 @@ IB_INLINE page_cur_t* btr_pcur_get_page_cur(const btr_pcur_t* cursor);
 {
     return btr_cur_get_page_cur(btr_pcur_get_btr_cur(cursor));
 }
-#endif /* IB_DEBUG */
+#endif // IB_DEBUG
+
 IB_INLINE page_t* btr_pcur_get_page(btr_pcur_t* cursor);
 {
 	ut_ad(cursor->pos_state == BTR_PCUR_IS_POSITIONED);
@@ -318,7 +319,7 @@ IB_INLINE void btr_pcur_open_at_rnd_pos_func(dict_index_t* dict_index, ulint lat
 IB_INLINE void btr_pcur_close(btr_pcur_t* cursor);
 {
 	if (cursor->old_rec_buf != NULL) {
-		mem_free(cursor->old_rec_buf);
+		IB_MEM_FREE(cursor->old_rec_buf);
 		cursor->old_rec = NULL;
 		cursor->old_rec_buf = NULL;
 	}

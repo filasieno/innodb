@@ -26,9 +26,11 @@
 // this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 // Place, Suite 330, Boston, MA 02111-1307 USA
 
-// @file include/univ.inl
-// Version control for database, common definitions, and include files
-// Created 1/20/1994 Heikki Tuuri
+/// \file defs.hpp
+/// \brief Version control for database, common definitions, and include files
+/// \details Originally created by Heikki Tuuri in 1/20/1994
+/// \author Fabio N. Filasieno
+/// \date 22/10/2025
 
 #pragma once
 
@@ -211,13 +213,10 @@ operations (very slow); also IB_DEBUG must be defined
 //			DATABASE VERSION CONTROL
 //			========================
 
-// The 2-logarithm of IB_PAGE_SIZE:
-#define IB_PAGE_SIZE_SHIFT 14
-// The universal page size of the database
-#define IB_PAGE_SIZE (1 << IB_PAGE_SIZE_SHIFT)
+constinit ulint IB_PAGE_SIZE_SHIFT = 14;
+constinit ulint IB_PAGE_SIZE = (1 << IB_PAGE_SIZE_SHIFT);
 
-// Maximum number of parallel threads in a parallelized operation
-#define IB_MAX_PARALLELISM 32
+constinit ulint IB_MAX_PARALLELISM = 32;
 
 //			UNIVERSAL TYPE DEFINITIONS
 //			==========================

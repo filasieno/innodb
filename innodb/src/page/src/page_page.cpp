@@ -233,7 +233,7 @@ static page_t* page_create_low(buf_block_t* block, ulint comp)
 	buf_block_modify_clock_inc(block);
 	page_t* page = buf_block_get_frame(block);
 	fil_page_set_type(page, FIL_PAGE_INDEX);
-	mem_heap_t* heap = mem_heap_create(200);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(200);
 	// 3. CREATE THE INFIMUM AND SUPREMUM RECORDS
 	// Create first a data tuple for infimum record
 	dtuple_t* tuple = dtuple_create(heap, 1);
@@ -274,7 +274,7 @@ static page_t* page_create_low(buf_block_t* block, ulint comp)
 	offsets = rec_get_offsets(supremum_rec, index, offsets, ULINT_UNDEFINED, &heap);
 	heap_top = rec_get_end(supremum_rec, offsets);
 	ut_ad(heap_top == page + (comp ? PAGE_NEW_SUPREMUM_END : PAGE_OLD_SUPREMUM_END));
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	// 4. INITIALIZE THE PAGE
 	page_header_set_field(page, NULL, PAGE_N_DIR_SLOTS, 2);
 	page_header_set_ptr(page, NULL, PAGE_HEAP_TOP, heap_top);
@@ -359,7 +359,7 @@ IB_INTERN void page_copy_rec_list_end_no_locks(buf_block_t* new_block, buf_block
 		cur2 = ins_rec;
 	}
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 }
 
@@ -456,7 +456,7 @@ IB_INTERN rec_t* page_copy_rec_list_start(buf_block_t* new_block, buf_block_t* b
 		page_cur_move_to_next(&cur1);
 	}
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	// Update PAGE_MAX_TRX_ID on the uncompressed page. Modifications will be redo logged and copied to the compressed page in page_zip_compress() or page_zip_reorganize() below.
 	if (dict_index_is_sec_or_ibuf(index) && page_is_leaf(page_align(rec))) {
@@ -566,7 +566,7 @@ IB_INTERN void page_delete_rec_list_end(rec_t* rec, buf_block_t* block, dict_ind
 			page_cur_delete_rec(&cur, index, offsets, mtr);
 		} while (page_offset(rec) != PAGE_NEW_SUPREMUM);
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 		// Restore log mode
 		mtr_set_log_mode(mtr, log_mode);
@@ -589,7 +589,7 @@ IB_INTERN void page_delete_rec_list_end(rec_t* rec, buf_block_t* block, dict_ind
 			rec2 = page_rec_get_next(rec2);
 		} while (!page_rec_is_supremum(rec2));
 		if (IB_LIKELY_NULL(heap)) {
-			mem_heap_free(heap);
+			IB_MEM_HEAP_FREE(heap);
 		}
 	}
 	ut_ad(size < IB_PAGE_SIZE);
@@ -667,7 +667,7 @@ IB_INTERN void page_delete_rec_list_start(rec_t* rec, buf_block_t* block, dict_i
 		page_cur_delete_rec(&cur1, index, offsets, mtr);
 	}
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 	// Restore log mode
 	mtr_set_log_mode(mtr, log_mode);
@@ -953,7 +953,7 @@ IB_INTERN void page_print_list(buf_block_t* block, dict_index_t* index, ulint pr
 	}
 	ib_log(state, "Total of %lu records \n--------------------------------\n", (ulong) (count + 1));
 	if (IB_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
+		IB_MEM_HEAP_FREE(heap);
 	}
 }
 
@@ -1223,7 +1223,7 @@ IB_INTERN ibool page_validate(page_t* page, dict_index_t* index)
 			goto func_exit2;
 		}
 	}
-	mem_heap_t* heap = mem_heap_create(IB_PAGE_SIZE + 200);
+	mem_heap_t* heap = IB_MEM_HEAP_CREATE(IB_PAGE_SIZE + 200);
 	// The following buffer is used to check that the records in the page record heap do not overlap
 	byte* buf = mem_heap_zalloc(heap, IB_PAGE_SIZE);
 	// Check first that the record heap and the directory do not overlap.
@@ -1371,7 +1371,7 @@ n_owned_zero:
 	}
 	ret = TRUE;
 func_exit:
-	mem_heap_free(heap);
+	IB_MEM_HEAP_FREE(heap);
 	if (IB_UNLIKELY(ret == FALSE)) {
 func_exit2:
 		ib_log(state, "InnoDB: Apparent corruption in space %lu page %lu index %s\n", (ulong) page_get_space_id(page), (ulong) page_get_page_no(page), index->name);
