@@ -6,6 +6,15 @@ set(CMAKE_CXX_STANDARD            23)
 set(CMAKE_CXX_STANDARD_REQUIRED   ON)
 set(CMAKE_CXX_EXTENSIONS          OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Keep compile_commands.json at repo root for clangd on each configure
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
+    RESULT_VARIABLE _cc_symlink_result
+  )
+endif()
 
 # Ensure consistent stack protector mode across all targets to avoid PCM mismatch
 add_compile_options(-fstack-protector-strong)
@@ -63,7 +72,7 @@ function(xinnodb_module MODULE_NAME)
     if(module_src_files)
         add_library(${module_object_library} OBJECT ${module_src_files})
         target_link_libraries(${module_object_library} PRIVATE xinnodb_headers)
-        target_include_directories(${module_object_library} PRIVATE ${module_include_dir})
+        target_include_directories(${module_object_library} PRIVATE ${module_include_dir} ${XINNODB_INCLUDE_ROOT})
         # Add include paths for declared dependencies
         foreach(dep IN LISTS XMODULE_DEPS)
             target_include_directories(${module_object_library} PRIVATE "${XINNODB_SRC_ROOT}/${dep}/include")
