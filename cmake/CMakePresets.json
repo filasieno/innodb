@@ -1,0 +1,77 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 24 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS":     "ON",
+                "INNODB_ENABLE_GCOV":                "OFF",
+                "INNODB_ENABLE_UNIT_TESTING":        "ON",
+                "INNODB_ENABLE_INTEGRATION_TESTING": "ON",
+                "INNODB_ENABLE_XA":                  "ON",
+                "INNODB_ENABLE_ASAN":                "OFF",
+                "INNODB_ENABLE_TSAN":                "OFF",
+                "INNODB_ENABLE_UBSAN":               "OFF",
+                "INNODB_ENABLE_UNITY_BUILD":         "OFF",
+                "INNODB_ENABLE_IPO":                 "OFF",
+                "INNODB_ENABLE_CCACHE":              "ON",
+                "INNODB_ENABLE_CLANG_TIDY":          "OFF"
+            }
+        },
+        {
+            "name":        "debug",
+            "inherits":    "base",
+            "displayName": "Debug",
+            "description": "Complete debug build configuration with all options documented",
+
+            "cacheVariables": {
+            }
+        },
+        {
+            "name":        "debug-gcov",
+            "inherits":    "debug",
+            "displayName": "Debug GCov",
+            
+            "cacheVariables": {
+                "INNODB_ENABLE_UNIT_TESTING": "ON"
+            }
+        },
+        {
+            "name":        "debug-asan",
+            "inherits":    "debug",
+            "displayName": "Debug ASAN",
+            
+            "cacheVariables": {
+                "INNODB_ENABLE_UBSAN": "ON"
+            }
+        },
+        {
+            "name":        "debug-tsan",
+            "inherits":    "debug",
+            "displayName": "Debug TSAN",
+            
+            "cacheVariables": {
+                "INNODB_ENABLE_TSAN": "ON"
+            }
+        },
+        {
+            "name":        "debug-ubsan",
+            "inherits":    "debug",
+            "displayName": "Debug UBSAN",
+            
+            "cacheVariables": {
+                "INNODB_ENABLE_UBSAN": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "debug",       "configurePreset": "debug"       },
+        { "name": "debug-gcov",  "configurePreset": "debug-gcov"  },
+        { "name": "debug-asan",  "configurePreset": "debug-asan"  },
+        { "name": "debug-tsan",  "configurePreset": "debug-tsan"  },
+        { "name": "debug-ubsan", "configurePreset": "debug-ubsan" }
+    ]
+}

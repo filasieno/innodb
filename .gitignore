@@ -5,3 +5,5 @@
 *.dirstamp
 
 build
+result
+result-dev
