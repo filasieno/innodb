@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 4.1)
 
 project(xinnodb_project VERSION 0.1.0 LANGUAGES CXX)
 
@@ -22,6 +22,10 @@ add_compile_options(-fstack-protector-strong)
 # Setup testing framework
 enable_testing()
 find_package(GTest CONFIG REQUIRED)
+find_package(Doxygen REQUIRED)
+find_program(FLEX flex REQUIRED)
+find_program(BISON bison REQUIRED)
+
 include(GoogleTest)
 
 # Root folder configuration
@@ -49,14 +53,25 @@ set_target_properties(xinnodb_static PROPERTIES
     OUTPUT_NAME "xinnodb.${PROJECT_VERSION}"
 )
 
+# Doxygen configuration
+set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/doc")
+
+# Project Information
+
+
+
+
 # Collect all unit tests in a single runner
 set(XINNODB_ALL_TESTS)
 set(XINNODB_TEST_INCLUDE_DIRS)
+set(XINNODB_INTERNAL_DOCS_FOLDERS "${CMAKE_SOURCE_DIR}/xinnodb/include/")
 
+# ---------------------------------------------------------------------------------
 # Function to register a module and its unit tests
-function(xinnodb_module MODULE_NAME)
+# ---------------------------------------------------------------------------------
+function(xinnodb_component MODULE_NAME)
 
-    # Parse optional dependencies as: xinnodb_module(<name> DEPS dep1 dep2 ...)
+    # Parse optional dependencies as: xinnodb_component(<name> DEPS dep1 dep2 ...)
     set(oneValueArgs)
     set(multiValueArgs DEPS)
     cmake_parse_arguments(XMODULE "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -65,11 +80,12 @@ function(xinnodb_module MODULE_NAME)
     set(module_include_dir    "${module_src_dir}/include")
     set(module_impl_src_dir   "${module_src_dir}/src")
     set(module_test_src_dir   "${module_src_dir}/test")
-    set(module_object_library "${MODULE_NAME}_obj_lib")
+    
 
     # Define the module library either as a header only library or an object library
     file(GLOB module_src_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp")
     if(module_src_files)
+        set(module_object_library "${MODULE_NAME}_obj_lib")
         add_library(${module_object_library} OBJECT ${module_src_files})
         target_link_libraries(${module_object_library} PRIVATE xinnodb_headers)
         target_include_directories(${module_object_library} PRIVATE ${module_include_dir} ${XINNODB_INCLUDE_ROOT})
@@ -86,11 +102,13 @@ function(xinnodb_module MODULE_NAME)
         set(module_interface_library "${MODULE_NAME}_headers")
         add_library(${module_interface_library} INTERFACE)
         target_include_directories(${module_interface_library} INTERFACE ${module_include_dir})
+        
         # Propagate dependency include paths to consumers
         foreach(dep IN LISTS XMODULE_DEPS)
             target_include_directories(${module_interface_library} INTERFACE "${XINNODB_SRC_ROOT}/${dep}/include")
         endforeach()
         target_link_libraries(${module_interface_library} INTERFACE xinnodb_headers)
+
         # Link interface into aggregated libraries so consumers inherit includes
         target_link_libraries(xinnodb_static PUBLIC ${module_interface_library})
         target_link_libraries(xinnodb_shared PUBLIC ${module_interface_library})
@@ -101,11 +119,13 @@ function(xinnodb_module MODULE_NAME)
     if(module_test_srcs)
         list(APPEND XINNODB_ALL_TESTS ${module_test_srcs})
         list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_include_dir})
+        
         # Tests also need include paths from dependencies
         foreach(dep IN LISTS XMODULE_DEPS)
             list(APPEND XINNODB_TEST_INCLUDE_DIRS "${XINNODB_SRC_ROOT}/${dep}/include")
         endforeach()
         list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_test_src_dir})
+
         # Update the global variables
         set(XINNODB_ALL_TESTS         "${XINNODB_ALL_TESTS}"         PARENT_SCOPE)
         set(XINNODB_TEST_INCLUDE_DIRS "${XINNODB_TEST_INCLUDE_DIRS}" PARENT_SCOPE)
@@ -123,15 +143,34 @@ function(xinnodb_module MODULE_NAME)
           PATTERN "*.inl"
       )
     endif()
+
+    # Add Doxygen internal documentation    
+    list(APPEND XINNODB_INTERNAL_DOCS_FOLDERS "${module_include_dir}" )
+    # Propagate updated list to parent so subsequent modules see the accumulation
+    set(XINNODB_INTERNAL_DOCS_FOLDERS "${XINNODB_INTERNAL_DOCS_FOLDERS}" PARENT_SCOPE)
 endfunction()
 
 # ---------------------------------------------------------------------------------
-# XInnoDB standard module definitions
+# XInnoDB component definitions
 # ---------------------------------------------------------------------------------
-xinnodb_module(defs)
-xinnodb_module(io DEPS defs)
-xinnodb_module(ut)
+xinnodb_component(defs)
+xinnodb_component(io DEPS defs)
+xinnodb_component(ut)
 
+# ---------------------------------------------------------------------------------
+# XInnoDB documentation generation
+# ---------------------------------------------------------------------------------
+# Output Configuration (common settings)
+set(DOXYGEN_PROJECT_NAME       "XInnoDB")
+set(DOXYGEN_GENERATE_HTML      YES)  # Generate HTML documentation
+set(DOXYGEN_GENERATE_LATEX     NO)   # Skip LaTeX/PDF generation for faster builds
+set(DOXYGEN_RECURSIVE          YES)  # Recursively parse all source files
+set(DOXYGEN_GENERATE_XML       YES)  # Generate XML documentation
+set(DOXYGEN_INTERNAL_DOCS      YES)
+set(DOXYGEN_EXTRACT_STATIC     YES) 
+set(DOXYGEN_EXTRACT_ALL        YES)
+set(DOXYGEN_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/doc/public")
+doxygen_add_docs(XINNODB_DOC "${XINNODB_INTERNAL_DOCS_FOLDERS}")
 
 # ---------------------------------------------------------------------------------
 # Definition of the single unit test executable
@@ -181,5 +220,13 @@ install(
       PATTERN "*.hpp"
       PATTERN "*.h"
 )
+
+# Install Doxygen documentation (if generated)
+install(
+    DIRECTORY   "${CMAKE_BINARY_DIR}/doc/public/html"
+    DESTINATION "doc"
+    COMPONENT   dev
+)
+
 
 

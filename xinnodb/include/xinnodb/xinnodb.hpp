@@ -3,14 +3,29 @@
 #define INNODB_API
 
 using ib_u64 = unsigned long long;
-using size_t = ib_u64;
+using ib_i64 = signed long long;
+using ib_u32 = unsigned int;
+using ib_i32 = signed int;
+using ib_u16 = unsigned short;
+using ib_i16 = signed short;
+using ib_i8 = signed char;
+using ib_u8 = unsigned char;
+using ib_size_t = ib_u64;
+using ib_int = signed long int;
+using ib_ulint = unsigned long int;
+using ib_bool = bool;
 
 struct ib_sga_state;
 struct ib_state;
 
 /// \brief InnoDB Shared Global Area state descriptor
 struct ib_sga_state_desc {
-
+    ib_u64   frame_count;
+    ib_u64   worker_buffer_size;
+    ib_u64   context_buffer_size;
+    ib_u64   log_buffer_size;
+    ib_u64   debug_buffer_size;
+    ib_ulint file_table_capacity;
 };
 
 /// \brief InnoDB Worker state descriptor
@@ -36,6 +51,7 @@ struct ib_async {
 
 };
 
+/// \brief InnoDB API version
 struct ib_api_version {
     int major;
     int minor; 
@@ -43,27 +59,175 @@ struct ib_api_version {
     const char* build;
 };
 
-struct ib_err {
-    int code;
+/// \brief InnoDB error codes. 
+/// \details Most of the error codes are internal to the engine and will not be seen by user applications. 
+/// The partial error codes reflect the sub-state of an operation within InnoDB. 
+/// Some of the error codes are deprecated and are no longer used.
+/// \author Fabio N. Filasieno
+/// \date 2025-11-01
+enum class ib_err {
+    /// \brief A successult result
+	DB_SUCCESS = 10,
+
+	/// \brief This is a generic error code. 
+	/// \details It is used to classify error conditions that can't be represented by other codes
+	DB_ERROR,
+
+	/// \brief An operation was interrupted by a user.
+	DB_INTERRUPTED,
+
+	/// \brief Operation caused an out of memory error. 
+	/// \details Within InnoDB core code this is normally a fatal error
+	DB_OUT_OF_MEMORY,
+
+	/// \brief The operating system returned an out of file space error when trying to do an IO operation
+	DB_OUT_OF_FILE_SPACE,
+
+	/// \brief A lock request by transaction resulted in a lock wait
+	/// \details The thread is suspended internally by InnoDB and is put on a lock wait queue.
+	DB_LOCK_WAIT,
+
+	/// \brief A lock request by a transaction resulted in a deadlock. 
+	/// \details The transaction was rolled back
+	DB_DEADLOCK,
+
+	/// \brief Not used
+	DB_ROLLBACK,
+
+	/// \brief A record insert or update violates a unique contraint.
+	DB_DUPLICATE_KEY,
+
+	/// \brief A query thread should be in state suspended but is trying to acquire a lock. 
+	/// \details Currently this is treated as a hard error and a violation of an invariant.
+	DB_QUE_THR_SUSPENDED,
+
+	/// \brief Required history data has been deleted due to lack of space in rollback segment
+	DB_MISSING_HISTORY,
+
+	/// \brief This error is not used
+	DB_CLUSTER_NOT_FOUND = 30,
+
+	/// \brief The table could not be found
+	DB_TABLE_NOT_FOUND,
+
+	/// \brief The database has to be stopped and restarted with more file space
+	DB_MUST_GET_MORE_FILE_SPACE,
+
+	/// \brief The user is trying to create a table in the InnoDB data dictionary but a table with that name already exists
+	DB_TABLE_IS_BEING_USED,
+
+	/// \brief A record in an index would not fit on a compressed page, or it woul become bigger than 1/2 free space in an uncompressed page frame
+	DB_TOO_BIG_RECORD,
+
+	/// \brief Lock wait lasted too long
+	DB_LOCK_WAIT_TIMEOUT,
+
+	/// \brief Referenced key value not found for a foreign key in an insert or update of a row
+	DB_NO_REFERENCED_ROW,
+
+	/// \brief Cannot delete or update a row because it contains a key value which is referenced
+	DB_ROW_IS_REFERENCED,
+
+	/// \brief Adding a foreign key constraint to a table failed
+	DB_CANNOT_ADD_CONSTRAINT,
+
+	/// \brief Data structure corruption noticed
+	DB_CORRUPTION,
+
+	/// \brief InnoDB cannot handle an index where same column appears twice
+	DB_COL_APPEARS_TWICE_IN_INDEX,
+
+	/// \brief Dropping a foreign key constraint from a table failed
+	DB_CANNOT_DROP_CONSTRAINT,
+
+	/// \brief No savepoint exists with the given name
+	DB_NO_SAVEPOINT,
+
+	/// \brief We cannot create a new single-table tablespace because a file of the same name already exists
+	DB_TABLESPACE_ALREADY_EXISTS,
+
+	/// \brief Tablespace does not exist or is being dropped right now
+	DB_TABLESPACE_DELETED,
+
+	/// \brief Lock structs have exhausted the buffer pool (for big transactions, InnoDB stores the lock structs in the buffer pool)
+	DB_LOCK_TABLE_FULL,
+
+	/// \brief Foreign key constraints activated but the operation would lead to a duplicate key in some table
+	DB_FOREIGN_DUPLICATE_KEY,
+
+	/// \brief When InnoDB runs out of the preconfigured undo slots, this can only happen when there are too many concurrent transactions
+	DB_TOO_MANY_CONCURRENT_TRXS,
+
+	/// \brief When InnoDB sees any artefact or a feature that it can't recoginize or work with e.g., FT indexes created by a later version of the engine.
+	DB_UNSUPPORTED,
+
+	/// \brief A column in the PRIMARY KEY was found to be NULL
+	DB_PRIMARY_KEY_IS_NULL,
+
+	/// \brief The application should clean up and quite ASAP. 
+	/// \details Fatal error, InnoDB cannot continue operation without risking database corruption.
+	DB_FATAL,
+
+	// The following are partial failure codes
+	// -----------------------------------------------
+
+	/// \brief Partial failure code.
+	DB_FAIL = 1000,
+
+	/// \brief If an update or insert of a record doesn't fit in a Btree page
+	DB_OVERFLOW,
+
+	/// \brief If an update or delete of a record causes a Btree page to be below a minimum threshold
+	DB_UNDERFLOW,
+
+	/// \brief Failure to insert a secondary index entry to the insert buffer
+	DB_STRONG_FAIL,
+
+	/// \brief Failure trying to compress a page
+	DB_ZIP_OVERFLOW,
+	
+	// ------------------------------------------------------
+
+	/// \brief Record not found
+	DB_RECORD_NOT_FOUND = 1500,
+
+	/// \brief A cursor operation or search operation scanned to the end of the index.
+	DB_END_OF_INDEX,
+
+    /// \defgroup api_only_error_codes API only error codes
+    /// \brief Error codes that are only used by the API and not by the engine itself.
+    /// @{
+
+	/// \brief Generic schema error
+	DB_SCHEMA_ERROR = 2000,
+
+	/// \brief Column update or read failed because the types mismatch
+	DB_DATA_MISMATCH,
+
+	/// \brief If an API function expects the schema to be locked in exclusive mod and if it's not then that API function will return this error code
+	DB_SCHEMA_NOT_LOCKED,
+
+	/// \brief Generic error code for "Not found" type of errors
+	DB_NOT_FOUND,
+
+	/// \brief Generic error code for "Readonly" type of errors
+	DB_READONLY,
+
+	/// \brief Generic error code for "Invalid input" type of errors
+	DB_INVALID_INPUT
+
+    /// @}
 };
+
 
 extern int ib_version;
 
 using ib_worker_main_fn = ib_main_task_hdl(ib_state* state);
 
 
-struct ib_bool;
 struct ib_shutdown;
-struct ib_u32;
-struct ib_tpl;
-struct ib_ulint;
-struct ib_i64;
-struct ib_i32;
-struct ib_i16;
-struct ib_i8;
 
-struct ib_u16;
-struct ib_u8;
+struct ib_tpl;
 struct ib_cfg_type;
 struct ib_crsr;
 struct ib_trx;
@@ -88,7 +252,7 @@ struct ib_msg_stream;
 struct ib_trx_is_interrupted_handler;
 struct ib_panic_handler;
 
-INNODB_API ib_api_version           ib_get_version();
+INNODB_API ib_api_version           ib_get_api_version();
 
 INNODB_API ib_u64                   ib_get_sga_state_required_size(ib_sga_state_desc* desc);
 INNODB_API ib_u64                   ib_get_state_required_size(ib_state_desc* desc);
@@ -144,7 +308,7 @@ INNODB_API ib_async<ib_err>         ib_cursor_update_row(ib_state* db, ib_crsr c
 
 INNODB_API ib_async<ib_err>         ib_get_duplicate_key(ib_state* db, ib_trx trx, const char **table_name, const char **index_name);
 INNODB_API ib_async<ib_err>         ib_get_index_stat_n_diff_key_vals(ib_state* db, ib_crsr crsr, const char* index_name, ib_u64 *ncols, ib_i64 **n_diff);
-INNODB_API ib_async<ib_err>         ib_get_table_statistics(ib_state* db, ib_crsr crsr, ib_table_stats *table_stats, size_t sizeof_ib_table_stats_t);
+INNODB_API ib_async<ib_err>         ib_get_table_statistics(ib_state* db, ib_crsr crsr, ib_table_stats *table_stats, ib_size_t sizeof_ib_table_stats_t);
 
 INNODB_API ib_async<ib_err>         ib_index_create(ib_state* db, ib_idx_sch idx_sch, ib_id* index_id);
 INNODB_API ib_async<ib_err>         ib_index_drop(ib_state* db, ib_trx trx, ib_id index_id);

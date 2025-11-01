@@ -163,6 +163,7 @@
             buildPhase = ''
               echo "Building XInnoDB..."
               cmake --build build/release -j
+              cmake --build build/release --target XINNODB_DOC -j
             '';
 
             checkPhase = ''
@@ -174,8 +175,8 @@
             installPhase = ''
               echo "Installing XInnoDB..."
               # Install shared/runtime bits to $out, static libs and headers to $dev
-              cmake --install build/release --component runtime --prefix $out
-              cmake --install build/release --component dev     --prefix $dev
+              cmake --install build/release --component runtime      --prefix $out
+              cmake --install build/release --component dev          --prefix $dev
             '';
 
             meta = with pkgs.lib; {

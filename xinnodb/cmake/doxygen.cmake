@@ -87,12 +87,14 @@ if(DOXYGEN_FOUND)
     #
 
     # Project Information
-    set(DOXYGEN_PROJECT_NAME       "Embedded InnoDB")
+    set(DOXYGEN_PROJECT_NAME       "XInnoDB")
 
     # Output Configuration (common settings)
     set(DOXYGEN_GENERATE_HTML      YES)  # Generate HTML documentation
     set(DOXYGEN_GENERATE_LATEX     NO)   # Skip LaTeX/PDF generation for faster builds
     set(DOXYGEN_RECURSIVE          YES)  # Recursively parse all source files
+    set(DOXYGEN_GENERATE_XML       YES)  # Generate XML documentation
+    set(DOXYGEN_OUTPUT_DIRECTORY   "${CMAKE_BINARY_DIR}/doc")
 
     # ====================================================================================================================
     # 3. Doxygen Target Creation
@@ -126,8 +128,8 @@ if(DOXYGEN_FOUND)
     #
 
     set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/doc")
-    doxygen_add_docs(public-doc
-        "${CMAKE_SOURCE_DIR}/innodb/include/innodb.h"
+    doxygen_add_docs(xinnodb-public-doc
+        "${CMAKE_SOURCE_DIR}/xinnodb/include/xinnodb.h"
         COMMENT "Generate public API documentation for library users"
     )
 
@@ -151,7 +153,7 @@ if(DOXYGEN_FOUND)
     #
 
     set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/internal-doc")
-    doxygen_add_docs(internal-doc
+    doxygen_add_docs(xinnodb-internal-doc
         "${CMAKE_SOURCE_DIR}/innodb/include"
         "${CMAKE_SOURCE_DIR}/innodb/src/include"
         COMMENT "Generate comprehensive internal documentation for developers"
@@ -166,7 +168,7 @@ if(DOXYGEN_FOUND)
     # - Reducing visual clutter in the target list
     # - Making it easier to find documentation-related targets
     #
-    set_target_properties(public-doc internal-doc PROPERTIES FOLDER "Documentation")
+    set_target_properties(xinnodb-public-doc xinnodb-internal-doc PROPERTIES FOLDER "Documentation")
 
 else()
     message(STATUS "Doxygen not found - documentation generation will be skipped")
