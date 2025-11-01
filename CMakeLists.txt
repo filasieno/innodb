@@ -48,15 +48,17 @@ set(XINNODB_TEST_INCLUDE_DIRS)
 function(xinnodb_module MODULE_NAME)
 
     set(module_src_dir        "${XINNODB_SRC_ROOT}/${MODULE_NAME}")
-    set(module_test_src_dir   "${XINNODB_TEST_ROOT}/${MODULE_NAME}")
+    set(module_include_dir    "${module_src_dir}/include")
+    set(module_impl_src_dir   "${module_src_dir}/src")
+    set(module_test_src_dir   "${module_src_dir}/test")
     set(module_object_library "${MODULE_NAME}_obj_lib")
 
     # Define the module library either as a header only library or an object library
-    file(GLOB module_src_files CONFIGURE_DEPENDS "${module_src_dir}/*.cpp")
+    file(GLOB module_src_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp")
     if(module_src_files)
         add_library(${module_object_library} OBJECT ${module_src_files})
         target_link_libraries(${module_object_library} PRIVATE xinnodb_headers)
-        target_include_directories(${module_object_library} PRIVATE ${module_src_dir})
+        target_include_directories(${module_object_library} PRIVATE ${module_include_dir})
 
         # Add to the aggregated libraries
         target_sources(xinnodb_static PRIVATE $<TARGET_OBJECTS:${module_object_library}>)
@@ -65,7 +67,7 @@ function(xinnodb_module MODULE_NAME)
         # Header-only module: create an interface library to propagate includes
         set(module_interface_library "${MODULE_NAME}_headers")
         add_library(${module_interface_library} INTERFACE)
-        target_include_directories(${module_interface_library} INTERFACE ${module_src_dir})
+        target_include_directories(${module_interface_library} INTERFACE ${module_include_dir})
         target_link_libraries(${module_interface_library} INTERFACE xinnodb_headers)
         # Link interface into aggregated libraries so consumers inherit includes
         target_link_libraries(xinnodb_static PUBLIC ${module_interface_library})
@@ -76,11 +78,24 @@ function(xinnodb_module MODULE_NAME)
     file(GLOB module_test_srcs CONFIGURE_DEPENDS "${module_test_src_dir}/*.cpp")
     if(module_test_srcs)
         list(APPEND XINNODB_ALL_TESTS ${module_test_srcs})
-        list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_src_dir})
+        list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_include_dir})
         list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_test_src_dir})
         # Update the global variables
         set(XINNODB_ALL_TESTS         "${XINNODB_ALL_TESTS}"         PARENT_SCOPE)
         set(XINNODB_TEST_INCLUDE_DIRS "${XINNODB_TEST_INCLUDE_DIRS}" PARENT_SCOPE)
+    endif()
+
+    # Install module public headers from its include/ directory
+    if(EXISTS "${module_include_dir}")
+      install(
+        DIRECTORY "${module_include_dir}/"
+        DESTINATION "include/xinnodb/${MODULE_NAME}"
+        COMPONENT dev
+        FILES_MATCHING
+          PATTERN "*.hpp"
+          PATTERN "*.h"
+          PATTERN "*.inl"
+      )
     endif()
 endfunction()
 

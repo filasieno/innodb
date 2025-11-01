@@ -130,16 +130,16 @@
           pkgs.stdenv.mkDerivation {
             pname = "xinnodb";
             version = "0.1.0";
-            src = pkgs.lib.cleanSourceWith {
-              src = ./.;
-              filter = path: type:
-                let
-                  rel = pkgs.lib.removePrefix (toString ./. + "/") (toString path);
-                in
-                  rel == "xinnodb" || pkgs.lib.hasPrefix "xinnodb/" rel ||
+            # Include untracked files too: filter explicitly with builtins.filterSource
+            src = builtins.filterSource (
+              path: type:
+                let rel = pkgs.lib.removePrefix (toString ./. + "/") (toString path);
+                in (
                   rel == "CMakeLists.txt" ||
-                  rel == "CMakePresets.json";
-            };
+                  rel == "CMakePresets.json" ||
+                  rel == "xinnodb" || pkgs.lib.hasPrefix "xinnodb/" rel
+                )
+            ) ./.;
 
             outputs = [
               "out"
@@ -155,6 +155,8 @@
             configurePhase = ''
               echo "Configuring XInnoDB..."
               find . -type f -print | sort
+              echo "--- Module src files ---"
+              find xinnodb/src -type f -print | sort || true
               cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release
             '';
 
