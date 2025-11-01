@@ -47,6 +47,11 @@ set(XINNODB_TEST_INCLUDE_DIRS)
 # Function to register a module and its unit tests
 function(xinnodb_module MODULE_NAME)
 
+    # Parse optional dependencies as: xinnodb_module(<name> DEPS dep1 dep2 ...)
+    set(oneValueArgs)
+    set(multiValueArgs DEPS)
+    cmake_parse_arguments(XMODULE "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
     set(module_src_dir        "${XINNODB_SRC_ROOT}/${MODULE_NAME}")
     set(module_include_dir    "${module_src_dir}/include")
     set(module_impl_src_dir   "${module_src_dir}/src")
@@ -59,6 +64,10 @@ function(xinnodb_module MODULE_NAME)
         add_library(${module_object_library} OBJECT ${module_src_files})
         target_link_libraries(${module_object_library} PRIVATE xinnodb_headers)
         target_include_directories(${module_object_library} PRIVATE ${module_include_dir})
+        # Add include paths for declared dependencies
+        foreach(dep IN LISTS XMODULE_DEPS)
+            target_include_directories(${module_object_library} PRIVATE "${XINNODB_SRC_ROOT}/${dep}/include")
+        endforeach()
 
         # Add to the aggregated libraries
         target_sources(xinnodb_static PRIVATE $<TARGET_OBJECTS:${module_object_library}>)
@@ -68,6 +77,10 @@ function(xinnodb_module MODULE_NAME)
         set(module_interface_library "${MODULE_NAME}_headers")
         add_library(${module_interface_library} INTERFACE)
         target_include_directories(${module_interface_library} INTERFACE ${module_include_dir})
+        # Propagate dependency include paths to consumers
+        foreach(dep IN LISTS XMODULE_DEPS)
+            target_include_directories(${module_interface_library} INTERFACE "${XINNODB_SRC_ROOT}/${dep}/include")
+        endforeach()
         target_link_libraries(${module_interface_library} INTERFACE xinnodb_headers)
         # Link interface into aggregated libraries so consumers inherit includes
         target_link_libraries(xinnodb_static PUBLIC ${module_interface_library})
@@ -79,6 +92,10 @@ function(xinnodb_module MODULE_NAME)
     if(module_test_srcs)
         list(APPEND XINNODB_ALL_TESTS ${module_test_srcs})
         list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_include_dir})
+        # Tests also need include paths from dependencies
+        foreach(dep IN LISTS XMODULE_DEPS)
+            list(APPEND XINNODB_TEST_INCLUDE_DIRS "${XINNODB_SRC_ROOT}/${dep}/include")
+        endforeach()
         list(APPEND XINNODB_TEST_INCLUDE_DIRS ${module_test_src_dir})
         # Update the global variables
         set(XINNODB_ALL_TESTS         "${XINNODB_ALL_TESTS}"         PARENT_SCOPE)
@@ -103,7 +120,7 @@ endfunction()
 # XInnoDB standard module definitions
 # ---------------------------------------------------------------------------------
 xinnodb_module(defs)
-xinnodb_module(io)
+xinnodb_module(io DEPS defs)
 xinnodb_module(ut)
 
 
