@@ -31,8 +31,8 @@
     #define IB_ASSERT(...)                                   IB_ASSERT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // IB_ASSERT_NOT_NULL dispatch
-    #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ut_assert<"(ptr) != nullptr", "">((ptr) != nullptr, std::source_location::current())
-    #define IB_ASSERT_NOT_NULL_DISPATCH_2(ptr, fmt, ...)     ut_assert<"(ptr) != nullptr", fmt>((ptr) != nullptr, std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ut_assert<"ptr != nullptr", "">((ptr) != nullptr, std::source_location::current())
+    #define IB_ASSERT_NOT_NULL_DISPATCH_2(ptr, fmt, ...)     ut_assert<"ptr != nullptr", fmt>((ptr) != nullptr, std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_NOT_NULL_DISPATCH_3                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_DISPATCH_4                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_DISPATCH_5                    IB_ASSERT_NOT_NULL_DISPATCH_2
@@ -46,8 +46,8 @@
 
     // Binary comparison assertions (2 args => no fmt; 3+ args => fmt + args)
     // ==
-    #define IB_ASSERT_EQ_DISPATCH_2(a, b)                   ut_assert<("(" #a ") == (" #b ")"), "">(((a) == (b)), std::source_location::current())
-    #define IB_ASSERT_EQ_DISPATCH_3(a, b, fmt, ...)         ut_assert<("(" #a ") == (" #b ")"), fmt>(((a) == (b)), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_EQ_DISPATCH_2(a, b)                    ut_assert<(#a " == " #b ), "">(((a) == (b)), std::source_location::current())
+    #define IB_ASSERT_EQ_DISPATCH_3(a, b, fmt, ...)          ut_assert<(#a " == " #b ), fmt>(((a) == (b)), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_EQ_DISPATCH_4                          IB_ASSERT_EQ_DISPATCH_3
     #define IB_ASSERT_EQ_DISPATCH_5                          IB_ASSERT_EQ_DISPATCH_3
     #define IB_ASSERT_EQ_DISPATCH_6                          IB_ASSERT_EQ_DISPATCH_3
@@ -59,8 +59,8 @@
     #define IB_ASSERT_EQ(...)                                IB_ASSERT_EQ_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // !=
-    #define IB_ASSERT_NEQ_DISPATCH_2(a, b)                  ut_assert<("(" #a ") != (" #b ")"), "">(((a) != (b)), std::source_location::current())
-    #define IB_ASSERT_NEQ_DISPATCH_3(a, b, fmt, ...)        ut_assert<("(" #a ") != (" #b ")"), fmt>(((a) != (b)), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_NEQ_DISPATCH_2(a, b)                   ut_assert<(#a " != " #b ), "">(((a) != (b)), std::source_location::current())
+    #define IB_ASSERT_NEQ_DISPATCH_3(a, b, fmt, ...)         ut_assert<(#a " != " #b ), fmt>(((a) != (b)), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_NEQ_DISPATCH_4                         IB_ASSERT_NEQ_DISPATCH_3
     #define IB_ASSERT_NEQ_DISPATCH_5                         IB_ASSERT_NEQ_DISPATCH_3
     #define IB_ASSERT_NEQ_DISPATCH_6                         IB_ASSERT_NEQ_DISPATCH_3
@@ -72,8 +72,8 @@
     #define IB_ASSERT_NEQ(...)                               IB_ASSERT_NEQ_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // <
-    #define IB_ASSERT_LT_DISPATCH_2(a, b)                   ut_assert<("(" #a ") < (" #b ")"), "">(((a) < (b)), std::source_location::current())
-    #define IB_ASSERT_LT_DISPATCH_3(a, b, fmt, ...)         ut_assert<("(" #a ") < (" #b ")"), fmt>(((a) < (b)), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_LT_DISPATCH_2(a, b)                    ut_assert<(#a " < " #b), "">(((a) < (b)), std::source_location::current())
+    #define IB_ASSERT_LT_DISPATCH_3(a, b, fmt, ...)          ut_assert<(#a " < " #b), fmt>(((a) < (b)), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_LT_DISPATCH_4                          IB_ASSERT_LT_DISPATCH_3
     #define IB_ASSERT_LT_DISPATCH_5                          IB_ASSERT_LT_DISPATCH_3
     #define IB_ASSERT_LT_DISPATCH_6                          IB_ASSERT_LT_DISPATCH_3
@@ -85,8 +85,8 @@
     #define IB_ASSERT_LT(...)                                IB_ASSERT_LT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // >
-    #define IB_ASSERT_GT_DISPATCH_2(a, b)                   ut_assert<("(" #a ") > (" #b ")"), "">(((a) > (b)), std::source_location::current())
-    #define IB_ASSERT_GT_DISPATCH_3(a, b, fmt, ...)         ut_assert<("(" #a ") > (" #b ")"), fmt>(((a) > (b)), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_GT_DISPATCH_2(a, b)                    ut_assert<(#a " > " #b), "">(((a) > (b)), std::source_location::current())
+    #define IB_ASSERT_GT_DISPATCH_3(a, b, fmt, ...)          ut_assert<(#a " > " #b), fmt>(((a) > (b)), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_GT_DISPATCH_4                          IB_ASSERT_GT_DISPATCH_3
     #define IB_ASSERT_GT_DISPATCH_5                          IB_ASSERT_GT_DISPATCH_3
     #define IB_ASSERT_GT_DISPATCH_6                          IB_ASSERT_GT_DISPATCH_3
@@ -98,8 +98,8 @@
     #define IB_ASSERT_GT(...)                                IB_ASSERT_GT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // >= (not less than)
-    #define IB_ASSERT_NLT_DISPATCH_2(a, b)                  ut_assert<("(" #a ") >= (" #b ")"), "">(((a) >= (b)), std::source_location::current())
-    #define IB_ASSERT_NLT_DISPATCH_3(a, b, fmt, ...)        ut_assert<("(" #a ") >= (" #b ")"), fmt>(((a) >= (b)), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_NLT_DISPATCH_2(a, b)                   ut_assert<("!(" #a " <= " #b ")"), "">(((a) >= (b)), std::source_location::current())
+    #define IB_ASSERT_NLT_DISPATCH_3(a, b, fmt, ...)         ut_assert<("!(" #a " <= " #b ")"), fmt>(((a) >= (b)), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_NLT_DISPATCH_4                         IB_ASSERT_NLT_DISPATCH_3
     #define IB_ASSERT_NLT_DISPATCH_5                         IB_ASSERT_NLT_DISPATCH_3
     #define IB_ASSERT_NLT_DISPATCH_6                         IB_ASSERT_NLT_DISPATCH_3
@@ -111,8 +111,8 @@
     #define IB_ASSERT_NLT(...)                               IB_ASSERT_NLT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // <= (not greater than)
-    #define IB_ASSERT_NGT_DISPATCH_2(a, b)                  ut_assert<("(" #a ") <= (" #b ")"), "">(((a) <= (b)), std::source_location::current())
-    #define IB_ASSERT_NGT_DISPATCH_3(a, b, fmt, ...)        ut_assert<("(" #a ") <= (" #b ")"), fmt>(((a) <= (b)), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_NGT_DISPATCH_2(a, b)                   ut_assert<("!(" #a " >= " #b ")"), "">(((a) <= (b)), std::source_location::current())
+    #define IB_ASSERT_NGT_DISPATCH_3(a, b, fmt, ...)         ut_assert<("!(" #a " >= " #b ")"), fmt>(((a) <= (b)), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_NGT_DISPATCH_4                         IB_ASSERT_NGT_DISPATCH_3
     #define IB_ASSERT_NGT_DISPATCH_5                         IB_ASSERT_NGT_DISPATCH_3
     #define IB_ASSERT_NGT_DISPATCH_6                         IB_ASSERT_NGT_DISPATCH_3
@@ -124,6 +124,7 @@
     #define IB_ASSERT_NGT(...)                               IB_ASSERT_NGT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // Explicit failure: IB_FAIL(fmt) or IB_FAIL(fmt, args...) -> ut_fatal_error
+    #define IB_FAIL_DISPATCH_0()                             ut_fatal_error<>(std::source_location::current())
     #define IB_FAIL_DISPATCH_1(fmt)                          ut_fatal_error<fmt>(std::source_location::current())
     #define IB_FAIL_DISPATCH_2(fmt, ...)                     ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__)
     #define IB_FAIL_DISPATCH_3                               IB_FAIL_DISPATCH_2

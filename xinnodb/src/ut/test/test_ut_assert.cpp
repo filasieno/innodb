@@ -100,7 +100,7 @@ TEST(UtAssert, AssertNotNull_Fail) {
     std::string output = capture.getOutput();
     std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
-    EXPECT_TRUE(output.find("Assertion '(ptr) != nullptr' failed") != std::string::npos);
+    EXPECT_TRUE(output.find("Assertion 'ptr != nullptr' failed") != std::string::npos);
 }
 
 TEST(UtAssert, AssertNotNull_FailWithFormat) {
@@ -113,7 +113,7 @@ TEST(UtAssert, AssertNotNull_FailWithFormat) {
     std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
     // Look for key parts of the message
-    EXPECT_TRUE(output.find("Assertion '(ptr) != nullptr' failed: Pointer was null in function test_function") != std::string::npos);    
+    EXPECT_TRUE(output.find("Assertion 'ptr != nullptr' failed: Pointer was null in function test_function") != std::string::npos);    
 }
 
 // Comparison macro pass cases (no output)
@@ -138,7 +138,7 @@ TEST(UtAssert, Compare_EQ_Fail_WithFormat) {
     IB_ASSERT_EQ(a, b, "a {} b {}", a, b);
     std::string out = capture.getOutput();
     EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '(a) == (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("Assertion 'a == b' failed"), std::string::npos);
     EXPECT_NE(out.find("a 1 b 2"), std::string::npos);
 }
 
@@ -148,7 +148,7 @@ TEST(UtAssert, Compare_NEQ_Fail_WithFormat) {
     IB_ASSERT_NEQ(a, b, "expected a != b but both {}", a);
     std::string out = capture.getOutput();
     EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '(a) != (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("Assertion 'a != b' failed"), std::string::npos);
     EXPECT_NE(out.find("expected a != b but both 2"), std::string::npos);
 }
 
@@ -158,7 +158,7 @@ TEST(UtAssert, Compare_LT_Fail_WithFormat) {
     IB_ASSERT_LT(a, b, "a={} b={}", a, b);
     std::string out = capture.getOutput();
     EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '(a) < (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("Assertion 'a < b' failed"), std::string::npos);
     EXPECT_NE(out.find("a=3 b=1"), std::string::npos);
 }
 
@@ -168,7 +168,7 @@ TEST(UtAssert, Compare_GT_Fail_WithFormat) {
     IB_ASSERT_GT(a, b, "a={} b={}", a, b);
     std::string out = capture.getOutput();
     EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '(a) > (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("Assertion 'a > b' failed"), std::string::npos);
     EXPECT_NE(out.find("a=1 b=2"), std::string::npos);
 }
 
@@ -178,7 +178,7 @@ TEST(UtAssert, Compare_NLT_Fail_WithFormat) {
     IB_ASSERT_NLT(a, b, "a={} b={}", a, b);
     std::string out = capture.getOutput();
     EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '(a) >= (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("Assertion '!(a <= b)' failed"), std::string::npos);
     EXPECT_NE(out.find("a=1 b=2"), std::string::npos);
 }
 
@@ -188,7 +188,7 @@ TEST(UtAssert, Compare_NGT_Fail_WithFormat) {
     IB_ASSERT_NGT(a, b, "a={} b={}", a, b);
     std::string out = capture.getOutput();
     EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '(a) <= (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("Assertion '!(a >= b)' failed"), std::string::npos);
     EXPECT_NE(out.find("a=2 b=1"), std::string::npos);
 }
 
