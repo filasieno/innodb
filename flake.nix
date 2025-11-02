@@ -269,6 +269,7 @@
             export CXX=g++
             export CMAKE_C_COMPILER=$CC
             export CMAKE_CXX_COMPILER=$CXX
+            export PATH=$PROJECT_ROOT/scripts:$PATH
           '';
 
           # Clang dev shell: include clang-tools/llvm/lld; avoid any gcc tools here
@@ -279,6 +280,7 @@
             export CXX=clang++
             export CMAKE_C_COMPILER=$CC
             export CMAKE_CXX_COMPILER=$CXX
+            export PATH=$PROJECT_ROOT/scripts:$PATH
           '';
         }
       );

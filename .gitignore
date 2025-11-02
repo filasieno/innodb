@@ -1,10 +1,10 @@
-.lo
 *.lo
 *.libs
 *.deps
 *.dirstamp
 
-build
-result
-result-dev
-compile_commands.json
+/build
+/result
+/result-dev
+/compile_commands.json
+/.preset

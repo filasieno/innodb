@@ -82,7 +82,6 @@ function(xinnodb_component MODULE_NAME)
     set(module_impl_src_dir   "${module_src_dir}/src")
     set(module_test_src_dir   "${module_src_dir}/test")
     
-
     # Define the module library either as a header only library or an object library
     file(GLOB module_src_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp")
     if(module_src_files)
@@ -174,7 +173,7 @@ set(DOXYGEN_EXTRACT_ALL        YES)
 set(DOXYGEN_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/doc/public")
 set(DOXYGEN_LAYOUT_FILE       "${CMAKE_SOURCE_DIR}/xinnodb/docs/DoxygenLayout.xml")
 set(DOXYGEN_GENERATE_GROUPS   YES)
-doxygen_add_docs(XINNODB_DOC "${XINNODB_INTERNAL_DOCS_FOLDERS}")
+doxygen_add_docs(doc "${XINNODB_INTERNAL_DOCS_FOLDERS}")
 
 # ---------------------------------------------------------------------------------
 # Definition of the single unit test executable
@@ -200,6 +199,12 @@ if(XINNODB_ALL_TESTS)
         COMPONENT dev
     )
 endif()
+
+add_custom_target(check
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+  DEPENDS xinnodb_tests
+  COMMENT "Running unit tests"
+)
 
 # ---------------------------------------------------------------------------------
 # Install rules
