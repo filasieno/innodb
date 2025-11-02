@@ -15,10 +15,10 @@
 #define IB_ENABLE_ASSERT true
 #endif
 
+#define IB_GET_NTH_ARG(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
+#define IB_COUNT_ARGS(...) IB_GET_NTH_ARG(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
 #if IB_ENABLE_ASSERT == true
-    // Minimal counting: we only care if there's 1 arg (no fmt) or 2+ (with fmt)
-    #define IB_GET_NTH_ARG(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
-    #define IB_COUNT_ARGS(...) IB_GET_NTH_ARG(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 
     // IB_ASSERT dispatch
     #define IB_ASSERT_DISPATCH_1(cond)                       ut_assert<#cond, "">((cond), std::source_location::current())
@@ -138,9 +138,9 @@
 #endif
 
 // Explicit failure: IB_FAIL(fmt) or IB_FAIL(fmt, args...) -> ut_fatal_error
-#define IB_FAIL_DISPATCH_0()         do { ut_fatal_error<>(std::source_location::current()) }
-#define IB_FAIL_DISPATCH_1(fmt)      do { ut_fatal_error<fmt>(std::source_location::current()) }
-#define IB_FAIL_DISPATCH_2(fmt, ...) do { ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__) }
+#define IB_FAIL_DISPATCH_0()         do { ut_fatal_error<>(std::source_location::current()); } while (0)
+#define IB_FAIL_DISPATCH_1(fmt)      do { ut_fatal_error<fmt>(std::source_location::current()); } while (0)
+#define IB_FAIL_DISPATCH_2(fmt, ...) do { ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__); } while (0)
 #define IB_FAIL_DISPATCH_3           IB_FAIL_DISPATCH_2
 #define IB_FAIL_DISPATCH_4           IB_FAIL_DISPATCH_2
 #define IB_FAIL_DISPATCH_5           IB_FAIL_DISPATCH_2
@@ -254,22 +254,4 @@ requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
 
 /// \brief Unreachable code marker; always terminates
 /// \ingroup assert
-[[noreturn]] inline void ib_unreachable(const std::source_location loc = std::source_location::current()) noexcept
-{
-    static constexpr ut_comptime_string RED("\033[1;31m");
-    static constexpr ut_comptime_string RESET("\033[0m");
-    static constexpr auto fmt = RED + "{}:{}: Unreachable code reached\n" + RESET;
-    auto message = std::format(
-        static_cast<std::string_view>(fmt),
-        loc.file_name(),
-        (int)loc.line());
-
-    ut__assert_failed_func(message);
-
-    #if defined(__clang__) || defined(__GNUC__)
-        __builtin_unreachable();
-    #elif defined(_MSC_VER)
-        __assume(false);
-    #endif
-}
-
+[[noreturn]] void ib_unreachable(const std::source_location loc = std::source_location::current()) noexcept;
