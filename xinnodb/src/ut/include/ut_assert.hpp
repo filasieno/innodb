@@ -7,11 +7,15 @@
 
 /// \defgroup assert Assertions
 /// \brief A set of macros to perform assertions
+
 /// \ingroup ut
 
-#define IB_ENABLE_ASSERT
+#if !defined(IB_ENABLE_ASSERT)
+/// \brief Enable assertions by default
+#define IB_ENABLE_ASSERT true
+#endif
 
-#if defined(IB_ENABLE_ASSERT)
+#if IB_ENABLE_ASSERT == true
     // Minimal counting: we only care if there's 1 arg (no fmt) or 2+ (with fmt)
     #define IB_GET_NTH_ARG(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
     #define IB_COUNT_ARGS(...) IB_GET_NTH_ARG(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
@@ -28,7 +32,7 @@
     #define IB_ASSERT_DISPATCH_9                             IB_ASSERT_DISPATCH_2
     #define IB_ASSERT_SELECT(count)                          IB_ASSERT_SELECT_I(count)
     #define IB_ASSERT_SELECT_I(count)                        IB_ASSERT_DISPATCH_##count
-    #define IB_ASSERT(...)                                   IB_ASSERT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT(...)                                   do { IB_ASSERT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // IB_ASSERT_NOT_NULL dispatch
     #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ut_assert<"ptr != nullptr", "">((ptr) != nullptr, std::source_location::current())
@@ -42,7 +46,7 @@
     #define IB_ASSERT_NOT_NULL_DISPATCH_9                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_SELECT(count)                 IB_ASSERT_NOT_NULL_SELECT_I(count)
     #define IB_ASSERT_NOT_NULL_SELECT_I(count)               IB_ASSERT_NOT_NULL_DISPATCH_##count
-    #define IB_ASSERT_NOT_NULL(...)                          IB_ASSERT_NOT_NULL_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_NOT_NULL(...)                          do { IB_ASSERT_NOT_NULL_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // Binary comparison assertions (2 args => no fmt; 3+ args => fmt + args)
     // ==
@@ -56,7 +60,7 @@
     #define IB_ASSERT_EQ_DISPATCH_9                          IB_ASSERT_EQ_DISPATCH_3
     #define IB_ASSERT_EQ_SELECT(count)                       IB_ASSERT_EQ_SELECT_I(count)
     #define IB_ASSERT_EQ_SELECT_I(count)                     IB_ASSERT_EQ_DISPATCH_##count
-    #define IB_ASSERT_EQ(...)                                IB_ASSERT_EQ_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_EQ(...)                                do { IB_ASSERT_EQ_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // !=
     #define IB_ASSERT_NEQ_DISPATCH_2(a, b)                   ut_assert<(#a " != " #b ), "">(((a) != (b)), std::source_location::current())
@@ -69,7 +73,7 @@
     #define IB_ASSERT_NEQ_DISPATCH_9                         IB_ASSERT_NEQ_DISPATCH_3
     #define IB_ASSERT_NEQ_SELECT(count)                      IB_ASSERT_NEQ_SELECT_I(count)
     #define IB_ASSERT_NEQ_SELECT_I(count)                    IB_ASSERT_NEQ_DISPATCH_##count
-    #define IB_ASSERT_NEQ(...)                               IB_ASSERT_NEQ_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_NEQ(...)                               do { IB_ASSERT_NEQ_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // <
     #define IB_ASSERT_LT_DISPATCH_2(a, b)                    ut_assert<(#a " < " #b), "">(((a) < (b)), std::source_location::current())
@@ -82,7 +86,7 @@
     #define IB_ASSERT_LT_DISPATCH_9                          IB_ASSERT_LT_DISPATCH_3
     #define IB_ASSERT_LT_SELECT(count)                       IB_ASSERT_LT_SELECT_I(count)
     #define IB_ASSERT_LT_SELECT_I(count)                     IB_ASSERT_LT_DISPATCH_##count
-    #define IB_ASSERT_LT(...)                                IB_ASSERT_LT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_LT(...)                                do { IB_ASSERT_LT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // >
     #define IB_ASSERT_GT_DISPATCH_2(a, b)                    ut_assert<(#a " > " #b), "">(((a) > (b)), std::source_location::current())
@@ -95,7 +99,7 @@
     #define IB_ASSERT_GT_DISPATCH_9                          IB_ASSERT_GT_DISPATCH_3
     #define IB_ASSERT_GT_SELECT(count)                       IB_ASSERT_GT_SELECT_I(count)
     #define IB_ASSERT_GT_SELECT_I(count)                     IB_ASSERT_GT_DISPATCH_##count
-    #define IB_ASSERT_GT(...)                                IB_ASSERT_GT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_GT(...)                                do { IB_ASSERT_GT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // >= (not less than)
     #define IB_ASSERT_NLT_DISPATCH_2(a, b)                   ut_assert<("!(" #a " <= " #b ")"), "">(((a) >= (b)), std::source_location::current())
@@ -108,7 +112,7 @@
     #define IB_ASSERT_NLT_DISPATCH_9                         IB_ASSERT_NLT_DISPATCH_3
     #define IB_ASSERT_NLT_SELECT(count)                      IB_ASSERT_NLT_SELECT_I(count)
     #define IB_ASSERT_NLT_SELECT_I(count)                    IB_ASSERT_NLT_DISPATCH_##count
-    #define IB_ASSERT_NLT(...)                               IB_ASSERT_NLT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_NLT(...)                               do { IB_ASSERT_NLT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // <= (not greater than)
     #define IB_ASSERT_NGT_DISPATCH_2(a, b)                   ut_assert<("!(" #a " >= " #b ")"), "">(((a) <= (b)), std::source_location::current())
@@ -121,7 +125,7 @@
     #define IB_ASSERT_NGT_DISPATCH_9                         IB_ASSERT_NGT_DISPATCH_3
     #define IB_ASSERT_NGT_SELECT(count)                      IB_ASSERT_NGT_SELECT_I(count)
     #define IB_ASSERT_NGT_SELECT_I(count)                    IB_ASSERT_NGT_DISPATCH_##count
-    #define IB_ASSERT_NGT(...)                               IB_ASSERT_NGT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_ASSERT_NGT(...)                               do { IB_ASSERT_NGT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // Explicit failure: IB_FAIL(fmt) or IB_FAIL(fmt, args...) -> ut_fatal_error
     #define IB_FAIL_DISPATCH_0()                             ut_fatal_error<>(std::source_location::current())
@@ -136,7 +140,7 @@
     #define IB_FAIL_DISPATCH_9                               IB_FAIL_DISPATCH_2
     #define IB_FAIL_SELECT(count)                            IB_FAIL_SELECT_I(count)
     #define IB_FAIL_SELECT_I(count)                          IB_FAIL_DISPATCH_##count
-    #define IB_FAIL(...)                                     IB_FAIL_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+    #define IB_FAIL(...)                                     do { IB_FAIL_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 #else
     #define IB_ASSERT(...)
     #define IB_ASSERT_NOT_NULL(...)
@@ -168,15 +172,16 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
     static constexpr ut_comptime_string RESET("\033[0m");
 
     if constexpr (!user_fmt.empty()) {
+        static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed: " + user_fmt + RESET + "\n";
         if constexpr (sizeof...(Args) == 0) {
             // Simple message without arguments
-            static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed: {}" + RESET + "\n";
             auto message = std::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
                 (int)loc.line(),
-                condition_str,
-                static_cast<std::string_view>(user_fmt));
+                condition_str
+            );
+
             #if !defined(IB_ASSERT_TEST_MODE)
                 ut__assert_failed_func(message);
             #else
@@ -185,13 +190,13 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
 
         } else {
             // Message with arguments - format user message first, then combine
-            static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed: " + user_fmt + RESET + "\n";
             auto message = std::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
                 (int)loc.line(),
                 condition_str,
-                std::forward<Args>(args)...);
+                std::forward<Args>(args)...
+            );
 
             #if !defined(IB_ASSERT_TEST_MODE)
                 ut__assert_failed_func(message);

@@ -1,12 +1,6 @@
 #include <gtest/gtest.h>
-#include <sstream>
-#include <iostream>
-
-// Enable test mode before including the header
-#define IB_ASSERT_TEST_MODE 
 #include "ut_assert.hpp"
 
-// Test helper to capture std::cout output
 class AssertOutputCapture {
 public:
     AssertOutputCapture() {
@@ -40,80 +34,48 @@ TEST(UtAssert, AssertPass_NoOutput) {
     EXPECT_TRUE(capture.getOutput().empty());
 }
 
+
+TEST(UtAssert, Fail_NoArgs) {
+    EXPECT_DEATH( { IB_FAIL("explicit fail"); } , "Fatal error: explicit fail" );
+}
+
 // Test assertion failure with no format string
 TEST(UtAssert, AssertFail_NoFormat) {
-    AssertOutputCapture capture;
-
-    IB_ASSERT(false);
-
-    std::string output = capture.getOutput();
-    std::print("output: {}", output);
-    EXPECT_FALSE(output.empty());
-    EXPECT_TRUE(output.find("Assertion 'false' failed") != std::string::npos);
-    EXPECT_TRUE(output.find("\033[1;31m") != std::string::npos); // Red color
-    EXPECT_TRUE(output.find("\033[0m") != std::string::npos);   // Reset color
+    auto fn = []() { IB_ASSERT(false); };
+    EXPECT_DEATH( fn (), "Assertion 'false' failed" );
 }
 
 // Test assertion failure with format string but no arguments
 TEST(UtAssert, AssertFail_FormatNoArgs) {
-    AssertOutputCapture capture;
-
-    IB_ASSERT(false, "This should fail");
-
-    std::string output = capture.getOutput();
-    std::print("output: {}", output);
-    EXPECT_FALSE(output.empty());
-    EXPECT_TRUE(output.find("Assertion 'false' failed: This should fail") != std::string::npos);
+    auto fn = []() { IB_ASSERT(false, "This should fail"); };
+    EXPECT_DEATH( fn(), "Assertion 'false' failed: This should fail");
 }
 
 // Test assertion failure with format string and arguments
 TEST(UtAssert, AssertFail_FormatWithArgs) {
-    AssertOutputCapture capture;
-
     int value = 42;
-    IB_ASSERT(value < 0, "Value {} should be negative, got {}", value, value);
-
-    std::string output = capture.getOutput();
-    std::print("output: {}", output);
-    EXPECT_FALSE(output.empty());
-    // Look for key parts of the message rather than exact match
-    EXPECT_TRUE(output.find("Assertion 'value < 0' failed: Value 42 should be negative, got 42") != std::string::npos);
+    auto fn = [&]() { IB_ASSERT(value < 0, "Value {} should be negative, got {}", value, value); };
+    EXPECT_DEATH( fn(), "Assertion 'value < 0' failed: Value 42 should be negative, got 42");
 }
 
 // Test IB_ASSERT_NOT_NULL macro
 TEST(UtAssert, AssertNotNull_Pass) {
-    AssertOutputCapture capture;
-
     int* ptr = new int(42);
-    IB_ASSERT_NOT_NULL(ptr);
+    auto fn = [&]() { IB_ASSERT_NOT_NULL(ptr); };
     delete ptr;
-
-    EXPECT_TRUE(capture.getOutput().empty());
+    fn();
 }
 
 TEST(UtAssert, AssertNotNull_Fail) {
-    AssertOutputCapture capture;
-
     int* ptr = nullptr;
-    IB_ASSERT_NOT_NULL(ptr);
-
-    std::string output = capture.getOutput();
-    std::print("output: {}", output);
-    EXPECT_FALSE(output.empty());
-    EXPECT_TRUE(output.find("Assertion 'ptr != nullptr' failed") != std::string::npos);
+    auto fn = [&]() { IB_ASSERT_NOT_NULL(ptr); };
+    EXPECT_DEATH( fn(), "Assertion 'ptr != nullptr' failed");
 }
 
 TEST(UtAssert, AssertNotNull_FailWithFormat) {
-    AssertOutputCapture capture;
-
     int* ptr = nullptr;
-    IB_ASSERT_NOT_NULL(ptr, "Pointer was null in function {}", "test_function");
-
-    std::string output = capture.getOutput();
-    std::print("output: {}", output);
-    EXPECT_FALSE(output.empty());
-    // Look for key parts of the message
-    EXPECT_TRUE(output.find("Assertion 'ptr != nullptr' failed: Pointer was null in function test_function") != std::string::npos);    
+    auto fn = [&]() { IB_ASSERT_NOT_NULL(ptr, "Pointer was null in function {}", "test_function"); };
+    EXPECT_DEATH( fn(), "Assertion 'ptr != nullptr' failed: Pointer was null in function test_function");
 }
 
 // Comparison macro pass cases (no output)
@@ -133,97 +95,58 @@ TEST(UtAssert, CompareMacros_Pass_NoOutput) {
 
 // Comparison macro failure cases with format
 TEST(UtAssert, Compare_EQ_Fail_WithFormat) {
-    AssertOutputCapture capture;
     int a = 1, b = 2;
-    IB_ASSERT_EQ(a, b, "a {} b {}", a, b);
-    std::string out = capture.getOutput();
-    EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion 'a == b' failed"), std::string::npos);
-    EXPECT_NE(out.find("a 1 b 2"), std::string::npos);
+    auto fn = [&](){ IB_ASSERT_EQ(a, b, "a {} b {}", a, b); };
+
+    EXPECT_DEATH(fn(), "Assertion 'a == b' failed.*a 1 b 2");
 }
 
 TEST(UtAssert, Compare_NEQ_Fail_WithFormat) {
-    AssertOutputCapture capture;
     int a = 2, b = 2;
-    IB_ASSERT_NEQ(a, b, "expected a != b but both {}", a);
-    std::string out = capture.getOutput();
-    EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion 'a != b' failed"), std::string::npos);
-    EXPECT_NE(out.find("expected a != b but both 2"), std::string::npos);
+    auto fn = [&]() { IB_ASSERT_NEQ(a, b, "expected a != b but both {}", a); };
+    EXPECT_DEATH(fn(), "Assertion 'a != b' failed.*expected a != b but both 2");
 }
 
 TEST(UtAssert, Compare_LT_Fail_WithFormat) {
-    AssertOutputCapture capture;
     int a = 3, b = 1;
-    IB_ASSERT_LT(a, b, "a={} b={}", a, b);
-    std::string out = capture.getOutput();
-    EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion 'a < b' failed"), std::string::npos);
-    EXPECT_NE(out.find("a=3 b=1"), std::string::npos);
+    auto fn = [&](){ IB_ASSERT_LT(a, b, "a={} b={}", a, b); };
+    EXPECT_DEATH(fn(), "Assertion 'a < b' failed.*a=3 b=1");
 }
 
 TEST(UtAssert, Compare_GT_Fail_WithFormat) {
-    AssertOutputCapture capture;
     int a = 1, b = 2;
-    IB_ASSERT_GT(a, b, "a={} b={}", a, b);
-    std::string out = capture.getOutput();
-    EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion 'a > b' failed"), std::string::npos);
-    EXPECT_NE(out.find("a=1 b=2"), std::string::npos);
+    auto fn = [&](){ IB_ASSERT_GT(a, b, "a={} b={}", a, b); };
+    EXPECT_DEATH(fn(), "Assertion 'a > b' failed.*a=1 b=2");
 }
 
 TEST(UtAssert, Compare_NLT_Fail_WithFormat) {
-    AssertOutputCapture capture;
     int a = 1, b = 2; // a >= b fails
-    IB_ASSERT_NLT(a, b, "a={} b={}", a, b);
-    std::string out = capture.getOutput();
-    EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '!(a <= b)' failed"), std::string::npos);
-    EXPECT_NE(out.find("a=1 b=2"), std::string::npos);
+    auto fn = [&](){ IB_ASSERT_NLT(a, b, "a={} b={}", a, b); };
+    EXPECT_DEATH(fn(), "Assertion '!\\(a <= b\\)' failed.*a=1 b=2");
 }
 
 TEST(UtAssert, Compare_NGT_Fail_WithFormat) {
-    AssertOutputCapture capture;
     int a = 2, b = 1; // a <= b fails
-    IB_ASSERT_NGT(a, b, "a={} b={}", a, b);
-    std::string out = capture.getOutput();
-    EXPECT_FALSE(out.empty());
-    EXPECT_NE(out.find("Assertion '!(a >= b)' failed"), std::string::npos);
-    EXPECT_NE(out.find("a=2 b=1"), std::string::npos);
-}
-
-// IB_FAIL now routes to ut_fatal_error and must abort with message
-TEST(UtAssert, Fail_NoArgs) {
-    ASSERT_DEATH({ IB_FAIL("explicit fail"); }, "Fatal error: explicit fail");
+    auto fn = [&](){ IB_ASSERT_NGT(a, b, "a={} b={}", a, b); };
+    EXPECT_DEATH(fn(), "Assertion '!\\(a >= b\\)' failed.*a=2 b=1");
 }
 
 TEST(UtAssert, Fail_WithArgs) {
-    ASSERT_DEATH({ IB_FAIL("oops {} {}", 1, 2); }, "Fatal error: oops 1 2");
+    auto fn = []() { IB_FAIL("oops {} {}", 1, 2); };
+    EXPECT_DEATH( fn(), "Fatal error: oops 1 2");
 }
 
-// Death tests: ib_unreachable and ut_fatal_error always abort
 TEST(UtAssert, Unreachable_Death) {
-    ASSERT_DEATH({ ib_unreachable(); }, "Unreachable code reached");
+    auto fn = []() { ib_unreachable(); };
+    EXPECT_DEATH( fn(), "Unreachable code reached");
 }
 
 TEST(UtAssert, FatalError_Death_NoMsg) {
-    ASSERT_DEATH({ IB_FAIL(); }, "Fatal error");
+    auto fn = []() { IB_FAIL(); };
+    EXPECT_DEATH( fn(), "Fatal error");
 }
 
 TEST(UtAssert, FatalError_Death_WithMsg) {
-    ASSERT_DEATH({ IB_FAIL("Oops {} {}", 1, 2); }, "Fatal error: Oops 1 2");
+    auto fn = []() { IB_FAIL("Oops {} {}", 1, 2); };
+    EXPECT_DEATH( fn(), "Fatal error: Oops 1 2");
 }
-
-// Test that disabled assertions do nothing
-#ifndef IB_ENABLE_ASSERT
-TEST(UtAssert, AssertDisabled_NoOutput) {
-    AssertOutputCapture capture;
-
-    // When assertions are disabled, these should be no-ops
-    IB_ASSERT(false);
-    IB_ASSERT(false, "This should not appear");
-    IB_ASSERT_NOT_NULL(nullptr);
-
-    EXPECT_TRUE(capture.getOutput().empty());
-}
-#endif

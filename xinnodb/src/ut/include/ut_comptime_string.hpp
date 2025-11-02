@@ -34,7 +34,7 @@ struct ut_comptime_string {
 
     constexpr ib_size_t size() const noexcept { return N; }
 
-    constexpr ib_size_t length() const noexcept { return N > 0 ? N - 1 : 0; }
+    constexpr ib_size_t length() const noexcept { return N - 1; }
 
     constexpr bool empty() const noexcept { return N <= 1; }
 
