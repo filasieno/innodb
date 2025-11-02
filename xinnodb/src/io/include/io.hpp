@@ -4,6 +4,7 @@
 
 
 /// \defgroup IO io
+/// \ingroup components
 /// \brief I/O routines
 /// @{
 

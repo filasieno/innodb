@@ -1,7 +1,8 @@
 #pragma once
 
 /// \defgroup defs defs
-/// \brief Definitions for the InnoDB engine
+/// \brief Definitions for the XInnoDB engine
+/// \ingroup components
 
 
 /// \addtogroup defs

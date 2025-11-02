@@ -155,8 +155,9 @@ endfunction()
 # XInnoDB component definitions
 # ---------------------------------------------------------------------------------
 xinnodb_component(defs)
-xinnodb_component(io DEPS defs)
 xinnodb_component(ut)
+xinnodb_component(io DEPS defs)
+
 
 # ---------------------------------------------------------------------------------
 # XInnoDB documentation generation
@@ -171,7 +172,7 @@ set(DOXYGEN_INTERNAL_DOCS      YES)
 set(DOXYGEN_EXTRACT_STATIC     YES) 
 set(DOXYGEN_EXTRACT_ALL        YES)
 set(DOXYGEN_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/doc/public")
-set(DOXYGEN_LAYOUT_FILE       "${CMAKE_SOURCE_DIR}/xinnodb/docs/layout.xml")
+set(DOXYGEN_LAYOUT_FILE       "${CMAKE_SOURCE_DIR}/xinnodb/docs/DoxygenLayout.xml")
 set(DOXYGEN_GENERATE_GROUPS   YES)
 doxygen_add_docs(XINNODB_DOC "${XINNODB_INTERNAL_DOCS_FOLDERS}")
 
@@ -185,6 +186,7 @@ if(XINNODB_ALL_TESTS)
         message(STATUS "  ${test_src}")
     endforeach()
     add_executable(xinnodb_tests ${XINNODB_ALL_TESTS})
+    set_target_properties(xinnodb_tests PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
     target_include_directories(xinnodb_tests
         PRIVATE ${XINNODB_INCLUDE_ROOT}
         PRIVATE ${XINNODB_SRC_ROOT}           # allow including module headers like "io.hpp"
