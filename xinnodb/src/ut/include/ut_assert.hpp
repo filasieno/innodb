@@ -125,28 +125,32 @@
     #define IB_ASSERT_NGT_DISPATCH_9                         IB_ASSERT_NGT_DISPATCH_3
     #define IB_ASSERT_NGT_SELECT(count)                      IB_ASSERT_NGT_SELECT_I(count)
     #define IB_ASSERT_NGT_SELECT_I(count)                    IB_ASSERT_NGT_DISPATCH_##count
-    #define IB_ASSERT_NGT(...)                               do { IB_ASSERT_NGT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
-
-    // Explicit failure: IB_FAIL(fmt) or IB_FAIL(fmt, args...) -> ut_fatal_error
-    #define IB_FAIL_DISPATCH_0()                             ut_fatal_error<>(std::source_location::current())
-    #define IB_FAIL_DISPATCH_1(fmt)                          ut_fatal_error<fmt>(std::source_location::current())
-    #define IB_FAIL_DISPATCH_2(fmt, ...)                     ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__)
-    #define IB_FAIL_DISPATCH_3                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_DISPATCH_4                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_DISPATCH_5                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_DISPATCH_6                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_DISPATCH_7                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_DISPATCH_8                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_DISPATCH_9                               IB_FAIL_DISPATCH_2
-    #define IB_FAIL_SELECT(count)                            IB_FAIL_SELECT_I(count)
-    #define IB_FAIL_SELECT_I(count)                          IB_FAIL_DISPATCH_##count
-    #define IB_FAIL(...)                                     do { IB_FAIL_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
+    #define IB_ASSERT_NGT(...)                               do { IB_ASSERT_NGT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)                        
 #else
     #define IB_ASSERT(...)
     #define IB_ASSERT_NOT_NULL(...)
+    #define IB_ASSERT_EQ(...)
+    #define IB_ASSERT_NEQ(...)
+    #define IB_ASSERT_GT(...)
+    #define IB_ASSERT_LT(...)
+    #define IB_ASSERT_NGT(...)
+    #define IB_ASSERT_NLT(...)
 #endif
 
-
+// Explicit failure: IB_FAIL(fmt) or IB_FAIL(fmt, args...) -> ut_fatal_error
+#define IB_FAIL_DISPATCH_0()         ut_fatal_error<>(std::source_location::current())
+#define IB_FAIL_DISPATCH_1(fmt)      ut_fatal_error<fmt>(std::source_location::current())
+#define IB_FAIL_DISPATCH_2(fmt, ...) ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__)
+#define IB_FAIL_DISPATCH_3           IB_FAIL_DISPATCH_2
+#define IB_FAIL_DISPATCH_4           IB_FAIL_DISPATCH_2
+#define IB_FAIL_DISPATCH_5           IB_FAIL_DISPATCH_2
+#define IB_FAIL_DISPATCH_6           IB_FAIL_DISPATCH_2
+#define IB_FAIL_DISPATCH_7           IB_FAIL_DISPATCH_2
+#define IB_FAIL_DISPATCH_8           IB_FAIL_DISPATCH_2
+#define IB_FAIL_DISPATCH_9           IB_FAIL_DISPATCH_2
+#define IB_FAIL_SELECT(count)        IB_FAIL_SELECT_I(count)
+#define IB_FAIL_SELECT_I(count)      IB_FAIL_DISPATCH_##count
+#define IB_FAIL(...)                 do { IB_FAIL_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
 /// \brief Function to handle assertion failures
 /// \param message The message to print
@@ -181,13 +185,7 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
                 (int)loc.line(),
                 condition_str
             );
-
-            #if !defined(IB_ASSERT_TEST_MODE)
-                ut__assert_failed_func(message);
-            #else
-                std::cout << message;
-            #endif
-
+            ut__assert_failed_func(message);
         } else {
             // Message with arguments - format user message first, then combine
             auto message = std::format(
@@ -197,12 +195,7 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
                 condition_str,
                 std::forward<Args>(args)...
             );
-
-            #if !defined(IB_ASSERT_TEST_MODE)
-                ut__assert_failed_func(message);
-            #else
-                std::cout << message;
-            #endif
+            ut__assert_failed_func(message);
         }
 
     } else {
@@ -212,13 +205,9 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
             static_cast<std::string_view>(fmt),
             loc.file_name(),
             (int)loc.line(),
-            condition_str);
-
-        #if !defined(IB_ASSERT_TEST_MODE)
-            ut__assert_failed_func(message);
-        #else
-            std::cout << message;
-        #endif
+            condition_str
+        );
+        ut__assert_failed_func(message);
     }
 }
 

@@ -6,15 +6,15 @@ declare script_name=${BASH_SOURCE[0]}
 script_name=${script_name##*/}
 
 
-declare -a extra=()
-declare -a targets=()
-declare target=
 declare preset=
 declare preset_file="$source_dir/.preset"
+declare -a targets=()
+declare -a target_opts=()
+declare target
 
 help() {
 	cat <<-EOF
-	$script_name [--help|-h] [--preset PRESET] [TARGET ...]
+	$script_name [--help|-h] [--preset|-p PRESET] [TARGET ...]
 	EOF
 }
 
@@ -53,7 +53,6 @@ while (( $# > 0 )); do
 done
 
 if [[ $preset ]]; then
-	extra+=(--preset "$preset")
 	echo "$preset" > "$preset_file"
 else
 	preset=$(cat "$preset_file" 2> /dev/null)
@@ -61,11 +60,10 @@ else
 		preset=debug
 		echo "$preset" > "$preset_file"
 	fi
-	extra+=(--preset "$preset")
 fi
 
 for target in "${targets[@]}"; do
-	extra+=(--target "$target")
+	target_opts+=(--target "$target")
 done
 
 intro
@@ -74,4 +72,4 @@ intro
 cd "$source_dir" || { printf 'Invalid source directory "%s"\n' "$source_dir" >&2 ;  exit 1; }
 
 cmake --preset "$preset"
-cmake --build -j "${extra[@]}"
+cmake --build -j --preset "$preset" "${target_opts[@]}"

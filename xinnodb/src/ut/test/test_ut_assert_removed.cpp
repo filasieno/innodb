@@ -30,7 +30,27 @@ TEST(UtAssertDisabled, AssertDisabled_NoOutput) {
     // When assertions are disabled, these should be no-ops
     IB_ASSERT(false);
     IB_ASSERT(false, "This should not appear");
+
     IB_ASSERT_NOT_NULL(nullptr);
+    IB_ASSERT_NOT_NULL(nullptr, "This should not appear");
+
+    IB_ASSERT_EQ(2,1);
+    IB_ASSERT_EQ(2,1, "This should not appear");
+
+    IB_ASSERT_NEQ(2, 2);
+    IB_ASSERT_NEQ(2, 2, "This should not appear");
+
+    IB_ASSERT_GT(1,2)
+    IB_ASSERT_GT(1,2, "This should not appear");
+
+    IB_ASSERT_LT(2,1)
+    IB_ASSERT_LT(2,1, "This should not appear");
+
+    IB_ASSERT_NGT(2,1)
+    IB_ASSERT_NGT(2,1, "This should not appear");
+
+    IB_ASSERT_NLT(1,2)    
+    IB_ASSERT_NLT(1,2, "This should not appear");
 
     EXPECT_TRUE(capture.getOutput().empty());
 }
