@@ -73,7 +73,7 @@ inline static void ib_assert(bool condition, const std::source_location loc, Arg
     if constexpr (!user_fmt.empty()) {
         if constexpr (sizeof...(Args) == 0) {
             // Simple message without arguments
-            static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed {}\n" + RESET;
+            static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed: {}" + RESET + "\n";
             auto message = std::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
@@ -88,7 +88,7 @@ inline static void ib_assert(bool condition, const std::source_location loc, Arg
 
         } else {
             // Message with arguments - format user message first, then combine
-            static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed \n" + user_fmt + RESET;
+            static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed: " + user_fmt + RESET + "\n";
             auto message = std::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),

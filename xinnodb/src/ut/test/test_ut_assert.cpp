@@ -47,6 +47,7 @@ TEST(UtAssert, AssertFail_NoFormat) {
     IB_ASSERT(false);
 
     std::string output = capture.getOutput();
+    std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
     EXPECT_TRUE(output.find("Assertion 'false' failed") != std::string::npos);
     EXPECT_TRUE(output.find("\033[1;31m") != std::string::npos); // Red color
@@ -60,8 +61,9 @@ TEST(UtAssert, AssertFail_FormatNoArgs) {
     IB_ASSERT(false, "This should fail");
 
     std::string output = capture.getOutput();
+    std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
-    EXPECT_TRUE(output.find("Assertion 'false' failed This should fail") != std::string::npos);
+    EXPECT_TRUE(output.find("Assertion 'false' failed: This should fail") != std::string::npos);
 }
 
 // Test assertion failure with format string and arguments
@@ -72,10 +74,10 @@ TEST(UtAssert, AssertFail_FormatWithArgs) {
     IB_ASSERT(value < 0, "Value {} should be negative, got {}", value, value);
 
     std::string output = capture.getOutput();
+    std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
     // Look for key parts of the message rather than exact match
-    EXPECT_TRUE(output.find("Assertion 'value < 0' failed") != std::string::npos);
-    EXPECT_TRUE(output.find("Value 42 should be negative, got 42") != std::string::npos);
+    EXPECT_TRUE(output.find("Assertion 'value < 0' failed: Value 42 should be negative, got 42") != std::string::npos);
 }
 
 // Test IB_ASSERT_NOT_NULL macro
@@ -96,6 +98,7 @@ TEST(UtAssert, AssertNotNull_Fail) {
     IB_ASSERT_NOT_NULL(ptr);
 
     std::string output = capture.getOutput();
+    std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
     EXPECT_TRUE(output.find("Assertion '(ptr) != nullptr' failed") != std::string::npos);
 }
@@ -107,10 +110,10 @@ TEST(UtAssert, AssertNotNull_FailWithFormat) {
     IB_ASSERT_NOT_NULL(ptr, "Pointer was null in function {}", "test_function");
 
     std::string output = capture.getOutput();
+    std::print("output: {}", output);
     EXPECT_FALSE(output.empty());
     // Look for key parts of the message
-    EXPECT_TRUE(output.find("Assertion '(ptr) != nullptr' failed") != std::string::npos);
-    EXPECT_TRUE(output.find("Pointer was null in function test_function") != std::string::npos);
+    EXPECT_TRUE(output.find("Assertion '(ptr) != nullptr' failed: Pointer was null in function test_function") != std::string::npos);    
 }
 
 // Test that disabled assertions do nothing
