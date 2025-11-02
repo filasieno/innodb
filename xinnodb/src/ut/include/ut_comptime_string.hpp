@@ -6,7 +6,7 @@
 
 using ib_size_t = unsigned long long int;
 
-/// \defgroup ut_comptime_string Compile-time string helper and concatenation
+/// \defgroup ut_comptime_string Comptime string
 /// \ingroup ut
 
 

@@ -16,8 +16,8 @@
     #define IB_COUNT_ARGS(...) IB_GET_NTH_ARG(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 
     // IB_ASSERT dispatch
-    #define IB_ASSERT_DISPATCH_1(cond)                       ib_assert<#cond, "">((cond), std::source_location::current())
-    #define IB_ASSERT_DISPATCH_2(cond, fmt, ...)             ib_assert<#cond, fmt>((cond), std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_DISPATCH_1(cond)                       ut_assert<#cond, "">((cond), std::source_location::current())
+    #define IB_ASSERT_DISPATCH_2(cond, fmt, ...)             ut_assert<#cond, fmt>((cond), std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_DISPATCH_3                             IB_ASSERT_DISPATCH_2
     #define IB_ASSERT_DISPATCH_4                             IB_ASSERT_DISPATCH_2
     #define IB_ASSERT_DISPATCH_5                             IB_ASSERT_DISPATCH_2
@@ -30,8 +30,8 @@
     #define IB_ASSERT(...)                                   IB_ASSERT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
     // IB_ASSERT_NOT_NULL dispatch
-    #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ib_assert<"(ptr) != nullptr", "">((ptr) != nullptr, std::source_location::current())
-    #define IB_ASSERT_NOT_NULL_DISPATCH_2(ptr, fmt, ...)     ib_assert<"(ptr) != nullptr", fmt>((ptr) != nullptr, std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ut_assert<"(ptr) != nullptr", "">((ptr) != nullptr, std::source_location::current())
+    #define IB_ASSERT_NOT_NULL_DISPATCH_2(ptr, fmt, ...)     ut_assert<"(ptr) != nullptr", fmt>((ptr) != nullptr, std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_NOT_NULL_DISPATCH_3                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_DISPATCH_4                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_DISPATCH_5                    IB_ASSERT_NOT_NULL_DISPATCH_2
@@ -63,7 +63,7 @@
 /// \ingroup assert
 template <ut_comptime_string condition_str, ut_comptime_string user_fmt = "", typename... Args>
 requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
-inline static void ib_assert(bool condition, const std::source_location loc, Args&&... args) noexcept
+inline static void ut_assert(bool condition, const std::source_location loc, Args&&... args) noexcept
 {
     if (condition) return; // Assertion passed, nothing to do
 
