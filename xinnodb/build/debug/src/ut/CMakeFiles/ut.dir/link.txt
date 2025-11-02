@@ -1,0 +1,2 @@
+/run/current-system/sw/bin/ar qc libut.a CMakeFiles/ut.dir/src/ut_ut.cpp.o
+/run/current-system/sw/bin/ranlib libut.a

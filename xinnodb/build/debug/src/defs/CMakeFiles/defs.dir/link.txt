@@ -1,0 +1,2 @@
+/run/current-system/sw/bin/ar qc libdefs.a CMakeFiles/defs.dir/src/defs.cpp.o
+/run/current-system/sw/bin/ranlib libdefs.a

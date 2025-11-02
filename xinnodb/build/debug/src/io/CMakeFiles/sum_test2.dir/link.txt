@@ -1,0 +1,1 @@
+/run/current-system/sw/bin/clang++ -g -O0 -Wall -Wextra -Wpedantic CMakeFiles/sum_test2.dir/test/sum_test2.cpp.o -o sum_test2  -Wl,-rpath,/nix/store/hfwj51h101nhrjgkk9vlbbl6npfzf2ch-gtest-1.16.0/lib /nix/store/hfwj51h101nhrjgkk9vlbbl6npfzf2ch-gtest-1.16.0/lib/libgtest_main.so.1.16.0 /nix/store/hfwj51h101nhrjgkk9vlbbl6npfzf2ch-gtest-1.16.0/lib/libgtest.so.1.16.0

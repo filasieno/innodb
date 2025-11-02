@@ -54,14 +54,6 @@ set_target_properties(xinnodb_static PROPERTIES
     OUTPUT_NAME "xinnodb.${PROJECT_VERSION}"
 )
 
-# Doxygen configuration
-set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/doc")
-
-# Project Information
-
-
-
-
 # Collect all unit tests in a single runner
 set(XINNODB_ALL_TESTS)
 set(XINNODB_TEST_INCLUDE_DIRS)

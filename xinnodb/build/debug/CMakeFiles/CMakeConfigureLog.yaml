@@ -1,0 +1,596 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The system is: Linux - 6.15.4 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags:  
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags: -c 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags: --c++ 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags: --ec++ 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags: --target=arm-arm-none-eabi;-mcpu=cortex-m3 
+      
+      The output was:
+      1
+      Warning: supplying the --target arm-arm-none-eabi != x86_64-unknown-linux-gnu argument to a nix-wrapped compiler may not work correctly - cc-wrapper is currently not designed with multi-target compilers in mind. You may want to use an un-wrapped compiler instead.
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags: -c;-I__does_not_exist__ 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: 
+      Id flags: -c 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: 
+      Id flags: --c++ 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: 
+      Id flags: --ec++ 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: 
+      Id flags: --target=arm-arm-none-eabi;-mcpu=cortex-m3 
+      
+      The output was:
+      1
+      Warning: supplying the --target arm-arm-none-eabi != x86_64-unknown-linux-gnu argument to a nix-wrapped compiler may not work correctly - cc-wrapper is currently not designed with multi-target compilers in mind. You may want to use an un-wrapped compiler instead.
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: 
+      Id flags: -c;-I__does_not_exist__ 
+      
+      The output was:
+      1
+      mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:1178 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:86 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Checking whether the CXX compiler is IAR using "" did not match "IAR .+ Compiler":
+      mktemp: failed to create file via template '/tmp/nix-shell-3375012-0/cc-params.XXXXXX': No such file or directory
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:1178 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:86 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Checking whether the CXX compiler is IAR using "" did not match "IAR .+ Compiler":
+      mktemp: failed to create file via template '/tmp/nix-shell-3375012-0/cc-params.XXXXXX': No such file or directory
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:64 (try_compile)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-8TYHr8"
+      binary: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-8TYHr8"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-g -O0 -Wall -Wextra -Wpedantic"
+      CMAKE_CXX_FLAGS_DEBUG: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-8TYHr8'
+        
+        Run Build Command(s): /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E env VERBOSE=1 /run/current-system/sw/bin/make -f Makefile cmTC_6be10/fast
+        make: TMPDIR value /tmp/nix-shell-3375012-0: No such file or directory
+        make: using default temporary directory '/tmp'
+        /run/current-system/sw/bin/make  -f CMakeFiles/cmTC_6be10.dir/build.make CMakeFiles/cmTC_6be10.dir/build
+        make: TMPDIR value /tmp/nix-shell-3375012-0: No such file or directory
+        make: using default temporary directory '/tmp'
+        make[1]: Entering directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-8TYHr8'
+        Building CXX object CMakeFiles/cmTC_6be10.dir/CMakeCXXCompilerABI.cpp.o
+        /run/current-system/sw/bin/clang++   -g -O0 -Wall -Wextra -Wpedantic  -o CMakeFiles/cmTC_6be10.dir/CMakeCXXCompilerABI.cpp.o -c /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp
+        mktemp: failed to create file via template '/tmp/nix-shell-3375012-0/cc-params.XXXXXX': No such file or directory
+        make[1]: *** [CMakeFiles/cmTC_6be10.dir/build.make:78: CMakeFiles/cmTC_6be10.dir/CMakeCXXCompilerABI.cpp.o] Error 1
+        make[1]: Leaving directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-8TYHr8'
+        make: *** [Makefile:127: cmTC_6be10/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:49 (try_compile)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Check for working CXX compiler: /run/current-system/sw/bin/clang++"
+    directories:
+      source: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-ECqC2s"
+      binary: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-ECqC2s"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-g -O0 -Wall -Wextra -Wpedantic"
+      CMAKE_CXX_FLAGS_DEBUG: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_CXX_COMPILER_WORKS"
+      cached: true
+      stdout: |
+        Change Dir: '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-ECqC2s'
+        
+        Run Build Command(s): /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E env VERBOSE=1 /run/current-system/sw/bin/make -f Makefile cmTC_f0fac/fast
+        make: TMPDIR value /tmp/nix-shell-3375012-0: No such file or directory
+        make: using default temporary directory '/tmp'
+        /run/current-system/sw/bin/make  -f CMakeFiles/cmTC_f0fac.dir/build.make CMakeFiles/cmTC_f0fac.dir/build
+        make: TMPDIR value /tmp/nix-shell-3375012-0: No such file or directory
+        make: using default temporary directory '/tmp'
+        make[1]: Entering directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-ECqC2s'
+        Building CXX object CMakeFiles/cmTC_f0fac.dir/testCXXCompiler.cxx.o
+        /run/current-system/sw/bin/clang++   -g -O0 -Wall -Wextra -Wpedantic  -o CMakeFiles/cmTC_f0fac.dir/testCXXCompiler.cxx.o -c /home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-ECqC2s/testCXXCompiler.cxx
+        mktemp: failed to create file via template ‘/tmp/nix-shell-3375012-0/cc-params.XXXXXX’: No such file or directory
+        make[1]: *** [CMakeFiles/cmTC_f0fac.dir/build.make:78: CMakeFiles/cmTC_f0fac.dir/testCXXCompiler.cxx.o] Error 1
+        make[1]: Leaving directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-ECqC2s'
+        make: *** [Makefile:127: cmTC_f0fac/fast] Error 2
+        
+      exitCode: 2
+...
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -g;-O0;-Wall;-Wextra;-Wpedantic
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is Clang, found in:
+        /home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/3.29.2/CompilerIdCXX/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:64 (try_compile)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk"
+      binary: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/nix/var/nix/profiles/default/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: "-g -O0 -Wall -Wextra -Wpedantic"
+      CMAKE_CXX_FLAGS_DEBUG: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk'
+        
+        Run Build Command(s): /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E env VERBOSE=1 /run/current-system/sw/bin/make -f Makefile cmTC_ffd16/fast
+        /run/current-system/sw/bin/make  -f CMakeFiles/cmTC_ffd16.dir/build.make CMakeFiles/cmTC_ffd16.dir/build
+        make[1]: Entering directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk'
+        Building CXX object CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o
+        /run/current-system/sw/bin/clang++   -g -O0 -Wall -Wextra -Wpedantic    -v -MD -MT CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -c /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp
+        clang version 20.1.6
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /nix/store/hfcjhzwcavb440ij41nkfxaqwblab0vl-clang-20.1.6/bin
+        Found candidate GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0
+        Selected GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0
+        Candidate multilib: .;@m64
+        Selected multilib: .;@m64
+         (in-process)
+         "/nix/store/hfcjhzwcavb440ij41nkfxaqwblab0vl-clang-20.1.6/bin/clang++" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debug-info-kind=constructor -dwarf-version=5 -debugger-tuning=gdb -fdebug-compilation-dir=/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk -v -fcoverage-compilation-dir=/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk -nostdsysteminc -resource-dir /nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root -dependency-file CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -idirafter /nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include -idirafter /usr/include -isystem /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0 -isystem /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu -U _FORTIFY_SOURCE -U _FORTIFY_SOURCE -D _FORTIFY_SOURCE=2 -internal-isystem /nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include -source-date-epoch 315532800 -O0 -Wformat -Wformat-security -Werror=format-security -Wall -Wextra -Wpedantic -fdeprecated-macro -ferror-limit 19 -fzero-call-used-regs=used-gpr -fwrapv -stack-protector 2 -stack-protector-buffer-size 4 -fstack-clash-protection -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -x c++ /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp
+        clang -cc1 version 20.1.6 based upon LLVM 20.1.6 default target x86_64-unknown-linux-gnu
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0
+         /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu
+         /nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include
+         /nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include
+         /usr/include
+        End of search list.
+        Linking CXX executable cmTC_ffd16
+        /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ffd16.dir/link.txt --verbose=1
+        /run/current-system/sw/bin/clang++ -g -O0 -Wall -Wextra -Wpedantic   -v -Wl,-v CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_ffd16
+        clang version 20.1.6
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /nix/store/hfcjhzwcavb440ij41nkfxaqwblab0vl-clang-20.1.6/bin
+        Found candidate GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0
+        Selected GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0
+        Candidate multilib: .;@m64
+        Selected multilib: .;@m64
+         "/nix/store/7m1yk2z3hhsh8wwrcwi1sdvng3b9pqch-binutils-wrapper-2.44/bin/ld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -pie -o cmTC_ffd16 /nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/Scrt1.o /nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crti.o /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtbeginS.o -L/usr/lib -L/usr/lib32 -L/usr/lib -L/usr/lib32 -L/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib -L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0 -L/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib -L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0//lib -L/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib -L/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib -L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0 -L/lib/../lib64 -L/usr/lib/../lib64 -L/lib -L/usr/lib -dynamic-linker=/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/ld-linux-x86-64.so.2 -v CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtendS.o /nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crtn.o
+        GNU ld (GNU Binutils) 2.44
+        make[1]: Leaving directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:134 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0]
+          add: [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu]
+          add: [/nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include]
+          add: [/nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0] ==> [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0]
+        collapse include dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu] ==> [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu]
+        collapse include dir [/nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include] ==> [/nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include]
+        collapse include dir [/nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include] ==> [/nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0;/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu;/nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include;/nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:170 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?))("|,| |$)]
+        ignore line: [Change Dir: '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk']
+        ignore line: []
+        ignore line: [Run Build Command(s): /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E env VERBOSE=1 /run/current-system/sw/bin/make -f Makefile cmTC_ffd16/fast]
+        ignore line: [/run/current-system/sw/bin/make  -f CMakeFiles/cmTC_ffd16.dir/build.make CMakeFiles/cmTC_ffd16.dir/build]
+        ignore line: [make[1]: Entering directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk']
+        ignore line: [Building CXX object CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/run/current-system/sw/bin/clang++   -g -O0 -Wall -Wextra -Wpedantic    -v -MD -MT CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -c /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang version 20.1.6]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /nix/store/hfcjhzwcavb440ij41nkfxaqwblab0vl-clang-20.1.6/bin]
+        ignore line: [Found candidate GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+        ignore line: [Selected GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        ignore line: [ (in-process)]
+        ignore line: [ "/nix/store/hfcjhzwcavb440ij41nkfxaqwblab0vl-clang-20.1.6/bin/clang++" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debug-info-kind=constructor -dwarf-version=5 -debugger-tuning=gdb -fdebug-compilation-dir=/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk -v -fcoverage-compilation-dir=/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-a3luvk -nostdsysteminc -resource-dir /nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root -dependency-file CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -idirafter /nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include -idirafter /usr/include -isystem /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0 -isystem /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu -U _FORTIFY_SOURCE -U _FORTIFY_SOURCE -D _FORTIFY_SOURCE=2 -internal-isystem /nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include -source-date-epoch 315532800 -O0 -Wformat -Wformat-security -Werror=format-security -Wall -Wextra -Wpedantic -fdeprecated-macro -ferror-limit 19 -fzero-call-used-regs=used-gpr -fwrapv -stack-protector 2 -stack-protector-buffer-size 4 -fstack-clash-protection -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -x c++ /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang -cc1 version 20.1.6 based upon LLVM 20.1.6 default target x86_64-unknown-linux-gnu]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0]
+        ignore line: [ /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/include/c++/14.3.0/x86_64-unknown-linux-gnu]
+        ignore line: [ /nix/store/2sl7aqfjb3k4cl9xpjih8y2vqr489cmr-clang-wrapper-20.1.6/resource-root/include]
+        ignore line: [ /nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Linking CXX executable cmTC_ffd16]
+        ignore line: [/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ffd16.dir/link.txt --verbose=1]
+        ignore line: [/run/current-system/sw/bin/clang++ -g -O0 -Wall -Wextra -Wpedantic   -v -Wl -v CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_ffd16]
+        ignore line: [clang version 20.1.6]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /nix/store/hfcjhzwcavb440ij41nkfxaqwblab0vl-clang-20.1.6/bin]
+        ignore line: [Found candidate GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+        ignore line: [Selected GCC installation: /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        link line: [ "/nix/store/7m1yk2z3hhsh8wwrcwi1sdvng3b9pqch-binutils-wrapper-2.44/bin/ld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -pie -o cmTC_ffd16 /nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/Scrt1.o /nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crti.o /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtbeginS.o -L/usr/lib -L/usr/lib32 -L/usr/lib -L/usr/lib32 -L/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib -L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0 -L/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib -L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0//lib -L/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib -L/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib -L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0 -L/lib/../lib64 -L/usr/lib/../lib64 -L/lib -L/usr/lib -dynamic-linker=/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/ld-linux-x86-64.so.2 -v CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtendS.o /nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crtn.o]
+          arg [/nix/store/7m1yk2z3hhsh8wwrcwi1sdvng3b9pqch-binutils-wrapper-2.44/bin/ld] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [-pie] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_ffd16] ==> ignore
+          arg [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/Scrt1.o] ==> obj [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/Scrt1.o]
+          arg [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crti.o] ==> obj [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crti.o]
+          arg [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtbeginS.o] ==> obj [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtbeginS.o]
+          arg [-L/usr/lib] ==> dir [/usr/lib]
+          arg [-L/usr/lib32] ==> dir [/usr/lib32]
+          arg [-L/usr/lib] ==> dir [/usr/lib]
+          arg [-L/usr/lib32] ==> dir [/usr/lib32]
+          arg [-L/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib] ==> dir [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib]
+          arg [-L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0] ==> dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+          arg [-L/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib] ==> dir [/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib]
+          arg [-L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0//lib] ==> dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0//lib]
+          arg [-L/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib] ==> dir [/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib]
+          arg [-L/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib] ==> dir [/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib]
+          arg [-L/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0] ==> dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+          arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+          arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/lib] ==> dir [/lib]
+          arg [-L/usr/lib] ==> dir [/usr/lib]
+          arg [-dynamic-linker=/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/ld-linux-x86-64.so.2] ==> ignore
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_ffd16.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lc] ==> lib [c]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtendS.o] ==> obj [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtendS.o]
+          arg [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crtn.o] ==> obj [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crtn.o]
+        linker tool for 'CXX': /nix/store/7m1yk2z3hhsh8wwrcwi1sdvng3b9pqch-binutils-wrapper-2.44/bin/ld
+        collapse library dir [/usr/lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib32] ==> [/usr/lib32]
+        collapse library dir [/usr/lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib32] ==> [/usr/lib32]
+        collapse library dir [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib] ==> [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib]
+        collapse library dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0] ==> [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+        collapse library dir [/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib] ==> [/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib]
+        collapse library dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0//lib] ==> [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib]
+        collapse library dir [/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib] ==> [/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib]
+        collapse library dir [/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib] ==> [/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib]
+        collapse library dir [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0] ==> [/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0]
+        collapse library dir [/lib/../lib64] ==> [/lib64]
+        collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/lib] ==> [/lib]
+        collapse library dir [/usr/lib] ==> [/usr/lib]
+        implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+        implicit objs: [/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/Scrt1.o;/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crti.o;/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtbeginS.o;/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0/crtendS.o;/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib/crtn.o]
+        implicit dirs: [/usr/lib;/usr/lib32;/nix/store/q4wq65gl3r8fy746v9bbwgx4gzn0r2kl-glibc-2.40-66/lib;/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib/gcc/x86_64-unknown-linux-gnu/14.3.0;/nix/store/l7d6vwajpfvgsd3j4cr25imd1mzb7d1d-gcc-14.3.0-lib/lib;/nix/store/sa7j7cddyblhcb3ch3ds10w7nw75yjj1-gcc-14.3.0/lib;/nix/store/h8x8m2vcaqd13sm794q5l3yrynbf3h0q-gcc-14.3.0-libgcc/lib;/nix/store/igxg4cq4sb90y2qi9n53cdcbf54mnxz8-clang-20.1.6-lib/lib;/lib64;/usr/lib64;/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:207 (cmake_determine_linker_id)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the CXX compiler's linker: "/nix/store/7m1yk2z3hhsh8wwrcwi1sdvng3b9pqch-binutils-wrapper-2.44/bin/ld" "-v"
+      GNU ld (GNU Binutils) 2.44
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/FindThreads.cmake:99 (CHECK_CXX_SOURCE_COMPILES)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/run/current-system/sw/lib/cmake/GTest/GTestConfig.cmake:29 (find_dependency)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/FindGTest.cmake:194 (find_package)"
+      - "CMakeLists.txt:13 (find_package)"
+    directories:
+      source: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA"
+      binary: "/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/nix/var/nix/profiles/default/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: "-g -O0 -Wall -Wextra -Wpedantic"
+      CMAKE_CXX_FLAGS_DEBUG: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA'
+        
+        Run Build Command(s): /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E env VERBOSE=1 /run/current-system/sw/bin/make -f Makefile cmTC_b9d22/fast
+        /run/current-system/sw/bin/make  -f CMakeFiles/cmTC_b9d22.dir/build.make CMakeFiles/cmTC_b9d22.dir/build
+        make[1]: Entering directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA'
+        Building CXX object CMakeFiles/cmTC_b9d22.dir/src.cxx.o
+        /run/current-system/sw/bin/clang++ -DCMAKE_HAVE_LIBC_PTHREAD  -g -O0 -Wall -Wextra -Wpedantic  -std=c++23 -MD -MT CMakeFiles/cmTC_b9d22.dir/src.cxx.o -MF CMakeFiles/cmTC_b9d22.dir/src.cxx.o.d -o CMakeFiles/cmTC_b9d22.dir/src.cxx.o -c /home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA/src.cxx
+        In file included from /home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA/src.cxx:1:
+        In file included from /nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include/pthread.h:21:
+        /nix/store/x4cz3spvw0bwwz5sjsdn2qm4f89rcryn-glibc-2.40-66-dev/include/features.h:422:4: warning: _FORTIFY_SOURCE requires compiling with optimization (-O) [-W#warnings]
+          422 | #  warning _FORTIFY_SOURCE requires compiling with optimization (-O)
+              |    ^
+        1 warning generated.
+        Linking CXX executable cmTC_b9d22
+        /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b9d22.dir/link.txt --verbose=1
+        /run/current-system/sw/bin/clang++ -g -O0 -Wall -Wextra -Wpedantic  CMakeFiles/cmTC_b9d22.dir/src.cxx.o -o cmTC_b9d22
+        make[1]: Leaving directory '/home/fabio/code/innodb/xinnodb/build/debug/CMakeFiles/CMakeScratch/TryCompile-S8KwaA'
+        
+      exitCode: 0
+...
