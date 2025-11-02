@@ -35,8 +35,8 @@
     #define IB_ASSERT(...)                                   do { IB_ASSERT_SELECT(IB_COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__); } while (0)
 
     // IB_ASSERT_NOT_NULL dispatch
-    #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ut_assert<"ptr != nullptr", "">((ptr) != nullptr, std::source_location::current())
-    #define IB_ASSERT_NOT_NULL_DISPATCH_2(ptr, fmt, ...)     ut_assert<"ptr != nullptr", fmt>((ptr) != nullptr, std::source_location::current(), ##__VA_ARGS__)
+    #define IB_ASSERT_NOT_NULL_DISPATCH_1(ptr)               ut_assert<#ptr " != nullptr", "">((ptr) != nullptr, std::source_location::current())
+    #define IB_ASSERT_NOT_NULL_DISPATCH_2(ptr, fmt, ...)     ut_assert<#ptr " != nullptr", fmt>((ptr) != nullptr, std::source_location::current(), ##__VA_ARGS__)
     #define IB_ASSERT_NOT_NULL_DISPATCH_3                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_DISPATCH_4                    IB_ASSERT_NOT_NULL_DISPATCH_2
     #define IB_ASSERT_NOT_NULL_DISPATCH_5                    IB_ASSERT_NOT_NULL_DISPATCH_2
@@ -138,9 +138,9 @@
 #endif
 
 // Explicit failure: IB_FAIL(fmt) or IB_FAIL(fmt, args...) -> ut_fatal_error
-#define IB_FAIL_DISPATCH_0()         ut_fatal_error<>(std::source_location::current())
-#define IB_FAIL_DISPATCH_1(fmt)      ut_fatal_error<fmt>(std::source_location::current())
-#define IB_FAIL_DISPATCH_2(fmt, ...) ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__)
+#define IB_FAIL_DISPATCH_0()         do { ut_fatal_error<>(std::source_location::current()) }
+#define IB_FAIL_DISPATCH_1(fmt)      do { ut_fatal_error<fmt>(std::source_location::current()) }
+#define IB_FAIL_DISPATCH_2(fmt, ...) do { ut_fatal_error<fmt>(std::source_location::current(), ##__VA_ARGS__) }
 #define IB_FAIL_DISPATCH_3           IB_FAIL_DISPATCH_2
 #define IB_FAIL_DISPATCH_4           IB_FAIL_DISPATCH_2
 #define IB_FAIL_DISPATCH_5           IB_FAIL_DISPATCH_2
