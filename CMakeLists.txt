@@ -6,12 +6,13 @@ set(CMAKE_CXX_STANDARD            23)
 set(CMAKE_CXX_STANDARD_REQUIRED   ON)
 set(CMAKE_CXX_EXTENSIONS          OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# Keep compile_commands.json at repo root for clangd on each configure
+# Ensure compile_commands.json is available at source-relative build/compilation_database
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/build/compilation_database")
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E create_symlink
             ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_SOURCE_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/build/compilation_database/compile_commands.json
     RESULT_VARIABLE _cc_symlink_result
   )
 endif()
@@ -170,6 +171,8 @@ set(DOXYGEN_INTERNAL_DOCS      YES)
 set(DOXYGEN_EXTRACT_STATIC     YES) 
 set(DOXYGEN_EXTRACT_ALL        YES)
 set(DOXYGEN_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/doc/public")
+set(DOXYGEN_LAYOUT_FILE       "${CMAKE_SOURCE_DIR}/xinnodb/docs/layout.xml")
+set(DOXYGEN_GENERATE_GROUPS   YES)
 doxygen_add_docs(XINNODB_DOC "${XINNODB_INTERNAL_DOCS_FOLDERS}")
 
 # ---------------------------------------------------------------------------------
