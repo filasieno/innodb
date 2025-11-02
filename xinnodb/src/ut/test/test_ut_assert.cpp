@@ -116,6 +116,104 @@ TEST(UtAssert, AssertNotNull_FailWithFormat) {
     EXPECT_TRUE(output.find("Assertion '(ptr) != nullptr' failed: Pointer was null in function test_function") != std::string::npos);    
 }
 
+// Comparison macro pass cases (no output)
+TEST(UtAssert, CompareMacros_Pass_NoOutput) {
+    AssertOutputCapture capture;
+
+    int a = 2, b = 2;
+    IB_ASSERT_EQ(a, b);
+    IB_ASSERT_NEQ(a, b + 1);
+    IB_ASSERT_LT(1, 2);
+    IB_ASSERT_GT(2, 1);
+    IB_ASSERT_NLT(a, b); // >=
+    IB_ASSERT_NGT(a, b); // <=
+
+    EXPECT_TRUE(capture.getOutput().empty());
+}
+
+// Comparison macro failure cases with format
+TEST(UtAssert, Compare_EQ_Fail_WithFormat) {
+    AssertOutputCapture capture;
+    int a = 1, b = 2;
+    IB_ASSERT_EQ(a, b, "a {} b {}", a, b);
+    std::string out = capture.getOutput();
+    EXPECT_FALSE(out.empty());
+    EXPECT_NE(out.find("Assertion '(a) == (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("a 1 b 2"), std::string::npos);
+}
+
+TEST(UtAssert, Compare_NEQ_Fail_WithFormat) {
+    AssertOutputCapture capture;
+    int a = 2, b = 2;
+    IB_ASSERT_NEQ(a, b, "expected a != b but both {}", a);
+    std::string out = capture.getOutput();
+    EXPECT_FALSE(out.empty());
+    EXPECT_NE(out.find("Assertion '(a) != (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("expected a != b but both 2"), std::string::npos);
+}
+
+TEST(UtAssert, Compare_LT_Fail_WithFormat) {
+    AssertOutputCapture capture;
+    int a = 3, b = 1;
+    IB_ASSERT_LT(a, b, "a={} b={}", a, b);
+    std::string out = capture.getOutput();
+    EXPECT_FALSE(out.empty());
+    EXPECT_NE(out.find("Assertion '(a) < (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("a=3 b=1"), std::string::npos);
+}
+
+TEST(UtAssert, Compare_GT_Fail_WithFormat) {
+    AssertOutputCapture capture;
+    int a = 1, b = 2;
+    IB_ASSERT_GT(a, b, "a={} b={}", a, b);
+    std::string out = capture.getOutput();
+    EXPECT_FALSE(out.empty());
+    EXPECT_NE(out.find("Assertion '(a) > (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("a=1 b=2"), std::string::npos);
+}
+
+TEST(UtAssert, Compare_NLT_Fail_WithFormat) {
+    AssertOutputCapture capture;
+    int a = 1, b = 2; // a >= b fails
+    IB_ASSERT_NLT(a, b, "a={} b={}", a, b);
+    std::string out = capture.getOutput();
+    EXPECT_FALSE(out.empty());
+    EXPECT_NE(out.find("Assertion '(a) >= (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("a=1 b=2"), std::string::npos);
+}
+
+TEST(UtAssert, Compare_NGT_Fail_WithFormat) {
+    AssertOutputCapture capture;
+    int a = 2, b = 1; // a <= b fails
+    IB_ASSERT_NGT(a, b, "a={} b={}", a, b);
+    std::string out = capture.getOutput();
+    EXPECT_FALSE(out.empty());
+    EXPECT_NE(out.find("Assertion '(a) <= (b)' failed"), std::string::npos);
+    EXPECT_NE(out.find("a=2 b=1"), std::string::npos);
+}
+
+// IB_FAIL now routes to ut_fatal_error and must abort with message
+TEST(UtAssert, Fail_NoArgs) {
+    ASSERT_DEATH({ IB_FAIL("explicit fail"); }, "Fatal error: explicit fail");
+}
+
+TEST(UtAssert, Fail_WithArgs) {
+    ASSERT_DEATH({ IB_FAIL("oops {} {}", 1, 2); }, "Fatal error: oops 1 2");
+}
+
+// Death tests: ib_unreachable and ut_fatal_error always abort
+TEST(UtAssert, Unreachable_Death) {
+    ASSERT_DEATH({ ib_unreachable(); }, "Unreachable code reached");
+}
+
+TEST(UtAssert, FatalError_Death_NoMsg) {
+    ASSERT_DEATH({ IB_FAIL(); }, "Fatal error");
+}
+
+TEST(UtAssert, FatalError_Death_WithMsg) {
+    ASSERT_DEATH({ IB_FAIL("Oops {} {}", 1, 2); }, "Fatal error: Oops 1 2");
+}
+
 // Test that disabled assertions do nothing
 #ifndef IB_ENABLE_ASSERT
 TEST(UtAssert, AssertDisabled_NoOutput) {
