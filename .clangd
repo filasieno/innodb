@@ -30,3 +30,9 @@ If:
     - "effect/.*"
 Index:
   Background: Skip  
+---
+If:
+  PathMatch:
+    - "innobase/.*"
+Index:
+  Background: Skip  

@@ -12,5 +12,8 @@
 		"--clang-tidy=false",
 		"--query-driver=/nix/store/*-clang-wrapper-*/bin/clang++;*/bin/clang++"
 	],
-	"clangd.onConfigChanged": "restart"
+	"clangd.onConfigChanged": "restart",
+	"files.associations": {
+		"*.ic": "cpp"
+	}
 }
