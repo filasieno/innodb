@@ -3,14 +3,15 @@
 	"nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix",
 	"C_Cpp.intelliSenseEngine": "disabled",
 	"clangd.arguments": [
-//		"--log=verbose"
+//		"--log=verbose" 
 		"--enable-config",
 		"--background-index",
 		"--pch-storage=disk",
 		"--all-scopes-completion",
 		"--header-insertion=never",
 		"--clang-tidy=false",
-		"--query-driver=/nix/store/*-clang-wrapper-*/bin/clang++;*/bin/clang++"
+		"--query-driver=/nix/store/*-clang-wrapper-*/bin/clang++;*/bin/clang++",
+		"--compile-commands-dir=${workspaceFolder}/build/compilation_database"
 	],
 	"clangd.onConfigChanged": "restart",
 	"files.associations": {

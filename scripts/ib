@@ -7,6 +7,7 @@ script_name=${script_name##*/}
 
 
 declare preset=
+declare user_set_preset=false
 declare preset_file="$source_dir/.preset"
 declare -a targets=()
 declare -a target_opts=()
@@ -34,6 +35,7 @@ while (( $# > 0 )); do
 			;;
 		--preset|-p)
 			preset=$2
+			user_set_preset=true
 			shift 2
 			;;
 		--)
@@ -74,5 +76,9 @@ cd "$source_dir" || { printf 'Invalid source directory "%s"\n' "$source_dir" >&2
 
 export CMAKE_COLOR_DIAGNOSTICS=ON
 export CLICOLOR_FORCE=1
-cmake --preset "$preset"
-cmake --build -j --preset "$preset" "${target_opts[@]}"
+
+if [[ $user_set_preset == true ]]; then
+	cmake --preset "$preset"
+fi
+
+cmake --build -j --preset "$preset" "${target_opts[@]}" --verbose

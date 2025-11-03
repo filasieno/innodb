@@ -2,8 +2,7 @@
 
 #include "ut_comptime_string.hpp"
 #include <source_location>
-#include <cstdlib>
-#include <print>
+#include <fmt/format.h>
 
 /// \defgroup assert Assertions
 /// \brief A set of macros to perform assertions
@@ -157,17 +156,22 @@
 /// \ingroup assert
 [[noreturn]] void ut__assert_failed_func(const std::string_view message) noexcept;
 
+/// \brief Defines a formattable type
+/// \tparam T The type to check
+/// \ingroup assert
+template <typename T>
+concept fmt_formattable = fmt::is_formattable<std::remove_cvref_t<T>, char>::value;
 
 /// \brief Compile-time string formatting
-/// \param condition_str The condition string
-/// \param user_fmt The user format string
-/// \param Args The argument types
+/// \tparam condition_str The condition string
+/// \tparam user_fmt The user format string
+/// \tparam Args The argument types
 /// \param condition The condition to check
 /// \param loc The source location
 /// \param args The arguments to format
 /// \ingroup assert
 template <ut_comptime_string condition_str, ut_comptime_string user_fmt = "", typename... Args>
-requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
+requires ( fmt_formattable<Args>&& ... )
 inline static void ut_assert(bool condition, const std::source_location loc, Args&&... args) noexcept
 {
     if (condition) return; // Assertion passed, nothing to do
@@ -179,7 +183,7 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
         static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed: " + user_fmt + RESET + "\n";
         if constexpr (sizeof...(Args) == 0) {
             // Simple message without arguments
-            auto message = std::format(
+            auto message = fmt::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
                 (int)loc.line(),
@@ -188,7 +192,7 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
             ut__assert_failed_func(message);
         } else {
             // Message with arguments - format user message first, then combine
-            auto message = std::format(
+            auto message = fmt::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
                 (int)loc.line(),
@@ -201,7 +205,7 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
     } else {
         static_assert(sizeof...(Args) == 0, "Expected no arguments");
         static constexpr auto fmt = RED + "{}:{}: Assertion '{}' failed\n" + RESET;
-        auto message = std::format(
+        auto message = fmt::format(
             static_cast<std::string_view>(fmt),
             loc.file_name(),
             (int)loc.line(),
@@ -218,7 +222,7 @@ inline static void ut_assert(bool condition, const std::source_location loc, Arg
 /// \param args The arguments to format
 /// \ingroup assert
 template <ut_comptime_string user_fmt = "", typename... Args>
-requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
+requires ( fmt_formattable<Args>&& ... )
 [[noreturn]] inline static void ut_fatal_error(const std::source_location loc, Args&&... args) noexcept
 {
     static constexpr ut_comptime_string RED("\033[1;31m");
@@ -227,7 +231,7 @@ requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
     if constexpr (!user_fmt.empty()) {
         if constexpr (sizeof...(Args) == 0) {
             static constexpr auto fmt = RED + "{}:{}: Fatal error: {}" + RESET + "\n";
-            auto message = std::format(
+            auto message = fmt::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
                 (int)loc.line(),
@@ -235,7 +239,7 @@ requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
             ut__assert_failed_func(message);
         } else {
             static constexpr auto fmt = RED + "{}:{}: Fatal error: " + user_fmt + RESET + "\n";
-            auto message = std::format(
+            auto message = fmt::format(
                 static_cast<std::string_view>(fmt),
                 loc.file_name(),
                 (int)loc.line(),
@@ -244,7 +248,7 @@ requires ( (std::formattable<std::remove_cvref_t<Args>, char>) && ... )
         }
     } else {
         static constexpr auto fmt = RED + "{}:{}: Fatal error" + RESET + "\n";
-        auto message = std::format(
+        auto message = fmt::format(
             static_cast<std::string_view>(fmt),
             loc.file_name(),
             (int)loc.line());

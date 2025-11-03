@@ -15,6 +15,7 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
             ${CMAKE_SOURCE_DIR}/build/compilation_database/compile_commands.json
     RESULT_VARIABLE _cc_symlink_result
   )
+  message(STATUS "Compile commands file: ${CMAKE_SOURCE_DIR}/build/compilation_database/compile_commands.json")
 endif()
 
 # Ensure consistent stack protector mode across all targets to avoid PCM mismatch
@@ -22,9 +23,11 @@ add_compile_options(-fstack-protector-strong)
 
 # Setup testing framework
 enable_testing()
-find_package(Git QUIET)
-find_package(GTest CONFIG REQUIRED)
-find_package(Doxygen REQUIRED)
+find_package(Git      QUIET)
+find_package(GTest    CONFIG REQUIRED)
+find_package(Doxygen  REQUIRED)
+find_package(fmt      12 CONFIG REQUIRED)
+
 find_program(FLEX flex REQUIRED)
 find_program(BISON bison REQUIRED)
 
@@ -35,6 +38,12 @@ set(XINNODB_INCLUDE_ROOT ${CMAKE_SOURCE_DIR}/xinnodb/include)
 set(XINNODB_SRC_ROOT     ${CMAKE_SOURCE_DIR}/xinnodb/src)
 set(XINNODB_TEST_ROOT    ${CMAKE_SOURCE_DIR}/xinnodb/test)
 
+# Precompiled headers interface target
+add_library(xinnodb_pch INTERFACE)
+target_precompile_headers(xinnodb_pch INTERFACE
+  $<$<COMPILE_LANGUAGE:CXX>:${XINNODB_SRC_ROOT}/defs/include/defs_precompiled.hpp>
+)
+
 # Public headers interface, consumable by all modules and library users
 add_library(xinnodb_headers INTERFACE)
 target_include_directories(xinnodb_headers INTERFACE ${XINNODB_INCLUDE_ROOT})
@@ -42,10 +51,14 @@ target_include_directories(xinnodb_headers INTERFACE ${XINNODB_INCLUDE_ROOT})
 # Aggregated libraries composed of per-module object/interface libraries
 # Ensure at least one source exists to satisfy CMake when no modules add sources
 file(WRITE "${CMAKE_BINARY_DIR}/xinnodb_dummy.cpp" "// generated placeholder\n")
+
 add_library(xinnodb_static STATIC "${CMAKE_BINARY_DIR}/xinnodb_dummy.cpp")
-add_library(xinnodb_shared SHARED "${CMAKE_BINARY_DIR}/xinnodb_dummy.cpp")
+target_link_libraries(xinnodb_static PRIVATE xinnodb_pch)
 target_link_libraries(xinnodb_static PUBLIC xinnodb_headers)
+
+add_library(xinnodb_shared SHARED "${CMAKE_BINARY_DIR}/xinnodb_dummy.cpp")
 target_link_libraries(xinnodb_shared PUBLIC xinnodb_headers)
+target_link_libraries(xinnodb_shared PRIVATE xinnodb_pch)
 
 # Versioned output names
 set_target_properties(xinnodb_shared PROPERTIES
@@ -56,9 +69,6 @@ set_target_properties(xinnodb_static PROPERTIES
 )
 
 # Collect all unit tests in a single runner
-set(XINNODB_ALL_TESTS)
-set(XINNODB_TEST_INCLUDE_DIRS)
-set(XINNODB_INTERNAL_DOCS_FOLDERS "${CMAKE_SOURCE_DIR}/xinnodb/include/")
 
 if(GIT_FOUND)
   execute_process(
@@ -75,11 +85,14 @@ else()
     message(FATAL_ERROR "Git not found")
 endif()
 
-
-
 # ---------------------------------------------------------------------------------
 # Function to register a module and its unit tests
 # ---------------------------------------------------------------------------------
+
+set(XINNODB_ALL_TESTS)
+set(XINNODB_TEST_INCLUDE_DIRS)
+set(XINNODB_INTERNAL_DOCS_FOLDERS "${CMAKE_SOURCE_DIR}/xinnodb/include/")
+
 function(xinnodb_component MODULE_NAME)
 
     # Parse optional dependencies as: xinnodb_component(<name> DEPS dep1 dep2 ...)
@@ -95,14 +108,6 @@ function(xinnodb_component MODULE_NAME)
     set(module_test_src_dir          "${module_src_dir}/test")
     
     # Generate .in source files
-    # file(GLOB component_src_in_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp.in")
-    # foreach(in_file IN LISTS component_src_in_files)
-    #     string(REGEX REPLACE "^${module_src_dir}/" "${module_generated_src_dir}/" out_file "${in_file}")
-    #     string(REGEX REPLACE "\\.cpp\\.in$" ".cpp" out_file "${out_file}")
-    #     configure_file("${in_file}" "${out_file}" @ONLY)
-    # endforeach()
-    
-
     file(GLOB_RECURSE component_src_in_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp.in")
     foreach(in_file IN LISTS component_src_in_files)
         file(RELATIVE_PATH rel "${module_impl_src_dir}" "${in_file}")
@@ -118,6 +123,7 @@ function(xinnodb_component MODULE_NAME)
 
     # Define the module library either as a header only library or an object library
     file(GLOB module_src_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp")
+
     # Exclude sources that have a corresponding .cpp.in (we'll use generated ones)
     set(_pruned_module_src_files)
     foreach(_src IN LISTS module_src_files)
@@ -127,13 +133,16 @@ function(xinnodb_component MODULE_NAME)
             list(APPEND _pruned_module_src_files "${_src}")
         endif()
     endforeach()
-    set(module_src_files "${_pruned_module_src_files}")
+
+    set(module_src_files ${_pruned_module_src_files})
     file(GLOB_RECURSE module_generated_src_files CONFIGURE_DEPENDS "${module_generated_src_dir}/*.cpp")
     list(APPEND module_src_files ${module_generated_src_files})
     if(module_src_files)
         set(module_object_library "${MODULE_NAME}_obj_lib")
         add_library(${module_object_library} OBJECT ${module_src_files})
         target_link_libraries(${module_object_library} PRIVATE xinnodb_headers)
+        target_link_libraries(${module_object_library} PRIVATE fmt::fmt-header-only)
+        target_link_libraries(${module_object_library} PRIVATE xinnodb_pch)
         target_include_directories(${module_object_library} PRIVATE ${module_include_dir} ${XINNODB_INCLUDE_ROOT} ${module_generated_include_dir})
         # Add include paths for declared dependencies
         foreach(dep IN LISTS XMODULE_DEPS)
@@ -199,15 +208,15 @@ endfunction()
 # ---------------------------------------------------------------------------------
 # XInnoDB component definitions
 # ---------------------------------------------------------------------------------
+
 xinnodb_component(defs)
 xinnodb_component(ut)
 xinnodb_component(io DEPS defs)
 
-
 # ---------------------------------------------------------------------------------
 # XInnoDB documentation generation
 # ---------------------------------------------------------------------------------
-# Output Configuration (common settings)
+
 set(DOXYGEN_PROJECT_NAME       "XInnoDB")
 set(DOXYGEN_GENERATE_HTML      YES)  # Generate HTML documentation
 set(DOXYGEN_GENERATE_LATEX     NO)   # Skip LaTeX/PDF generation for faster builds
@@ -238,7 +247,8 @@ if(XINNODB_ALL_TESTS)
         PRIVATE ${XINNODB_TEST_INCLUDE_DIRS}
     )
     # Unit tests should only use the static library
-    target_link_libraries(xinnodb_tests PRIVATE xinnodb_static GTest::gtest_main)
+    target_link_libraries(xinnodb_tests PRIVATE xinnodb_static GTest::gtest_main fmt::fmt-header-only)
+    target_link_libraries(xinnodb_tests PRIVATE xinnodb_pch)
     gtest_discover_tests(xinnodb_tests)
     install(TARGETS xinnodb_tests
         RUNTIME DESTINATION bin

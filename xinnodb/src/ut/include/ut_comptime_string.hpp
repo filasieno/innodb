@@ -2,7 +2,7 @@
 #pragma once
 
 #include <string_view>
-#include <format>
+#include <fmt/format.h>
 
 using ib_size_t = unsigned long long int;
 
@@ -41,30 +41,33 @@ struct ut_comptime_string {
     char value[N];
 };
 
-namespace std {
-    template<ib_size_t N>
-    struct formatter<ut_comptime_string<N>, char> {
 
-        /// \brief Parse format specifications
-        /// \param pc The parse context
-        /// \return The iterator
-        constexpr typename basic_format_parse_context<char>::iterator parse(basic_format_parse_context<char>& pc) {
-            return fmtter.parse(pc);
-        }
+// template<ib_size_t N>
+// struct std::formatter<ut_comptime_string<N>, char> : std::formatter<std::string_view, char> {
+//     /// \brief Format the string
+//     /// \param value The string to format
+//     /// \param ctx The format context
+//     /// \return The iterator
+//     template <typename FormatContext>
+//     auto format(const ut_comptime_string<N>& value, FormatContext& ctx) const {
+//         return std::formatter<std::string_view, char>::format(static_cast<std::string_view>(value), ctx);
+//     }
+// };
 
-        /// \brief Format the string
-        /// \param str The string to format
-        /// \param fc The format context
-        /// \return The iterator
-        template<typename Out>
-        typename basic_format_context<Out, char>::iterator format(const ut_comptime_string<N>& str, basic_format_context<Out, char>& fc) const {
-            return fmtter.format(static_cast<std::string_view>(str), fc);
-        }
 
-    private:
-        formatter<std::string_view, char> fmtter;
-    };
-}
+// Enable fmtlib formatting support for ut_comptime_string<N>
+template <ib_size_t N>
+struct fmt::formatter<ut_comptime_string<N>, char> : fmt::formatter<std::string_view, char> {
+    
+    /// \brief Format the string
+    /// \param value The string to format
+    /// \param ctx The format context
+    /// \return The iterator
+    template <typename FormatContext>
+    auto format(const ut_comptime_string<N>& value, FormatContext& ctx) const {
+        return fmt::formatter<std::string_view, char>::format(static_cast<std::string_view>(value), ctx);
+    }
+};
 
 /// \brief CTAD deduction guide for string literals/char arrays
 /// \ingroup ut_comptime_string
