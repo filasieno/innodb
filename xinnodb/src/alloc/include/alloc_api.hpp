@@ -3,6 +3,10 @@
 #include "xinnodb.hpp"  // base types and macros
 #include "ut_dlink.hpp" // dlink
 
+/// \brief Allocator Block State
+/// \details The allocator block state is used to track the allocator's blocks.
+/// \ingroup alloc
+/// \brief Allocator Block State
 enum alloc_block_state 
 {
     ALLOC_BLOCK_STATE_INVALID              = 0b0000,
@@ -15,6 +19,10 @@ enum alloc_block_state
 };
 const char* to_string(enum alloc_block_state) noexcept;
 
+/// \brief Allocator Kind
+/// \details The allocator kind is used to track the allocator's blocks.
+/// \ingroup alloc
+/// \brief Allocator Kind
 enum class alloc_kind 
 {
     INVALID = 0,
@@ -25,6 +33,10 @@ enum class alloc_kind
     FREE_SEGMENT_INDEX_LEAF_EXTENSION
 };
 
+/// \brief Allocator Block Description
+/// \details The allocator block description is used to track the allocator's blocks.
+/// \ingroup alloc
+/// \brief Allocator Block Description
 struct alloc_block_desc 
 { 
     ib_u64 size:48; 
@@ -32,18 +44,30 @@ struct alloc_block_desc
     ib_u64 kind:12; 
 };
 
+/// \brief Allocator Block Header
+/// \details The allocator block header is used to track the allocator's blocks.
+/// \ingroup alloc
+/// \brief Allocator Block Header
 struct alloc_block_header 
 { 
     struct alloc_block_desc this_desc; 
     struct alloc_block_desc prev_desc; 
 };
 
+/// \brief Allocator Pooled Free Block Header
+/// \details The allocator pooled free block header is used to track the allocator's pooled free blocks.
+/// \ingroup alloc
+/// \brief Allocator Pooled Free Block Header
 struct alloc_pooled_free_block_header : public alloc_block_header 
 { 
     ut_dlink freelist_link; 
 };
 static_assert(sizeof(alloc_pooled_free_block_header) == 32);
 
+/// \brief Allocator Free Block Header
+/// \details The allocator free block header is used to track the allocator's free blocks.
+/// \ingroup alloc
+/// \brief Allocator Free Block Header
 struct alloc_free_block_header : public alloc_block_header 
 {
     struct ut_dlink                    multimap_link;
@@ -55,6 +79,10 @@ struct alloc_free_block_header : public alloc_block_header
 };
 static_assert(sizeof(alloc_free_block_header) == 64, "AllocFreeBlockHeader size is not 64 bytes");
 
+/// \brief Allocator Stats
+/// \details The allocator stats are used to track the allocator's memory usage.
+/// \ingroup alloc
+/// \brief Allocator Stats
 struct alloc_stats 
 {
     static constexpr int ALLOCATOR_BIN_COUNT = 64;
@@ -72,7 +100,10 @@ struct alloc_stats
     ib_size pooled_counter[STATS_BIN_COUNT];
 };
 
-
+/// \brief Allocator Table
+/// \details The allocator table is the central data structure that manages the allocator's memory.
+/// \ingroup alloc
+/// \brief Allocator Table
 struct alloc_table 
 {
     static constexpr int ALLOCATOR_BIN_COUNT = alloc_stats::ALLOCATOR_BIN_COUNT;
