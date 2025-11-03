@@ -1,0 +1,10 @@
+#include "xinnodb.hpp"
+
+ib_api_version ib_get_api_version() noexcept {
+    return { 
+        .major = 0,
+        .minor = 1,
+        .revision = 0,
+        .build = "@IB_GIT_COMMIT_HASH@"
+    };
+}

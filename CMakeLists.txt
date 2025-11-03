@@ -22,6 +22,7 @@ add_compile_options(-fstack-protector-strong)
 
 # Setup testing framework
 enable_testing()
+find_package(Git QUIET)
 find_package(GTest CONFIG REQUIRED)
 find_package(Doxygen REQUIRED)
 find_program(FLEX flex REQUIRED)
@@ -59,6 +60,23 @@ set(XINNODB_ALL_TESTS)
 set(XINNODB_TEST_INCLUDE_DIRS)
 set(XINNODB_INTERNAL_DOCS_FOLDERS "${CMAKE_SOURCE_DIR}/xinnodb/include/")
 
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  message(STATUS "Git commit hash: ${GIT_COMMIT_HASH}")
+  # Provide legacy variable name used by templates
+  set(IB_GIT_COMMIT_HASH "${GIT_COMMIT_HASH}")
+else()
+    message(FATAL_ERROR "Git not found")
+endif()
+
+
+
 # ---------------------------------------------------------------------------------
 # Function to register a module and its unit tests
 # ---------------------------------------------------------------------------------
@@ -69,18 +87,54 @@ function(xinnodb_component MODULE_NAME)
     set(multiValueArgs DEPS)
     cmake_parse_arguments(XMODULE "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    set(module_src_dir        "${XINNODB_SRC_ROOT}/${MODULE_NAME}")
-    set(module_include_dir    "${module_src_dir}/include")
-    set(module_impl_src_dir   "${module_src_dir}/src")
-    set(module_test_src_dir   "${module_src_dir}/test")
+    set(module_src_dir               "${XINNODB_SRC_ROOT}/${MODULE_NAME}")
+    set(module_include_dir           "${module_src_dir}/include")
+    set(module_generated_include_dir "${CMAKE_BINARY_DIR}/generated/${MODULE_NAME}/include")
+    set(module_generated_src_dir     "${CMAKE_BINARY_DIR}/generated/${MODULE_NAME}/src")
+    set(module_impl_src_dir          "${module_src_dir}/src")
+    set(module_test_src_dir          "${module_src_dir}/test")
     
+    # Generate .in source files
+    # file(GLOB component_src_in_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp.in")
+    # foreach(in_file IN LISTS component_src_in_files)
+    #     string(REGEX REPLACE "^${module_src_dir}/" "${module_generated_src_dir}/" out_file "${in_file}")
+    #     string(REGEX REPLACE "\\.cpp\\.in$" ".cpp" out_file "${out_file}")
+    #     configure_file("${in_file}" "${out_file}" @ONLY)
+    # endforeach()
+    
+
+    file(GLOB_RECURSE component_src_in_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp.in")
+    foreach(in_file IN LISTS component_src_in_files)
+        file(RELATIVE_PATH rel "${module_impl_src_dir}" "${in_file}")
+        set(out_file "${module_generated_src_dir}/${rel}")
+        string(REGEX REPLACE "\\.cpp\\.in$" ".cpp" out_file "${out_file}")
+        get_filename_component(out_dir "${out_file}" DIRECTORY)
+        file(MAKE_DIRECTORY "${out_dir}")
+        configure_file("${in_file}" "${out_file}" @ONLY)
+    endforeach()
+
+    # Generate .in header files
+    # TODO
+
     # Define the module library either as a header only library or an object library
     file(GLOB module_src_files CONFIGURE_DEPENDS "${module_impl_src_dir}/*.cpp")
+    # Exclude sources that have a corresponding .cpp.in (we'll use generated ones)
+    set(_pruned_module_src_files)
+    foreach(_src IN LISTS module_src_files)
+        if(EXISTS "${_src}.in")
+            # Skip: generated counterpart will be used
+        else()
+            list(APPEND _pruned_module_src_files "${_src}")
+        endif()
+    endforeach()
+    set(module_src_files "${_pruned_module_src_files}")
+    file(GLOB_RECURSE module_generated_src_files CONFIGURE_DEPENDS "${module_generated_src_dir}/*.cpp")
+    list(APPEND module_src_files ${module_generated_src_files})
     if(module_src_files)
         set(module_object_library "${MODULE_NAME}_obj_lib")
         add_library(${module_object_library} OBJECT ${module_src_files})
         target_link_libraries(${module_object_library} PRIVATE xinnodb_headers)
-        target_include_directories(${module_object_library} PRIVATE ${module_include_dir} ${XINNODB_INCLUDE_ROOT})
+        target_include_directories(${module_object_library} PRIVATE ${module_include_dir} ${XINNODB_INCLUDE_ROOT} ${module_generated_include_dir})
         # Add include paths for declared dependencies
         foreach(dep IN LISTS XMODULE_DEPS)
             target_include_directories(${module_object_library} PRIVATE "${XINNODB_SRC_ROOT}/${dep}/include")

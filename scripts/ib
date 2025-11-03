@@ -20,6 +20,7 @@ help() {
 
 intro() {
 	cat <<-EOF
+	Inno Build v0.1.0
 	Current preset = $preset
 	Targets = ${targets[@]}
 	EOF
@@ -71,5 +72,7 @@ intro
 
 cd "$source_dir" || { printf 'Invalid source directory "%s"\n' "$source_dir" >&2 ;  exit 1; }
 
+export CMAKE_COLOR_DIAGNOSTICS=ON
+export CLICOLOR_FORCE=1
 cmake --preset "$preset"
 cmake --build -j --preset "$preset" "${target_opts[@]}"
