@@ -49,12 +49,12 @@ struct AkPromise {
     AkTask         get_return_object() noexcept;
     constexpr auto initial_suspend() const noexcept { return InitialSuspend {}; }
     constexpr auto final_suspend () const noexcept { return FinalSuspend{}; }
-    void         return_value(int value) noexcept;
-    void         unhandled_exception() noexcept;
+    void           return_value(int value) noexcept;
+    void           unhandled_exception() noexcept;
 
-    AkCoroutineState state;
-    int            res;
-    AkU32            prepared_io;
+    AkCoroutineState  state;
+    int               res;
+    AkU32             prepared_io;
     ak_dlink          wait_link;     //< Used to enqueue tasks waiting for Critical Section
     ak_dlink          tasklist_link; //< Global Task list
     ak_dlink          awaiter_list;  //< The list of all tasks waiting for this task

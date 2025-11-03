@@ -675,23 +675,23 @@ using ib_client_cmp_fn = int(const ib_col_meta *col_meta, const ib_byte *p1, ib_
 
 /// \brief Represents SQL_NULL length
 /// \ingroup prim
-constinit ib_u32 IB_SQL_NULL = 0xFFFFFFFF;
+inline constexpr ib_u32 IB_SQL_NULL = 0xFFFFFFFF;
 
 /// \brief The number of system columns in a row.
 /// \ingroup prim
-constinit ib_u32 IB_N_SYS_COLS = 3;
+inline constexpr ib_u32 IB_N_SYS_COLS = 3;
 
 /// \brief The maximum length of a text column.
 /// \ingroup prim
-constinit ib_u32 MAX_TEXT_LEN = 4096;
+inline constexpr ib_u32 MAX_TEXT_LEN = 4096;
 
 /// \brief The maximum length of a column name in a table schema.
 /// \ingroup prim
-constinit ib_u32 IB_MAX_COL_IB_NAME_LEN = 64 * 3;
+inline constexpr ib_u32 IB_MAX_COL_IB_NAME_LEN = 64 * 3;
 
 /// \brief The maximum length of a table name (plus database name).
 /// \ingroup prim
-constinit ib_u32 IB_MAX_TABLE_IB_NAME_LEN = 64 * 3;
+inline constexpr ib_u32 IB_MAX_TABLE_IB_NAME_LEN = 64 * 3;
 
 /// \brief Type of callback in the event of INNODB panicing.
 /// \details Your callback should

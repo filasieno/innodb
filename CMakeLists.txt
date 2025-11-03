@@ -43,6 +43,8 @@ add_library(xinnodb_pch INTERFACE)
 target_precompile_headers(xinnodb_pch INTERFACE
   $<$<COMPILE_LANGUAGE:CXX>:${XINNODB_SRC_ROOT}/defs/include/defs_precompiled.hpp>
 )
+# Provide fmt headers for the precompiled header that includes <fmt/core.h>
+target_link_libraries(xinnodb_pch INTERFACE fmt::fmt-header-only)
 
 # Public headers interface, consumable by all modules and library users
 add_library(xinnodb_headers INTERFACE)
@@ -211,7 +213,8 @@ endfunction()
 
 xinnodb_component(defs)
 xinnodb_component(ut)
-xinnodb_component(io DEPS defs)
+xinnodb_component(io    DEPS defs)
+xinnodb_component(alloc DEPS defs ut)
 
 # ---------------------------------------------------------------------------------
 # XInnoDB documentation generation

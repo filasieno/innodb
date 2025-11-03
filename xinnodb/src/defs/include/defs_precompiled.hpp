@@ -9,6 +9,7 @@
 #include <source_location> // IWYU pragma: keep
 #include <string_view>     // IWYU pragma: keep
 #include <coroutine>       // IWYU pragma: keep
+#include <cstddef>         // IWYU pragma: keep
 
 // C standard library
 #include <cstdio>          // IWYU pragma: keep

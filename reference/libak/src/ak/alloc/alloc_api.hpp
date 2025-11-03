@@ -76,9 +76,9 @@ struct ak_alloc_table
 {
     static constexpr int ALLOCATOR_BIN_COUNT = ak_alloc_stats::ALLOCATOR_BIN_COUNT;
 
-    alignas(8)  AkU64                         freelist_mask;
     alignas(64) struct ak_dlink               freelist_head[ALLOCATOR_BIN_COUNT];
     alignas(64) AkU32                         freelist_count[ALLOCATOR_BIN_COUNT];
+    alignas(8)  AkU64                         freelist_mask;
     alignas(8)  char*                         heap_begin;
     alignas(8)  char*                         heap_end;
     alignas(8)  char*                         mem_begin;

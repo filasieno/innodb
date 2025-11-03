@@ -104,7 +104,7 @@
             ${devShellEx}
 
             # ccache: speed up rebuilds
-            export CCACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
+            export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
             mkdir -p "$CCACHE_DIR"
             export CCACHE_MAXSIZE=10G
             export CCACHE_COMPRESS=1
@@ -173,7 +173,7 @@
               find . -type f -print | sort
               echo "--- Module src files ---"
               find xinnodb/src -type f -print | sort || true
-              export CCACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
+              export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
               mkdir -p "$CCACHE_DIR"
               export CCACHE_MAXSIZE=10G
               export CCACHE_COMPRESS=1
@@ -236,7 +236,7 @@
             configurePhase = ''
               export CC=clang
               export CXX=clang++
-              export CCACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
+              export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
               mkdir -p "$CCACHE_DIR"
               export CCACHE_MAXSIZE=10G
               export CCACHE_COMPRESS=1
@@ -266,7 +266,7 @@
             configurePhase = ''
               export CC=gcc
               export CXX=g++
-              export CCACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
+              export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
               mkdir -p "$CCACHE_DIR"
               export CCACHE_MAXSIZE=10G
               export CCACHE_COMPRESS=1
