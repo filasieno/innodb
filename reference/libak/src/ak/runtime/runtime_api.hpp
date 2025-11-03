@@ -217,13 +217,13 @@ struct AkIOOp {
 template <typename... Args>
 int ak_run_main(AkTask (*co_main)(Args ...) noexcept, Args... args) noexcept;
 
-int                     ak_init_kernel(AkKernelConfig* config) noexcept;
-void                    ak_fini_kernel() noexcept;
+int                       ak_init_kernel(AkKernelConfig* config) noexcept;
+void                      ak_fini_kernel() noexcept;
 constexpr AkSuspendTaskOp ak_suspend_task() noexcept;
 AkResumeTaskOp            ak_resume_task(AkTask task) noexcept;
 AkCoroutineState          ak_get_task_state(AkTask task) noexcept;
-bool                    ak_is_task_valid(AkTask task) noexcept;
-bool                    ak_is_task_done(AkTask task) noexcept;
+bool                      ak_is_task_valid(AkTask task) noexcept;
+bool                      ak_is_task_done(AkTask task) noexcept;
 AkPromise*                ak_get_promise() noexcept;
 AkPromise*                ak_get_promise(AkTask task) noexcept;
 
@@ -232,9 +232,9 @@ AkJoinTaskOp              ak_join_task(AkTask task) noexcept;
 
 AkGetCurrentTaskOp        ak_get_task_promise_async() noexcept; //< Remove Task
 
-void*                   ak_alloc_mem(AkSize sz) noexcept;
-void                    ak_free_mem(void*ptr, AkU32 side_coalesching = (AkU32)~0) noexcept;
-int                     ak_defragment_mem(AkU64 millis_time_budget = ~0ull) noexcept;
+void*                     ak_alloc_mem(AkSize sz) noexcept;
+void                      ak_free_mem(void*ptr, AkU32 side_coalesching = (AkU32)~0) noexcept;
+int                       ak_defragment_mem(AkU64 millis_time_budget = ~0ull) noexcept;
 
 // IO Routines
 AkIOOp ak_os_io_open(const char* path, int flags, mode_t mode) noexcept;

@@ -15,24 +15,7 @@ InlayHints:
 ---
 If:
   PathMatch:
-    - "libak/.*"
+    - "reference/.*"
 Index:
   Background: Skip
----
-If:
-  PathMatch:
-    - "innodb/.*"
-Index:
-  Background: Skip
----
-If:
-  PathMatch:
-    - "effect/.*"
-Index:
-  Background: Skip  
----
-If:
-  PathMatch:
-    - "innobase/.*"
-Index:
-  Background: Skip  
+ 
