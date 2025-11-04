@@ -6,7 +6,6 @@ struct ctx_t {
     int value;
 };
 
-
 IB_ASYNC step(ctx_t* ctx) {
     fmt::print("step: {}\n", ctx->value);
     if (ctx->value == 0) {
@@ -17,7 +16,6 @@ IB_ASYNC step(ctx_t* ctx) {
         ib_tail_call(step, ctx);
     }
 }
-
 
 IB_ASYNC aysnc_main(int argc, char** argv) {
     ctx_t* ctx = new ctx_t({ .value = 20 });
