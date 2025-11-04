@@ -317,3 +317,23 @@ add_custom_command(TARGET task POST_BUILD
     COMMENT "Generating assembly listing for task executable"
 )
 
+
+# ---------------------------------------------------------------------------------
+# Simple debug example: xinnodb/src/task/example/tail_call.cpp
+# ---------------------------------------------------------------------------------
+add_executable(tail_call
+  ${CMAKE_SOURCE_DIR}/xinnodb/src/task/example/tail_call.cpp
+)
+target_link_libraries(tail_call PRIVATE fmt::fmt)
+# Force debug-style compilation flags for this target regardless of global build type
+
+target_compile_options(tail_call PRIVATE -O3 -fno-rtti -fno-exceptions)
+
+# Custom target to generate assembly from object files
+add_custom_command(TARGET tail_call POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} -d -S $<TARGET_FILE:tail_call> > $<TARGET_FILE_DIR:tail_call>/tail_call.asm
+    COMMENT "Generating assembly listing for task executable"
+)
+
+
+
