@@ -10,9 +10,9 @@ using reg_t = unsigned long long int;
 // Combined compile-time validation: signature match, size check, no floats
 template<typename Fn, typename... Args>
 constexpr bool check_tail_call() {
-    static_assert(std::is_invocable_v<Fn, Args...>, "ib_tail_call: Function signature doesn't match arguments");
-    static_assert((... && (sizeof(Args) <= sizeof(reg_t))), "ib_tail_call: Arguments must be ≤ 8 bytes");
-    static_assert((... && (!std::is_floating_point_v<Args>)), "ib_tail_call: Float/double not allowed (use XMM registers)");
+    static_assert(std::is_invocable_v<Fn, Args...>, "co_do: Function signature doesn't match arguments");
+    static_assert((... && (sizeof(Args) <= sizeof(reg_t))), "co_do: Arguments must be ≤ 8 bytes");
+    static_assert((... && (!std::is_floating_point_v<Args>)), "co_do: Float/double not allowed (use XMM registers)");
     return true;
 }
 
@@ -24,20 +24,20 @@ constexpr bool check_tail_call() {
 // These functions never return, so no need to preserve callee-saved registers
 
 #define TAIL_CALL_0(fn) do { \
-    static_assert(check_tail_call<decltype(fn)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn)>(), "co_do: invalid function signature or argument constraints"); \
     asm volatile("leave; jmpq *%0" : : "r"((void*)(fn)) : "memory"); \
     __builtin_unreachable(); \
 } while(0)
 
 #define TAIL_CALL_1(fn, a1) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     asm volatile("leave; jmpq *%0" : : "r"((void*)(fn)), "r"(r1) : "memory"); \
     __builtin_unreachable(); \
 } while(0)
 
 #define TAIL_CALL_2(fn, a1, a2) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     asm volatile("leave; jmpq *%0" : : "r"((void*)(fn)), "r"(r1), "r"(r2) : "memory"); \
@@ -45,7 +45,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_3(fn, a1, a2, a3) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -54,7 +54,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_4(fn, a1, a2, a3, a4) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -64,7 +64,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_5(fn, a1, a2, a3, a4, a5) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -75,7 +75,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_6(fn, a1, a2, a3, a4, a5, a6) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -88,7 +88,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_7(fn, a1, a2, a3, a4, a5, a6, a7) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -102,7 +102,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_8(fn, a1, a2, a3, a4, a5, a6, a7, a8) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -117,7 +117,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_9(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -133,7 +133,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_10(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -150,7 +150,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_11(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10), decltype(a11)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10), decltype(a11)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -168,7 +168,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_12(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10), decltype(a11), decltype(a12)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10), decltype(a11), decltype(a12)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -187,7 +187,7 @@ constexpr bool check_tail_call() {
 } while(0)
 
 #define TAIL_CALL_13(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) do { \
-    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10), decltype(a11), decltype(a12), decltype(a13)>(), "ib_tail_call: invalid function signature or argument constraints"); \
+    static_assert(check_tail_call<decltype(fn), decltype(a1), decltype(a2), decltype(a3), decltype(a4), decltype(a5), decltype(a6), decltype(a7), decltype(a8), decltype(a9), decltype(a10), decltype(a11), decltype(a12), decltype(a13)>(), "co_do: invalid function signature or argument constraints"); \
     register reg_t r1 asm("rdi") = (reg_t)(a1); \
     register reg_t r2 asm("rsi") = (reg_t)(a2); \
     register reg_t r3 asm("rdx") = (reg_t)(a3); \
@@ -207,9 +207,16 @@ constexpr bool check_tail_call() {
 } while(0)
 
 // Optimized tail call with strict validation
-#define ib_tail_call(fn, ...) TAIL_CALL_DISPATCH(VA_NARGS(__VA_ARGS__), fn __VA_OPT__(,) __VA_ARGS__)
+#define co_do(fn, ...) TAIL_CALL_DISPATCH(VA_NARGS(__VA_ARGS__), fn __VA_OPT__(,) __VA_ARGS__)
 
 // Dispatch tail call based on argument count
 #define TAIL_CALL_DISPATCH(n, ...) TAIL_CALL_DISPATCH_IMPL(n, __VA_ARGS__)
 #define TAIL_CALL_DISPATCH_IMPL(n, ...) TAIL_CALL_DISPATCH_IMPL2(n, __VA_ARGS__)
 #define TAIL_CALL_DISPATCH_IMPL2(n, ...) TAIL_CALL_##n(__VA_ARGS__)
+
+#define co_if(cond, if_true, if_false, ...) \
+   if (cond) { \
+      co_do(if_true __VA_OPT__(,) __VA_ARGS__); \
+   } else { \
+      co_do(if_false __VA_OPT__(,) __VA_ARGS__); \
+   }
