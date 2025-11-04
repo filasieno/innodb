@@ -2,7 +2,7 @@
 *.libs
 *.deps
 *.dirstamp
-
+.extensions
 /build
 /result
 /result-dev

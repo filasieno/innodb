@@ -8,6 +8,19 @@
 			"preset": "debug",
 			"problemMatcher": [],
 			"detail": "CMake template install task"
-		}
+		},
+		{
+			"type": "cmake",
+			"label": "cmake build debug",
+			"command": "build",
+			"targets": ["task"],
+			"preset": "debug",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"detail": "CMake template build task targeting task"
+		},
 	]
 }

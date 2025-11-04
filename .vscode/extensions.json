@@ -5,6 +5,7 @@
         "github.vscode-github-actions",
         "github.vscode-pull-request-github",
         "ms-vscode.hexeditor",
-        "ms-vscode.cmake-tools"
+        "ms-vscode.cmake-tools",
+        "franneck94.vscode-c-cpp-dev-extension-pack"
     ]
 }

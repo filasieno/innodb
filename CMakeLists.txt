@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD            23)
 set(CMAKE_CXX_STANDARD_REQUIRED   ON)
 set(CMAKE_CXX_EXTENSIONS          OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Ensure compile_commands.json is available at source-relative build/compilation_database
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
   file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/build/compilation_database")
@@ -298,4 +299,21 @@ install(
 )
 
 
+
+# ---------------------------------------------------------------------------------
+# Simple debug example: xinnodb/src/task/example/task.cpp
+# ---------------------------------------------------------------------------------
+add_executable(task
+  ${CMAKE_SOURCE_DIR}/xinnodb/src/task/example/task.cpp
+)
+target_link_libraries(task PRIVATE fmt::fmt)
+# Force debug-style compilation flags for this target regardless of global build type
+
+target_compile_options(task PRIVATE -O3 -fno-rtti -fno-exceptions)
+
+# Custom target to generate assembly from object files
+add_custom_command(TARGET task POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} -d -S $<TARGET_FILE:task> > $<TARGET_FILE_DIR:task>/task.asm
+    COMMENT "Generating assembly listing for task executable"
+)
 

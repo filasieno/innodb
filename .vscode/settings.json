@@ -1,7 +1,7 @@
 {
 	"Lua.diagnostics.globals": [],
 	"nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix",
-	"C_Cpp.intelliSenseEngine": "disabled",
+	"extensions.ignoreRecommendations": false,
 	"clangd.arguments": [
 //		"--log=verbose" 
 		"--enable-config",
@@ -16,5 +16,23 @@
 	"clangd.onConfigChanged": "restart",
 	"files.associations": {
 		"*.ic": "cpp"
-	}
+	},
+	
+	"lldb.library": "/nix/store/8rss7ifvfb6yficbnyhmjjgic8zsn4k4-lldb-21.1.2/lib/liblldb.so",
+	
+	"terminal.integrated.env.linux": {
+		"TMPDIR": "${workspaceFolder}/.tmp",
+		"TEMP": "${workspaceFolder}/.tmp",
+		"TMP": "${workspaceFolder}/.tmp"
+	},
+	"lldb.adapterEnv": {
+		"TMPDIR": "${workspaceFolder}/.tmp",
+		"TEMP": "${workspaceFolder}/.tmp",
+		"TMP": "${workspaceFolder}/.tmp"
+	},
+	"cmake.environment": {
+		"TMPDIR": "${workspaceFolder}/.tmp",
+		"TEMP": "${workspaceFolder}/.tmp",
+		"TMP": "${workspaceFolder}/.tmp"
+	},
 }

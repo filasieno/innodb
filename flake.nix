@@ -311,9 +311,9 @@
 
           '';
 
-          # Clang dev shell: include clang-tools/llvm/lld; avoid any gcc tools here
+          # Clang dev shell: include clang-tools/llvm/lld/lldb; avoid any gcc tools here
           clang = mkCommonDevShell system pkgs.clangStdenv (
-            with pkgs; [ clang-tools llvmPackages.llvm llvmPackages.lld ]
+            with pkgs; [ clang-tools llvmPackages.llvm llvmPackages.lld llvmPackages.lldb ]
           ) ''
             export CC=clang
             export CXX=clang++

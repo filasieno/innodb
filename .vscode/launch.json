@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Task",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/task",
+            "args": [],
+            "preLaunchTask": "cmake build debug",
+            "initCommands": [
+                "settings set target.source-map /home/fabio/code/innodb/build/debug /home/fabio/code/innodb",
+                "settings set stop-disassembly-display never",
+                "breakpoint set --file xinnodb/src/task/example/task.cpp --line 10",
+                "breakpoint set --name main --skip-prologue false"
+            ],
+            "sourceLanguages": [
+                "cpp"
+            ],
+            "expressions": "simple"
+        }
+    ]
+}

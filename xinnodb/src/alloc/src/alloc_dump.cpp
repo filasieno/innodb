@@ -1,5 +1,6 @@
 #include "alloc.hpp" // IWYU pragma: keep
 #include <fmt/core.h>
+#include "ut.hpp"
 
 constexpr const char* DEBUG_ALLOC_COLOR_RESET  = "\033[0m";
 constexpr const char* DEBUG_ALLOC_COLOR_WHITE  = "\033[37m"; 
@@ -147,7 +148,7 @@ static inline void alloc_debug_dump_row(const alloc_table* at, const alloc_block
         if (prev == head) {
             fmt::print("{} {:<18} ", state_color, "HEAD");
         } else {
-            const ib_size link_off = offsetof(alloc_pooled_free_block_header, freelist_link);
+            const ib_size link_off = IB_OFFSET_OF(alloc_pooled_free_block_header, freelist_link);
             alloc_block_header* prev_block = (alloc_block_header*)((char*)prev - link_off);
             ib_size offset = (ib_size)((char*)prev_block - (char*)at->sentinel_begin);
             fmt::print("{} {:<18} ", state_color, offset);
@@ -166,7 +167,7 @@ static inline void alloc_debug_dump_row(const alloc_table* at, const alloc_block
         if (next == head) {
             fmt::print("{} {:<18} ", state_color, "HEAD");
         } else {
-            const ib_size link_off = offsetof(alloc_pooled_free_block_header, freelist_link);
+            const ib_size link_off = IB_OFFSET_OF(alloc_pooled_free_block_header, freelist_link);
             alloc_block_header* next_block = (alloc_block_header*)((char*)next - link_off);
             ib_size offset = (ib_size)((char*)next_block - (char*)at->sentinel_begin);
             fmt::print("{} {:<18} ", state_color, offset);
