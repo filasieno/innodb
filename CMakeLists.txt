@@ -309,7 +309,7 @@ add_executable(task
 target_link_libraries(task PRIVATE fmt::fmt)
 # Force debug-style compilation flags for this target regardless of global build type
 
-target_compile_options(task PRIVATE -O3 -fno-rtti -fno-exceptions)
+target_compile_options(task PRIVATE -O3 -fno-rtti -fno-exceptions -foptimize-sibling-calls)
 
 # Custom target to generate assembly from object files
 add_custom_command(TARGET task POST_BUILD
@@ -327,7 +327,12 @@ add_executable(tail_call
 target_link_libraries(tail_call PRIVATE fmt::fmt)
 # Force debug-style compilation flags for this target regardless of global build type
 
-target_compile_options(tail_call PRIVATE -O3 -fno-rtti -fno-exceptions)
+target_compile_options(tail_call PRIVATE 
+    -O3 
+    -fno-rtti 
+    -fno-exceptions
+    -foptimize-sibling-calls
+)
 
 # Custom target to generate assembly from object files
 add_custom_command(TARGET tail_call POST_BUILD
@@ -336,4 +341,25 @@ add_custom_command(TARGET tail_call POST_BUILD
 )
 
 
+# ---------------------------------------------------------------------------------
+# Test must_tail: xinnodb/src/task/example/task2.cpp
+# ---------------------------------------------------------------------------------
+add_executable(task2
+  ${CMAKE_SOURCE_DIR}/xinnodb/src/task/example/task2.cpp
+)
+target_link_libraries(task2 PRIVATE)
 
+# Force TCO with optimization
+target_compile_options(task2 PRIVATE 
+  -O3 
+  -foptimize-sibling-calls  # Enable tail call optimization
+  -fomit-frame-pointer      # Allow better TCO
+  -fno-rtti 
+  -fno-exceptions
+)
+
+# Generate assembly to verify TCO
+add_custom_command(TARGET task2 POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} -d $<TARGET_FILE:task2> > $<TARGET_FILE_DIR:task2>/task2.asm
+    COMMENT "Generating assembly listing for task2 executable"
+)
