@@ -1,0 +1,13 @@
+# Build artifacts
+build/
+cmake-build-*/
+
+# Test output
+# /data/actual/
+# *.actual
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

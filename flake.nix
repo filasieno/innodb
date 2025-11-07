@@ -75,7 +75,7 @@
         stdenv.mkDerivation {
           name = "xinnodb-devshell";
 
-          nativeBuildInputs = buildDeps pkgs ++ devTools pkgs ++ extraPkgs ++ [ stdenv.cc ];
+          nativeBuildInputs = buildDeps pkgs ++ devTools pkgs ++ extraPkgs ++ [ stdenv.cc ] ++ [ pkgs.tree-sitter pkgs.ccache ];
           buildInputs = runtimeDeps config;
 
           # Configure PKG_CONFIG_PATH for proper library discovery
@@ -126,6 +126,8 @@
             echo "  gbenchmark   : ${pkgs.gbenchmark}"
             echo "  fmt.dev      : ${pkgs.fmt_12.dev}"
             echo "  liburing.dev : ${pkgs.liburing.dev}"
+            echo "  tree-sitter  : ${pkgs.tree-sitter}"
+            echo "  ccache       : ${pkgs.ccache}"
           '';
 
           phases = [ "installPhase" ];

@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug Build",
+      "description": "Debug build with Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release Build",
+      "description": "Release build with Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "default",
+      "displayName": "Default Build",
+      "description": "Default build configuration with Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "displayName": "Debug Build",
+      "description": "Build debug configuration"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "displayName": "Release Build",
+      "description": "Build release configuration"
+    },
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "displayName": "Default Build",
+      "description": "Build default configuration"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "displayName": "Default Tests",
+      "description": "Run tests with default configuration",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "displayName": "Debug Tests",
+      "description": "Run tests with debug configuration",
+      "output": {
+        "outputOnFailure": true,
+        "verbosity": "verbose"
+      }
+    }
+  ]
+}

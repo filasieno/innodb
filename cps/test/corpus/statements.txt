@@ -1,0 +1,9 @@
+==================
+Namespace 1
+==================
+
+namespace sample;
+
+---
+
+(file top_level_def: (set_namespace_def name: (identifier)))

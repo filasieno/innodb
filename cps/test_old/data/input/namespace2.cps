@@ -1,0 +1,1 @@
+namespace another_namespace;
