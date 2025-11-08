@@ -1,7 +1,0 @@
-(file top_level_def: 
-   (namespace_def 
-       name: (identifier) 
-       defs: (fun_def 
-          name: (identifier) 
-          return_types: (type_list (named_type name: (identifier))) 
-          body: (block))))

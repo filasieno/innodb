@@ -154,8 +154,10 @@
                   false
                   || rel == "CMakeLists.txt"
                   || rel == "CMakePresets.json"
-                  || rel == "xinnodb" 
+                  || rel == "xinnodb"
                   || pkgs.lib.hasPrefix "xinnodb/" rel
+                  || rel == "tools"
+                  || pkgs.lib.hasPrefix "tools/" rel
                 )
             ) ./.;
 
@@ -207,7 +209,7 @@
             '';
 
             meta = with pkgs.lib; {
-              description = "XInnoDB embedded database engine";
+              description = "XInnoDB embedded database engine with CPS parser support";
               homepage = "https://github.com/sunbains/embedded-innodb";
               license = licenses.gpl2Only;
               platforms = platforms.linux;
@@ -217,7 +219,75 @@
               ];
             };
           };
-       
+
+        # Tree-sitter CPS parser package
+        "tree-sitter-cps" =
+          let
+            config = commonConfig system;
+            pkgs = config.pkgs;
+          in
+          pkgs.stdenv.mkDerivation {
+            pname = "tree-sitter-cps";
+            version = "0.1.0";
+
+            src = ./tools/tree-sitter-cps;
+
+            outputs = [ "out" "dev" ];
+
+            nativeBuildInputs = with pkgs; [
+              cmake
+              ninja
+              pkg-config
+              tree-sitter
+            ];
+
+            buildInputs = with pkgs; [
+              tree-sitter
+              gtest
+            ];
+
+            cmakeFlags = [
+              "-DCMAKE_BUILD_TYPE=Release"
+              "-DBUILD_TESTING=ON"
+            ];
+
+            # Generate parser.c from grammar.json during build
+            preConfigure = ''
+              echo "Generating parser.c from grammar.json..."
+              tree-sitter generate src/grammar.json --abi=15
+            '';
+
+            doCheck = true;
+
+            checkPhase = ''
+              runHook preCheck
+
+              echo "Running CPS parser tests..."
+              ./cps_parser_test
+
+              runHook postCheck
+            '';
+
+            # Install both static and shared libraries to dev output
+            # Headers and pkg-config to dev output
+            # Runtime libraries to out output
+            postInstall = ''
+              mkdir -p $dev/lib/pkgconfig
+              mv $out/lib/pkgconfig/tree-sitter-cps.pc $dev/lib/pkgconfig/ 2>/dev/null || true
+            '';
+
+            meta = with pkgs.lib; {
+              description = "CPS grammar for tree-sitter";
+              homepage = "https://github.com/tree-sitter/tree-sitter-cps";
+              license = licenses.mit;
+              platforms = platforms.linux;
+              maintainers = [
+                "Fabio N. Filasieno"
+              ];
+            };
+          };
+
+
       });
 
       # Checks (CI-like): build and run tests under both toolchains using presets
@@ -232,13 +302,13 @@
           clang = pkgs.clangStdenv.mkDerivation {
             name = "xinnodb-check-clang";
             src = ./.;
-            nativeBuildInputs = buildDeps pkgs ++ [ pkgs.clang pkgs.ninja pkgs.cmake pkgs.ccache ];
-            buildInputs = runtimeDeps config;
+            nativeBuildInputs = buildDeps pkgs ++ [ pkgs.clang pkgs.ninja pkgs.cmake pkgs.ccache pkgs.fmt_12.dev ];
+            buildInputs = runtimeDeps config ++ [ pkgs.tree-sitter ];
             doCheck = true;
             configurePhase = ''
               export CC=clang
               export CXX=clang++
-              export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
+              export CCACHE_DIR="$PWD/.ccache"
               mkdir -p "$CCACHE_DIR"
               export CCACHE_MAXSIZE=10G
               export CCACHE_COMPRESS=1
@@ -262,13 +332,13 @@
           gcc = pkgs.stdenv.mkDerivation {
             name = "xinnodb-check-gcc";
             src = ./.;
-            nativeBuildInputs = buildDeps pkgs ++ [ pkgs.gcc pkgs.ninja pkgs.cmake pkgs.ccache ];
-            buildInputs = runtimeDeps config;
+            nativeBuildInputs = buildDeps pkgs ++ [ pkgs.gcc pkgs.ninja pkgs.cmake pkgs.ccache pkgs.fmt_12.dev ];
+            buildInputs = runtimeDeps config ++ [ pkgs.tree-sitter ];
             doCheck = true;
             configurePhase = ''
               export CC=gcc
               export CXX=g++
-              export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
+              export CCACHE_DIR="$PWD/.ccache"
               mkdir -p "$CCACHE_DIR"
               export CCACHE_MAXSIZE=10G
               export CCACHE_COMPRESS=1

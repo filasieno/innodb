@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.1)
 
-project(xinnodb_project VERSION 0.1.0 LANGUAGES CXX)
+project(xinnodb_project VERSION 0.1.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD            23)
 set(CMAKE_CXX_STANDARD_REQUIRED   ON)
@@ -32,7 +32,9 @@ find_package(fmt      12 CONFIG REQUIRED)
 find_program(FLEX flex REQUIRED)
 find_program(BISON bison REQUIRED)
 
+
 include(GoogleTest)
+
 
 # Root folder configuration
 set(XINNODB_INCLUDE_ROOT ${CMAKE_SOURCE_DIR}/xinnodb/include)
@@ -46,6 +48,12 @@ target_precompile_headers(xinnodb_pch INTERFACE
 )
 # Provide fmt headers for the precompiled header that includes <fmt/core.h>
 target_link_libraries(xinnodb_pch INTERFACE fmt::fmt-header-only)
+
+
+
+# ---------------------------------------------------------------------------------
+# XInnoDB libraries
+# ---------------------------------------------------------------------------------
 
 # Public headers interface, consumable by all modules and library users
 add_library(xinnodb_headers INTERFACE)
@@ -234,9 +242,11 @@ set(DOXYGEN_LAYOUT_FILE       "${CMAKE_SOURCE_DIR}/xinnodb/docs/DoxygenLayout.xm
 set(DOXYGEN_GENERATE_GROUPS   YES)
 doxygen_add_docs(doc "${XINNODB_INTERNAL_DOCS_FOLDERS}")
 
+
 # ---------------------------------------------------------------------------------
 # Definition of the single unit test executable
 # ---------------------------------------------------------------------------------
+
 if(XINNODB_ALL_TESTS)
     list(REMOVE_DUPLICATES XINNODB_TEST_INCLUDE_DIRS)
     message(STATUS "Unit test sources:")
@@ -265,6 +275,7 @@ add_custom_target(check
   DEPENDS xinnodb_tests
   COMMENT "Running unit tests"
 )
+
 
 # ---------------------------------------------------------------------------------
 # Install rules
