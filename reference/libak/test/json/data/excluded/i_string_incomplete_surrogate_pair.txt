@@ -1,3 +1,0 @@
-name=i_string_incomplete_surrogate_pair
-----------
-["\uDd1ea"]

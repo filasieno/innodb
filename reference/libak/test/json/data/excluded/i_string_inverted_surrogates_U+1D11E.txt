@@ -1,3 +1,0 @@
-name=i_string_inverted_surrogates_U+1D11E
-----------
-["\uDd1e\uD834"]

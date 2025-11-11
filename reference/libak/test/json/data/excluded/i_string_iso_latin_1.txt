@@ -1,3 +1,0 @@
-name=i_string_iso_latin_1
-----------
-["é"]

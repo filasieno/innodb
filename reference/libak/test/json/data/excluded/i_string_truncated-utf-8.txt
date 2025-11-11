@@ -1,3 +1,0 @@
-name=i_string_truncated-utf-8
-----------
-["ая"]

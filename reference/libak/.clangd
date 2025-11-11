@@ -1,5 +1,0 @@
-Diagnostics:
-  # Suppress all diagnostics in libak to effectively exclude it from clangd noise
-  Suppress: ["*"]
-
-

@@ -1,3 +1,0 @@
-name=i_string_1st_surrogate_but_2nd_missing
-----------
-["\uDADA"]

@@ -1,3 +1,0 @@
-name=i_number_real_neg_overflow
-----------
-[-123123e100000]

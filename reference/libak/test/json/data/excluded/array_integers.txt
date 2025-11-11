@@ -1,3 +1,0 @@
-name=ArrayIntegers
-----------
-[1,2,3]

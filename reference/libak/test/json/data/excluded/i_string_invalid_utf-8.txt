@@ -1,3 +1,0 @@
-name=i_string_invalid_utf-8
-----------
-["ÿ"]

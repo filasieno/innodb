@@ -1,3 +1,0 @@
-name=i_string_1st_valid_surrogate_2nd_invalid
-----------
-["\uD888\u1234"]

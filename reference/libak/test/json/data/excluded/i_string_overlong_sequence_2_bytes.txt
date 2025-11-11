@@ -1,3 +1,0 @@
-name=i_string_overlong_sequence_2_bytes
-----------
-["À¯"]

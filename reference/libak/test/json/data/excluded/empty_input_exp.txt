@@ -1,5 +1,0 @@
-result=ERROR
-value=210
----
-EVENT
-ERROR 210
