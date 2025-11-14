@@ -1,0 +1,273 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kaitai.io/ksy_schema.json",
+  "title": "Kaitai Struct Format Specification",
+  "description": "JSON Schema for .ksy files used by Kaitai Struct compiler",
+  "type": "object",
+  "required": ["meta"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Metadata section defining file-level properties",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique identifier for this format specification"
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable title"
+        },
+        "application": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ],
+          "description": "Application(s) that use this format"
+        },
+        "file-extension": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ],
+          "description": "File extension(s) for this format"
+        },
+        "xref": {
+          "type": "object",
+          "description": "External references (forensics wiki, ISO, etc.)"
+        },
+        "license": {
+          "type": "string",
+          "description": "License for this specification"
+        },
+        "ks-version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "Minimum Kaitai Struct version required"
+        },
+        "ks-debug": {
+          "type": "boolean",
+          "description": "Enable debug mode"
+        },
+        "ks-opaque-types": {
+          "type": "boolean",
+          "description": "Allow opaque external types"
+        },
+        "imports": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Other .ksy files to import"
+        },
+        "encoding": {
+          "type": "string",
+          "description": "Default string encoding"
+        },
+        "endian": {
+          "enum": ["le", "be"],
+          "description": "Default endianness (little/big endian)"
+        },
+        "bit-endian": {
+          "enum": ["le", "be"],
+          "description": "Bit endianness for bit-sized integers"
+        }
+      }
+    },
+    "doc": {
+      "type": "string",
+      "description": "Documentation string for this format"
+    },
+    "doc-ref": {
+      "oneOf": [
+        {"type": "string"},
+        {"type": "array", "items": {"type": "string"}}
+      ],
+      "description": "URL(s) to external documentation"
+    },
+    "seq": {
+      "type": "array",
+      "description": "Sequential list of attributes to parse",
+      "items": {
+        "$ref": "#/definitions/attribute"
+      }
+    },
+    "types": {
+      "type": "object",
+      "description": "User-defined types",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#/definitions/type_spec"
+        }
+      }
+    },
+    "instances": {
+      "type": "object",
+      "description": "Lazy-evaluated instances",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#/definitions/instance"
+        }
+      }
+    },
+    "enums": {
+      "type": "object",
+      "description": "Enumerations",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "type": "object",
+          "patternProperties": {
+            "^-?[0-9]+$": {"type": "string"}
+          }
+        }
+      }
+    },
+    "params": {
+      "type": "array",
+      "description": "Parameters for parametric types",
+      "items": {
+        "$ref": "#/definitions/param"
+      }
+    }
+  },
+  "definitions": {
+    "attribute": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "doc": {"type": "string"},
+        "doc-ref": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        },
+        "contents": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "integer"}},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        },
+        "type": {
+          "oneOf": [
+            {"type": "string"},
+            {"$ref": "#/definitions/type_ref"}
+          ]
+        },
+        "repeat": {
+          "enum": ["expr", "eos", "until"]
+        },
+        "repeat-expr": {},
+        "repeat-until": {},
+        "if": {},
+        "size": {},
+        "size-eos": {"type": "boolean"},
+        "process": {"type": "string"},
+        "enum": {"type": "string"},
+        "encoding": {"type": "string"},
+        "pad-right": {"type": "integer"},
+        "terminator": {"type": "integer"},
+        "consume": {"type": "boolean"},
+        "include": {"type": "boolean"},
+        "eos-error": {"type": "boolean"},
+        "pos": {},
+        "io": {},
+        "value": {}
+      }
+    },
+    "type_spec": {
+      "type": "object",
+      "properties": {
+        "meta": {"$ref": "#/properties/meta"},
+        "doc": {"type": "string"},
+        "doc-ref": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        },
+        "params": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/param"}
+        },
+        "seq": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/attribute"}
+        },
+        "types": {"$ref": "#/properties/types"},
+        "instances": {"$ref": "#/properties/instances"},
+        "enums": {"$ref": "#/properties/enums"}
+      }
+    },
+    "instance": {
+      "type": "object",
+      "properties": {
+        "doc": {"type": "string"},
+        "doc-ref": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        },
+        "pos": {},
+        "io": {},
+        "value": {},
+        "type": {
+          "oneOf": [
+            {"type": "string"},
+            {"$ref": "#/definitions/type_ref"}
+          ]
+        },
+        "size": {},
+        "size-eos": {"type": "boolean"},
+        "process": {"type": "string"},
+        "enum": {"type": "string"},
+        "encoding": {"type": "string"},
+        "if": {},
+        "repeat": {
+          "enum": ["expr", "eos", "until"]
+        },
+        "repeat-expr": {},
+        "repeat-until": {}
+      }
+    },
+    "param": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "type": {
+          "oneOf": [
+            {"type": "string"},
+            {"$ref": "#/definitions/type_ref"}
+          ]
+        },
+        "doc": {"type": "string"},
+        "doc-ref": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        }
+      }
+    },
+    "type_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "switch-on": {},
+        "cases": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

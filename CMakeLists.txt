@@ -24,11 +24,11 @@ add_compile_options(-fstack-protector-strong)
 
 # Setup testing framework
 enable_testing()
-find_package(Git      QUIET)
-find_package(GTest    CONFIG REQUIRED)
-find_package(Doxygen  REQUIRED)
-find_package(fmt      12 CONFIG REQUIRED)
 
+find_package(Git QUIET)
+find_package(GTest CONFIG REQUIRED)
+find_package(Doxygen REQUIRED)
+find_package(fmt 12 CONFIG REQUIRED)
 find_program(FLEX flex REQUIRED)
 find_program(BISON bison REQUIRED)
 

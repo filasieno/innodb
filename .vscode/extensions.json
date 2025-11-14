@@ -1,11 +1,8 @@
 {
-    "recommendations": [
-        "llvm-vs-code-extensions.vscode-clangd",
-        "github.vscode-codeql",
-        "github.vscode-github-actions",
-        "github.vscode-pull-request-github",
-        "ms-vscode.hexeditor",
-        "ms-vscode.cmake-tools",
-        "franneck94.vscode-c-cpp-dev-extension-pack"
-    ]
+  "recommendations": [
+    "redhat.vscode-yaml",
+    "streetsidesoftware.code-spell-checker",
+    "mermaidchart.vscode-mermaid-chart"
+  ],
+  "unwantedRecommendations": []
 }

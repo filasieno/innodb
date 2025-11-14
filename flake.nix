@@ -64,6 +64,7 @@
           luajit
           sysbench
           bun
+          kaitai-struct-compiler
         ];
 
       # Common dev shell (toolchain provided via stdenv; extras via extraPkgs)

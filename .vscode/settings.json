@@ -1,38 +1,69 @@
 {
-	"Lua.diagnostics.globals": [],
-	"nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix",
-	"extensions.ignoreRecommendations": false,
-	"clangd.arguments": [
-//		"--log=verbose" 
-		"--enable-config",
-		"--background-index",
-		"--pch-storage=disk",
-		"--all-scopes-completion",
-		"--header-insertion=never",
-		"--clang-tidy=false",
-		"--query-driver=/nix/store/*-clang-wrapper-*/bin/clang++;*/bin/clang++",
-		"--compile-commands-dir=${workspaceFolder}/build/compilation_database"
-	],
-	"clangd.onConfigChanged": "restart",
-	"files.associations": {
-		"*.ic": "cpp"
-	},
-	
-	"lldb.library": "/nix/store/8rss7ifvfb6yficbnyhmjjgic8zsn4k4-lldb-21.1.2/lib/liblldb.so",
-	
-	"terminal.integrated.env.linux": {
-		"TMPDIR": "${workspaceFolder}/.tmp",
-		"TEMP": "${workspaceFolder}/.tmp",
-		"TMP": "${workspaceFolder}/.tmp"
-	},
-	"lldb.adapterEnv": {
-		"TMPDIR": "${workspaceFolder}/.tmp",
-		"TEMP": "${workspaceFolder}/.tmp",
-		"TMP": "${workspaceFolder}/.tmp"
-	},
-	"cmake.environment": {
-		"TMPDIR": "${workspaceFolder}/.tmp",
-		"TEMP": "${workspaceFolder}/.tmp",
-		"TMP": "${workspaceFolder}/.tmp"
-	},
+  "yaml.schemas": {
+    "./schema/kaitai.schema.json": [
+      "**/*.ksy",
+      "**/*.ksy.yaml"
+    ]
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["**/tools/ib-lsp-model/metaModel.json"],
+      "url": "./schema/lsp-metamodel.schema.json"
+    }
+  ],
+  "files.associations": {
+    "*.ksy": "yaml"
+  },
+  "yaml.customTags": [
+    "!kaitai"
+  ],
+  "yaml.format.enable": true,
+  "yaml.format.singleQuote": false,
+  "yaml.validate": true,
+  "yaml.hover": true,
+  "yaml.completion": true,
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.semanticHighlighting.enabled": true,
+    "editor.bracketPairColorization.enabled": true
+  },
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "entity.name.tag.yaml",
+        "settings": {
+          "foreground": "#4EC9B0"
+        }
+      },
+      {
+        "scope": "string.quoted.yaml",
+        "settings": {
+          "foreground": "#CE9178"
+        }
+      },
+      {
+        "scope": "constant.numeric.yaml",
+        "settings": {
+          "foreground": "#B5CEA8"
+        }
+      }
+    ]
+  },
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:innodb}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  },
+  "nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix"
 }

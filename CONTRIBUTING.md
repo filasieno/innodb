@@ -1,141 +1,113 @@
-# Contributing
+# Contributing (WIP not finalized)
 
 ## Physical Architecture
 
 ### Overview
 
-XInnoDB follows a strict layered architecture designed for ABI stability, maintainability, and extensibility. The system is organized into distinct layers with clear dependency rules and no circular dependencies.
+XInnoDB follows a strict layered architecture designed for ABI stability, maintainability, and extensibility.
+The system is organized into distinct layers with clear dependency rules and no circular dependencies.
 
 ## Architecture Layers
 
+<!-- markdownlint-disable MD033 -->
+<div style="background-color: #ffffff; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+
 ```mermaid
-graph TB
-    subgraph Layer0["**Layer 0: Public API** (`xinnodb.hpp`)"]
-        API["Type-erased, ABI-stable C++ coroutine interface<br/>Forever stable (additive-only changes after 1.0)<br/>Zero templates in ABI surface"]
-    end
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#666666','lineColor':'#666666','background':'#ffffff'}}}%%
+flowchart BT
+    Layer3["<b>Layer 3: Module Implementation</b><br/>xinnodb/src/&lt;module&gt;/src/<br/><br/>Private implementation"]
+    Layer2["<b>Layer 2: Module APIs</b><br/>xinnodb/src/&lt;module&gt;/include/<br/><br/>Inter-module interfaces"]
+    Layer1["<b>Layer 1: SDK</b><br/>xinnodb/include/xib/*.hpp<br/><br/>Rich C++ API<br/>for plugins and extensions"]
+    Layer0["<b>Layer 0: Public API</b><br/>xinnodb/include/*.hpp<br/><br/>ABI-stable C++ API<br/>Frozen at v1.0"]
     
-    subgraph Layer1["Layer 1: SDK (xinnodb/sdk/)"]
-        SDK["Rich C++ API for plugin/extension developers<br/>RAII wrappers, modern C++ features<br/>Can evolve independently of public API"]
-    end
+    Layer3 -->|depends on| Layer2
+    Layer2 -->|depends on| Layer1
+    Layer1 -->|depends on| Layer0
     
-    subgraph Layer2["Layer 2: Internal Utilities (xinnodb/internal/)"]
-        Internal["Shared utilities across implementation modules<br/>Not exposed to users or SDK<br/>dlink, assert, comptime utilities"]
-    end
-    
-    subgraph Layer3["Layer 3: Module APIs (xinnodb/src/*/include/)"]
-        ModuleAPI["Inter-module communication interfaces<br/>Each module exposes public interface<br/>alloc, task, sched, sync, io, rt, etc."]
-    end
-    
-    subgraph Layer4["Layer 4: Module Implementation (xinnodb/src/*/src/)"]
-        ModuleImpl["Private implementation details<br/>Never included by other modules<br/>Implementation files and private headers"]
-    end
-    
-    API <-- SDK
-    SDK <-- Internal
-    SDK <-- ModuleAPI
-    Internal <-- ModuleAPI
-    ModuleAPI <-- ModuleImpl
-    
-    style Layer0 fill:#e1f5ff,stroke:#01579b,stroke-width:3px
-    style Layer1 fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    style Layer2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Layer3 fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
-    style Layer4 fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style Layer0 fill:#ffffff,stroke:#4caf50,stroke-width:3px,rx:10,ry:10
+    style Layer1 fill:#ffffff,stroke:#2196f3,stroke-width:3px,rx:10,ry:10
+    style Layer2 fill:#ffffff,stroke:#ff9800,stroke-width:3px,rx:10,ry:10
+    style Layer3 fill:#ffffff,stroke:#e91e63,stroke-width:3px,rx:10,ry:10
 ```
 
-**Layer Hierarchy (Top to Bottom):**
+</div>
+<!-- markdownlint-enable MD033 -->
 
-- **Layer 4** (Top/Private): Module Implementation - Private details
-- **Layer 3**: Module APIs - Inter-module interfaces
-- **Layer 2**: Internal Utilities - Shared infrastructure
+**Layer Hierarchy (Bottom to Top):**
+
+- **Layer 0**: Public API - What users see and use (stable, foundation)
 - **Layer 1**: SDK - Rich extension layer for developers (less stable)
-- **Layer 0** (Leaf): Public API - What users see and use (stable)
+- **Layer 2**: Module APIs - Inter-module interfaces  
+- **Layer 3**: Module Implementation - Private implementation details
 
 ## Directory Structure
 
-```
+```text
 xinnodb/
-├── include/
-│   ├── xinnodb.hpp                      # Layer 0: Public API (STABLE ABI)
-│   └── xinnodb/
-│       ├── sdk/                         # Layer 1: SDK
-│       │   ├── database.hpp             # Rich Database wrapper
-│       │   ├── transaction.hpp          # Rich Transaction wrapper
-│       │   ├── cursor.hpp               # Rich Cursor wrapper
-│       │   ├── plugin.hpp               # Plugin development interface
-│       │   ├── allocator.hpp            # Custom allocator support
-│       │   └── utilities.hpp            # SDK helper functions
-│       │
-│       └── internal/                    # Layer 2: Internal utilities
-│           ├── dlink.hpp                # Intrusive linked lists
-│           ├── assert.hpp               # Debug assertions
-│           ├── comptime_string.hpp      # Compile-time utilities
-│           └── common.hpp               # Common internal types
+├── include/                             # Layers 0: Public Stable API
+│   └── ib/                              # Layers 0: SDK subdirectory
 │
-└── src/                                 # Implementation modules
-    ├── defs/                            # Foundation: basic definitions
-    │   ├── include/defs/
-    │   │   ├── defs.hpp                 # Module public interface
-    │   │   └── defs_types.hpp           # Types for other modules
-    │   ├── src/
-    │   │   └── defs_impl.cpp            # Private implementation
-    │   └── test/
-    │       └── test_defs.cpp
+└── src/                                 # Layers 2 & 3: Module APIs and Implementation
+    ├── defs/                            # Foundation - Basic definitions
+    │   ├── include/defs/                #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── alloc/                           # Memory allocator module
-    │   ├── include/alloc/
-    │   │   ├── alloc.hpp                # Allocator public API
-    │   │   └── alloc_types.hpp          # Allocator types
-    │   ├── src/
-    │   │   ├── alloc_impl.hpp           # Private headers
-    │   │   ├── alloc_table.cpp
-    │   │   └── alloc_freeblock.cpp
-    │   └── test/
+    ├── ut/                              # Foundation - Utilities
+    │   ├── include/ut/                  #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── sync/                            # Synchronization primitives
-    │   ├── include/sync/
-    │   ├── src/
-    │   └── test/
+    ├── alloc/                           # Core - Memory allocator
+    │   ├── include/alloc/               #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── task/                            # Coroutine task system
-    │   ├── include/task/
-    │   ├── src/
-    │   └── test/
+    ├── sync/                            # Core - Synchronization
+    │   ├── include/sync/                #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── sched/                           # Scheduler
-    │   ├── include/sched/
-    │   ├── src/
-    │   └── test/
+    ├── io/                              # Core - I/O operations
+    │   ├── include/io/                  #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── io/                              # I/O operations
-    │   ├── include/io/
-    │   ├── src/
-    │   └── test/
+    ├── task/                            # Runtime - Coroutine tasks
+    │   ├── include/task/                #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── pwa/                             # Private Worker Area
-    │   ├── include/pwa/
-    │   ├── src/
-    │   └── test/
+    ├── sched/                           # Runtime - Scheduler
+    │   ├── include/sched/               #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── sga/                             # Shared Global Area
-    │   ├── include/sga/
-    │   ├── src/
-    │   └── test/
+    ├── pwa/                             # Runtime - Private Worker Area
+    │   ├── include/pwa/                 #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    ├── msgbus/                          # Message bus
-    │   ├── include/msgbus/
-    │   ├── src/
-    │   └── test/
+    ├── sga/                             # System - Shared Global Area
+    │   ├── include/sga/                 #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
     │
-    └── rt/                              # Runtime orchestration
-        ├── include/rt/
-        ├── src/
-        └── test/
+    ├── msgbus/                          # System - Message bus
+    │   ├── include/msgbus/              #   Layer 2: Module public API
+    │   ├── src/                         #   Layer 3: Private implementation
+    │   └── test/                        #   Layer 3: Unit tests
+    │
+    └── rt/                              # System - Runtime orchestration
+        ├── include/rt/                  #   Layer 2: Module public API
+        ├── src/                         #   Layer 3: Private implementation
+        └── test/                        #   Layer 3: Unit tests
 ```
 
 ## Layer 0: Public API (`xinnodb.hpp`)
 
 ### Purpose
+
 The public API is the **forever-stable** interface for all XInnoDB users. It uses type erasure to achieve ABI stability while supporting C++20 coroutines.
 
 ### Design Principles
@@ -152,41 +124,43 @@ The public API is the **forever-stable** interface for all XInnoDB users. It use
 // xinnodb.hpp has two sections:
 
 // SECTION 1: Type-Erased API (Stable ABI)
-namespace xinnodb {
-    // POD handle types
-    struct ib_sga_hdl { ib_u64 hdl; };
-    
-    // Type-erased result container
-    struct ib_async_result {
-        ib_async_opaque opaque;
-        const ib_async_ops* ops;
-        char result_buffer[32];
-    };
-    
-    // Type-erased functions (exported from library)
-    ib_async_result ib_trx_commit_async(ib_trx_hdl) noexcept;
-}
+
+// POD handle types
+struct ib_sga_hdl { ib_u64 hdl; };
+
+// Type-erased result container
+struct ib_async_result {
+    ib_async_opaque opaque;
+    const ib_async_ops* ops;
+    char result_buffer[32];
+};
+
+// Type-erased functions (exported from library)
+ib_async_result ib_trx_commit_async(ib_trx_hdl) noexcept;
+
 
 // SECTION 2: Template Wrappers (No ABI surface)
-namespace xinnodb::inline templates {
-    // Header-only template wrappers
-    template<typename T>
-    class ib_async_hdl { /* wraps ib_async_result */ };
-    
-    // Convenience template functions
-    inline ib_async_hdl<ib_err> ib_trx_commit(ib_trx_hdl);
-}
+
+// Header-only template wrappers
+template<typename T>
+class ib_async_hdl { /* wraps ib_async_result */ };
+
+// Convenience template functions
+inline ib_async_hdl<ib_err> ib_trx_commit(ib_trx_hdl);
+
 ```
 
 ### Adding to Public API
 
 **✅ ALLOWED:**
+
 - Add new functions (additive)
 - Add new enum values at the end
 - Add new handle types
 - Add overloads (carefully)
 
 **❌ FORBIDDEN:**
+
 - Change function signatures
 - Remove functions
 - Change enum values
@@ -195,10 +169,7 @@ namespace xinnodb::inline templates {
 
 ## Layer 1: SDK (`xinnodb/sdk/`)
 
-### Purpose
 Rich C++ API for plugin and extension developers. Built on top of the stable public API.
-
-### Design Principles
 
 1. **Depends on Public API**: Includes `xinnodb.hpp`
 2. **Modern C++**: RAII, exceptions, smart pointers, concepts
@@ -211,55 +182,34 @@ Rich C++ API for plugin and extension developers. Built on top of the stable pub
 #pragma once
 #include "xinnodb.hpp"  // Depends on public API
 
-namespace xinnodb::sdk {
-    class Database {
-        ib_state_hdl handle_;
-    public:
-        // RAII wrapper
-        static ib_async_hdl<Database> create(ib_sga_hdl);
-        
-        // Rich interface
-        auto begin_transaction() -> ib_async_hdl<Transaction>;
-        
-        // Access underlying handle
-        ib_state_hdl native_handle() const noexcept;
-    };
-}
+
+class ib_db {
+    ib_state_hdl handle_;
+public:
+    // RAII wrapper
+    static ib_async_hdl<Database> create(ib_sga_hdl);
+    
+    // Rich interface
+    auto begin_transaction() -> ib_async_hdl<Transaction>;
+    
+    // Access underlying handle
+    ib_state_hdl native_handle() const noexcept;
+};
+
 ```
 
 ### Versioning
 
 SDK versions independently from public API:
+
 - Public API: `v1.0.0` (frozen)
 - SDK: `v1.5.2` (can evolve)
 
-## Layer 2: Internal Utilities (`xinnodb/internal/`)
+## Layer 2: Module APIs (`xinnodb/src/*/include/`)
 
-### Purpose
-Shared utilities used by implementation modules but not exposed to users.
-
-### Contents
-
-- **dlink.hpp**: Intrusive linked list implementation
-- **assert.hpp**: Debug assertion macros
-- **comptime_string.hpp**: Compile-time string utilities
-- **common.hpp**: Internal common types
-
-### Usage Rules
-
-1. Only included by implementation modules (`xinnodb/src/*/`)
-2. NOT included by public API or SDK
-3. Can change freely (internal implementation detail)
-4. Must be header-only or compiled into internal object files
-
-## Layer 3: Module APIs (`xinnodb/src/*/include/`)
-
-### Purpose
 Module APIs provide the public interface that each implementation module exposes to other modules. This is the inter-module communication layer.
 
-### Design Principles
-
-1. **Clean Interfaces**: Minimal, focused API for each module
+1. **Interfaces**: Minimal, focused API for each module
 2. **Type Safety**: Strong typing for inter-module communication
 3. **No Circular Dependencies**: Enforced through dependency levels
 4. **Documentation**: All APIs must be documented
@@ -272,20 +222,15 @@ Module APIs provide the public interface that each implementation module exposes
 
 #include "alloc/alloc_types.hpp"
 
-namespace xinnodb::alloc {
     // Public API for other modules to use
     void* alloc_table_malloc(ib_alloc_table* table, size_t size) noexcept;
-    void alloc_table_free(ib_alloc_table* table, void* ptr) noexcept;
-    int alloc_table_init(ib_alloc_table* table, void* mem, size_t size) noexcept;
-}
+void  alloc_table_free(ib_alloc_table* table, void* ptr) noexcept;
+int   alloc_table_init(ib_alloc_table* table, void* mem, size_t size) noexcept;
 ```
 
-## Layer 4: Module Implementation (`xinnodb/src/*/src/`)
+## Layer 3: Module Implementation (`xinnodb/src/*/src/`)
 
-### Purpose
 The module implementation layer contains all private implementation details, helper functions, and internal data structures. This is the "leaf" layer where actual work happens.
-
-### Design Principles
 
 1. **Encapsulation**: Implementation details never leak to other modules
 2. **Private Headers**: Internal headers in `src/` directory only
@@ -299,40 +244,37 @@ The module implementation layer contains all private implementation details, hel
 #pragma once
 
 #include "alloc/alloc.hpp"
-#include "xinnodb/internal/assert.hpp"
 
-namespace xinnodb::alloc::detail {
-    // Private helper functions
-    void* find_free_block(ib_alloc_table* table, size_t size) noexcept;
-    void coalesce_blocks(ib_alloc_table* table) noexcept;
+void* alloc_find_free_block(ib_alloc_table* table, size_t size) noexcept;
+void  alloc_coalesce_blocks(ib_alloc_table* table) noexcept;
     
-    // Private data structures
-    struct FreeBlock {
-        size_t size;
-        FreeBlock* next;
-    };
-}
+// Private data structures (no ib)
+struct alloc_block {
+    size_t size;
+    alloc_block* next;
+};
+
 ```
 
 ```cpp
 // xinnodb/src/alloc/src/alloc_table.cpp (PRIVATE)
 #include "alloc_impl.hpp"
 
-namespace xinnodb::alloc {
-    void* alloc_table_malloc(ib_alloc_table* table, size_t size) noexcept {
-        // Implementation uses private helpers
-        return detail::find_free_block(table, size);
-    }
+
+void* alloc_malloc(ib_alloc_table* table, size_t size) noexcept {
+    // Implementation uses private helpers
+    // ...
+    return alloc_find_free_block(table, size);
 }
+
 ```
 
 ### Private Implementation Rules
 
 1. **Header Location**: All private headers in `src/` subdirectory
 2. **Include Guards**: Use `#pragma once`
-3. **Namespace**: Use `detail` or `internal` sub-namespace for private APIs
-4. **Documentation**: Document complex algorithms, not required for all helpers
-5. **Testing**: Private details can be tested via white-box testing
+3. **Documentation**: Document complex algorithms, not required for all helpers
+4. **Testing**: Private details can be tested via white-box testing
 
 ## Module Structure Template
 
@@ -342,88 +284,134 @@ Each module follows this structure:
 
 ```text
 xinnodb/src/<module>/
-├── include/<module>/          # Public interface (to other modules)
-│   ├── <module>.hpp           # Main module API
-│   ├── <module>_types.hpp     # Types other modules need
-│   └── <module>_fwd.hpp       # Forward declarations (optional)
+├── include/<module>/           # Layer 2: Module public API
+│   ├── <module>.hpp            # Main module interface
+│   └── <module>_types.hpp      # Public types
 │
-├── src/                       # Private implementation
-│   ├── <module>_impl.hpp      # Private headers
-│   ├── <module>_impl.cpp      # Implementation
-│   └── <module>_internal.hpp  # Private utilities
+├── src/                        # Layer 3: Private implementation
+│   ├── <module>_xxx.hpp        # Private headers
+│   └── <module>_yyy.cpp        # Implementation files
 │
-└── test/                      # Unit tests
-    └── test_<module>.cpp
+└── test/                       # Unit tests
+    └── test_<module>_what.cpp
 ```
 
 ### Include Guidelines
 
 **From other modules:**
+
+From module `A`:
+
 ```cpp
-#include "<module>/<module>.hpp"  // ✅ Correct
+#include "<module B>/<module B>.hpp"  // ✅ Correct
 ```
 
-**Never do this:**
+From module `A`:
+
 ```cpp
-#include "<module>/src/impl.hpp"  // ❌ WRONG - private header
+#include "<module B>/src/xxx.hpp"  // ❌ WRONG - private header
 ```
 
-## Module Dependency Graph
+## Dependencies
 
-Modules are organized in dependency levels to prevent circular dependencies:
+### Structural type relations
 
-### Level 0: Foundation
-```
-defs          # Basic types, configuration
-ut            # Utilities
+**todo**: write a type structural diagram
+
+### Module Dependencies
+
+<!-- markdownlint-disable MD033 -->
+<div style="background-color: #ffffff; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#666666','lineColor':'#666666','background':'#ffffff'}}}%%
+graph RL
+    subgraph system["<b>Module dependencies</b>"]
+
+        defs["<b>defs</b><br/>Basic types"]
+        ut["<b>ut</b><br/>Utilities"]
+        sync["<b>sync</b><br/>Sync"]
+        alloc["<b>alloc</b><br/>Allocator"]
+        io["<b>io</b><br/>I/O"]
+        pwa["<b>pwa</b><br/>PWA"]
+        task["<b>task</b><br/>Tasks"]
+        sched["<b>sched</b><br/>Scheduler"]
+        sga["<b>sga</b><br/>SGA"]        
+        bufman["<b>bufman</b><br/>Buffer Manager"]
+        msgbus["<b>msgbus</b><br/>Message bus"]
+        wal["<b>wal</b><br/>Write Ahead Log"]
+        rt["<b>rt</b><br/>Runtime"]
+        
+        %% Dependencies
+        sync   --> defs
+        sync   --> ut
+        alloc  --> defs
+        alloc  --> ut
+        io     --> sync
+        sga    --> bufman
+        sga    --> msgbus
+        sga    --> pwa
+        sga    --> wal
+        task   --> alloc
+        task   --> sync
+        sched  --> task
+        sched  --> io
+        pwa    --> sched
+        bufman --> io
+        wal    --> io
+        rt     --> sga
+    end
+    
+
+    style defs   fill:#ffffff, stroke:#4caf50, stroke-width:3px, rx:10, ry:10
+    style ut     fill:#ffffff, stroke:#4caf50, stroke-width:3px, rx:10, ry:10
+    style alloc  fill:#ffffff, stroke:#2196f3, stroke-width:3px, rx:10, ry:10
+    style sync   fill:#ffffff, stroke:#2196f3, stroke-width:3px, rx:10, ry:10
+    style io     fill:#ffffff, stroke:#ff9800, stroke-width:3px, rx:10, ry:10
+    style task   fill:#ffffff, stroke:#ff9800, stroke-width:3px, rx:10, ry:10
+    style sga    fill:#ffffff, stroke:#337713, stroke-width:3px, rx:10, ry:10
+    style sched  fill:#ffffff, stroke:#e91e63, stroke-width:3px, rx:10, ry:10
+    style pwa    fill:#ffffff, stroke:#9c27b0, stroke-width:3px, rx:10, ry:10
+    style bufman fill:#ffffff, stroke:#9c27b0, stroke-width:3px, rx:10, ry:10
+    style msgbus fill:#ffffff, stroke:#9c27b0, stroke-width:3px, rx:10, ry:10
+    style wal    fill:#ffffff, stroke:#9c27b0, stroke-width:3px, rx:10, ry:10
+    style rt     fill:#ffffff, stroke:#00FF33,    stroke-width:3px, rx:10, ry:10
 ```
 
-### Level 1: Core Infrastructure
-```
-alloc         # Memory allocator (depends: defs)
-sync          # Synchronization primitives (depends: defs)
-io            # I/O operations (depends: defs, sync)
-```
+</div>
+<!-- markdownlint-enable MD033 -->
 
-### Level 2: Runtime Components
-```
-task          # Coroutine tasks (depends: defs, alloc)
-sched         # Scheduler (depends: defs, task)
-pwa           # Private Worker Area (depends: alloc, task)
-```
+**Dependency Levels:**
 
-### Level 3: System Services
-```
-sga           # Shared Global Area (depends: alloc, sync)
-msgbus        # Message bus (depends: alloc, task, sched)
-rt            # Runtime orchestration (depends: task, sched, pwa)
-```
+**todo**: complete the dependencies
 
-### Level 4: Public API Implementation
-```
-api           # Implements xinnodb.hpp (depends: all modules)
-```
+- 🟢 **Level 0** (Green): `defs`, `ut` - No dependencies
+- 🔵 **Level 1** (Blue): `alloc`, `sync` - Depend on Level 0
+- 🟠 **Level 2** (Orange): `io`, `task`, `sga` - Depend on Level 1
+- 🔴 **Level 3** (Pink): `sched`, `pwa` - Depend on Level 2
+- 🟣 **Level 4** (Purple): `msgbus`, `rt` - Depend on Level 3
 
 ### Dependency Rules
 
 1. **Acyclic**: No circular dependencies allowed
-2. **Downward Only**: Modules can only depend on lower levels
-3. **Explicit**: All dependencies documented in module `README.md`
-4. **Minimal**: Depend only on what you need
+2. **Explicit**: All dependencies documented in module `README.md`
+3. **Minimal**: Depend only on what you need
 
 ### Checking Dependencies
 
 ```bash
 # Generate dependency graph
-./tools/check-dependencies.sh
+./scripts/check-dependencies.sh
 
 # Verify no cycles
-./tools/verify-acyclic.sh
+./scripts/verify-acyclic.sh
 ```
 
 ## Adding a New Module
 
 ### Step 1: Create Module Structure
+
+todo: replace with nix cmd
 
 ```bash
 cd xinnodb/src
@@ -461,13 +449,12 @@ Modules that depend on this module.
 #include "defs/defs.hpp"       // Foundation dependency
 #include "alloc/alloc.hpp"     // Core dependency
 
-namespace xinnodb::mymodule {
     // Public API for other modules
-    class MyService {
-    public:
-        void do_something() noexcept;
-    };
-}
+struct ib_my_service {
+    void (*do_something)(ib_my_service* self) noexcept;
+};
+
+void ib_my_service_init(ib_my_service* service) noexcept;
 ```
 
 ### Step 4: Implement Private Details
@@ -477,31 +464,28 @@ namespace xinnodb::mymodule {
 #pragma once
 
 #include "mymodule/mymodule.hpp"
-#include "xinnodb/internal/common.hpp"
 
-namespace xinnodb::mymodule::detail {
     // Private implementation details
-}
+static void my_service_do_something_impl(ib_my_service* self) noexcept;
 ```
 
 ### Step 5: Add CMake Integration
 
+Add to root `CMakeLists.txt`:
+
 ```cmake
-# CMakeLists.txt (module registration)
-add_xinnodb_module(mymodule
-    SOURCES
-        src/mymodule.cpp
-    PUBLIC_HEADERS
-        include/mymodule/mymodule.hpp
-    PRIVATE_HEADERS
-        src/mymodule_impl.hpp
-    DEPENDENCIES
-        defs_obj
-        alloc_obj
-    TESTS
-        test/test_mymodule.cpp
-)
+# In CMakeLists.txt - Component definitions section
+xinnodb_component(mymodule DEPS defs alloc)
 ```
+
+The `xinnodb_component` function will:
+
+- Automatically discover `.cpp` files in `src/` directory
+- Handle `.cpp.in` template files with `@VARIABLE@` substitution
+- Create object library or interface library as needed
+- Set up include paths for module and dependencies
+- Collect unit tests from `test/` directory
+- Generate Doxygen documentation from `include/` headers
 
 ### Step 6: Write Tests
 
@@ -511,8 +495,9 @@ add_xinnodb_module(mymodule
 #include "mymodule/mymodule.hpp"
 
 TEST(MyModule, BasicFunctionality) {
-    xinnodb::mymodule::MyService service;
-    service.do_something();
+    ib_my_service service;
+    ib_my_service_init(&service);
+    service.do_something(&service);
     // Assertions...
 }
 ```
@@ -584,48 +569,51 @@ add_library(xinnodb_shared SHARED
 
 ### Module Implementation
 
+From my module:
+
 ```cpp
 #include "mymodule/mymodule.hpp"          // Own public API
 #include "defs/defs.hpp"                  // Other module public API
-#include "xinnodb/internal/common.hpp"    // Internal utilities
 ```
 
 ### Private Implementation
 
+From my module:
+
 ```cpp
-#include "mymodule_impl.hpp"              // Own private header
+#include "mymodule_xxx.hpp"              // Own private header
 ```
 
 ## Type Erasure Pattern
 
 ### Implementing Type-Erased Functions
 
+*TBD*.
+
+Possible draft:
+
 ```cpp
 // Public API (xinnodb.hpp) - type-erased
-namespace xinnodb {
-    ib_async_result my_operation_async(ib_handle_t h) noexcept;
-}
+ib_async_result ib_my_operation_async(ib_handle_t h) noexcept;
 
 // Implementation (src/api/api_impl.cpp)
-namespace xinnodb::detail {
     template<typename T>
-    struct async_vtable {
-        static bool await_ready(ib_async_opaque*) noexcept;
-        static void await_resume(ib_async_opaque*, void*) noexcept;
+struct ib_async_vtable {
+    bool (*await_ready)(ib_async_opaque*) noexcept;
+    void (*await_resume)(ib_async_opaque*, void*) noexcept;
         // ...
     };
     
     template<typename T>
-    const ib_async_ops vtable_for = {
-        &async_vtable<T>::await_ready,
-        &async_vtable<T>::await_resume,
+static const ib_async_ops ib_vtable_for = {
+    &ib_async_vtable<T>::await_ready,
+    &ib_async_vtable<T>::await_resume,
         // ...
     };
-}
 
-ib_async_result my_operation_async(ib_handle_t h) noexcept {
+ib_async_result ib_my_operation_async(ib_handle_t h) noexcept {
     ib_async_result result;
-    result.ops = &detail::vtable_for<my_result_type>;
+    result.ops = &ib_vtable_for<my_result_type>;
     // Setup type-erased promise...
     return result;
 }
@@ -717,22 +705,23 @@ ib_async_hdl<ib_err> my_function(ib_handle_t h) noexcept;
 
 ### Naming Conventions
 
-- **Types**: `ib_snake_case` (e.g., `ib_trx_hdl`)
-- **Functions**: `ib_snake_case` (e.g., `ib_trx_begin`)
-- **Enums**: `IB_SCREAMING_CASE` (e.g., `DB_SUCCESS`)
-- **Namespaces**: `lowercase` (e.g., `xinnodb::sdk`)
-- **Classes** (SDK): `PascalCase` (e.g., `Database`)
+- **General purpose types**: `ib_snake_case_t` (e.g., `ib_trx_hdl`)
+- **Handles**: `ib_snake_case_hdl` (e.g., `ib_trx_hdl`)
+- **Public functions**: `ib_snake_case`
+- **Public SDK functions**: `ib_module_snake_case`
+- **Enums**: `IB_SCREAMING_CASE` (e.g., `IB_DB_SUCCESS`)
 
 ### File Naming
 
-- **Headers**: `module_name.hpp`
-- **Implementation**: `module_name.cpp`
-- **Private headers**: `module_name_impl.hpp`
-- **Tests**: `test_module_name.cpp`
+- **Public headers**: `ib/<feature>.hpp`
+- **Public SDK Headers**: `ib/sdk/<module>_<feature>.hpp`
+- **Private headers**: `<module>/<module>_<feature>.hpp`
+- **Implementation**: `<module>_<feature>.cpp`
+- **Tests**: `test_<module>_<feature>.cpp`
 
 ## Review Checklist
 
-Before submitting:
+Before submitting checklist:
 
 - [ ] No circular dependencies
 - [ ] Module README updated
@@ -743,14 +732,11 @@ Before submitting:
 - [ ] No ABI-breaking changes to public API
 - [ ] CMake integration complete
 - [ ] Tests pass locally
+- [ ] Micro benchmarks with no performance regressions
 
 ## Getting Help
 
-- **Architecture questions**: See `docs/architecture.md`
-- **Build issues**: See `docs/building.md`
-- **API design**: Discuss in GitHub issues
-- **Module design**: Review existing modules as examples
-
----
-
-**Remember**: The public API (`xinnodb.hpp`) is **forever stable**. Think carefully before adding to it. Most features should go in the SDK layer.
+- **Architecture questions**: ...
+- **Build issues**: ...
+- **API design**: ...
+- **Module design**: ..

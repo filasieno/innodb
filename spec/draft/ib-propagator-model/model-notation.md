@@ -18,12 +18,12 @@
 - **Example**    : `cell_id`, `cv_id`, `prop_id`
 - **Properties** : Unique constraint, used in APIs and serialization
 
-## Systematic Naming Pattern
+## Entities
 
 For every entity `<ENTITY>`:
 
 ```text
-[entity] Entity:
+entity [entity] Entity:
   - <entity>_pid    : UUID <<PK>>      # Physical ID
   - <entity>_id     : UUID <<UNIQUE>>  # Logical ID
   - ... other fields ...
@@ -40,7 +40,7 @@ Always reference via Physical ID:
 ### Variant Tables (Single-Table Inheritance)
 
 ```text
-[variant] EntityVariant:
+entity [variant] EntityVariant:
   - variant_pid     : UUID <<PK>>                  # Physical ID for variant
   - entity_pid      : UUID <<FK entity>> <<UNIQUE>>  # FK to parent entity Physical ID
   - ... variant-specific fields ...
@@ -50,4 +50,9 @@ Constraints:
 
 - UNIQUE: (entity_pid)  # Enforces 1:1 relationship
 - FK: entity_pid → [entity].entity_pid
+
+## Struct
+
+
+
 
