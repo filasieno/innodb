@@ -148,7 +148,7 @@ void alloc_freeblock_detach(alloc_free_block_header** root, alloc_free_block_hea
     // 1. Get the first element of the list N (FIFO) and detach H from the ring
     
     ut_dlink* next_node_link = node->multimap_link.next;
-    alloc_free_block_header* next_node = (alloc_free_block_header*)((char*)next_node_link - offsetof(alloc_free_block_header, multimap_link));
+    alloc_free_block_header* next_node = (alloc_free_block_header*)((char*)next_node_link - IB_OFFSET_OF(alloc_free_block_header, multimap_link));
     IB_ASSERT(next_node != nullptr && next_node != node);
     // Remove H from circular list so that N becomes the new head
     ut_dlink_detach(&node->multimap_link);

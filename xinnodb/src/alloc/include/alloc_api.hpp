@@ -70,12 +70,12 @@ static_assert(sizeof(alloc_pooled_free_block_header) == 32);
 /// \brief Allocator Free Block Header
 struct alloc_free_block_header : public alloc_block_header 
 {
-    struct ut_dlink                    multimap_link;
+    struct ut_dlink                 multimap_link;
     struct alloc_free_block_header* parent;
     struct alloc_free_block_header* left;
     struct alloc_free_block_header* right;
-    int                                height;
-    int                                balance;
+    int                             height;
+    int                             balance;
 };
 static_assert(sizeof(alloc_free_block_header) == 64, "AllocFreeBlockHeader size is not 64 bytes");
 

@@ -178,12 +178,7 @@
               find . -type f -print | sort
               echo "--- Module src files ---"
               find xinnodb/src -type f -print | sort || true
-              export CCACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/ccache/xinnodb"
-              mkdir -p "$CCACHE_DIR"
-              export CCACHE_MAXSIZE=10G
-              export CCACHE_COMPRESS=1
-              export CCACHE_BASEDIR="$PWD"
-              cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+              cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release
               echo "✅ Configuration completed"
             '';
 
@@ -210,7 +205,7 @@
             '';
 
             meta = with pkgs.lib; {
-              description = "XInnoDB embedded database engine with CPS parser support";
+              description = "XInnoDB storage engine";
               homepage = "https://github.com/sunbains/embedded-innodb";
               license = licenses.gpl2Only;
               platforms = platforms.linux;

@@ -126,7 +126,7 @@ void* alloc_table_try_malloc(alloc_table* at, ib_size size) noexcept {
         if (at->freelist_count[bin_idx] == 0) {
             alloc_freelist_clear_mask(&at->freelist_mask, bin_idx);
         }
-        alloc_block_header* block = (alloc_block_header*)((char*)link - offsetof(alloc_pooled_free_block_header, freelist_link));
+        alloc_block_header* block = (alloc_block_header*)((char*)link - IB_OFFSET_OF(alloc_pooled_free_block_header, freelist_link));
         alloc_block_header* next_block = alloc_block_next(block);
         __builtin_prefetch(next_block, 1, 3);
         
@@ -428,17 +428,17 @@ ib_i64 alloc_table_coalesce_left(alloc_table* at, alloc_block_header** out_block
         ib_u64 left_size = left->this_desc.size;
         if (lst == ALLOC_BLOCK_STATE_FREE) {
             if (left_size <= MAX_SMALL_BIN_SIZE) {
-                ib_u32 lbin = alloc_freelist_get_index(left_size);
+                ib_u32 lain = alloc_freelist_get_index(left_size);
                 ut_dlink* link = &((alloc_pooled_free_block_header*)left)->freelist_link;
                 if (!ut_dlink_is_detached(link)) {
                     ut_dlink_detach(link);
-                    IB_ASSERT(at->freelist_count[lbin] > 0);
-                    --at->freelist_count[lbin];
-                    if (at->freelist_count[lbin] == 0) {
-                        alloc_freelist_clear_mask(&at->freelist_mask, lbin);
+                    IB_ASSERT(at->freelist_count[lain] > 0);
+                    --at->freelist_count[lain];
+                    if (at->freelist_count[lain] == 0) {
+                        alloc_freelist_clear_mask(&at->freelist_mask, lain);
                     }
                 }
-                ++at->stats.merged_counter[lbin];
+                ++at->stats.merged_counter[lain];
             } else {
                 alloc_freeblock_detach(&at->root_free_block, (alloc_free_block_header*)left);
                 ++at->stats.merged_counter[STATS_IDX_TREE];

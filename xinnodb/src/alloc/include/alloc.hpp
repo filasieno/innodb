@@ -1,6 +1,7 @@
 #pragma once
 
 #include "xinnodb.hpp"               // IWYU pragma: keep
+#include "ut.hpp"                    // IWYU pragma: keep
 #include "ut_assert.hpp"             // IWYU pragma: keep
 #include "ut_dlink.hpp"              // IWYU pragma: keep
 
