@@ -59,13 +59,7 @@ set_target_properties(ib_node_plugin PROPERTIES
   SUFFIX ".node"
 )
 
-# Output directory for the addon
-set(_addon_out "${CMAKE_CURRENT_BINARY_DIR}")
-set_target_properties(ib_node_plugin PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY "${_addon_out}"
-  RUNTIME_OUTPUT_DIRECTORY "${_addon_out}"
-  ARCHIVE_OUTPUT_DIRECTORY "${_addon_out}"
-)
+# Output directory for the addon is set via CMAKE_MODULE_OUTPUT_DIRECTORY
 
 # Test executable
 # add_executable(test_addon
