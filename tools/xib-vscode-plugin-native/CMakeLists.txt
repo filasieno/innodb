@@ -5,6 +5,7 @@ project(xib_vscode_plugin_native LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MODULE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 # find_package(GTest CONFIG REQUIRED)
 
@@ -42,23 +43,23 @@ endif()
 
 message(STATUS "Using NODE_INCLUDE_DIR=${NODE_INCLUDE_DIR}")
 
-add_library(addon MODULE
+add_library(ib_node_plugin MODULE
   src/ib_node_plugin.cpp
 )
 
-target_include_directories(addon PRIVATE
+target_include_directories(ib_node_plugin PRIVATE
   ${NODE_INCLUDE_DIR}
 )
 
 # Produce a .node binary with no 'lib' prefix
-set_target_properties(addon PROPERTIES
+set_target_properties(ib_node_plugin PROPERTIES
   PREFIX ""
   SUFFIX ".node"
 )
 
 # Output directory for the addon
 set(_addon_out "${CMAKE_CURRENT_BINARY_DIR}")
-set_target_properties(addon PROPERTIES
+set_target_properties(ib_node_plugin PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${_addon_out}"
   RUNTIME_OUTPUT_DIRECTORY "${_addon_out}"
   ARCHIVE_OUTPUT_DIRECTORY "${_addon_out}"
@@ -76,6 +77,6 @@ set_target_properties(addon PROPERTIES
 # add_test(NAME addon_tests COMMAND test_addon)
 
 # Install the built addon into lib/ for consumption by other packages
-install(TARGETS addon
+install(TARGETS ib_node_plugin
   LIBRARY DESTINATION lib
 )
