@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
     mkdir -p $out/lib
-    cp build/addon.node $out/lib/
+    cp build/Release/addon.node $out/lib/
     runHook postInstall
   '';
 

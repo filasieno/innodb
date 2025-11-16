@@ -43,7 +43,7 @@ endif()
 message(STATUS "Using NODE_INCLUDE_DIR=${NODE_INCLUDE_DIR}")
 
 add_library(addon MODULE
-  src/addon.cpp
+  src/ib_node_plugin.cpp
 )
 
 target_include_directories(addon PRIVATE
@@ -57,7 +57,7 @@ set_target_properties(addon PROPERTIES
 )
 
 # Output directory for the addon
-set(_addon_out "${CMAKE_CURRENT_BINARY_DIR}")
+set(_addon_out "${CMAKE_CURRENT_BINARY_DIR}/Release")
 set_target_properties(addon PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${_addon_out}"
   RUNTIME_OUTPUT_DIRECTORY "${_addon_out}"

@@ -314,10 +314,6 @@ install(
 #
 option(BUILD_XIB_VSCODE_NATIVE "Build the VSCode native addon (.node)" ON)
 if(BUILD_XIB_VSCODE_NATIVE)
-  # Allow picking up Node headers from Nix dev shell automatically
-  if(NOT DEFINED NODE_INCLUDE_DIR AND DEFINED ENV{NODE_INCLUDE_DIR})
-    set(NODE_INCLUDE_DIR "$ENV{NODE_INCLUDE_DIR}")
-  endif()
-  add_subdirectory(${CMAKE_SOURCE_DIR}/tools/xib-vscode-plugin/native)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/tools/xib-vscode-plugin-native)
 endif()
 
