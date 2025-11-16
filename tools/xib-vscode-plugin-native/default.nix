@@ -30,7 +30,7 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     runHook preInstall
-    cmake --install build
+    cmake --install build --prefix $out
     runHook postInstall
   '';
 
