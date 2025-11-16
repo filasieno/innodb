@@ -64,6 +64,11 @@
           luajit
           sysbench
           bun
+          nodejs_20
+          nodePackages.vsce
+          esbuild
+          cmake
+          ninja
           kaitai-struct-compiler
         ];
 
@@ -283,6 +288,30 @@
             };
           };
 
+        # VS Code extension (Hello World) - packaged/copied for parent builds
+        "xib-vscode-plugin" =
+          let
+            config = commonConfig system;
+            pkgs = config.pkgs;
+          in
+          (import ./tools/xib-vscode-plugin/default.nix {
+            inherit (pkgs) lib stdenv esbuild;
+            nodejs = pkgs.nodejs_20;
+            vsce = pkgs.nodePackages.vsce;
+            xibVscodeNative = self.packages.${system}."xib-vscode-plugin-native";
+          });
+
+        # Standalone native Node-API addon for the VSCode plugin
+        "xib-vscode-plugin-native" =
+          let
+            config = commonConfig system;
+            pkgs = config.pkgs;
+          in
+          (import ./tools/xib-vscode-plugin-native/default.nix {
+            inherit (pkgs) lib cmake ninja gtest;
+            stdenv = pkgs.clangStdenv;
+            nodejs = pkgs.nodejs_20;
+          });
 
       });
 

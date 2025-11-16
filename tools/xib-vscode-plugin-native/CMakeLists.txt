@@ -66,7 +66,7 @@ set_target_properties(addon PROPERTIES
 
 # Test executable
 add_executable(test_addon
-  src/test_addon.cpp
+  test/test_addon.cpp
 )
 
 target_link_libraries(test_addon
