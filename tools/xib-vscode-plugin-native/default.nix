@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
     mkdir -p $out/lib
-    cp build/ib_node_plugin.node $out/lib/
+    cp ib_node_plugin.node $out/lib/
     runHook postInstall
   '';
 
