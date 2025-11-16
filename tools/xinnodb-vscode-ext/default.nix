@@ -16,9 +16,6 @@ stdenv.mkDerivation rec {
   buildPhase = ''
     runHook preBuild
 
-    # Install dependencies
-    npm install
-
     mkdir -p dist
     esbuild src/extension.ts src/interfaces.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js
 
