@@ -10,6 +10,6 @@
 
 /// \brief Computes the byte offset of a field within its type
 /// \ingroup ut
-#define IB_OFFSET_OF(type, field) ( static_cast<unsigned long>(reinterpret_cast<const char*>(&reinterpret_cast<const type*>(0)->field) - reinterpret_cast<const char*>(0)) )
+#define IB_OFFSET_OF(type, field) ((static_cast<unsigned long>(reinterpret_cast<uintptr_t>(&((type*)(nullptr)->field)))))
 
 #endif

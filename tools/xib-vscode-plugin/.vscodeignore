@@ -1,0 +1,13 @@
+.gitignore
+.vscode/**
+src/**
+tsconfig.json
+**/*.map
+**/*.ts
+node_modules/**/typescript/**
+node_modules/**/@types/**
+native/src/**
+native/*.gyp
+node_modules/**
+
+

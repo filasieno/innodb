@@ -1,0 +1,46 @@
+{
+  "name": "xib-vscode-plugin",
+  "displayName": "XIB VSCode Plugin",
+  "description": "Hello World starter command for the innodb project.",
+  "version": "0.0.1",
+  "publisher": "your-publisher-id",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "xib.helloWorld",
+        "title": "XIB: Hello World"
+      }
+    ]
+  },
+  "files": [
+    "dist/**/*",
+    "native/build/Release/*.node",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p .",
+    "lint": "echo \"No linter configured\"",
+    "package": "vsce package",
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.84.0",
+    "typescript": "^5.4.0",
+    "vsce": "^2.15.0"
+  }
+}
+
+
