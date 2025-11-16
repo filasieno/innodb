@@ -2,7 +2,6 @@
 , stdenv
 , nodejs
 , esbuild
-, vsce
 , xibVscodeNative ? null
 }:
 
@@ -12,9 +11,9 @@ stdenv.mkDerivation rec {
 
   src = ./.;
 
-  nativeBuildInputs = [ nodejs esbuild vsce ];
+  nativeBuildInputs = [ nodejs esbuild ];
 
-  # Build: transpile TS with esbuild (no network), build native addon with node-gyp, package vsix
+  # Build: transpile TS with esbuild (no network), bundle native addon
   buildPhase = ''
     runHook preBuild
     mkdir -p dist
@@ -28,15 +27,13 @@ stdenv.mkDerivation rec {
       echo "WARNING: xibVscodeNative not provided; native addon will be missing."
     fi
 
-    echo "Packaging VSIX"
-    vsce package --no-dependencies --out xib-vscode-plugin.vsix
     runHook postBuild
   '';
 
   installPhase = ''
     runHook preInstall
     mkdir -p "$out"
-    cp xib-vscode-plugin.vsix "$out"/
+    cp -r . "$out"/
     runHook postInstall
   '';
 
