@@ -15,16 +15,10 @@ stdenv.mkDerivation rec {
 
   buildInputs = [ nodejs ];
 
-  configureFlags = [
+  cmakeFlags = [
     "-DCMAKE_BUILD_TYPE=Release"
     "-DNODE_INCLUDE_DIR=${nodejs}/include/node"
   ];
-
-  buildPhase = ''
-    runHook preBuild
-    cmake --build build --config Release -j
-    runHook postBuild
-  '';
 
   installPhase = ''
     runHook preInstall
