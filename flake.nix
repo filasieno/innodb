@@ -65,7 +65,6 @@
           sysbench
           bun
           nodejs_20
-          nodePackages.vsce
           esbuild
           cmake
           ninja
@@ -78,7 +77,7 @@
           config = commonConfig system;
           pkgs = config.pkgs;
         in
-        stdenv.mkDerivation {
+        pkgs.mkShell.override { inherit stdenv; } {
           name = "xinnodb-devshell";
 
           nativeBuildInputs = buildDeps pkgs ++ devTools pkgs ++ extraPkgs ++ [ stdenv.cc ] ++ [ pkgs.tree-sitter pkgs.ccache ];
@@ -86,6 +85,10 @@
 
           # Configure PKG_CONFIG_PATH for proper library discovery
           shellHook = ''
+            # Disable shell integration that might cause hanging
+            export VSCODE_SHELL_INTEGRATION=0
+            export CURSOR_SHELL_INTEGRATION=0
+            
             export PKG_CONFIG_PATH="${
               pkgs.lib.concatStringsSep ":" [
                 (pkgs.lib.makeSearchPathOutput "dev" "lib/pkgconfig" (
@@ -119,25 +122,23 @@
             export CMAKE_C_COMPILER_LAUNCHER=ccache
             export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-            # Custom prompt
-            export PS1="\[\e[1;33m\](xinnodb)\[\e[0m\] \[\e[1;32m\][\u@\h:\w]\$\[\e[0m\] "
-
-            echo "Using packages: "
-            echo "  compiler     : $CC ($CXX) [${stdenv.cc}]"
-            echo "  cmake        : ${pkgs.cmake}"
-            echo "  ninja        : ${pkgs.ninja}"
-            echo "  gcovr        : ${pkgs.gcovr}"
-            echo "  lcov         : ${pkgs.lcov}"
-            echo "  gtest        : ${pkgs.gtest}"
-            echo "  gbenchmark   : ${pkgs.gbenchmark}"
-            echo "  fmt.dev      : ${pkgs.fmt_12.dev}"
-            echo "  liburing.dev : ${pkgs.liburing.dev}"
-            echo "  tree-sitter  : ${pkgs.tree-sitter}"
-            echo "  ccache       : ${pkgs.ccache}"
+            # Custom prompt (only in interactive shells)
+            if [[ -t 0 ]]; then
+              export PS1="\[\e[1;33m\](xinnodb)\[\e[0m\] \[\e[1;32m\][\u@\h:\w]\$\[\e[0m\] "
+              echo "Using packages: "
+              echo "  compiler     : $CC ($CXX) [${stdenv.cc}]"
+              echo "  cmake        : ${pkgs.cmake}"
+              echo "  ninja        : ${pkgs.ninja}"
+              echo "  gcovr        : ${pkgs.gcovr}"
+              echo "  lcov         : ${pkgs.lcov}"
+              echo "  gtest        : ${pkgs.gtest}"
+              echo "  gbenchmark   : ${pkgs.gbenchmark}"
+              echo "  fmt.dev      : ${pkgs.fmt_12.dev}"
+              echo "  liburing.dev : ${pkgs.liburing.dev}"
+              echo "  tree-sitter  : ${pkgs.tree-sitter}"
+              echo "  ccache       : ${pkgs.ccache}"
+            fi
           '';
-
-          phases = [ "installPhase" ];
-          installPhase = "mkdir -p $out";
         };
 
     in
@@ -289,15 +290,14 @@
           };
 
         # VS Code extension (Hello World) - packaged/copied for parent builds
-        "xib-vscode-plugin" =
+        "xinnodb-vscode-ext" =
           let
             config = commonConfig system;
             pkgs = config.pkgs;
           in
-          (import ./tools/xib-vscode-plugin/default.nix {
-            inherit (pkgs) lib stdenv esbuild;
+          (import ./tools/xinnodb-vscode-ext/default.nix {
+            inherit (pkgs) lib stdenv esbuild fetchurl fetchFromGitHub runCommand;
             nodejs = pkgs.nodejs_20;
-            xibVscodeNative = self.packages.${system}."xinnodb-node-addon";
           });
 
         # Standalone native Node-API addon for the VSCode plugin

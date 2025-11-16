@@ -2,7 +2,7 @@
 # This is used by Nix to build the addon independently
 # The main build logic is in the root CMakeLists.txt
 
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 3.29)
 
 project(xinnodb_node_addon LANGUAGES CXX)
 
@@ -13,8 +13,13 @@ set(CMAKE_MODULE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 set(CMAKE_MODULE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}")
 set(CMAKE_MODULE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}")
 
-# find_package(GTest CONFIG REQUIRED)
-# enable_testing()
+find_package(GTest CONFIG REQUIRED)
+enable_testing()
+
+# Set CMAKE_BUILD_RPATH to include GTest library directory
+get_target_property(GTEST_LOCATION GTest::gtest_main LOCATION)
+get_filename_component(GTEST_LIB_DIR "${GTEST_LOCATION}" DIRECTORY)
+set(CMAKE_BUILD_RPATH "${GTEST_LIB_DIR}")
 
 # Allow passing NODE_INCLUDE_DIR; default to node include path in Nix dev shell if provided
 if(NOT DEFINED NODE_INCLUDE_DIR AND DEFINED ENV{NODE_INCLUDE_DIR})
@@ -66,15 +71,21 @@ set_target_properties(ib_node_plugin PROPERTIES
 )
 
 # Test executable
-# add_executable(test_addon
-#   test/test_addon.cpp
-# )
+add_executable(test_addon
+  test/test_addon.cpp
+)
 
-# target_link_libraries(test_addon
-#   GTest::gtest_main
-# )
+target_link_libraries(test_addon
+  GTest::gtest_main
+)
 
-# add_test(NAME addon_tests COMMAND test_addon)
+# Set RPATH so the test can find GTest shared libraries
+set_target_properties(test_addon PROPERTIES
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE
+)
+
+add_test(NAME addon_tests COMMAND test_addon)
 
 # Install the built addon into lib/ for consumption by other packages
 install(TARGETS ib_node_plugin

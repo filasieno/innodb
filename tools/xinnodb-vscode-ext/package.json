@@ -1,7 +1,7 @@
 {
-  "name": "xib-vscode-plugin",
-  "displayName": "XIB VSCode Plugin",
-  "description": "Hello World starter command for the innodb project.",
+  "name": "xinnodb-vscode-ext",
+  "displayName": "XInnoDB VSCode Extension",
+  "description": "Hello World starter command for the XInnoDB project.",
   "version": "0.0.1",
   "publisher": "your-publisher-id",
   "license": "MIT",
@@ -16,14 +16,13 @@
   "contributes": {
     "commands": [
       {
-        "command": "xib.helloWorld",
-        "title": "XIB: Hello World"
+        "command": "xinnodb.helloWorld",
+        "title": "XInnoDB: Hello World"
       }
     ]
   },
   "files": [
     "dist/**/*",
-    "native/build/Release/*.node",
     "README.md",
     "package.json"
   ],
@@ -33,11 +32,15 @@
     "watch": "tsc -w -p .",
     "lint": "echo \"No linter configured\"",
     "package": "vsce package",
-    "test": "echo \"No tests yet\""
+    "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.30",
     "@types/vscode": "^1.84.0",
+    "@vscode/test-electron": "^2.3.9",
+    "glob": "^10.3.10",
+    "mocha": "^10.3.0",
     "typescript": "^5.4.0",
     "vsce": "^2.15.0"
   }

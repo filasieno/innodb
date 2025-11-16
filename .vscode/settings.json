@@ -65,5 +65,18 @@
       "scope": "workspace"
     }
   },
-  "nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix"
+  "nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix",
+  "terminal.integrated.defaultProfile.linux": "nix-develop",
+  "terminal.integrated.profiles.linux": {
+    "nix-develop": {
+      "path": "nix",
+      "args": ["develop"],
+      "icon": "terminal-bash"
+    },
+    "bash": {
+      "path": "/run/current-system/sw/bin/bash",
+      "icon": "terminal-bash"
+    }
+  },
+  "terminal.integrated.shellIntegration.enabled": false
 }

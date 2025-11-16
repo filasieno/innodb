@@ -1,0 +1,143 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      The system is: Linux - 6.17.7 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -std=c++23
+      Id flags:  
+      
+      The output was:
+      1
+      /nix/store/asc30cdibhz4d82jv1bgaadfv529xqli-binutils-2.44/bin/ld: cannot find crtbeginS.o: No such file or directory
+      clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /run/current-system/sw/bin/clang++ 
+      Build flags: -std=c++23
+      Id flags: -c 
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.o"
+      
+      The CXX compiler identification is Clang, found in:
+        /home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/3.29.2/CompilerIdCXX/CMakeCXXCompilerId.o
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:64 (try_compile)"
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:7 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-1mF5sf"
+      binary: "/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-1mF5sf"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/nix/store/whqr7s7ljsjyrl42fpw2hq7dnpsfcpkx-clang-21.1.2/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: "-std=c++23"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "-fuse-ld=lld"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-1mF5sf'
+        
+        Run Build Command(s): /run/current-system/sw/bin/ninja -v cmTC_f3ba6
+        [1/2] /run/current-system/sw/bin/clang++   -std=c++23    -v -MD -MT CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -c /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp
+        clang version 21.1.2
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /nix/store/whqr7s7ljsjyrl42fpw2hq7dnpsfcpkx-clang-21.1.2/bin
+         (in-process)
+         "/nix/store/whqr7s7ljsjyrl42fpw2hq7dnpsfcpkx-clang-21.1.2/bin/clang++" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-1mF5sf -v -fcoverage-compilation-dir=/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-1mF5sf -resource-dir /nix/store/0zn99g048j67syaq97rczq5z0j8dsvc8-clang-21.1.2-lib/lib/clang/21 -dependency-file CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /nix/store/0zn99g048j67syaq97rczq5z0j8dsvc8-clang-21.1.2-lib/lib/clang/21/include -internal-isystem /usr/local/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -std=c++23 -fdeprecated-macro -ferror-limit 19 -fgnuc-version=4.2.1 -fno-implicit-modules -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -x c++ /nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp
+        clang -cc1 version 21.1.2 based upon LLVM 21.1.2 default target x86_64-unknown-linux-gnu
+        ignoring nonexistent directory "/usr/local/include"
+        ignoring nonexistent directory "/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /nix/store/0zn99g048j67syaq97rczq5z0j8dsvc8-clang-21.1.2-lib/lib/clang/21/include
+         /usr/include
+        End of search list.
+        [2/2] : && /run/current-system/sw/bin/clang++ -std=c++23 -fuse-ld=lld -v -Wl,-v CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_f3ba6   && :
+        FAILED: [code=1] cmTC_f3ba6 
+        : && /run/current-system/sw/bin/clang++ -std=c++23 -fuse-ld=lld -v -Wl,-v CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_f3ba6   && :
+        clang version 21.1.2
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /nix/store/whqr7s7ljsjyrl42fpw2hq7dnpsfcpkx-clang-21.1.2/bin
+         "/run/current-system/sw/bin/ld.lld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -pie -o cmTC_f3ba6 /lib/../lib64/Scrt1.o /lib/../lib64/crti.o crtbeginS.o -L/lib/../lib64 -L/usr/lib64 -L/lib -L/usr/lib -v CMakeFiles/cmTC_f3ba6.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc crtendS.o /lib/../lib64/crtn.o
+        LLD 21.1.2 (compatible with GNU linkers)
+        ld.lld: error: cannot open crtbeginS.o: No such file or directory
+        ld.lld: error: unable to find library -lgcc
+        ld.lld: error: unable to find library -lgcc
+        ld.lld: error: cannot open crtendS.o: No such file or directory
+        clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/nix/store/28s979fhz8d6h1rny3n5zh1ybmby6kjz-cmake-3.29.2/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:49 (try_compile)"
+      - "CMakeLists.txt:7 (project)"
+    checks:
+      - "Check for working CXX compiler: /run/current-system/sw/bin/clang++"
+    directories:
+      source: "/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-BLj5bs"
+      binary: "/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-BLj5bs"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/nix/store/whqr7s7ljsjyrl42fpw2hq7dnpsfcpkx-clang-21.1.2/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: "-std=c++23"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "-fuse-ld=lld"
+    buildResult:
+      variable: "CMAKE_CXX_COMPILER_WORKS"
+      cached: true
+      stdout: |
+        Change Dir: '/home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-BLj5bs'
+        
+        Run Build Command(s): /run/current-system/sw/bin/ninja -v cmTC_5afc2
+        [1/2] /run/current-system/sw/bin/clang++   -std=c++23 -MD -MT CMakeFiles/cmTC_5afc2.dir/testCXXCompiler.cxx.o -MF CMakeFiles/cmTC_5afc2.dir/testCXXCompiler.cxx.o.d -o CMakeFiles/cmTC_5afc2.dir/testCXXCompiler.cxx.o -c /home/fabio/code/innodb/tools/xinnodb-node-addon/build/CMakeFiles/CMakeScratch/TryCompile-BLj5bs/testCXXCompiler.cxx
+        [2/2] : && /run/current-system/sw/bin/clang++ -std=c++23 -fuse-ld=lld CMakeFiles/cmTC_5afc2.dir/testCXXCompiler.cxx.o -o cmTC_5afc2   && :
+        FAILED: [code=1] cmTC_5afc2 
+        : && /run/current-system/sw/bin/clang++ -std=c++23 -fuse-ld=lld CMakeFiles/cmTC_5afc2.dir/testCXXCompiler.cxx.o -o cmTC_5afc2   && :
+        ld.lld: error: cannot open crtbeginS.o: No such file or directory
+        ld.lld: error: unable to find library -lgcc
+        ld.lld: error: unable to find library -lgcc
+        ld.lld: error: cannot open crtendS.o: No such file or directory
+        clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+...
