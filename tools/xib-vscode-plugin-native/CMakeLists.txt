@@ -57,6 +57,9 @@ target_include_directories(ib_node_plugin PRIVATE
 set_target_properties(ib_node_plugin PROPERTIES
   PREFIX ""
   SUFFIX ".node"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 # Output directory for the addon is set via CMAKE_MODULE_OUTPUT_DIRECTORY
