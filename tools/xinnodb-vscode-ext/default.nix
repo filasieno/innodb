@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
     runHook preBuild
 
     mkdir -p dist
-    esbuild src/extension.ts src/interfaces.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js
+    esbuild src/extension.ts src/interfaces.ts --bundle --platform=node --format=cjs --external:vscode --outdir=dist
 
     # Compile tests if they exist
     if [ -d test ]; then
