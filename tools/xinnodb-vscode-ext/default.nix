@@ -19,11 +19,7 @@ stdenv.mkDerivation rec {
     mkdir -p dist
     esbuild src/extension.ts src/interfaces.ts --bundle --platform=node --format=cjs --external:vscode --outdir=dist
 
-    # Compile tests if they exist
-    if [ -d test ]; then
-      mkdir -p out/test
-      esbuild test/**/*.ts --bundle --platform=node --format=cjs --external:vscode --outdir=out/test
-    fi
+    # Skip test compilation in Nix build - tests are for development only
 
     runHook postBuild
   '';
