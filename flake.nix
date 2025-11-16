@@ -296,7 +296,7 @@
             pkgs = config.pkgs;
           in
           (import ./tools/xinnodb-vscode-ext/default.nix {
-            inherit (pkgs) lib stdenv esbuild fetchurl fetchFromGitHub runCommand;
+            inherit (pkgs) lib stdenv esbuild;
             nodejs = pkgs.nodejs_20;
           });
 
