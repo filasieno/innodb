@@ -297,16 +297,16 @@
           (import ./tools/xib-vscode-plugin/default.nix {
             inherit (pkgs) lib stdenv esbuild;
             nodejs = pkgs.nodejs_20;
-            xibVscodeNative = self.packages.${system}."xib-vscode-plugin-native";
+            xibVscodeNative = self.packages.${system}."xinnodb-node-addon";
           });
 
         # Standalone native Node-API addon for the VSCode plugin
-        "xib-vscode-plugin-native" =
+        "xinnodb-node-addon" =
           let
             config = commonConfig system;
             pkgs = config.pkgs;
           in
-          (import ./tools/xib-vscode-plugin-native/default.nix {
+          (import ./tools/xinnodb-node-addon/default.nix {
             inherit (pkgs) lib cmake ninja;
             stdenv = pkgs.clangStdenv;
             nodejs = pkgs.nodejs_20;

@@ -314,6 +314,76 @@ install(
 #
 option(BUILD_XIB_VSCODE_NATIVE "Build the VSCode native addon (.node)" ON)
 if(BUILD_XIB_VSCODE_NATIVE)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/tools/xib-vscode-plugin-native)
+  set(CMAKE_MODULE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  set(CMAKE_MODULE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}")
+  set(CMAKE_MODULE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}")
+
+  # find_package(GTest CONFIG REQUIRED)
+  # enable_testing()
+
+  # Allow passing NODE_INCLUDE_DIR; default to node include path in Nix dev shell if provided
+  if(NOT DEFINED NODE_INCLUDE_DIR AND DEFINED ENV{NODE_INCLUDE_DIR})
+    set(NODE_INCLUDE_DIR "$ENV{NODE_INCLUDE_DIR}")
+  endif()
+
+  if(NOT NODE_INCLUDE_DIR)
+    # Try pkg-config first
+    find_package(PkgConfig QUIET)
+    if(PKG_CONFIG_FOUND)
+      pkg_check_modules(NODE QUIET node)
+      if(NODE_FOUND)
+        set(NODE_INCLUDE_DIR ${NODE_INCLUDE_DIRS})
+        message(STATUS "Found Node-API via pkg-config: ${NODE_INCLUDE_DIR}")
+      endif()
+    endif()
+
+    # Fallback to manual search
+    if(NOT NODE_INCLUDE_DIR)
+      message(STATUS "NODE_INCLUDE_DIR not provided and pkg-config failed; attempting common locations")
+      find_path(NODE_INCLUDE_DIR
+        NAMES node_api.h
+        PATH_SUFFIXES node include/node
+      )
+    endif()
+  endif()
+
+  if(NOT NODE_INCLUDE_DIR)
+    message(FATAL_ERROR "Could not locate Node-API headers (node_api.h). Set NODE_INCLUDE_DIR to Node's include directory or install node.pc.")
+  endif()
+
+  message(STATUS "Using NODE_INCLUDE_DIR=${NODE_INCLUDE_DIR}")
+
+  add_library(ib_node_plugin MODULE
+    tools/xinnodb-node-addon/src/ib_node_plugin.cpp
+  )
+
+  target_include_directories(ib_node_plugin PRIVATE
+    ${NODE_INCLUDE_DIR}
+  )
+
+  # Produce a .node binary with no 'lib' prefix
+  set_target_properties(ib_node_plugin PROPERTIES
+    PREFIX ""
+    SUFFIX ".node"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  )
+
+  # Test executable
+  # add_executable(test_addon
+  #   tools/xinnodb-node-addon/test/test_addon.cpp
+  # )
+
+  # target_link_libraries(test_addon
+  #   GTest::gtest_main
+  # )
+
+  # add_test(NAME addon_tests COMMAND test_addon)
+
+  # Install the built addon into lib/ for consumption by other packages
+  install(TARGETS ib_node_plugin
+    LIBRARY DESTINATION lib
+  )
 endif()
 

@@ -1,6 +1,10 @@
+# Minimal CMakeLists for the xinnodb-node-addon project
+# This is used by Nix to build the addon independently
+# The main build logic is in the root CMakeLists.txt
+
 cmake_minimum_required(VERSION 4.1)
 
-project(xib_vscode_plugin_native LANGUAGES CXX)
+project(xinnodb_node_addon LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,7 +14,6 @@ set(CMAKE_MODULE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}")
 set(CMAKE_MODULE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}")
 
 # find_package(GTest CONFIG REQUIRED)
-
 # enable_testing()
 
 # Allow passing NODE_INCLUDE_DIR; default to node include path in Nix dev shell if provided
@@ -61,8 +64,6 @@ set_target_properties(ib_node_plugin PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
-
-# Output directory for the addon is set via CMAKE_MODULE_OUTPUT_DIRECTORY
 
 # Test executable
 # add_executable(test_addon

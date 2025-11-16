@@ -6,7 +6,7 @@
 }:
 
 stdenv.mkDerivation rec {
-  pname = "xib-vscode-plugin-native";
+  pname = "xinnodb-node-addon";
   version = "0.0.1";
 
   src = ./.;
@@ -36,7 +36,7 @@ stdenv.mkDerivation rec {
   '';
 
   meta = with lib; {
-    description = "Standalone Node-API native addon for the XIB VSCode plugin";
+    description = "Standalone Node-API native addon for XInnoDB";
     license = licenses.mit;
     platforms = platforms.linux;
   };
