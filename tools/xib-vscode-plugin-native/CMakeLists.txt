@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.1)
 
-project(xib_vscode_plugin_native LANGUAGES C CXX)
+project(xib_vscode_plugin_native LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,7 +43,7 @@ endif()
 message(STATUS "Using NODE_INCLUDE_DIR=${NODE_INCLUDE_DIR}")
 
 add_library(addon MODULE
-  src/addon.c
+  src/addon.cpp
 )
 
 target_include_directories(addon PRIVATE
