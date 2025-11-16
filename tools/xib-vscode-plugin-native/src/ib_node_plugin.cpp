@@ -1,5 +1,7 @@
 #include <node_api.h>
 
+#define IB_NODE_PLUGIN_NAME addon
+
 // Simple N-API function: returns a greeting string
 napi_value greet(napi_env env, napi_callback_info info) {
   napi_value result;
@@ -14,4 +16,4 @@ napi_value Init(napi_env env, napi_value exports) {
   return exports;
 }
 
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
+NAPI_MODULE(IB_NODE_PLUGIN_NAME, Init)

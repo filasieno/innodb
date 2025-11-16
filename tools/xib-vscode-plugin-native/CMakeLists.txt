@@ -57,7 +57,7 @@ set_target_properties(addon PROPERTIES
 )
 
 # Output directory for the addon
-set(_addon_out "${CMAKE_CURRENT_BINARY_DIR}/Release")
+set(_addon_out "${CMAKE_CURRENT_BINARY_DIR}")
 set_target_properties(addon PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${_addon_out}"
   RUNTIME_OUTPUT_DIRECTORY "${_addon_out}"
