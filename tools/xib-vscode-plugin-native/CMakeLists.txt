@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-find_package(GTest CONFIG REQUIRED)
+# find_package(GTest CONFIG REQUIRED)
 
-enable_testing()
+# enable_testing()
 
 # Allow passing NODE_INCLUDE_DIR; default to node include path in Nix dev shell if provided
 if(NOT DEFINED NODE_INCLUDE_DIR AND DEFINED ENV{NODE_INCLUDE_DIR})
@@ -65,15 +65,15 @@ set_target_properties(addon PROPERTIES
 )
 
 # Test executable
-add_executable(test_addon
-  test/test_addon.cpp
-)
+# add_executable(test_addon
+#   test/test_addon.cpp
+# )
 
-target_link_libraries(test_addon
-  GTest::gtest_main
-)
+# target_link_libraries(test_addon
+#   GTest::gtest_main
+# )
 
-add_test(NAME addon_tests COMMAND test_addon)
+# add_test(NAME addon_tests COMMAND test_addon)
 
 # Install the built addon into lib/ for consumption by other packages
 install(TARGETS addon

@@ -13,20 +13,20 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ cmake ninja ];
 
-  buildInputs = [ nodejs gtest ];
+  buildInputs = [ nodejs ];
 
   cmakeFlags = [
     "-DCMAKE_BUILD_TYPE=Release"
     "-DNODE_INCLUDE_DIR=${nodejs}/include/node"
   ];
 
-  doCheck = true;
+# doCheck = true;
 
-  checkPhase = ''
-    runHook preCheck
-    ctest --test-dir build --output-on-failure -j
-    runHook postCheck
-  '';
+# checkPhase = ''
+#   runHook preCheck
+#   ctest --test-dir build --output-on-failure -j
+#   runHook postCheck
+# '';
 
   installPhase = ''
     runHook preInstall

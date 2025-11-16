@@ -308,7 +308,7 @@
             pkgs = config.pkgs;
           in
           (import ./tools/xib-vscode-plugin-native/default.nix {
-            inherit (pkgs) lib cmake ninja gtest;
+            inherit (pkgs) lib cmake ninja;
             stdenv = pkgs.clangStdenv;
             nodejs = pkgs.nodejs_20;
           });
