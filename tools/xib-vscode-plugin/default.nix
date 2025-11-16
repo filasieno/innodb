@@ -22,7 +22,7 @@ stdenv.mkDerivation rec {
     if [ -n "${xibVscodeNative}" ]; then
       echo "Bundling prebuilt native addon from dependency"
       mkdir -p native/build/Release
-      cp -v ${xibVscodeNative}/lib/addon.node native/build/Release/addon.node
+      cp -v ${xibVscodeNative}/lib/ib_node_plugin.node native/build/Release/addon.node
     else
       echo "WARNING: xibVscodeNative not provided; native addon will be missing."
     fi
