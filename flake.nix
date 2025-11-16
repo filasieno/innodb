@@ -297,7 +297,7 @@
           (import ./tools/xib-vscode-plugin/default.nix {
             inherit (pkgs) lib stdenv esbuild;
             nodejs = pkgs.nodejs_20;
-            vsce = pkgs.nodePackages.vsce;
+            vsce = pkgs.nodePackages."@vscode/vsce";
             xibVscodeNative = self.packages.${system}."xib-vscode-plugin-native";
           });
 
