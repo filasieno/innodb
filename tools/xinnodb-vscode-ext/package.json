@@ -31,6 +31,7 @@
     "compile": "tsc -p .",
     "watch": "tsc -w -p .",
     "lint": "echo \"No linter configured\"",
+    "docs": "typedoc --out docs src",
     "package": "vsce package",
     "test": "node ./out/test/runTest.js"
   },
@@ -41,9 +42,8 @@
     "@vscode/test-electron": "^2.3.9",
     "glob": "^10.3.10",
     "mocha": "^10.3.0",
+    "typedoc": "^0.28.14",
     "typescript": "^5.4.0",
     "vsce": "^2.15.0"
   }
 }
-
-
